@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Luxe - Verify OTP</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "background": "#101622",
+          "surface-container": "#1a2235",
+          "surface-container-high": "#232d43",
+          "on-background": "#f8fafc",
+          "on-surface": "#f1f5f9",
+          "on-surface-variant": "#94a3b8",
+          "primary": "#1152d4",
+          "primary-fixed-dim": "#bfdbfe",
+          "on-primary-fixed": "#1e3a8a",
+          "outline": "#334155",
+          "outline-variant": "#1e293b",
+          "error": "#ef4444",
+          "tertiary": "#f59e0b",
+        },
+        fontFamily: { "headline": ["Manrope"], "body": ["Manrope"] },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Manrope', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* OTP input base */
+  .otp-input {
+    height: 5rem;
+    width: 100%;
+    background: #1a2235;
+    border: 2px solid #1e293b;
+    border-radius: 0.75rem;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    caret-color: #1152d4;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    -moz-appearance: textfield;
+  }
+  .otp-input::-webkit-outer-spin-button,
+  .otp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .otp-input::placeholder { color: #334155; font-size: 1.5rem; }
+
+  .otp-input:focus {
+    border-color: #1152d4;
+    box-shadow: 0 0 0 3px rgba(17, 82, 212, 0.25);
+    background: #1e2a42;
+  }
+  .otp-input.filled {
+    border-color: #1152d4;
+    background: #1a2235;
+  }
+  .otp-input.is-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.2) !important;
+    animation: shake 0.4s ease;
+  }
+  .otp-input.is-success {
+    border-color: #22c55e !important;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.2) !important;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+
+  /* Submit button states */
+  #submitBtn { transition: all 0.3s; }
+  #submitBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #submitBtn:not(:disabled):hover { filter: brightness(1.15); }
+  #submitBtn:not(:disabled):active { transform: scale(0.98); }
+
+  /* Resend button */
+  #resendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #resendBtn:not(:disabled) { color: #1152d4; cursor: pointer; }
+  #resendBtn:not(:disabled):hover { text-decoration: underline; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { background: #166534; color: #bbf7d0; }
+  #toast.error   { background: #7f1d1d; color: #fecaca; }
+  #toast.info    { background: #1e293b; color: #f1f5f9; }
+
+  /* Timer ring */
+  .timer-ring { transform: rotate(-90deg); }
+  .timer-ring-bg { fill: none; stroke: #1e293b; stroke-width: 3; }
+  .timer-ring-fill { fill: none; stroke: #1152d4; stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+
+  /* Status message */
+  #statusMsg { min-height: 20px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.02em; }
+
+  /* Verify success overlay */
+  #successOverlay {
+    display: none;
+    position: absolute; inset: 0;
+    background: #101622;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 50;
+  }
+  #successOverlay.show { display: flex; }
+  .check-circle {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.15);
+    border: 2px solid #22c55e;
+    display: flex; align-items: center; justify-content: center;
+    animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+</style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+
+<main class="flex-grow flex flex-col md:flex-row h-screen overflow-hidden">
+
+  <!-- Left: Visual Anchor -->
+  <section class="hidden md:block md:w-1/2 lg:w-3/5 h-full relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 opacity-60"></div>
+    <img
+      alt="Male model wearing high-end minimal fashion"
+      class="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-1000"
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7AalC4G9HgK70nr8hqqm6mlMBAW_NqfzLXdORPXdgL5WIC9UD6gJPNfDBmKYWmdzP5OX8JMngGTTeAG5rhmcJsEI-S9D1KnJ0-T81ddv24O2RCOSWoRKJKCz0Ly-ilveJONJwakCQo8-1s8HKERAwAFQOsYxKOxPknqfADFHtHc02GWjVjk_K7AgL4xWHWPUVHhHAg-oMKtzvLkss6JnZ0ioLhwNvNwpr7_kgb2UmFp3R5ikzd6Nckie6EOuYCx1i3PPPB-yGldkn"
+    />
+    <div class="absolute bottom-12 left-12 z-20">
+      <span class="text-xs tracking-[0.4em] uppercase font-bold text-on-surface-variant mb-4 block">Spring / Summer Edition</span>
+      <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tighter text-white max-w-md">Refined Simplicity in Every Thread.</h2>
+    </div>
+  </section>
+
+  <!-- Right: Verification Form -->
+  <section class="w-full md:w-1/2 lg:w-2/5 h-full flex items-center justify-center p-8 lg:p-16 bg-background relative overflow-y-auto">
+
+    <!-- Success Overlay -->
+    <div id="successOverlay">
+      <div class="check-circle">
+        <span class="material-symbols-outlined text-green-400 text-4xl">check</span>
+      </div>
+      <h2 class="text-2xl font-extrabold text-white tracking-tight">Identity Verified</h2>
+      <p class="text-on-surface-variant text-sm">Redirecting you now…</p>
+    </div>
+
+    <div class="w-full max-w-md space-y-10" id="formPanel">
+
+      <!-- Brand -->
+      <div class="flex flex-col items-center md:items-start">
+        <span class="text-3xl font-extrabold tracking-tighter text-white mb-2">Luxe</span>
+        <div class="h-1 w-12 bg-primary rounded-full"></div>
+      </div>
+
+      <!-- Header -->
+      <div class="space-y-3">
+        <h1 class="text-3xl lg:text-4xl font-extrabold tracking-tight text-on-background">Verify Your Identity</h1>
+        <p class="text-on-surface-variant text-base">
+          Enter the 4-digit code sent to
+          <span class="text-on-surface font-semibold" id="emailDisplay">your email</span>
+        </p>
+      </div>
+
+      <!-- OTP Form -->
+      <form id="otpForm" novalidate class="space-y-8">
+
+        <!-- Timer + Inputs -->
+        <div class="space-y-5">
+
+          <!-- Timer row -->
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Enter Code</span>
+            <div class="flex items-center gap-2">
+              <!-- SVG ring timer -->
+              <svg width="28" height="28" viewBox="0 0 28 28">
+                <circle class="timer-ring-bg" cx="14" cy="14" r="11"/>
+                <circle class="timer-ring-fill timer-ring" id="timerRing" cx="14" cy="14" r="11"
+                  stroke-dasharray="69.12"
+                  stroke-dashoffset="0"/>
+              </svg>
+              <span class="text-sm font-bold text-on-surface tabular-nums" id="timerDisplay">01:00</span>
+            </div>
+          </div>
+
+          <!-- 4 OTP inputs -->
+          <div class="grid grid-cols-4 gap-4" id="otpGrid">
+            <input class="otp-input" id="otp0" type="text" inputmode="numeric" maxlength="1" placeholder="·" autocomplete="one-time-code" />
+            <input class="otp-input" id="otp1" type="text" inputmode="numeric" maxlength="1" placeholder="·" />
+            <input class="otp-input" id="otp2" type="text" inputmode="numeric" maxlength="1" placeholder="·" />
+            <input class="otp-input" id="otp3" type="text" inputmode="numeric" maxlength="1" placeholder="·" />
+          </div>
+
+          <!-- Status message -->
+          <p id="statusMsg" class="text-center text-transparent select-none">placeholder</p>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          id="submitBtn"
+          disabled
+          class="group w-full h-16 bg-primary text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+        >
+          <span id="btnText">Verify &amp; Proceed</span>
+          <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" id="btnIcon">arrow_forward</span>
+        </button>
+
+        <!-- Resend row -->
+        <div class="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            id="resendBtn"
+            disabled
+            class="uppercase text-[10px] tracking-widest font-bold flex items-center gap-2 text-on-surface-variant transition-colors"
+          >
+            <span class="material-symbols-outlined text-sm">refresh</span>
+            Resend Code
+          </button>
+          <p class="text-xs text-on-surface-variant/60 font-medium" id="resendHint">
+            Resend available in <span class="text-on-surface font-semibold" id="resendCountdown">01:00</span>
+          </p>
+        </div>
+
+        <input type="hidden" name="email" id="emailHidden" value="">
+      </form>
+
+      <!-- Footer -->
+      <div class="pt-6 border-t border-outline-variant flex justify-between items-center opacity-60">
+        <button class="text-[10px] uppercase tracking-widest font-bold hover:text-primary transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">help_outline</span>
+          Need Help?
+        </button>
+        <a href="/forgot-password" class="text-[10px] uppercase tracking-widest font-bold hover:text-primary transition-colors">
+          Use Email Instead
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-8 px-12 flex justify-between items-center bg-background border-t border-outline-variant">
+  <div class="flex flex-col md:flex-row items-center gap-6">
+    <span class="text-lg font-bold text-white">Luxe</span>
+    <span class="text-[12px] uppercase tracking-widest text-slate-500">© 2024 Luxe Editorial. All rights reserved.</span>
+  </div>
+  <div class="hidden md:flex gap-8">
+    <a class="text-[12px] uppercase tracking-widest text-slate-500 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+    <a class="text-[12px] uppercase tracking-widest text-slate-500 hover:text-primary transition-colors" href="#">Terms of Service</a>
+    <a class="text-[12px] uppercase tracking-widest text-slate-500 hover:text-primary transition-colors" href="#">Support</a>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+  /* ── Config ── */
+  const TIMER_SECONDS  = 60;   // countdown duration
+  const DEMO_VALID_OTP = '1234'; // for demo — remove in production
+
+  /* ── State ── */
+  let timerInterval  = null;
+  let timeLeft       = TIMER_SECONDS;
+  let expired        = false;
+  let attemptCount   = 0;
+  const MAX_ATTEMPTS = 3;
+
+  /* ── Elements ── */
+  const inputs         = Array.from({ length: 4 }, (_, i) => document.getElementById('otp' + i));
+  const submitBtn      = document.getElementById('submitBtn');
+  const btnText        = document.getElementById('btnText');
+  const btnIcon        = document.getElementById('btnIcon');
+  const resendBtn      = document.getElementById('resendBtn');
+  const resendHint     = document.getElementById('resendHint');
+  const resendCD       = document.getElementById('resendCountdown');
+  const timerDisplay   = document.getElementById('timerDisplay');
+  const timerRing      = document.getElementById('timerRing');
+  const statusMsg      = document.getElementById('statusMsg');
+  const toast          = document.getElementById('toast');
+  const successOverlay = document.getElementById('successOverlay');
+  const otpForm        = document.getElementById('otpForm');
+  const emailDisplay   = document.getElementById('emailDisplay');
+
+  /* ── Seed email from URL param (e.g. ?email=user@luxe.com) ── */
+  const urlEmail = new URLSearchParams(window.location.search).get('email') || '';
+  if (urlEmail) {
+    emailDisplay.textContent = urlEmail;
+    document.getElementById('emailHidden').value = urlEmail;
+  }
+
+  /* ── Timer ── */
+  const circumference = 2 * Math.PI * 11; // r=11 → ~69.12
+
+  function formatTime(s) {
+    const m = String(Math.floor(s / 60)).padStart(2, '0');
+    const sec = String(s % 60).padStart(2, '0');
+    return m + ':' + sec;
+  }
+
+  function updateRing(s) {
+    const fraction = s / TIMER_SECONDS;
+    timerRing.style.strokeDashoffset = circumference * (1 - fraction);
+    // colour shift: blue → amber → red
+    if (s > 20)       timerRing.style.stroke = '#1152d4';
+    else if (s > 10)  timerRing.style.stroke = '#f59e0b';
+    else              timerRing.style.stroke = '#ef4444';
+    // text colour
+    if (s > 20)       timerDisplay.style.color = '#f1f5f9';
+    else if (s > 10)  timerDisplay.style.color = '#f59e0b';
+    else              timerDisplay.style.color = '#ef4444';
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft  = TIMER_SECONDS;
+    expired   = false;
+    timerDisplay.textContent  = formatTime(timeLeft);
+    resendCD.textContent      = formatTime(timeLeft);
+    updateRing(timeLeft);
+    resendBtn.disabled = true;
+    resendHint.style.display = '';
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = formatTime(timeLeft);
+      resendCD.textContent     = formatTime(timeLeft);
+      updateRing(timeLeft);
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        expired = true;
+        timerDisplay.textContent = '00:00';
+        timerDisplay.style.color = '#ef4444';
+        timerRing.style.stroke   = '#ef4444';
+        setStatus('Code expired. Please resend.', 'error');
+        submitBtn.disabled = true;
+        resendBtn.disabled = false;
+        resendHint.style.display = 'none';
+        // Dim the inputs
+        inputs.forEach(i => { i.disabled = true; i.classList.add('opacity-40'); });
+      }
+    }, 1000);
+  }
+
+  /* ── Status message ── */
+  function setStatus(msg, type) {
+    statusMsg.textContent = msg;
+    statusMsg.className = 'text-center text-sm font-semibold select-none';
+    if (type === 'error')   statusMsg.classList.add('text-red-400');
+    if (type === 'success') statusMsg.classList.add('text-green-400');
+    if (type === 'info')    statusMsg.classList.add('text-on-surface-variant');
+    if (!type)              statusMsg.classList.add('text-transparent');
+  }
+
+  /* ── Toast ── */
+  function showToast(msg, type = 'info') {
+    toast.textContent = msg;
+    toast.className = 'show ' + type;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.className = type; }, 3500);
+  }
+
+  /* ── OTP helpers ── */
+  function getValue() { return inputs.map(i => i.value).join(''); }
+
+  function isComplete() { return getValue().length === 4; }
+
+  function setAllState(cls) {
+    inputs.forEach(i => {
+      i.classList.remove('is-error', 'is-success');
+      if (cls) i.classList.add(cls);
+    });
+  }
+
+  function clearAll() {
+    inputs.forEach(i => {
+      i.value = '';
+      i.classList.remove('filled', 'is-error', 'is-success');
+    });
+    submitBtn.disabled = true;
+    setStatus('', null);
+    inputs[0].focus();
+  }
+
+  /* ── Input event wiring ── */
+  inputs.forEach((input, idx) => {
+
+    input.addEventListener('keydown', (e) => {
+      // Allow only digits, backspace, delete, arrow keys, tab
+      if (!/^\d$/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) {
+        e.preventDefault();
+      }
+      if (e.key === 'Backspace') {
+        if (!input.value && idx > 0) {
+          inputs[idx - 1].value = '';
+          inputs[idx - 1].classList.remove('filled');
+          inputs[idx - 1].focus();
+        }
+      }
+      if (e.key === 'ArrowLeft'  && idx > 0) inputs[idx - 1].focus();
+      if (e.key === 'ArrowRight' && idx < 3) inputs[idx + 1].focus();
+    });
+
+    input.addEventListener('input', () => {
+      // Strip non-digits
+      input.value = input.value.replace(/\D/g, '').slice(-1);
+
+      if (input.value) {
+        input.classList.add('filled');
+        input.classList.remove('is-error');
+        if (idx < 3) inputs[idx + 1].focus();
+      } else {
+        input.classList.remove('filled');
+      }
+
+      // Enable submit only when all 4 filled and not expired
+      submitBtn.disabled = !(isComplete() && !expired);
+      if (isComplete()) setStatus('', null);
+    });
+
+    // Handle paste on any input
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 4);
+      pasted.split('').forEach((ch, i) => {
+        if (inputs[i]) {
+          inputs[i].value = ch;
+          inputs[i].classList.add('filled');
+        }
+      });
+      const nextEmpty = inputs.findIndex(i => !i.value);
+      (nextEmpty === -1 ? inputs[3] : inputs[nextEmpty]).focus();
+      submitBtn.disabled = !(isComplete() && !expired);
+    });
+
+    // Click focuses same input (don't jump)
+    input.addEventListener('click', () => input.select());
+  });
+
+  /* ── Form submit ── */
+  otpForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (expired) { setStatus('Code has expired. Please resend.', 'error'); return; }
+    if (!isComplete()) { setStatus('Please fill in all 4 digits.', 'error'); return; }
+    if (attemptCount >= MAX_ATTEMPTS) {
+      setStatus('Too many attempts. Request a new code.', 'error');
+      submitBtn.disabled = true;
+      resendBtn.disabled = false;
+      return;
+    }
+
+    // Loading state
+    submitBtn.disabled = true;
+    btnText.textContent = 'Verifying…';
+    btnIcon.textContent = 'hourglass_empty';
+
+    await new Promise(r => setTimeout(r, 1000)); // simulate network
+
+    const entered = getValue();
+
+    // ── Demo logic: replace with real API call ──
+    if (entered === DEMO_VALID_OTP) {
+      clearInterval(timerInterval);
+      setAllState('is-success');
+      btnText.textContent = 'Verified!';
+      btnIcon.textContent = 'check_circle';
+      setStatus('Identity verified!', 'success');
+      showToast('Identity verified! Redirecting…', 'success');
+      setTimeout(() => {
+        successOverlay.classList.add('show');
+        // window.location.href = '/dashboard'; // uncomment in production
+      }, 600);
+    } else {
+      attemptCount++;
+      setAllState('is-error');
+      const remaining = MAX_ATTEMPTS - attemptCount;
+      if (remaining > 0) {
+        setStatus(`Incorrect code. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining.`, 'error');
+        showToast('Incorrect code — try again.', 'error');
+      } else {
+        setStatus('Too many failed attempts. Request a new code.', 'error');
+        showToast('Too many failed attempts.', 'error');
+        inputs.forEach(i => { i.disabled = true; i.classList.add('opacity-40'); });
+        clearInterval(timerInterval);
+        resendBtn.disabled = false;
+        resendHint.style.display = 'none';
+      }
+      btnText.textContent = 'Verify & Proceed';
+      btnIcon.textContent = 'arrow_forward';
+      submitBtn.disabled = false;
+      // Shake then clear after brief pause
+      setTimeout(() => { clearAll(); setStatus('', null); }, 800);
+    }
+  });
+
+  /* ── Resend ── */
+  resendBtn.addEventListener('click', () => {
+    attemptCount = 0;
+    inputs.forEach(i => {
+      i.disabled = false;
+      i.classList.remove('opacity-40', 'is-error', 'is-success', 'filled');
+      i.value = '';
+    });
+    submitBtn.disabled = true;
+    btnText.textContent = 'Verify & Proceed';
+    btnIcon.textContent = 'arrow_forward';
+    setStatus('New code sent!', 'info');
+    showToast('A new code has been sent to your email.', 'info');
+    startTimer();
+    inputs[0].focus();
+    setTimeout(() => setStatus('', null), 3000);
+  });
+
+  /* ── Init ── */
+  startTimer();
+  inputs[0].focus();
+</script>
+
+</body>
+</html>

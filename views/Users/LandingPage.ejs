@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#d8e3fb",
+                    "on-primary-fixed-variant": "#0039b5",
+                    "on-secondary": "#263143",
+                    "on-background": "#dae2fd",
+                    "surface-container-high": "#222a3d",
+                    "primary-fixed": "#dce1ff",
+                    "on-tertiary-fixed-variant": "#004395",
+                    "tertiary": "#adc6ff",
+                    "on-primary": "#002682",
+                    "on-secondary-container": "#aeb9d0",
+                    "on-tertiary-container": "#c4d5ff",
+                    "error": "#ffb4ab",
+                    "surface": "#0b1326",
+                    "primary": "#b7c4ff",
+                    "on-primary-container": "#cad3ff",
+                    "surface-container": "#171f33",
+                    "on-surface": "#dae2fd",
+                    "on-error": "#690005",
+                    "inverse-surface": "#dae2fd",
+                    "surface-tint": "#b7c4ff",
+                    "surface-container-low": "#131b2e",
+                    "inverse-primary": "#2151da",
+                    "secondary-fixed-dim": "#bcc7de",
+                    "background": "#0b1326",
+                    "outline-variant": "#434655",
+                    "on-primary-fixed": "#001551",
+                    "secondary-container": "#3e495d",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "secondary": "#bcc7de",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary": "#002e6a",
+                    "primary-container": "#1d4ed8",
+                    "on-secondary-fixed-variant": "#3c475a",
+                    "on-secondary-fixed": "#111c2d",
+                    "surface-bright": "#31394d",
+                    "on-surface-variant": "#c4c5d7",
+                    "outline": "#8e90a0",
+                    "surface-variant": "#2d3449",
+                    "inverse-on-surface": "#283044",
+                    "surface-container-highest": "#2d3449",
+                    "tertiary-fixed": "#d8e2ff",
+                    "primary-fixed-dim": "#b7c4ff",
+                    "surface-container-lowest": "#060e20",
+                    "on-tertiary-fixed": "#001a42",
+                    "tertiary-container": "#0058be",
+                    "surface-dim": "#0b1326",
+                    "error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .headline-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-panel {
+            background: rgba(49, 57, 77, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-surface selection:bg-primary-container selection:text-white">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0b1326]/80 backdrop-blur-xl">
+<div class="flex justify-between items-center w-full px-12 py-6 max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-[0.2em] text-white headline-font">LUXE</div>
+<div class="hidden md:flex items-center space-x-12">
+<a class="text-white border-b border-[#1d4ed8] pb-1 font-label text-[12px] uppercase tracking-widest transition-all duration-200" href="#">Atelier Series</a>
+<a class="text-[#c4c5d7] hover:text-white transition-colors duration-300 font-label text-[12px] uppercase tracking-widest" href="#">Permanent Collection</a>
+<a class="text-[#c4c5d7] hover:text-white transition-colors duration-300 font-label text-[12px] uppercase tracking-widest" href="#">Heritage</a>
+<a class="text-[#c4c5d7] hover:text-white transition-colors duration-300 font-label text-[12px] uppercase tracking-widest" href="#">Craftsmanship</a>
+</div>
+<div class="flex items-center space-x-6">
+<button class="text-[#c4c5d7] hover:text-[#1d4ed8] transition-all duration-200 opacity-80 hover:opacity-100">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+</button>
+<button class="text-[#c4c5d7] hover:text-[#1d4ed8] transition-all duration-200 opacity-80 hover:opacity-100">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative h-screen flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover brightness-[0.4]" data-alt="Close-up of a luxurious deep navy velvet blazer with intricate silk embroidery details in a dimly lit high-end atelier setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYhrhGLY7ZR5gW3NPlxmAjhYn6h2xNVDpg4gVXsH1G5v4Yi_e7kDclJdK1PS16hoAci73FxVWp1rsGnW-t-xbyU4k2S8LpVDLlXX13lK_Koe4EaNSist2nnEmeSGmOm7ih6nGnJtlbfSEpofUol0WgY7H5hmjjMsV_BcxIF7NE7FNbhLbZOj_HtWUhTKj9KcybXxYZnhtQkmerRzLfkfc76CMFu_8U7hSuQCwCCYA8SXlKcuAvoGoSzh8rpAiWmcg9AqUmJN2jWwI"/>
+<div class="absolute inset-0 bg-gradient-to-b from-surface/20 via-transparent to-surface"></div>
+</div>
+<div class="relative z-10 text-center px-6 max-w-4xl">
+<p class="font-label text-primary tracking-[0.4em] uppercase text-xs mb-6">Established 1924</p>
+<h1 class="headline-font text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-10 tracking-tight leading-tight">
+                    The Art of <br/><span class="italic font-light">Eternal Elegance</span>
+</h1>
+<a href="/login">
+  <button class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-md font-bold text-lg transition-all transform hover:scale-105">
+    Shop Now
+  </button>
+</a>
+
+
+</div>
+<div class="absolute bottom-10 left-12 flex items-center gap-4">
+<div class="h-[1px] w-12 bg-primary"></div>
+<span class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant">Winter Atelier MMXXIV</span>
+</div>
+</section>
+<!-- Atelier Series: Asymmetric Showcase -->
+<section class="py-32 px-12 bg-surface">
+<div class="max-w-[1440px] mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-baseline mb-20 gap-8">
+<h2 class="headline-font text-4xl font-bold tracking-tight text-white max-w-md">The Atelier Series</h2>
+<p class="max-w-md text-on-surface-variant font-light leading-relaxed">
+                        A curated showcase of limited-edition items. Each piece is a testament to months of dedicated hand-work and uncompromising material selection.
+                    </p>
+</div>
+<div class="grid grid-cols-12 gap-8 lg:gap-16">
+<!-- Feature 1 -->
+<div class="col-span-12 lg:col-span-7 group">
+<div class="relative overflow-hidden aspect-[4/5] bg-surface-container-low mb-8">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Elegant tailored charcoal coat hanging in a modern architectural space with sharp dramatic shadows and cold lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtsc9PZyujQCCxDbVIi_zMcfomLhhRNLW87iezgFrS6HKmlVpN5OB35lz9132p_YvmUoaGKOGSWNJaQLktGs1MO_r1EDOICiTjI5wXFxGurAxj01KdioKU_FXV8Mr39KWSPMhk9RXvPkMH4n7im1r2nt7xFrl7wQxRM2A14kRKNCDA8jwO-fae7nQfCILYrFJL2gl5FDkSBBZzNt85o_PNr-f9JqAfHaeGAEkSOL-5RvPvO5lXXaMG_k_gZ2E_48bkmf7OKVuKiYQ"/>
+<div class="absolute bottom-8 right-8 glass-panel px-6 py-4 rounded-lg">
+<span class="font-label text-xs text-primary tracking-widest uppercase">01 / 15 Available</span>
+</div>
+</div>
+<h3 class="headline-font text-2xl font-bold mb-2">The Sculpted Overcoat</h3>
+<p class="text-on-surface-variant text-sm font-light">Italian cashmere blend with hand-stitched silk lining.</p>
+</div>
+<!-- Feature 2 -->
+<div class="col-span-12 lg:col-span-5 flex flex-col justify-end mt-12 lg:mt-0">
+<div class="group">
+<div class="relative overflow-hidden aspect-square bg-surface-container-low mb-8">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Extreme close-up of premium leather textures and handcrafted stitching on a luxury footwear piece" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU-vHwG-pGlfbTn82NSmtFYMXG9v8-cJ7qAGVjRWg8fn1otpdwxIDZ-CQMILwv9uVgvcrJWqcXsN9d7zzM55VkAbCRHKYzMk02XfGMdBpf5exahQo80ydXp6HSdZkq4cjyTje5AxCrwx1kSiQIRiKtVo1j-zoKgF34eI_XbEcMqc_42WJER7eRqrLtd43G_yIp-Pg2jj3U9oU0MyAWvNdxqdKzYTkG-fKUxOyb5aPh3WBI3044e74drWMzxvjfI707uFpo_POYM0g"/>
+<div class="absolute top-8 left-8 glass-panel px-6 py-4 rounded-lg">
+<span class="font-label text-xs text-primary tracking-widest uppercase">Limited Edition</span>
+</div>
+</div>
+<h3 class="headline-font text-2xl font-bold mb-2">Heritage Calfskin Boot</h3>
+<p class="text-on-surface-variant text-sm font-light">Goodyear welted construction using Grade-A full grain leather.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Permanent Collection: Tonal Grid -->
+<section class="py-32 px-12 bg-surface-container-low">
+<div class="max-w-[1440px] mx-auto">
+<div class="text-center mb-24">
+<span class="font-label text-primary tracking-[0.3em] uppercase text-xs mb-4 block">Foundations</span>
+<h2 class="headline-font text-4xl font-bold text-white tracking-tight">Permanent Collection</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-outline-variant/10">
+<!-- Grid Item 1 -->
+<div class="bg-surface-container-low p-8 group hover:bg-surface-container-high transition-colors duration-300">
+<div class="aspect-[3/4] mb-8 overflow-hidden">
+<img class="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-500" data-alt="Minimalist studio shot of a perfectly draped white luxury silk shirt on a dark mannequin" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCa2gPoDGBt1jfq9Yb5pPD0ANSALeJv_EzWakzM8nXNNwx6KsbmdsKL7Sf99e9FdvA8OcsBdR571N-P7mjANjmESNnWRzf-FPrj3Df1_hAwC3cVrocmJyQsqveuAPdfIyYzr_ooj3HEGmhYx-81x2UvK_XjxNdTLL-gS5-CJ-EO41eal-cOvhb3b4yovO3fiCjHnsyV-TdxsoPYiKwW-64cNfUB6TfzewlNWkK6y9RoBhjfHeppfWSn1QrEqlkNGAYoZG7HvSqlRgI"/>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-white mb-1">Silk Essential Shirt</h4>
+<p class="text-xs text-on-surface-variant tracking-wider uppercase">Ivory White</p>
+</div>
+<span class="text-primary font-semibold">$890</span>
+</div>
+</div>
+<!-- Grid Item 2 -->
+<div class="bg-surface-container-low p-8 group hover:bg-surface-container-high transition-colors duration-300">
+<div class="aspect-[3/4] mb-8 overflow-hidden">
+<img class="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-500" data-alt="Close up of a classic navy blue wool blazer fabric texture with gold crest button" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa_MEAf4eC72Dorjqw2eY_hdf3A5FmutvGP_fp_qvaWA2vAPB4Dc42qxTmbgfse8vJUUk2czSYe-1C1ZEBFSPB81Of8Oz1TrroL8kapWkfKeZv0tZjb2ZQ7cMW61OquHbMcI3UVc0aYBW71VYub28p6g-NZey9C-iOw8qUcpM_HABwmfocNetIamD6yjGdJRBBea1zZznV4Wzx9nVZLKNZxZNFzxaF-Grf7t-c1Zk2ZN3kx45IpJKbm_8epY6x5oaisKP0mlUeKz8"/>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-white mb-1">Classic Wool Blazer</h4>
+<p class="text-xs text-on-surface-variant tracking-wider uppercase">Midnight Navy</p>
+</div>
+<span class="text-primary font-semibold">$2,400</span>
+</div>
+</div>
+<!-- Grid Item 3 -->
+<div class="bg-surface-container-low p-8 group hover:bg-surface-container-high transition-colors duration-300">
+<div class="aspect-[3/4] mb-8 overflow-hidden">
+<img class="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-500" data-alt="Pair of slim fit charcoal tailored trousers draped over a high-end designer chair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPGxo1Un-m8RNElW_LdriwNJdZ7x5UvUUgoSKneez4dCheK9tX338qV8uwmp-za9Y9jF2sJeAoBCpz6rdKMgrWF28qX01tZAdAsoY4FuTf9mZbhsy8jHog4MVPPBjOt0gHm7dLNnu_k2e9WBALEP3Lyj_n6noxdkbyZVIc0Gi6fWdMdj4au9ZHmitFb5G5zCvtYtor1dXK5pdv_iZdXXZXYr20nREeDIvcepcR9Oykhn6IWLV5cvrcLJMCvNcZAxkwyPNep5rVtlM"/>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-white mb-1">Architectural Trouser</h4>
+<p class="text-xs text-on-surface-variant tracking-wider uppercase">Obsidian</p>
+</div>
+<span class="text-primary font-semibold">$1,150</span>
+</div>
+</div>
+<!-- Grid Item 4 -->
+<div class="bg-surface-container-low p-8 group hover:bg-surface-container-high transition-colors duration-300">
+<div class="aspect-[3/4] mb-8 overflow-hidden">
+<img class="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-500" data-alt="A pair of clean white minimalist leather sneakers in a pristine luxury display case" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAQSrJk_4ie3w8TiIIDlK4VRRAgMdduEWw0qNnUwc8wiMeqvbk-ehjoVSzqhsDzZABCVcHl0uMDHPf9Bprf3lZFClezLAhG33fvI4pHWhNY5YRBh1Uu2S5AGymZQxuv3yA77MdTXcQKbffZpe3wI2_mABxXNl46gSpoevhZajYFCcMRNibtzyTEfl3W4SElRZcYLaDWwMklY1vDK1RKG7y-M1FTVDTcjCqLBoh_aqWsuNdCSRNJOBPp39zxjcEcWyDQWKSsT80Eho"/>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-white mb-1">Series 01 Sneaker</h4>
+<p class="text-xs text-on-surface-variant tracking-wider uppercase">Optic White</p>
+</div>
+<span class="text-primary font-semibold">$650</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Heritage & Craftsmanship: Narrative Section -->
+<section class="py-32 px-12 bg-surface">
+<div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row items-center gap-20">
+<div class="lg:w-1/2 relative">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-4">
+<img class="w-full aspect-[4/5] object-cover rounded-sm" data-alt="Master tailor measuring rich navy fabric on an old wooden table with traditional tools" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnWx42lGKVW9VKP3f1WJVnyfrA2TBQxO_W8Wr5du9RVe6U0pm4AFl3IwZr1fesss9r9fvcIR3lrZ2MB9mzTX6JLnstYsDLctbAm6zm5ilCxPSD2tHgSmAE8IXb7nIIeIzHd2dvJhNT_BsoZEi_hHXHsCB21Mnc0asYzcnCztpdusRUJngj4_r0D2wGZQc5LJNJXGQ9GUUKJGIhpArTiP-cmi79rkKjWkP_HunQ2YFQsr54Mkj8of5kRyllvYcXifH58ZQ_NAwjJ94"/>
+<img class="w-full aspect-square object-cover rounded-sm" data-alt="Close-up of golden thread being hand-sewn into black velvet fabric with surgical precision" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5mj7TSwzro2ZkkMQT1j5OpqeTDbrbxb4Ro3m0DfJAvB5-lygNiGSIfYxPNSpr_oEHXe9Xbxewlxp3NZ5xy_k8WQdtYpQyllgD8sdsYYSqIXVNT4Fxjiy7XtVenF2nm8Xq7oLZWKPZrR3N80s4JRf8qSwoz1QyKE1At--kaf4-96tnFHwAqjGTR3eQIJ2okfA2LUoq5dkbEM0iwGK2ncsTLVJxcyGlJ66ARdrpgbGHpuuVYRjZn8dunwUYmIXff6cvW51dvL1cO1c"/>
+</div>
+<div class="pt-12 space-y-4">
+<img class="w-full aspect-square object-cover rounded-sm" data-alt="View through a boutique window of high-end garments organized on minimalist brass racks" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJNLAiG86T0AXdloN0ZSaioWZC6fqXUTZorVGd6My-3DkqQbxzirybhzKebTky-xxnWFHIr5kO1ZypVZm9bBZwdFXrwvesmfJLVgmr7OtxPt6aZVAOV5jvXONWWoR2U8SlzsNuEcTO7JxlWSO2vac3go0GmykxsxYHfIfUM1ILR3O5f5cT7J6jhFpxyuTz7Lu2HLTzS0kAt9izQRxzoyDdQtkbVR7g0_Od8Ey4UeE_N7GxFQgn7aBaIhfHwWL6EkfgcCBlnGOTcbg"/>
+<img class="w-full aspect-[4/5] object-cover rounded-sm" data-alt="Finished bespoke suit hanging against a dark marble wall with one focused spotlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlJ_JGeteOznHZShMi22mJKN0Ud7s4naSQruKmdwSGdSuy1pzb7T4XantP7hV820WCIeQFhKqnSq3hQE-2sVyMuSsfgkYOhNqrx7y_f2ip0Z_wg65bXeENOzLVJakvNeZ-g_Sfh5uQM7AC3i0QDS5gF131vkpQd2Mz-KWeOUOSXtgCjRDX6H5TVa4-Pe15YYaVoK_ViA9LH4QQjE0M4PZziv_31kKU8TQvgYi3_K6z6yMSnOamEK207DL2x9D8v_M5TD-PYOTyYS8"/>
+</div>
+</div>
+</div>
+<div class="lg:w-1/2 space-y-8">
+<span class="font-label text-primary tracking-[0.3em] uppercase text-xs">Our Legacy</span>
+<h2 class="headline-font text-5xl font-bold text-white leading-tight">Heritage &amp; Craftsmanship</h2>
+<p class="text-on-surface-variant text-lg leading-relaxed font-light">
+                        For over a century, LUXE has stood at the intersection of traditional artistry and contemporary vision. Every garment is born in our historic atelier, where master artisans dedicate themselves to the pursuit of perfection.
+                    </p>
+<div class="space-y-6 pt-6">
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 rounded-full border border-primary/30 flex items-center justify-center text-primary text-xs headline-font font-bold">01</div>
+<div>
+<h5 class="text-white font-bold mb-1 uppercase tracking-wider text-sm">Sourcing the Extraordinary</h5>
+<p class="text-on-surface-variant text-sm font-light">We travel the globe to secure only the finest 0.1% of raw fibers and textiles.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 rounded-full border border-primary/30 flex items-center justify-center text-primary text-xs headline-font font-bold">02</div>
+<div>
+<h5 class="text-white font-bold mb-1 uppercase tracking-wider text-sm">The 200-Hour Rule</h5>
+<p class="text-on-surface-variant text-sm font-light">No signature Atelier piece leaves our doors with less than 200 hours of focused craftsmanship.</p>
+</div>
+</div>
+</div>
+<button class="border-b border-primary text-primary pb-1 text-sm font-label uppercase tracking-widest hover:text-white hover:border-white transition-all duration-300">
+                        Discover Our Story
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t border-[#c4c5d7]/10 bg-[#0b1326]">
+<div class="flex flex-col items-center gap-8 py-16 px-12 w-full">
+<div class="text-lg font-bold tracking-widest text-white headline-font">LUXE</div>
+<div class="flex flex-wrap justify-center gap-12">
+<a class="text-[#c4c5d7] hover:text-[#1d4ed8] transition-colors duration-200 font-label text-[11px] uppercase tracking-[0.1em]" href="#">Privacy Policy</a>
+<a class="text-[#c4c5d7] hover:text-[#1d4ed8] transition-colors duration-200 font-label text-[11px] uppercase tracking-[0.1em]" href="#">Terms of Service</a>
+<a class="text-[#c4c5d7] hover:text-[#1d4ed8] transition-colors duration-200 font-label text-[11px] uppercase tracking-[0.1em]" href="#">Shipping &amp; Returns</a>
+<a class="text-[#c4c5d7] hover:text-[#1d4ed8] transition-colors duration-200 font-label text-[11px] uppercase tracking-[0.1em]" href="#">Contact Us</a>
+</div>
+<div class="text-center">
+<p class="text-[#c4c5d7] text-[10px] uppercase tracking-[0.2em] opacity-50 mb-4">A Legacy of Excellence</p>
+<div class="flex gap-6 justify-center text-white/40">
+<span class="material-symbols-outlined text-xl hover:text-primary transition-colors cursor-pointer" data-icon="share">share</span>
+<span class="material-symbols-outlined text-xl hover:text-primary transition-colors cursor-pointer" data-icon="mail">mail</span>
+<span class="material-symbols-outlined text-xl hover:text-primary transition-colors cursor-pointer" data-icon="location_on">location_on</span>
+</div>
+</div>
+<div class="text-[#c4c5d7] font-label text-[0.6875rem] uppercase tracking-[0.1em] mt-8">
+                © 2024 LUXE ATELIER. ALL RIGHTS RESERVED.
+            </div>
+</div>
+</footer>
+</body></html>
