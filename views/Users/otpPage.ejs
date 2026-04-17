@@ -149,6 +149,13 @@
 </head>
 
 <body class="bg-background text-on-background min-h-screen flex flex-col">
+  <div id="loadingOverlay" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg px-6 py-4 flex items-center gap-3 shadow-lg">
+    <div class="animate-spin rounded-full h-6 w-6 border-4 border-blue-500 border-t-transparent"></div>
+    <span class="text-gray-800 font-medium">Processing...</span>
+  </div>
+</div>
+
 
 <main class="flex-grow flex flex-col md:flex-row h-screen overflow-hidden">
 
@@ -289,6 +296,18 @@
 <div id="toast"></div>
 
 <script>
+
+
+const loader = document.getElementById("loadingOverlay");
+
+function showLoader() {
+  loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+  loader.classList.add("hidden");
+}
+
   /* ── Config ── */
   const TIMER_SECONDS  = 60;   // countdown duration
   const DEMO_VALID_OTP = '1234'; // for demo — remove in production
@@ -492,7 +511,7 @@
 
     
     const entered = getValue();
-
+  showLoader();
     const res = await fetch("/verify-otp", {
   method: "POST",
   headers: {
@@ -502,7 +521,7 @@
 });
 
 const data = await res.json();
-
+hideLoader();
 if (data.success) {
   window.location.href = data.redirect;
 } else {

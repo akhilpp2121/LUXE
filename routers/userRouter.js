@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 
 const router = express.Router();
-import { userLandingLoad,userLoginLoad,userSignUpLoad ,userForgotPasswordLoad,registerController,loginController,homeLoad,otpPageLoad,verifyEmailController,verifyOtpController, resetPasswordLoad, resendOtpController} from "../controller/userController.js";
+import { userLandingLoad,userLoginLoad,userSignUpLoad ,userForgotPasswordLoad,registerController,loginController,homeLoad,otpPageLoad,verifyEmailController,verifyOtpController, resetPasswordLoad, resendOtpController,resetPassword} from "../controller/userController.js";
 
 
 router.get('/',userLandingLoad)
@@ -16,5 +16,7 @@ router.post("/email-verification",verifyEmailController)
 router.post("/verify-otp",verifyOtpController)
 router.post("/resend-otp",resendOtpController)
 router.get("/reset-password",resetPasswordLoad)
+router.post("/reset-password", resetPassword);
+
 
 export default router;

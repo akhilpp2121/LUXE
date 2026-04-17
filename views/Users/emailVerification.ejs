@@ -63,6 +63,13 @@
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg px-6 py-4 flex items-center gap-3 shadow-lg">
+    <div class="animate-spin rounded-full h-6 w-6 border-4 border-blue-500 border-t-transparent"></div>
+    <span class="text-gray-800 font-medium">Processing...</span>
+  </div>
+</div>
+
 
     <div class="flex min-h-screen w-full flex-col lg:flex-row">
 
@@ -192,6 +199,17 @@
     <div id="toast"></div>
 
     <script>
+
+        const loader = document.getElementById("loadingOverlay");
+
+function showLoader() {
+  loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+  loader.classList.add("hidden");
+}
+
         const form        = document.getElementById('resetForm');
         const emailInput  = document.getElementById('emailInput');
         const errorEl     = document.getElementById('emailError');
@@ -292,27 +310,56 @@
             }
         });
 
-        form.addEventListener('submit', (e) => {
+        
+    form.addEventListener('submit', async (e) => {
+    e.preventDefault(); // ❗ stop normal form submit
+
     const val = emailInput.value.trim();
     const err = getEmailError(val);
 
     if (err) {
-        e.preventDefault(); // only block if invalid
         setError(err);
         emailInput.focus();
         return;
     }
-    setTimeout(() => {
-                btnText.textContent = 'Send Reset Link';
-                showToast('Reset link sent to ' + val);
-                setSuccess();
-                // In production: redirect or show a confirmation screen
-                // window.location.href = '/check-email';
-            }, 1200);
 
-    // ✅ allow normal POST
+    // 🔥 UI state
+    showLoader();
+    submitBtn.disabled = true;
+    btnText.textContent = "Sending...";
+
+    try {
+        const res = await fetch("/email-verification", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email: val })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            showToast("OTP sent successfully ✅");
+
+           
+            window.location.href = data.redirect;
+
+        } else {
+            showToast(data.message || "Something went wrong ");
+            hideLoader();
+            submitBtn.disabled = false;
+            btnText.textContent = "Send Reset Link";
+        }
+
+    } catch (err) {
+        console.log(err);
+        showToast("Server error ");
+        hideLoader();
+        submitBtn.disabled = false;
+        btnText.textContent = "Send Reset Link";
+    }
 });
-
 
             
         

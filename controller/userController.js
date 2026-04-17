@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
-import { registerService, userLoginLogic } from "../service/userService.js";
+import { registerService, userLoginLogic ,resetPasswordService} from "../service/userService.js";
 import { generateAndSendOtp } from "../service/userService.js";
-import { sendOtpEmail } from "../utilites/otp.js";
 export async function userLandingLoad(req, res) {
   try {
     if (req.session.user) {
@@ -131,7 +130,7 @@ export async function verifyEmailController(req, res) {
     // generate OTP ONCE
     await generateAndSendOtp(req, email);
 
-    return res.redirect("/otp");
+    return res.json({success:true,redirect:"/otp"})
   } catch (error) {
     console.log(error);
     return res.redirect("/login");
@@ -198,7 +197,9 @@ export async function verifyOtpController(req, res) {
 
 
 
-export const resetPasswordLoad = (req, res) => {
+export  async function resetPasswordLoad  (req, res)  {
+  
+
   try {
     if (!req.session.email) {
       return res.redirect("/login");
@@ -209,5 +210,35 @@ export const resetPasswordLoad = (req, res) => {
   } catch (err) {
     console.log(err);
     res.redirect("/login");
+  }
+};
+
+
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { password, confirmPassword } = req.body;
+    const email = req.session.email;
+
+    if (!email) {
+      return res.json({ success: false, message: "Session expired" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.json({ success: false, message: "Passwords do not match" });
+    }
+
+    await resetPasswordService(email, password);
+
+    req.session.email = null;
+
+    return res.json({
+      success: true,
+      message: "Password updated successfully"
+    });
+
+  } catch (err) {
+    console.log(err);
+    return res.json({ success: false, message: "Server error" });
   }
 };

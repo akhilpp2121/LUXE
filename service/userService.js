@@ -87,7 +87,7 @@ export async function generateAndSendOtp(req, email) {
   const otp = Math.floor(1000 + Math.random() * 9000);
 
   req.session.otp = otp;
-  req.session.email = email; // IMPORTANT FIX
+  req.session.email = email; 
   req.session.otpExpires = Date.now() + 60 * 1000;
 
   console.log("Generated OTP:", otp);
@@ -95,3 +95,15 @@ export async function generateAndSendOtp(req, email) {
   await sendOtpEmail(email, otp);
 }
 
+export const resetPasswordService = async (email, password) => {
+  const hashed = await bcrypt.hash(password, 10);
+
+  const result = await userModel.updateOne(
+    { email: email.toLowerCase() },
+    { $set: { password: hashed } }
+  );
+
+  console.log("UPDATE RESULT:", result); // 👈 ADD THIS
+
+  return { success: true };
+};
