@@ -490,62 +490,69 @@
     btnText.textContent = 'Verifying…';
     btnIcon.textContent = 'hourglass_empty';
 
-    await new Promise(r => setTimeout(r, 1000)); // simulate network
-
+    
     const entered = getValue();
 
-    // ── Demo logic: replace with real API call ──
-    if (entered === DEMO_VALID_OTP) {
-      clearInterval(timerInterval);
-      setAllState('is-success');
-      btnText.textContent = 'Verified!';
-      btnIcon.textContent = 'check_circle';
-      setStatus('Identity verified!', 'success');
-      showToast('Identity verified! Redirecting…', 'success');
-      setTimeout(() => {
-        successOverlay.classList.add('show');
-        // window.location.href = '/dashboard'; // uncomment in production
-      }, 600);
-    } else {
-      attemptCount++;
-      setAllState('is-error');
-      const remaining = MAX_ATTEMPTS - attemptCount;
-      if (remaining > 0) {
-        setStatus(`Incorrect code. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining.`, 'error');
-        showToast('Incorrect code — try again.', 'error');
-      } else {
-        setStatus('Too many failed attempts. Request a new code.', 'error');
-        showToast('Too many failed attempts.', 'error');
-        inputs.forEach(i => { i.disabled = true; i.classList.add('opacity-40'); });
-        clearInterval(timerInterval);
-        resendBtn.disabled = false;
-        resendHint.style.display = 'none';
-      }
-      btnText.textContent = 'Verify & Proceed';
-      btnIcon.textContent = 'arrow_forward';
-      submitBtn.disabled = false;
-      // Shake then clear after brief pause
-      setTimeout(() => { clearAll(); setStatus('', null); }, 800);
-    }
-  });
+    const res = await fetch("/verify-otp", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ otp: entered })
+});
 
+const data = await res.json();
+
+if (data.success) {
+  window.location.href = data.redirect;
+} else {
+  setStatus(data.message, "error");
+}
+
+
+
+  });
   /* ── Resend ── */
-  resendBtn.addEventListener('click', () => {
-    attemptCount = 0;
+resendBtn.addEventListener('click', async () => {
+  if (resendBtn.disabled) return;
+
+  resendBtn.disabled = true;
+  setStatus("Sending new OTP...", "info");
+
+  try {
+    const res = await fetch("/resend-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showToast(data.message || "OTP sent successfully", "success");
+    } else {
+      showToast(data.message || "Failed to resend OTP", "error");
+    }
+
+    // reset inputs
     inputs.forEach(i => {
       i.disabled = false;
-      i.classList.remove('opacity-40', 'is-error', 'is-success', 'filled');
       i.value = '';
+      i.classList.remove('opacity-40', 'is-error', 'is-success', 'filled');
     });
+
     submitBtn.disabled = true;
-    btnText.textContent = 'Verify & Proceed';
-    btnIcon.textContent = 'arrow_forward';
-    setStatus('New code sent!', 'info');
-    showToast('A new code has been sent to your email.', 'info');
     startTimer();
-    inputs[0].focus();
-    setTimeout(() => setStatus('', null), 3000);
-  });
+
+  } catch (err) {
+    console.log(err);
+    showToast("Server error", "error");
+  }
+
+  setTimeout(() => {
+    resendBtn.disabled = false;
+  }, 30000);
+});
+
 
   /* ── Init ── */
   startTimer();

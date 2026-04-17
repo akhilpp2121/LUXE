@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { userModel } from "../model/usermodel.js";
+import { sendOtpEmail } from "../utilites/otp.js";
 
 export const registerService = async (userData) => {
   try {
@@ -78,3 +79,19 @@ export const userLoginLogic = async (req, email, password) => {
     };
   }
 };
+
+
+
+
+export async function generateAndSendOtp(req, email) {
+  const otp = Math.floor(1000 + Math.random() * 9000);
+
+  req.session.otp = otp;
+  req.session.email = email; // IMPORTANT FIX
+  req.session.otpExpires = Date.now() + 60 * 1000;
+
+  console.log("Generated OTP:", otp);
+
+  await sendOtpEmail(email, otp);
+}
+

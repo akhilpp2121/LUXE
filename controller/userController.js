@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { registerService, userLoginLogic } from "../service/userService.js";
-
+import { generateAndSendOtp } from "../service/userService.js";
+import { sendOtpEmail } from "../utilites/otp.js";
 export async function userLandingLoad(req, res) {
   try {
     if (req.session.user) {
@@ -120,24 +121,93 @@ export async function verifyEmailController(req, res) {
   try {
     const { email } = req.body;
 
-    if (!email) {
-      return res.send("Invalid Email");
+    if (!email || !email.includes("@")) {
+      return res.status(400).send("Invalid email");
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
-
-    // save in session
+    // store email in session
     req.session.email = email;
-    req.session.otp = otp;
-    req.session.otpExpires = Date.now() + 5 * 60 * 1000; // 5 min
 
-    // send email
-    await sendOtpEmail(email, otp);
+    // generate OTP ONCE
+    await generateAndSendOtp(req, email);
 
-    req.session.save(() => {
-      res.redirect("/otp");
-    });
+    return res.redirect("/otp");
   } catch (error) {
     console.log(error);
+    return res.redirect("/login");
   }
 }
+
+
+
+
+
+
+
+export async function resendOtpController(req, res) {
+  try {
+    const email = req.session.email;
+
+    if (!email) {
+      return res.status(400).send("Email not found in session");
+    }
+
+    
+    if (req.session.otpExpires && Date.now() < req.session.otpExpires - 50000) {
+      return res.status(429).send("Please wait before resending OTP");
+    }
+
+    await generateAndSendOtp(req, email);
+
+    return res.json({success:true,redirect:"/reset-password"})
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Error resending OTP");
+  }
+}
+
+
+
+
+
+export async function verifyOtpController(req, res) {
+  try {
+    const { otp } = req.body;
+
+    if (!req.session.otp) {
+      return res.status(400).send("OTP expired");
+    }
+
+    if (Date.now() > req.session.otpExpires) {
+      return res.status(400).send("OTP expired");
+    }
+
+    if (Number(otp) !== req.session.otp) {
+      return res.status(400).send("Invalid OTP");
+    }
+
+    // success
+    req.session.otp = null;
+
+    return res.json({success:true,redirect:"/reset-password"})
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Server error");
+  }
+}
+
+
+
+export const resetPasswordLoad = (req, res) => {
+  try {
+    if (!req.session.email) {
+      return res.redirect("/login");
+    }
+
+    res.render("Users/resetPassword");
+
+  } catch (err) {
+    console.log(err);
+    res.redirect("/login");
+  }
+};
