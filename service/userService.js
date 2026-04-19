@@ -103,7 +103,29 @@ export const resetPasswordService = async (email, password) => {
     { $set: { password: hashed } }
   );
 
-  console.log("UPDATE RESULT:", result); // 👈 ADD THIS
+ 
 
   return { success: true };
 };
+
+
+export async function verifyOtpService(req) {
+  const { otp } = req.body;
+
+  if (!req.session.otp) {
+    throw new Error("OTP expired");
+  }
+
+  if (Date.now() > req.session.otpExpires) {
+    throw new Error("OTP expired");
+  }
+
+  if (Number(otp) !== req.session.otp) {
+    throw new Error("Invalid OTP");
+  }
+
+  req.session.otp = null;
+  return true;
+}
+
+

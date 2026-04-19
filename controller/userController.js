@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { registerService, userLoginLogic ,resetPasswordService} from "../service/userService.js";
+import { registerService, userLoginLogic ,resetPasswordService, verifyOtpService} from "../service/userService.js";
 import { generateAndSendOtp } from "../service/userService.js";
 export async function userLandingLoad(req, res) {
   try {
@@ -166,40 +166,23 @@ export async function resendOtpController(req, res) {
 }
 
 
-
-
-
-export async function verifyOtpController(req, res) {
+export async function verifyOtpForgotPasswordController(req, res) {
   try {
-    const { otp } = req.body;
-
-    if (!req.session.otp) {
-      return res.status(400).send("OTP expired");
-    }
-
-    if (Date.now() > req.session.otpExpires) {
-      return res.status(400).send("OTP expired");
-    }
-
-    if (Number(otp) !== req.session.otp) {
-      return res.status(400).send("Invalid OTP");
-    }
-
-    // success
-    req.session.otp = null;
-
-    return res.json({success:true,redirect:"/reset-password"})
+    await verifyOtpService(req);
+    return res.json({ success: true, redirect: "/reset-password" });
   } catch (error) {
     console.log(error);
-    return res.status(500).send("Server error");
+    return res.status(400).send(error.message);
   }
 }
 
 
 
+
+
+
 export  async function resetPasswordLoad  (req, res)  {
   
-
   try {
     if (!req.session.email) {
       return res.redirect("/login");
@@ -242,3 +225,8 @@ export const resetPassword = async (req, res) => {
     return res.json({ success: false, message: "Server error" });
   }
 };
+
+
+
+
+
