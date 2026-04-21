@@ -20,7 +20,6 @@
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; overflow-x: hidden; }
   ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: var(--bg); } ::-webkit-scrollbar-thumb { background: var(--sur4); border-radius: 99px; }
 
-  /* ── NAV ── */
   nav.topnav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(8,12,20,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid var(--bord); display: flex; align-items: center; justify-content: space-between; padding: 0 36px; z-index: 100; }
   .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: .22em; text-transform: uppercase; }
   .brand span { color: var(--gold); }
@@ -32,7 +31,6 @@
   .nav-btn:hover { color: var(--txt); } .nav-btn.on { color: var(--pri); }
   .nav-btn .ms { font-size: 22px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 300; }
 
-  /* ── SIDEBAR ── */
   aside.sidebar { position: fixed; top: var(--nav-h); left: 0; width: var(--side-w); height: calc(100vh - var(--nav-h)); background: var(--sur); border-right: 1px solid var(--bord); display: flex; flex-direction: column; padding: 28px 0 20px; z-index: 50; overflow-y: auto; }
   .sidebar-header { padding: 0 24px 24px; border-bottom: 1px solid var(--bord); margin-bottom: 12px; }
   .sidebar-header h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .9rem; margin-bottom: 6px; }
@@ -49,7 +47,6 @@
   .sidebar-footer a:hover { color: var(--txt2); }
   .sidebar-footer .material-symbols-outlined { font-size: 17px; font-variation-settings: 'FILL' 0, 'wght' 300; }
 
-  /* ── MAIN ── */
   main { margin-left: var(--side-w); padding: calc(var(--nav-h) + 44px) 48px 80px; min-height: 100vh; }
   .page-header { margin-bottom: 36px; display: flex; align-items: center; justify-content: space-between; }
   .page-header-left h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 3rem; letter-spacing: -.01em; line-height: 1.05; margin-bottom: 6px; }
@@ -59,16 +56,13 @@
   .back-link:hover { color: var(--txt); }
   .back-link .ms { font-size: 16px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 300; }
 
-  /* ── FLASH MESSAGES ── */
   .flash { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 24px; border: 1px solid; }
   .flash.success { background: rgba(34,197,94,.08); border-color: rgba(34,197,94,.2); color: #4ade80; }
   .flash.error { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.2); color: #f87171; }
   .flash .ms { font-size: 16px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 1, 'wght' 300; }
 
-  /* ── FORM LAYOUT ── */
   .edit-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
 
-  /* ── AVATAR CARD ── */
   .avatar-card { background: var(--sur); border: 1px solid var(--bord); border-radius: var(--rl); padding: 28px; display: flex; flex-direction: column; align-items: center; gap: 16px; animation: fu .5s ease both; }
   .avatar-card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--txt3); align-self: flex-start; }
   .av-preview { position: relative; width: 100px; height: 100px; }
@@ -87,7 +81,6 @@
   #avatarInput { display: none; }
   .av-err { color: var(--red); font-size: .7rem; text-align: center; min-height: 16px; }
 
-  /* ── FORM CARD ── */
   .form-card { background: var(--sur); border: 1px solid var(--bord); border-radius: var(--rl); padding: 32px; animation: fu .5s .06s ease both; }
   .form-section { margin-bottom: 30px; }
   .form-section:last-child { margin-bottom: 0; }
@@ -99,12 +92,7 @@
   .field label { font-family: 'Syne', sans-serif; font-size: .52rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--txt3); }
   .field-wrap { position: relative; }
   .field-wrap .fi { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--txt3); font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 300; pointer-events: none; }
-  .field input, .field select, .field textarea {
-    background: var(--sur2); border: 1px solid var(--bord); border-radius: 8px;
-    padding: 11px 14px 11px 40px; color: var(--txt); font-family: 'DM Sans', sans-serif;
-    font-size: .875rem; font-weight: 400; width: 100%; outline: none; transition: all .2s;
-    -webkit-appearance: none;
-  }
+  .field input, .field select, .field textarea { background: var(--sur2); border: 1px solid var(--bord); border-radius: 8px; padding: 11px 14px 11px 40px; color: var(--txt); font-family: 'DM Sans', sans-serif; font-size: .875rem; font-weight: 400; width: 100%; outline: none; transition: all .2s; -webkit-appearance: none; }
   .field textarea { padding: 11px 14px; resize: vertical; min-height: 80px; line-height: 1.5; }
   .field input:hover, .field select:hover, .field textarea:hover { border-color: var(--bord2); }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(58,111,247,.45); background: var(--sur3); }
@@ -113,29 +101,14 @@
   .field .errt .ms { font-size: 13px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 1, 'wght' 300; }
   .field select option { background: var(--sur2); color: var(--txt); }
 
-  /* EMAIL FIELD SPECIAL */
   .email-row { display: flex; align-items: flex-start; gap: 10px; }
   .email-row .field { flex: 1; }
-  .email-change-btn {
-    display: flex; align-items: center; gap: 5px; padding: 11px 14px;
-    background: rgba(58,111,247,.1); color: var(--pri); border: 1px solid rgba(58,111,247,.25);
-    border-radius: 8px; font-family: 'Syne', sans-serif; font-size: .58rem; font-weight: 700;
-    letter-spacing: .1em; text-transform: uppercase; cursor: pointer; white-space: nowrap;
-    transition: all .2s; margin-top: 22px; flex-shrink: 0;
-  }
+  .email-change-btn { display: flex; align-items: center; gap: 5px; padding: 11px 14px; background: rgba(58,111,247,.1); color: var(--pri); border: 1px solid rgba(58,111,247,.25); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: .58rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: all .2s; margin-top: 22px; flex-shrink: 0; text-decoration: none; }
   .email-change-btn:hover { background: rgba(58,111,247,.2); }
   .email-change-btn .ms { font-size: 14px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 300; }
-  .email-note { font-size: .7rem; color: var(--txt3); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
-  .email-note .ms { font-size: 13px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 300; }
 
-  /* FORM ACTIONS */
   .form-actions { display: flex; align-items: center; gap: 12px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--bord); }
-  .btn-save {
-    display: flex; align-items: center; gap: 8px; background: var(--pri); color: #fff;
-    border: none; border-radius: 8px; padding: 13px 28px; font-family: 'Syne', sans-serif;
-    font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-    cursor: pointer; transition: all .2s;
-  }
+  .btn-save { display: flex; align-items: center; gap: 8px; background: var(--pri); color: #fff; border: none; border-radius: 8px; padding: 13px 28px; font-family: 'Syne', sans-serif; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: all .2s; }
   .btn-save:hover { background: #5b84ff; box-shadow: 0 0 24px rgba(58,111,247,.35); }
   .btn-save .ms { font-size: 16px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 300; }
   .btn-cancel { display: flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--bord2); color: var(--txt2); border-radius: 8px; padding: 13px 24px; font-family: 'Syne', sans-serif; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: all .2s; text-decoration: none; }
@@ -149,7 +122,7 @@
 </head>
 <body>
 
-<!-- ── NAV ── -->
+<!-- NAV -->
 <nav class="topnav">
   <div class="brand">LUXE <span>ATELIER</span></div>
   <ul class="nav-links">
@@ -164,7 +137,7 @@
   </div>
 </nav>
 
-<!-- ── SIDEBAR ── -->
+<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-header">
     <h3>User Account</h3>
@@ -201,7 +174,7 @@
   </div>
 </aside>
 
-<!-- ── MAIN ── -->
+<!-- MAIN -->
 <main>
   <div class="page-header">
     <div class="page-header-left">
@@ -211,7 +184,6 @@
     <a href="/profile" class="back-link"><span class="ms material-symbols-outlined">arrow_back</span>Back to Profile</a>
   </div>
 
-  <!-- Flash Messages -->
   <% if (typeof success !== 'undefined' && success) { %>
     <div class="flash success"><span class="ms material-symbols-outlined">check_circle</span><%= success %></div>
   <% } %>
@@ -224,32 +196,37 @@
     <!-- Avatar Card -->
     <div class="avatar-card">
       <div class="avatar-card-title">Profile Photo</div>
+
       <div class="av-preview">
-        <img id="avatarPreview" src="<%= user.avatar || '/images/default-avatar.png' %>" alt="Avatar"/>
+        <img id="avatarPreview"
+          src="<%= user.avatar ? user.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.fullName || 'User') + '&background=1a2338&color=c9a96e&size=100' %>"
+          alt="Avatar"/>
         <div class="av-overlay" onclick="document.getElementById('avatarInput').click()">
           <span class="ms material-symbols-outlined">photo_camera</span>
         </div>
       </div>
-      <div class="av-hint">JPG, PNG or WEBP<br/>Max size 5MB</div>
+
+      <div class="av-hint">JPG, PNG or WEBP · Max 5MB</div>
+
       <div class="av-actions">
-        <button type="button" class="av-btn upload" onclick="document.getElementById('avatarInput').click()">
+        <button type="button" class="av-btn upload" id="uploadBtn" onclick="document.getElementById('avatarInput').click()">
           <span class="ms material-symbols-outlined">upload</span>Upload
         </button>
         <button type="button" class="av-btn remove" id="removeAvatarBtn">
           <span class="ms material-symbols-outlined">delete</span>Remove
         </button>
       </div>
+
       <p class="av-err" id="avatarErr"></p>
+
+      <!-- ONE file input, outside the form, no name attribute -->
       <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp"/>
     </div>
 
-    <!-- Main Form -->
+    <!-- Main Form — text fields only, no enctype, no avatar -->
     <div class="form-card">
-      <form id="editForm" method="POST" action="/profile/update" enctype="multipart/form-data" novalidate>
-        <input type="hidden" id="removeAvatarField" name="removeAvatar" value="0"/>
-        <input type="hidden" id="avatarDataField" name="avatarData" value=""/>
+      <form id="editForm" method="POST" action="/profile/update" novalidate>
 
-        <!-- Personal Info -->
         <div class="form-section">
           <div class="section-title"><span class="ms material-symbols-outlined">badge</span>Personal Information</div>
           <div class="fields-grid">
@@ -265,16 +242,13 @@
               <label for="phone">Phone Number</label>
               <div class="field-wrap">
                 <span class="fi material-symbols-outlined">call</span>
-                <input type="tel" id="phone" name="phoneNumber" value="<%= user.phoneNumber || '' %>" placeholder="+44 7700 000000"/>
+                <input type="tel" id="phone" name="phoneNumber" value="<%= user.phoneNumber || '' %>" placeholder="+91 99999 00000"/>
               </div>
               <span class="errt" id="phone-err"></span>
             </div>
-            
-            
           </div>
         </div>
 
-        <!-- Email -->
         <div class="form-section">
           <div class="section-title"><span class="ms material-symbols-outlined">mail</span>Email Address</div>
           <div class="email-row">
@@ -284,7 +258,6 @@
                 <span class="fi material-symbols-outlined">mail</span>
                 <input type="email" value="<%= user.email %>" readonly style="opacity:.6;cursor:not-allowed;padding-left:40px;"/>
               </div>
-              
             </div>
             <a href="/profile/email-edit" class="email-change-btn">
               <span class="ms material-symbols-outlined">edit</span>Change Email
@@ -292,11 +265,11 @@
           </div>
         </div>
 
-        <!-- Form Actions -->
         <div class="form-actions">
           <button type="submit" class="btn-save"><span class="ms material-symbols-outlined">save</span>Save Changes</button>
           <a href="/profile" class="btn-cancel">Cancel</a>
         </div>
+
       </form>
     </div>
 
@@ -304,95 +277,126 @@
 </main>
 
 <script>
-// ── AVATAR PREVIEW ──
-const avatarInput = document.getElementById('avatarInput');
-const avatarPreview = document.getElementById('avatarPreview');
-const avatarErr = document.getElementById('avatarErr');
-const avatarDataField = document.getElementById('avatarDataField');
-const removeAvatarField = document.getElementById('removeAvatarField');
-const DEFAULT_AVATAR = '/images/default-avatar.png';
-let originalAvatar = avatarPreview.src;
+document.addEventListener('DOMContentLoaded', function () {
 
-avatarInput.addEventListener('change', function() {
-  const file = this.files[0];
-  avatarErr.textContent = '';
-  if (!file) return;
-  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
-    avatarErr.textContent = 'Only JPG, PNG, or WEBP allowed.';
-    this.value = ''; return;
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    avatarErr.textContent = 'Image must be under 5MB.';
-    this.value = ''; return;
-  }
-  const reader = new FileReader();
-  reader.onload = e => {
-    avatarPreview.src = e.target.result;
-    avatarDataField.value = e.target.result;
-    removeAvatarField.value = '0';
+  const avatarInput  = document.getElementById('avatarInput');
+  const avatarPreview = document.getElementById('avatarPreview');
+  const avatarErr    = document.getElementById('avatarErr');
+  const uploadBtn    = document.getElementById('uploadBtn');
+  const removeBtn    = document.getElementById('removeAvatarBtn');
+  const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=<%= encodeURIComponent(user.fullName || "User") %>&background=1a2338&color=c9a96e&size=100';
+
+  // ── UPLOAD ──
+  avatarInput.addEventListener('change', async function () {
+    const file = this.files[0];
+    avatarErr.textContent = '';
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      avatarErr.textContent = 'Only JPG, PNG, or WEBP allowed.';
+      this.value = ''; return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      avatarErr.textContent = 'Image must be under 5MB.';
+      this.value = ''; return;
+    }
+
+    // Instant local preview
+    avatarPreview.src = URL.createObjectURL(file);
+    uploadBtn.textContent = 'Uploading…';
+    uploadBtn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    try {
+      const res  = await fetch('/profile/avatar/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      console.log(data);
+      
+
+      if (data.success) {
+        // Use server path so it persists after reload
+        avatarPreview.src = data.avatar + '?t=' + Date.now();
+      } else {
+        avatarErr.textContent = data.message || 'Upload failed.';
+        avatarPreview.src = DEFAULT_AVATAR;
+      }
+    } catch (err) {
+      console.error('Upload fetch error:', err);
+      avatarErr.textContent = 'Upload failed. Please try again.';
+      avatarPreview.src = DEFAULT_AVATAR;
+    } finally {
+      uploadBtn.innerHTML = '<span class="ms material-symbols-outlined">upload</span>Upload';
+      uploadBtn.disabled = false;
+      this.value = '';
+    }
+  });
+
+  // ── REMOVE ──
+  removeBtn.addEventListener('click', async function () {
+    avatarErr.textContent = '';
+    removeBtn.textContent = 'Removing…';
+    removeBtn.disabled = true;
+
+    try {
+      const res  = await fetch('/profile/avatar', { method: 'DELETE' });
+      const data = await res.json();
+
+      if (data.success) {
+        avatarPreview.src = DEFAULT_AVATAR;
+      } else {
+        avatarErr.textContent = data.message || 'Could not remove avatar.';
+      }
+    } catch (err) {
+      console.error('Remove fetch error:', err);
+      avatarErr.textContent = 'Remove failed. Please try again.';
+    } finally {
+      removeBtn.innerHTML = '<span class="ms material-symbols-outlined">delete</span>Remove';
+      removeBtn.disabled = false;
+    }
+  });
+
+  // ── FORM VALIDATION ──
+  const validators = {
+    fullName(v) {
+      if (!v.trim()) return 'Full name is required';
+      if (v.trim().length < 3) return 'Must be at least 3 characters';
+      if (!/^[a-zA-Z\s'\-.]+$/.test(v.trim())) return 'Only letters, spaces, hyphens, apostrophes';
+      return '';
+    },
+    phone(v) {
+      if (!v) return '';
+      
+      const c = v.replace(/[\s\-()]/g, '');
+      if (!/^\+?[0-9]{7,15}$/.test(c)) return 'Enter a valid phone number';
+      return '';
+    }
   };
-  reader.readAsDataURL(file);
-  this.value = '';
-});
 
-document.getElementById('removeAvatarBtn').addEventListener('click', function() {
-  avatarPreview.src = DEFAULT_AVATAR;
-  avatarDataField.value = '';
-  removeAvatarField.value = '1';
-  avatarInput.value = '';
-  avatarErr.textContent = '';
-});
-
-// ── CLIENT-SIDE VALIDATION ──
-const validators = {
-  fullName(v) {
-    if (!v.trim()) return 'Full name is required';
-    if (v.trim().length < 3) return 'Must be at least 3 characters';
-    if (!/^[a-zA-Z\s'\-\.]+$/.test(v.trim())) return 'Only letters, spaces, hyphens, apostrophes';
-    return '';
-  },
-  phone(v) {
-    if (!v) return '';
-    const c = v.replace(/[\s\-\(\)]/g, '');
-    if (!/^\+?[0-9]{7,15}$/.test(c)) return 'Enter a valid phone number';
-    return '';
-  },
-  dob(v) {
-    if (!v) return '';
-    const d = new Date(v);
-    const now = new Date();
-    const age = (now - d) / (365.25 * 24 * 3600 * 1000);
-    if (age < 13) return 'You must be at least 13 years old';
-    if (age > 120) return 'Please enter a valid date';
-    return '';
+  function validateField(id) {
+    const el    = document.getElementById(id);
+    const errEl = document.getElementById(id + '-err');
+    if (!el || !errEl || !validators[id]) return true;
+    const msg = validators[id](el.value);
+    errEl.innerHTML = msg ? `<span class="ms material-symbols-outlined">error</span>${msg}` : '';
+    el.classList.toggle('err', !!msg);
+    return !msg;
   }
-};
 
-function validateField(id) {
-  const el = document.getElementById(id);
-  const errEl = document.getElementById(id + '-err');
-  if (!el || !errEl || !validators[id]) return true;
-  const msg = validators[id](el.value);
-  errEl.innerHTML = msg ? `<span class="ms material-symbols-outlined">error</span>${msg}` : '';
-  el.classList.toggle('err', !!msg);
-  return !msg;
-}
+  ['fullName', 'phone'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('blur',  () => validateField(id));
+      el.addEventListener('input', () => { if (el.classList.contains('err')) validateField(id); });
+    }
+  });
 
-['fullName','phone','dob'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener('blur', () => validateField(id));
-    el.addEventListener('input', () => {
-      if (el.classList.contains('err')) validateField(id);
-    });
-  }
-});
+  document.getElementById('editForm').addEventListener('submit', function (e) {
+    const ok = ['fullName', 'phone'].every(id => validateField(id));
+    if (!ok) { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  });
 
-document.getElementById('editForm').addEventListener('submit', function(e) {
-  const fields = ['fullName','phone','dob'];
-  let ok = true;
-  fields.forEach(id => { if (!validateField(id)) ok = false; });
-  if (!ok) { e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); }
 });
 </script>
 </body>

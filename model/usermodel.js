@@ -63,6 +63,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    avatar: {
+  type: String,
+  default: "",
+},
     status: {
   type: String,
   enum: ["active", "inactive", "blocked"],

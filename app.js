@@ -4,6 +4,14 @@ import userRouter from "./routers/userRouter.js";
 import connect from "./config/db_config.js";
 import session from "express-session";
 
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+
+console.log("Static serving from:", path.join(__dirname, "public"));
+
+
 dotenv.config();
 
 const app = express();
@@ -12,6 +20,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 app.use((req, res, next) => {
   res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
   res.set("Pragma", "no-cache");
