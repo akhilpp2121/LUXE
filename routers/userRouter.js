@@ -48,11 +48,14 @@
 import express from "express";
 import { avatarUpload } from "../config/multer.js";
 
+
+import passport from "../config/passport.js"
+
 import {
   userLandingLoad, userLoginLoad, userSignUpLoad, userForgotPasswordLoad,
   registerController, loginController, homeLoad, otpPageLoad,
   verifyOtpController, resendOtpController, verifyEmailController,
-  resetPasswordLoad, resetPassword
+  resetPasswordLoad, resetPassword,googleCallback
 } from "../controller/userController.js";
 
 import {
@@ -69,6 +72,15 @@ router.get("/login", userLoginLoad);
 router.get("/signUp", userSignUpLoad);
 router.post("/signUp", registerController);
 router.post("/login", loginController);
+
+
+
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+router.get("/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  googleCallback
+);
+
 
 // ── OTP / PASSWORD ──
 router.get("/email-verification", userForgotPasswordLoad);
@@ -90,7 +102,7 @@ router.get("/address/add", addAddressPageLoad);
 // ── PROFILE UPDATE (text fields only — no file) ──
 router.post("/profile/update", avatarUpload.none(), userProfileUpdate);
 
-// ── AVATAR (AJAX endpoints) ──
+
 router.post("/profile/avatar/upload", avatarUpload.single("avatar"), uploadAvatar);
 router.delete("/profile/avatar", deleteAvatar);
 

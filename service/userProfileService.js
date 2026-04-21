@@ -11,7 +11,6 @@ const deleteOldAvatar = (avatarPath) => {
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 };
 
-// User data DB-ൽ നിന്ന് എടുക്കുക
 export const getUserProfileService = async (userId) => {
   if (!userId) return null;
   return await userModel.findById(userId);
@@ -55,6 +54,7 @@ export const updateProfileService = async (req) => {
       fullName: user.fullName,
       phoneNumber: user.phoneNumber,
       avatar: user.avatar,
+      
     };
   } catch (error) {
     console.error("updateProfileService error:", error);
@@ -62,10 +62,10 @@ export const updateProfileService = async (req) => {
   }
 };
 
-// Avatar upload — controller-ൽ നിന്ന് logic ഇവിടേക്ക് മാറ്റി
+
 export const uploadAvatarService = async (userId, file, currentAvatar) => {
   try {
-    // പഴയ avatar delete
+   
     deleteOldAvatar(currentAvatar);
 
     const newAvatarPath = "/uploads/avatars/" + file.filename;

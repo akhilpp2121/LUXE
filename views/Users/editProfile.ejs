@@ -194,34 +194,43 @@
   <div class="edit-layout">
 
     <!-- Avatar Card -->
-    <div class="avatar-card">
-      <div class="avatar-card-title">Profile Photo</div>
+   <!-- Avatar Card -->
+<% const isGoogleAvatar = user.avatar && user.avatar.startsWith('http'); %>
 
-      <div class="av-preview">
-        <img id="avatarPreview"
-          src="<%= user.avatar ? user.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.fullName || 'User') + '&background=1a2338&color=c9a96e&size=100' %>"
-          alt="Avatar"/>
-        <div class="av-overlay" onclick="document.getElementById('avatarInput').click()">
-          <span class="ms material-symbols-outlined">photo_camera</span>
-        </div>
-      </div>
+<div class="avatar-card">
+  <div class="avatar-card-title">Profile Photo</div>
 
-      <div class="av-hint">JPG, PNG or WEBP · Max 5MB</div>
-
-      <div class="av-actions">
-        <button type="button" class="av-btn upload" id="uploadBtn" onclick="document.getElementById('avatarInput').click()">
-          <span class="ms material-symbols-outlined">upload</span>Upload
-        </button>
-        <button type="button" class="av-btn remove" id="removeAvatarBtn">
-          <span class="ms material-symbols-outlined">delete</span>Remove
-        </button>
-      </div>
-
-      <p class="av-err" id="avatarErr"></p>
-
-      <!-- ONE file input, outside the form, no name attribute -->
-      <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp"/>
+  <div class="av-preview">
+    <img id="avatarPreview"
+      src="<%=
+        user.avatar
+          ? (isGoogleAvatar ? user.avatar : user.avatar + '?t=' + Date.now())
+          : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.fullName || 'User') + '&background=1a2338&color=c9a96e&size=100'
+      %>"
+      alt="Avatar"/>
+    <div class="av-overlay" onclick="document.getElementById('avatarInput').click()">
+      <span class="ms material-symbols-outlined">photo_camera</span>
     </div>
+  </div>
+
+  <div class="av-hint">JPG, PNG or WEBP · Max 5MB</div>
+
+  <div class="av-actions">
+    <button type="button" class="av-btn upload" id="uploadBtn" onclick="document.getElementById('avatarInput').click()">
+      <span class="ms material-symbols-outlined">upload</span>
+      <%= isGoogleAvatar ? 'Replace' : 'Upload' %>
+    </button>
+
+    <% if (!isGoogleAvatar) { %>
+    <button type="button" class="av-btn remove" id="removeAvatarBtn">
+      <span class="ms material-symbols-outlined">delete</span>Remove
+    </button>
+    <% } %>
+  </div>
+
+  <p class="av-err" id="avatarErr"></p>
+  <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp"/>
+</div>
 
     <!-- Main Form — text fields only, no enctype, no avatar -->
     <div class="form-card">
@@ -275,15 +284,14 @@
 
   </div>
 </main>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  const avatarInput  = document.getElementById('avatarInput');
+  const avatarInput   = document.getElementById('avatarInput');
   const avatarPreview = document.getElementById('avatarPreview');
-  const avatarErr    = document.getElementById('avatarErr');
-  const uploadBtn    = document.getElementById('uploadBtn');
-  const removeBtn    = document.getElementById('removeAvatarBtn');
+  const avatarErr     = document.getElementById('avatarErr');
+  const uploadBtn     = document.getElementById('uploadBtn');
+  const removeBtn     = document.getElementById('removeAvatarBtn'); // ✅ declared ONCE
   const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=<%= encodeURIComponent(user.fullName || "User") %>&background=1a2338&color=c9a96e&size=100';
 
   // ── UPLOAD ──
@@ -301,7 +309,6 @@ document.addEventListener('DOMContentLoaded', function () {
       this.value = ''; return;
     }
 
-    // Instant local preview
     avatarPreview.src = URL.createObjectURL(file);
     uploadBtn.textContent = 'Uploading…';
     uploadBtn.disabled = true;
@@ -312,11 +319,8 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const res  = await fetch('/profile/avatar/upload', { method: 'POST', body: formData });
       const data = await res.json();
-      console.log(data);
-      
 
       if (data.success) {
-        // Use server path so it persists after reload
         avatarPreview.src = data.avatar + '?t=' + Date.now();
       } else {
         avatarErr.textContent = data.message || 'Upload failed.';
@@ -333,29 +337,31 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // ── REMOVE ──
-  removeBtn.addEventListener('click', async function () {
-    avatarErr.textContent = '';
-    removeBtn.textContent = 'Removing…';
-    removeBtn.disabled = true;
+  // ── REMOVE (only for non-Google users) ──
+  if (removeBtn) {
+    removeBtn.addEventListener('click', async function () {
+      avatarErr.textContent = '';
+      removeBtn.textContent = 'Removing…';
+      removeBtn.disabled = true;
 
-    try {
-      const res  = await fetch('/profile/avatar', { method: 'DELETE' });
-      const data = await res.json();
+      try {
+        const res  = await fetch('/profile/avatar', { method: 'DELETE' });
+        const data = await res.json();
 
-      if (data.success) {
-        avatarPreview.src = DEFAULT_AVATAR;
-      } else {
-        avatarErr.textContent = data.message || 'Could not remove avatar.';
+        if (data.success) {
+          avatarPreview.src = DEFAULT_AVATAR;
+        } else {
+          avatarErr.textContent = data.message || 'Could not remove avatar.';
+        }
+      } catch (err) {
+        console.error('Remove fetch error:', err);
+        avatarErr.textContent = 'Remove failed. Please try again.';
+      } finally {
+        removeBtn.innerHTML = '<span class="ms material-symbols-outlined">delete</span>Remove';
+        removeBtn.disabled = false;
       }
-    } catch (err) {
-      console.error('Remove fetch error:', err);
-      avatarErr.textContent = 'Remove failed. Please try again.';
-    } finally {
-      removeBtn.innerHTML = '<span class="ms material-symbols-outlined">delete</span>Remove';
-      removeBtn.disabled = false;
-    }
-  });
+    });
+  }
 
   // ── FORM VALIDATION ──
   const validators = {
@@ -367,7 +373,6 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     phone(v) {
       if (!v) return '';
-      
       const c = v.replace(/[\s\-()]/g, '');
       if (!/^\+?[0-9]{7,15}$/.test(c)) return 'Enter a valid phone number';
       return '';
@@ -399,5 +404,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
+
 </body>
 </html>

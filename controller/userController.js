@@ -348,6 +348,29 @@ export const loginController = async (req, res) => {
   }
 };
 
+// ── GOOGLE CALLBACK ──────────────────────────────────────────────
+export async function googleCallback(req, res) {
+  try {
+    // req.user is set by passport after successful Google auth
+    const user = req.user;
+
+    // Set session exactly like your normal loginController does
+    req.session.user = {
+      id:          user._id,
+      fullName:    user.fullName,
+      email:       user.email,
+      avatar:      user.avatar,
+      phoneNumber: user.phoneNumber || "",
+    };
+
+    return res.redirect("/homePage");
+
+  } catch (err) {
+    console.error("googleCallback error:", err);
+    return res.redirect("/login");
+  }
+}
+
 export const verifyEmailController = async (req, res) => {
   try {
     const result = await verifyEmailService(req, req.body.email);

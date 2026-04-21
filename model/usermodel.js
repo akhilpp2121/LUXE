@@ -1,19 +1,17 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-        googleId: {
-        type: String,
-        unique: true,
-        sparse: true   // allows users without googleId
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
-
     fullName: {
       type: String,
       required: true,
       trim: true,
     },
-
     email: {
       type: String,
       required: true,
@@ -21,72 +19,29 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-
     phoneNumber: {
       type: String,
       unique: true,
-      required:true
+      sparse: true,  // allows multiple users without phoneNumber
+      required: false //  Google users won't have this
     },
-
     password: {
       type: String,
-      required: true,
+      required: false, //  Google users won't have this
     },
-
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-
-    isBlocked: {
-      type: Boolean,
-      default: false,
-    },
-    isVerified:{
-      type:Boolean,
-      default:false
-    },
-
-    referredBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
-
-    referalCode: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
-
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
-    avatar: {
-  type: String,
-  default: "",
-},
-    status: {
-  type: String,
-  enum: ["active", "inactive", "blocked"],
-  default: "active"
-},
-      otp:{
-        type:String
-    },
-    otpExpires:{
-        type:Date
-    },
-    wallet:{
-        type:Number,
-        default:0
-    }
+    isActive:   { type: Boolean, default: true },
+    isBlocked:  { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    referalCode:{ type: String, unique: true, sparse: true },
+    isDeleted:  { type: Boolean, default: false },
+    avatar:     { type: String, default: "" },
+    status:     { type: String, enum: ["active", "inactive", "blocked"], default: "active" },
+    otp:        { type: String },
+    otpExpires: { type: Date },
+    wallet:     { type: Number, default: 0 },
   },
-  {
-    timestamps: true, // automatically adds createdAt & updatedAt
-  }
+  { timestamps: true }
 );
-
 
 export const userModel = mongoose.model("User", userSchema);
