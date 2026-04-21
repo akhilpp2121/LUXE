@@ -149,13 +149,6 @@
 </head>
 
 <body class="bg-background text-on-background min-h-screen flex flex-col">
-  <div id="loadingOverlay" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg px-6 py-4 flex items-center gap-3 shadow-lg">
-    <div class="animate-spin rounded-full h-6 w-6 border-4 border-blue-500 border-t-transparent"></div>
-    <span class="text-gray-800 font-medium">Processing...</span>
-  </div>
-</div>
-
 
 <main class="flex-grow flex flex-col md:flex-row h-screen overflow-hidden">
 
@@ -296,30 +289,14 @@
 <div id="toast"></div>
 
 <script>
+  const TIMER_SECONDS = 60;
 
-
-const loader = document.getElementById("loadingOverlay");
-
-function showLoader() {
-  loader.classList.remove("hidden");
-}
-
-function hideLoader() {
-  loader.classList.add("hidden");
-}
-
-  /* ── Config ── */
-  const TIMER_SECONDS  = 60;   // countdown duration
-  const DEMO_VALID_OTP = '1234'; // for demo — remove in production
-
-  /* ── State ── */
-  let timerInterval  = null;
-  let timeLeft       = TIMER_SECONDS;
-  let expired        = false;
-  let attemptCount   = 0;
+  let timerInterval = null;
+  let timeLeft      = TIMER_SECONDS;
+  let expired       = false;
+  let attemptCount  = 0;
   const MAX_ATTEMPTS = 3;
 
-  /* ── Elements ── */
   const inputs         = Array.from({ length: 4 }, (_, i) => document.getElementById('otp' + i));
   const submitBtn      = document.getElementById('submitBtn');
   const btnText        = document.getElementById('btnText');
@@ -331,47 +308,37 @@ function hideLoader() {
   const timerRing      = document.getElementById('timerRing');
   const statusMsg      = document.getElementById('statusMsg');
   const toast          = document.getElementById('toast');
-  const successOverlay = document.getElementById('successOverlay');
   const otpForm        = document.getElementById('otpForm');
   const emailDisplay   = document.getElementById('emailDisplay');
 
-  /* ── Seed email from URL param (e.g. ?email=user@luxe.com) ── */
-  const urlEmail = new URLSearchParams(window.location.search).get('email') || '';
-  if (urlEmail) {
-    emailDisplay.textContent = urlEmail;
-    document.getElementById('emailHidden').value = urlEmail;
+  // ✅ FIX: Email from EJS server variable, not URL param
+  const serverEmail = '<%= typeof email !== "undefined" ? email : "" %>';
+  if (serverEmail) {
+    emailDisplay.textContent = serverEmail;
+    document.getElementById('emailHidden').value = serverEmail;
   }
 
-  /* ── Timer ── */
-  const circumference = 2 * Math.PI * 11; // r=11 → ~69.12
+  const circumference = 2 * Math.PI * 11;
 
   function formatTime(s) {
-    const m = String(Math.floor(s / 60)).padStart(2, '0');
-    const sec = String(s % 60).padStart(2, '0');
-    return m + ':' + sec;
+    return String(Math.floor(s / 60)).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
   }
 
   function updateRing(s) {
-    const fraction = s / TIMER_SECONDS;
-    timerRing.style.strokeDashoffset = circumference * (1 - fraction);
-    // colour shift: blue → amber → red
-    if (s > 20)       timerRing.style.stroke = '#1152d4';
-    else if (s > 10)  timerRing.style.stroke = '#f59e0b';
-    else              timerRing.style.stroke = '#ef4444';
-    // text colour
-    if (s > 20)       timerDisplay.style.color = '#f1f5f9';
-    else if (s > 10)  timerDisplay.style.color = '#f59e0b';
-    else              timerDisplay.style.color = '#ef4444';
+    timerRing.style.strokeDashoffset = circumference * (1 - s / TIMER_SECONDS);
+    const color = s > 20 ? '#1152d4' : s > 10 ? '#f59e0b' : '#ef4444';
+    timerRing.style.stroke = color;
+    timerDisplay.style.color = s > 20 ? '#f1f5f9' : color;
   }
 
   function startTimer() {
     clearInterval(timerInterval);
-    timeLeft  = TIMER_SECONDS;
-    expired   = false;
-    timerDisplay.textContent  = formatTime(timeLeft);
-    resendCD.textContent      = formatTime(timeLeft);
+    timeLeft = TIMER_SECONDS;
+    expired  = false;
+    timerDisplay.textContent = formatTime(timeLeft);
+    resendCD.textContent     = formatTime(timeLeft);
     updateRing(timeLeft);
-    resendBtn.disabled = true;
+    resendBtn.disabled       = true;
     resendHint.style.display = '';
 
     timerInterval = setInterval(() => {
@@ -387,37 +354,32 @@ function hideLoader() {
         timerDisplay.style.color = '#ef4444';
         timerRing.style.stroke   = '#ef4444';
         setStatus('Code expired. Please resend.', 'error');
-        submitBtn.disabled = true;
-        resendBtn.disabled = false;
+        submitBtn.disabled       = true;
+        resendBtn.disabled       = false;
         resendHint.style.display = 'none';
-        // Dim the inputs
         inputs.forEach(i => { i.disabled = true; i.classList.add('opacity-40'); });
       }
     }, 1000);
   }
 
-  /* ── Status message ── */
   function setStatus(msg, type) {
     statusMsg.textContent = msg;
-    statusMsg.className = 'text-center text-sm font-semibold select-none';
+    statusMsg.className   = 'text-center text-sm font-semibold select-none';
     if (type === 'error')   statusMsg.classList.add('text-red-400');
     if (type === 'success') statusMsg.classList.add('text-green-400');
     if (type === 'info')    statusMsg.classList.add('text-on-surface-variant');
     if (!type)              statusMsg.classList.add('text-transparent');
   }
 
-  /* ── Toast ── */
   function showToast(msg, type = 'info') {
     toast.textContent = msg;
-    toast.className = 'show ' + type;
+    toast.className   = 'show ' + type;
     clearTimeout(toast._t);
     toast._t = setTimeout(() => { toast.className = type; }, 3500);
   }
 
-  /* ── OTP helpers ── */
-  function getValue() { return inputs.map(i => i.value).join(''); }
-
-  function isComplete() { return getValue().length === 4; }
+  function getValue()    { return inputs.map(i => i.value).join(''); }
+  function isComplete()  { return getValue().length === 4; }
 
   function setAllState(cls) {
     inputs.forEach(i => {
@@ -426,76 +388,65 @@ function hideLoader() {
     });
   }
 
-  function clearAll() {
+  // ✅ FIX: Full reset — clears errors, re-enables inputs, resets attempts
+  function fullReset() {
+    attemptCount = 0;
+    expired      = false;
     inputs.forEach(i => {
-      i.value = '';
-      i.classList.remove('filled', 'is-error', 'is-success');
+      i.disabled = false;
+      i.value    = '';
+      i.classList.remove('opacity-40', 'is-error', 'is-success', 'filled');
     });
-    submitBtn.disabled = true;
+    submitBtn.disabled  = true;
+    btnText.textContent = 'Verify & Proceed';
+    btnIcon.textContent = 'arrow_forward';
     setStatus('', null);
     inputs[0].focus();
   }
 
-  /* ── Input event wiring ── */
+  /* Input wiring */
   inputs.forEach((input, idx) => {
-
     input.addEventListener('keydown', (e) => {
-      // Allow only digits, backspace, delete, arrow keys, tab
       if (!/^\d$/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) {
         e.preventDefault();
       }
-      if (e.key === 'Backspace') {
-        if (!input.value && idx > 0) {
-          inputs[idx - 1].value = '';
-          inputs[idx - 1].classList.remove('filled');
-          inputs[idx - 1].focus();
-        }
+      if (e.key === 'Backspace' && !input.value && idx > 0) {
+        inputs[idx-1].value = '';
+        inputs[idx-1].classList.remove('filled');
+        inputs[idx-1].focus();
       }
-      if (e.key === 'ArrowLeft'  && idx > 0) inputs[idx - 1].focus();
-      if (e.key === 'ArrowRight' && idx < 3) inputs[idx + 1].focus();
+      if (e.key === 'ArrowLeft'  && idx > 0) inputs[idx-1].focus();
+      if (e.key === 'ArrowRight' && idx < 3) inputs[idx+1].focus();
     });
 
     input.addEventListener('input', () => {
-      // Strip non-digits
       input.value = input.value.replace(/\D/g, '').slice(-1);
-
-      if (input.value) {
-        input.classList.add('filled');
-        input.classList.remove('is-error');
-        if (idx < 3) inputs[idx + 1].focus();
-      } else {
-        input.classList.remove('filled');
-      }
-
-      // Enable submit only when all 4 filled and not expired
+      input.value ? input.classList.add('filled') : input.classList.remove('filled');
+      input.classList.remove('is-error');
+      if (input.value && idx < 3) inputs[idx+1].focus();
       submitBtn.disabled = !(isComplete() && !expired);
       if (isComplete()) setStatus('', null);
     });
 
-    // Handle paste on any input
     input.addEventListener('paste', (e) => {
       e.preventDefault();
-      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 4);
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
       pasted.split('').forEach((ch, i) => {
-        if (inputs[i]) {
-          inputs[i].value = ch;
-          inputs[i].classList.add('filled');
-        }
+        if (inputs[i]) { inputs[i].value = ch; inputs[i].classList.add('filled'); }
       });
       const nextEmpty = inputs.findIndex(i => !i.value);
       (nextEmpty === -1 ? inputs[3] : inputs[nextEmpty]).focus();
       submitBtn.disabled = !(isComplete() && !expired);
     });
 
-    // Click focuses same input (don't jump)
     input.addEventListener('click', () => input.select());
   });
 
-  /* ── Form submit ── */
+  /* Submit */
   otpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (expired) { setStatus('Code has expired. Please resend.', 'error'); return; }
+    if (expired)      { setStatus('Code expired. Please resend.', 'error'); return; }
     if (!isComplete()) { setStatus('Please fill in all 4 digits.', 'error'); return; }
     if (attemptCount >= MAX_ATTEMPTS) {
       setStatus('Too many attempts. Request a new code.', 'error');
@@ -504,76 +455,102 @@ function hideLoader() {
       return;
     }
 
-    // Loading state
-    submitBtn.disabled = true;
+    submitBtn.disabled  = true;
     btnText.textContent = 'Verifying…';
     btnIcon.textContent = 'hourglass_empty';
 
-    
-    const entered = getValue();
-  showLoader();
-    const res = await fetch("/verify-otp", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ otp: entered })
-});
+    try {
+      const res  = await fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',  // ✅ important for session cookies
+        body: JSON.stringify({ otp: getValue() })
+      });
+      const data = await res.json();
 
-const data = await res.json();
-hideLoader();
-if (data.success) {
-  window.location.href = data.redirect;
-} else {
-  setStatus(data.message, "error");
-}
+      if (data.success) {
+        clearInterval(timerInterval);
+        setAllState('is-success');
+        btnText.textContent = 'Verified!';
+        btnIcon.textContent = 'check_circle';
+        setStatus('Verified successfully!', 'success');
+        showToast('Success', 'success');
+        setTimeout(() => { window.location.href = data.redirect || '/'; }, 800);
+        return;
+      }
 
+      // ❌ Failed
+      attemptCount++;
+      setAllState('is-error');
+      const remaining = MAX_ATTEMPTS - attemptCount;
 
+      if (remaining > 0) {
+        setStatus(`${data.message || 'Incorrect code'}. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining.`, 'error');
+        showToast('Incorrect OTP — try again', 'error');
+        // ✅ Clear inputs after wrong attempt so user re-enters cleanly
+        setTimeout(() => {
+          inputs.forEach(i => { i.value = ''; i.classList.remove('filled','is-error'); });
+          submitBtn.disabled = true;
+          inputs[0].focus();
+        }, 600);
+      } else {
+        setStatus('Too many failed attempts. Request a new code.', 'error');
+        showToast('Blocked — request new code', 'error');
+        inputs.forEach(i => { i.disabled = true; i.classList.add('opacity-40'); });
+        clearInterval(timerInterval);
+        resendBtn.disabled       = false;
+        resendHint.style.display = 'none';
+      }
 
-  });
-  /* ── Resend ── */
-resendBtn.addEventListener('click', async () => {
-  if (resendBtn.disabled) return;
-
-  resendBtn.disabled = true;
-  setStatus("Sending new OTP...", "info");
-
-  try {
-    const res = await fetch("/resend-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" }
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      showToast(data.message || "OTP sent successfully", "success");
-    } else {
-      showToast(data.message || "Failed to resend OTP", "error");
+    } catch (err) {
+      console.error(err);
+      setStatus('Server error. Try again.', 'error');
+      showToast('Server error', 'error');
     }
 
-    // reset inputs
-    inputs.forEach(i => {
-      i.disabled = false;
-      i.value = '';
-      i.classList.remove('opacity-40', 'is-error', 'is-success', 'filled');
-    });
+    // Reset button (only reached on failure)
+    btnText.textContent = 'Verify & Proceed';
+    btnIcon.textContent = 'arrow_forward';
+    submitBtn.disabled  = false;
+  });
 
-    submitBtn.disabled = true;
-    startTimer();
+  /* Resend */
+  resendBtn.addEventListener('click', async () => {
+    try {
+      setStatus('Sending new OTP...', 'info');
+      resendBtn.disabled = true; // ✅ prevent double-click
 
-  } catch (err) {
-    console.log(err);
-    showToast("Server error", "error");
-  }
+      const res  = await fetch('/resend-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+      const data = await res.json();
 
-  setTimeout(() => {
-    resendBtn.disabled = false;
-  }, 30000);
-});
+      if (!data.success) {
+        setStatus(data.message || 'Failed to resend OTP', 'error');
+        showToast(data.message || 'Error', 'error');
+        resendBtn.disabled = false; // re-enable on failure
+        return;
+      }
 
+      showToast('New OTP sent!', 'success');
 
-  /* ── Init ── */
+      // ✅ FIX: full reset THEN restart timer
+      fullReset();
+      startTimer();
+
+      setTimeout(() => setStatus('', null), 3000);
+
+    } catch (err) {
+      console.error(err);
+      setStatus('Server error while resending', 'error');
+      showToast('Server error', 'error');
+      resendBtn.disabled = false;
+    }
+  });
+
+  /* Init */
   startTimer();
   inputs[0].focus();
 </script>

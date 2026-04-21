@@ -2,11 +2,10 @@ import bcrypt from "bcrypt";
 import { userModel } from "../model/usermodel.js";
 import { sendOtpEmail } from "../utilites/otp.js";
 
-export const registerService = async (userData) => {
+export const registerService = async (fullName,email,password,phoneNumber) => {
   try {
-    const { fullName, email, password, mobileno } = userData;
-
-    if (!fullName || !email || !password || !mobileno) {
+    
+    if (!fullName || !email || !password || !phoneNumber) {
       return { success: false, message: "All fields are required" };
     }
 
@@ -15,7 +14,7 @@ export const registerService = async (userData) => {
       return { success: false, message: "Email already exists" };
     }
 
-    const phoneExists = await userModel.findOne({ phoneNumber: mobileno });
+    const phoneExists = await userModel.findOne({ phoneNumber: phoneNumber });
     if (phoneExists) {
       return { success: false, message: "Phone number already exists" };
     }
@@ -26,7 +25,8 @@ export const registerService = async (userData) => {
       fullName,
       email: email.toLowerCase(),
       password: hashedPassword,
-      phoneNumber: mobileno,
+      phoneNumber: phoneNumber,
+      status: "active",
     });
 
     await newUser.save();
@@ -84,6 +84,10 @@ export const userLoginLogic = async (req, email, password) => {
 
 
 export async function generateAndSendOtp(req, email) {
+
+
+
+
   const otp = Math.floor(1000 + Math.random() * 9000);
 
   req.session.otp = otp;
@@ -93,6 +97,8 @@ export async function generateAndSendOtp(req, email) {
   console.log("Generated OTP:", otp);
 
   await sendOtpEmail(email, otp);
+    
+  
 }
 
 export const resetPasswordService = async (email, password) => {
@@ -110,22 +116,24 @@ export const resetPasswordService = async (email, password) => {
 
 
 export async function verifyOtpService(req) {
-  const { otp } = req.body;
+  const otp = req.body.otp ? String(req.body.otp).trim() : null;
+  const sessionOtp = req.session.otp ? String(req.session.otp).trim() : null;
 
-  if (!req.session.otp) {
-    throw new Error("OTP expired");
+  if (!otp) {
+    return { valid: false, message: "OTP is required" };
   }
 
-  if (Date.now() > req.session.otpExpires) {
-    throw new Error("OTP expired");
+  if (!sessionOtp) {
+    return { valid: false, message: "OTP expired" };
   }
 
-  if (Number(otp) !== req.session.otp) {
-    throw new Error("Invalid OTP");
+  if (!req.session.otpExpires || Date.now() > req.session.otpExpires) {
+    return { valid: false, message: "OTP expired" };
   }
 
-  req.session.otp = null;
-  return true;
+  if (otp !== sessionOtp) {
+    return { valid: false, message: "Invalid OTP" };
+  }
+
+  return { valid: true };
 }
-
-

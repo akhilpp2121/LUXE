@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LUXE ATELIER — Address Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@200,0..1&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #06080f;
+  --surface: #0b0e19;
+  --s2: #0f1320;
+  --s3: #141826;
+  --s4: #1a2030;
+  --s5: #202640;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --border3: rgba(255,255,255,0.18);
+  --gold: #c8973f;
+  --gold2: #e8bb6a;
+  --gold3: #f5d48a;
+  --goldglow: rgba(200,151,63,0.15);
+  --pri: #4f7ef8;
+  --pri2: #7aa2ff;
+  --priglow: rgba(79,126,248,0.2);
+  --txt: #edf0f8;
+  --txt2: #7e8ba0;
+  --txt3: #4a5570;
+  --red: #e05252;
+  --redglow: rgba(224,82,82,0.15);
+  --green: #3ecf8e;
+  --greenglow: rgba(62,207,142,0.15);
+  --amber: #f59e0b;
+  --nav-h: 70px;
+  --side-w: 268px;
+  --radius: 14px;
+  --radius-lg: 18px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.35;
+}
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 99px; }
+
+/* ══ NAV ══ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: rgba(6,8,15,0.88);
+  backdrop-filter: blur(28px) saturate(1.5);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; z-index: 200;
+}
+.brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem; letter-spacing: 0.28em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.brand-accent { color: var(--gold2); font-style: italic; }
+.brand-sep { width: 1px; height: 14px; background: var(--border3); }
+.nav-links { display: flex; gap: 36px; list-style: none; }
+.nav-links a {
+  font-size: 0.6rem; font-weight: 500; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--txt3); text-decoration: none;
+  transition: color 0.2s; position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
+  height: 1px; background: var(--gold); transform: scaleX(0); transition: transform 0.25s;
+}
+.nav-links a:hover { color: var(--txt2); }
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+.nav-icon {
+  width: 38px; height: 38px; background: none;
+  border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--txt3); transition: all 0.2s;
+}
+.nav-icon:hover { background: var(--s3); color: var(--txt2); border-color: var(--border2); }
+.nav-icon.active { background: rgba(79,126,248,0.1); border-color: rgba(79,126,248,0.3); color: var(--pri2); }
+.nav-icon .material-symbols-outlined { font-size: 18px; font-variation-settings: 'FILL' 0,'wght' 200; }
+
+/* ══ SIDEBAR ══ */
+aside {
+  position: fixed; top: var(--nav-h); left: 0;
+  width: var(--side-w); height: calc(100vh - var(--nav-h));
+  background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 32px 0 24px;
+  z-index: 100; overflow-y: auto;
+}
+.sb-user { padding: 0 22px 28px; border-bottom: 1px solid var(--border); }
+.sb-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--s4); border: 1px solid var(--border3);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px; position: relative; overflow: hidden;
+}
+.sb-avatar::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 35% 35%, rgba(200,151,63,0.25), transparent 60%);
+}
+.sb-avatar .material-symbols-outlined { font-size: 22px; color: var(--gold); font-variation-settings: 'FILL' 1,'wght' 200; }
+.sb-name { font-size: 0.9rem; font-weight: 600; color: var(--txt); margin-bottom: 6px; }
+.sb-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(200,151,63,0.08); border: 1px solid rgba(200,151,63,0.22);
+  border-radius: 99px; padding: 3px 10px;
+}
+.sb-badge-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }
+.sb-badge span { font-size: 0.52rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.sb-section-label {
+  padding: 20px 22px 8px;
+  font-size: 0.5rem; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--txt3);
+}
+.sb-nav { display: flex; flex-direction: column; gap: 1px; padding: 0 12px; }
+.sb-link {
+  display: flex; align-items: center; gap: 11px; padding: 9px 12px;
+  border-radius: 9px; text-decoration: none; color: var(--txt3);
+  font-size: 0.7rem; font-weight: 500; letter-spacing: 0.02em; transition: all 0.18s;
+}
+.sb-link .material-symbols-outlined { font-size: 16px; flex-shrink: 0; font-variation-settings: 'FILL' 0,'wght' 200; }
+.sb-link:hover { background: var(--s3); color: var(--txt2); }
+.sb-link.active {
+  background: linear-gradient(90deg, rgba(79,126,248,0.12), rgba(79,126,248,0.04));
+  color: var(--pri2); border-right: 2px solid var(--pri);
+}
+.sb-link.active .material-symbols-outlined { font-variation-settings: 'FILL' 1,'wght' 200; }
+.sb-footer {
+  margin-top: auto; padding: 20px 22px 0;
+  border-top: 1px solid var(--border);
+}
+.sb-signout {
+  display: flex; align-items: center; gap: 9px; text-decoration: none;
+  color: var(--txt3); font-size: 0.68rem; font-weight: 500; transition: color 0.18s;
+}
+.sb-signout .material-symbols-outlined { font-size: 16px; font-variation-settings: 'FILL' 0,'wght' 200; }
+.sb-signout:hover { color: var(--red); }
+
+/* ══ MAIN ══ */
+main {
+  margin-left: var(--side-w);
+  padding: calc(var(--nav-h) + 52px) 56px 100px;
+  min-height: 100vh; position: relative;
+}
+main::before {
+  content: ''; position: fixed; top: 5%; right: -8%;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(200,151,63,0.035) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+main::after {
+  content: ''; position: fixed; bottom: 0%; left: 18%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(79,126,248,0.03) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ══ PAGE HEADER ══ */
+.page-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 44px; position: relative; z-index: 1;
+}
+.ph-eyebrow {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.55rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
+}
+.ph-eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--gold); }
+.ph-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.2rem; font-weight: 400; line-height: 1;
+  color: var(--txt); margin-bottom: 10px;
+}
+.ph-title em { font-style: italic; color: var(--gold2); }
+.ph-sub { font-size: 0.82rem; color: var(--txt3); font-weight: 300; }
+.btn-add-new {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--pri); color: #fff;
+  border: none; border-radius: 10px;
+  padding: 13px 22px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.22s; position: relative; overflow: hidden; white-space: nowrap;
+}
+.btn-add-new::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+}
+.btn-add-new:hover {
+  background: var(--pri2);
+  box-shadow: 0 0 28px rgba(79,126,248,0.35), 0 4px 16px rgba(79,126,248,0.2);
+  transform: translateY(-1px);
+}
+.btn-add-new .material-symbols-outlined { font-size: 17px; font-variation-settings: 'FILL' 0,'wght' 200; }
+
+/* ══ ADDRESS GRID ══ */
+.addresses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  position: relative; z-index: 1;
+  margin-bottom: 0;
+}
+
+/* ══ ADDRESS CARD ══ */
+.addr-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.28s cubic-bezier(0.22,1,0.36,1);
+  position: relative;
+  animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+}
+.addr-card:nth-child(1) { animation-delay: 0s; }
+.addr-card:nth-child(2) { animation-delay: 0.07s; }
+.addr-card:nth-child(3) { animation-delay: 0.14s; }
+.addr-card:nth-child(4) { animation-delay: 0.21s; }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.addr-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+.addr-card.default-card {
+  border-color: rgba(200,151,63,0.3);
+}
+.addr-card.default-card:hover {
+  border-color: rgba(200,151,63,0.45);
+}
+
+/* top shimmer */
+.addr-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+  transition: opacity 0.3s;
+}
+.addr-card.default-card::before {
+  background: linear-gradient(90deg, transparent, rgba(200,151,63,0.35), transparent);
+}
+
+.card-header {
+  padding: 22px 22px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.card-type-badge {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 12px 5px 8px;
+  border-radius: 99px;
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.card-type-badge .material-symbols-outlined { font-size: 14px; font-variation-settings: 'FILL' 1,'wght' 200; }
+.badge-home { background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.2); color: var(--green); }
+.badge-work { background: rgba(79,126,248,0.1); border: 1px solid rgba(79,126,248,0.2); color: var(--pri2); }
+.badge-other { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--amber); }
+
+.default-tag {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.52rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold); background: rgba(200,151,63,0.1);
+  border: 1px solid rgba(200,151,63,0.22); border-radius: 99px;
+  padding: 4px 10px;
+}
+.default-tag .material-symbols-outlined { font-size: 12px; font-variation-settings: 'FILL' 1,'wght' 200; }
+
+.card-body { padding: 16px 22px 20px; }
+.addr-name {
+  font-size: 1rem; font-weight: 600; color: var(--txt);
+  letter-spacing: 0.01em; margin-bottom: 12px;
+}
+.addr-lines { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.addr-line {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 0.8rem; color: var(--txt3); font-weight: 300; line-height: 1.5;
+}
+.addr-line .material-symbols-outlined {
+  font-size: 13px; color: var(--txt3); font-variation-settings: 'FILL' 0,'wght' 200;
+  flex-shrink: 0; margin-top: 2px;
+}
+.addr-phone {
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'DM Mono', monospace; font-size: 0.75rem;
+  color: var(--txt3); font-weight: 300;
+}
+.addr-phone .material-symbols-outlined { font-size: 13px; color: var(--txt3); font-variation-settings: 'FILL' 0,'wght' 200; }
+
+.card-divider { height: 1px; background: var(--border); margin: 0 22px; }
+
+.card-actions {
+  padding: 14px 22px 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-edit {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: 1px solid var(--border2);
+  border-radius: 8px; padding: 8px 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--txt2); cursor: pointer; transition: all 0.2s;
+}
+.btn-edit:hover { background: var(--s3); color: var(--txt); border-color: var(--border3); }
+.btn-edit .material-symbols-outlined { font-size: 13px; font-variation-settings: 'FILL' 0,'wght' 200; }
+.btn-delete {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--txt3); cursor: pointer; transition: all 0.2s;
+}
+.btn-delete:hover { background: var(--redglow); color: var(--red); border-color: rgba(224,82,82,0.3); }
+.btn-delete .material-symbols-outlined { font-size: 13px; font-variation-settings: 'FILL' 0,'wght' 200; }
+.btn-set-default {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 5px;
+  background: none; border: none; padding: 6px 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--txt3); cursor: pointer; transition: color 0.2s;
+}
+.btn-set-default:hover { color: var(--gold2); }
+.btn-set-default .material-symbols-outlined { font-size: 14px; font-variation-settings: 'FILL' 0,'wght' 200; }
+.btn-set-default.is-default { color: var(--gold); pointer-events: none; }
+.btn-set-default.is-default .material-symbols-outlined { font-variation-settings: 'FILL' 1,'wght' 200; }
+
+/* ══ ADD CARD TILE ══ */
+.addr-card-add {
+  background: transparent;
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-lg);
+  min-height: 220px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  cursor: pointer; transition: all 0.28s cubic-bezier(0.22,1,0.36,1);
+  animation: cardIn 0.5s 0.28s cubic-bezier(0.22,1,0.36,1) both;
+}
+.addr-card-add:hover {
+  border-color: rgba(79,126,248,0.4);
+  background: rgba(79,126,248,0.04);
+  transform: translateY(-3px);
+}
+.add-icon-wrap {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(79,126,248,0.08); border: 1px solid rgba(79,126,248,0.2);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.28s;
+}
+.addr-card-add:hover .add-icon-wrap {
+  background: rgba(79,126,248,0.15); border-color: rgba(79,126,248,0.4);
+  transform: scale(1.08);
+}
+.add-icon-wrap .material-symbols-outlined { font-size: 22px; color: var(--pri2); font-variation-settings: 'FILL' 0,'wght' 200; }
+.add-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--txt3); transition: color 0.2s;
+}
+.addr-card-add:hover .add-label { color: var(--pri2); }
+.add-sublabel { font-size: 0.7rem; color: var(--txt3); font-weight: 300; opacity: 0.7; }
+
+/* ══ MODAL OVERLAY ══ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(6,8,15,0.82);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  width: 100%; max-width: 620px;
+  max-height: 90vh; overflow-y: auto;
+  position: relative;
+  transform: translateY(24px) scale(0.98);
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+.modal::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,151,63,0.45), transparent);
+}
+
+.modal-header {
+  padding: 28px 32px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.modal-title-wrap {}
+.modal-eyebrow {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.52rem; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+}
+.modal-eyebrow .material-symbols-outlined { font-size: 13px; font-variation-settings: 'FILL' 0,'wght' 200; }
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem; font-weight: 400; color: var(--txt);
+}
+.modal-title em { font-style: italic; color: var(--gold2); }
+.modal-close {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: none; border: 1px solid var(--border);
+  cursor: pointer; color: var(--txt3); transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.modal-close:hover { background: var(--s3); color: var(--txt); border-color: var(--border2); }
+.modal-close .material-symbols-outlined { font-size: 17px; font-variation-settings: 'FILL' 0,'wght' 200; }
+
+.modal-body { padding: 28px 32px 32px; }
+
+/* type selector */
+.type-selector { display: flex; gap: 10px; margin-bottom: 24px; }
+.type-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 11px 16px; border-radius: 10px;
+  background: var(--s2); border: 1px solid var(--border);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--txt3); cursor: pointer; transition: all 0.2s;
+}
+.type-btn .material-symbols-outlined { font-size: 15px; font-variation-settings: 'FILL' 0,'wght' 200; }
+.type-btn:hover { border-color: var(--border2); color: var(--txt2); }
+.type-btn.active-home { background: rgba(62,207,142,0.1); border-color: rgba(62,207,142,0.3); color: var(--green); }
+.type-btn.active-work { background: rgba(79,126,248,0.1); border-color: rgba(79,126,248,0.3); color: var(--pri2); }
+.type-btn.active-other { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--amber); }
+
+/* form grid */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-grid .full { grid-column: 1 / -1; }
+
+.field-grp { display: flex; flex-direction: column; gap: 7px; }
+.field-lbl {
+  font-size: 0.54rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--txt3);
+}
+.field-wrap-m { position: relative; }
+.field-icon-m {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; color: var(--txt3);
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings: 'FILL' 0,'wght' 200;
+  pointer-events: none; transition: color 0.2s;
+}
+.field-input-m {
+  width: 100%; background: var(--s2); border: 1px solid var(--border);
+  border-radius: 9px; padding: 12px 14px 12px 42px;
+  color: var(--txt); font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem; font-weight: 400; outline: none; transition: all 0.22s;
+}
+.field-input-m::placeholder { color: var(--txt3); }
+.field-input-m:hover { border-color: var(--border2); }
+.field-input-m:focus {
+  border-color: rgba(79,126,248,0.4); background: var(--s3);
+  box-shadow: 0 0 0 3px rgba(79,126,248,0.07);
+}
+.field-wrap-m:focus-within .field-icon-m { color: var(--pri2); }
+.field-input-m.has-err { border-color: rgba(224,82,82,0.4) !important; background: rgba(224,82,82,0.04) !important; box-shadow: none !important; }
+.field-err { font-size: 0.68rem; color: var(--red); min-height: 14px; display: flex; align-items: center; gap: 4px; }
+.field-err .material-symbols-outlined { font-size: 12px; font-variation-settings: 'FILL' 1,'wght' 200; }
+
+select.field-input-m { appearance: none; }
+
+/* default checkbox row */
+.default-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; background: var(--s2);
+  border: 1px solid var(--border); border-radius: 10px;
+  margin-top: 8px; cursor: pointer; transition: border-color 0.2s;
+}
+.default-row:hover { border-color: var(--border2); }
+.custom-check {
+  width: 20px; height: 20px; border-radius: 6px;
+  border: 1px solid var(--border2); background: var(--s3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s;
+}
+.custom-check.checked { background: var(--gold); border-color: var(--gold2); }
+.custom-check .material-symbols-outlined { font-size: 13px; color: var(--bg); font-variation-settings: 'FILL' 1,'wght' 300; display: none; }
+.custom-check.checked .material-symbols-outlined { display: flex; }
+.default-row-text { font-size: 0.78rem; color: var(--txt2); font-weight: 400; }
+.default-row-text span { color: var(--gold2); }
+
+.modal-divider { height: 1px; background: var(--border); margin: 24px 0; }
+.modal-actions { display: flex; gap: 12px; }
+
+.btn-save {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--pri); color: #fff; border: none;
+  border-radius: 10px; padding: 14px 24px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.22s; position: relative; overflow: hidden;
+}
+.btn-save::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent); }
+.btn-save:hover { background: var(--pri2); box-shadow: 0 0 28px rgba(79,126,248,0.35); transform: translateY(-1px); }
+.btn-save:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-save .material-symbols-outlined { font-size: 16px; font-variation-settings: 'FILL' 0,'wght' 200; }
+.btn-cancel-m {
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: 1px solid var(--border2); color: var(--txt3);
+  border-radius: 10px; padding: 14px 22px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-cancel-m:hover { background: var(--s3); color: var(--txt2); border-color: var(--border3); }
+
+/* delete confirm modal */
+.delete-modal {
+  background: var(--surface); border: 1px solid rgba(224,82,82,0.25);
+  border-radius: var(--radius-lg); width: 100%; max-width: 420px;
+  padding: 36px; text-align: center;
+  position: relative;
+  transform: translateY(24px) scale(0.98);
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+.modal-overlay.open .delete-modal { transform: translateY(0) scale(1); }
+.delete-modal::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(224,82,82,0.5), transparent);
+}
+.del-icon {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: var(--redglow); border: 1px solid rgba(224,82,82,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.del-icon .material-symbols-outlined { font-size: 26px; color: var(--red); font-variation-settings: 'FILL' 0,'wght' 200; }
+.del-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--txt); margin-bottom: 8px; }
+.del-desc { font-size: 0.8rem; color: var(--txt3); font-weight: 300; line-height: 1.7; margin-bottom: 28px; }
+.del-addr-name { color: var(--txt2); font-weight: 500; }
+.del-actions { display: flex; gap: 12px; }
+.btn-confirm-del {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+  background: var(--red); color: #fff; border: none;
+  border-radius: 10px; padding: 13px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-confirm-del:hover { background: #f06464; box-shadow: 0 0 20px rgba(224,82,82,0.3); }
+.btn-confirm-del .material-symbols-outlined { font-size: 15px; font-variation-settings: 'FILL' 0,'wght' 200; }
+.btn-keep {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid var(--border2); color: var(--txt2);
+  border-radius: 10px; padding: 13px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-keep:hover { background: var(--s3); }
+
+/* spinner */
+.spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* toast */
+.toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 9000;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--s3); border: 1px solid var(--border2);
+  border-radius: 11px; padding: 14px 20px;
+  font-size: 0.78rem; color: var(--txt); font-weight: 400;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { font-size: 16px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 1,'wght' 200; }
+.toast.success .toast-icon { color: var(--green); }
+.toast.error .toast-icon { color: var(--red); }
+
+/* empty state */
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 64px 32px; text-align: center; gap: 16px;
+}
+.empty-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(200,151,63,0.08); border: 1px solid rgba(200,151,63,0.2);
+  display: flex; align-items: center; justify-content: center;
+}
+.empty-icon .material-symbols-outlined { font-size: 30px; color: var(--gold); font-variation-settings: 'FILL' 0,'wght' 200; }
+.empty-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--txt); }
+.empty-sub { font-size: 0.8rem; color: var(--txt3); font-weight: 300; }
+
+/* responsive */
+@media (max-width: 900px) {
+  :root { --side-w: 0px; }
+  aside { display: none; }
+  main { padding: calc(var(--nav-h) + 28px) 20px 80px; }
+  .nav-links { display: none; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .ph-title { font-size: 2.4rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .full { grid-column: 1; }
+}
+@media (max-width: 480px) {
+  .type-selector { flex-wrap: wrap; }
+  .modal-body { padding: 24px 22px 28px; }
+  .modal-header { padding: 24px 22px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon material-symbols-outlined" id="toast-icon">check_circle</span>
+  <span id="toast-msg">Saved successfully</span>
+</div>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="brand">Luxe<span class="brand-sep"></span><span class="brand-accent">Atelier</span></div>
+  <ul class="nav-links">
+    <li><a href="#">Showroom</a></li>
+    <li><a href="#">Collections</a></li>
+    <li><a href="#">Atelier</a></li>
+    <li><a href="#">Journal</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-icon"><span class="material-symbols-outlined">search</span></button>
+    <button class="nav-icon"><span class="material-symbols-outlined">shopping_bag</span></button>
+    <button class="nav-icon active"><span class="material-symbols-outlined">person</span></button>
+  </div>
+</nav>
+
+<!-- ══ SIDEBAR ══ -->
+<aside>
+  <div class="sb-user">
+    <div class="sb-avatar"><span class="material-symbols-outlined">person</span></div>
+    <div class="sb-name">Alexandra Chen</div>
+    <div class="sb-badge"><div class="sb-badge-dot"></div><span>Gold Member</span></div>
+  </div>
+  <div class="sb-section-label">Account</div>
+  <nav class="sb-nav">
+    <a href="#" class="sb-link"><span class="material-symbols-outlined">manage_accounts</span>Profile Settings</a>
+    <a href="#" class="sb-link"><span class="material-symbols-outlined">package_2</span>My Orders</a>
+    <a href="#" class="sb-link active"><span class="material-symbols-outlined">distance</span>Manage Address</a>
+    <a href="#" class="sb-link"><span class="material-symbols-outlined">lock_reset</span>Change Password</a>
+  </nav>
+  <div class="sb-section-label" style="padding-top:12px">Perks</div>
+  <nav class="sb-nav">
+    <a href="#" class="sb-link"><span class="material-symbols-outlined">favorite</span>Wishlist</a>
+    <a href="#" class="sb-link"><span class="material-symbols-outlined">share_reviews</span>Referral Link</a>
+    <a href="#" class="sb-link"><span class="material-symbols-outlined">account_balance_wallet</span>Wallet</a>
+    <a href="#" class="sb-link"><span class="material-symbols-outlined">confirmation_number</span>Coupons</a>
+  </nav>
+  <div class="sb-footer">
+    <a href="#" class="sb-signout"><span class="material-symbols-outlined">logout</span>Sign Out</a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main>
+  <div class="page-header">
+    <div>
+      <div class="ph-eyebrow">Delivery</div>
+      <h1 class="ph-title">My <em>Addresses</em></h1>
+      <p class="ph-sub">Manage your saved delivery locations</p>
+    </div>
+    <button class="btn-add-new" onclick="openModal('add')">
+      <span class="material-symbols-outlined">add_location_alt</span>Add New Address
+    </button>
+  </div>
+
+  <!-- ADDRESS GRID -->
+  <div class="addresses-grid" id="addressGrid"></div>
+</main>
+
+<!-- ══ ADD / EDIT MODAL ══ -->
+<div class="modal-overlay" id="formModal" onclick="handleOverlayClick(event,'formModal')">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <div class="modal-eyebrow"><span class="material-symbols-outlined">location_on</span><span id="modalEyebrow">New Address</span></div>
+        <div class="modal-title" id="modalTitle">Add <em>Address</em></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('formModal')"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="modal-body">
+      <!-- Type selector -->
+      <div class="type-selector">
+        <button class="type-btn active-home" data-type="home" onclick="setType('home')">
+          <span class="material-symbols-outlined">home</span>Home
+        </button>
+        <button class="type-btn" data-type="work" onclick="setType('work')">
+          <span class="material-symbols-outlined">business</span>Work
+        </button>
+        <button class="type-btn" data-type="other" onclick="setType('other')">
+          <span class="material-symbols-outlined">location_on</span>Other
+        </button>
+      </div>
+
+      <form id="addressForm" novalidate>
+        <input type="hidden" id="editId"/>
+        <div class="form-grid">
+          <div class="field-grp">
+            <label class="field-lbl">Full Name</label>
+            <div class="field-wrap-m">
+              <span class="field-icon-m material-symbols-outlined">person</span>
+              <input class="field-input-m" id="f-name" placeholder="Alexandra Chen" autocomplete="name"/>
+            </div>
+            <div class="field-err" id="err-name"></div>
+          </div>
+          <div class="field-grp">
+            <label class="field-lbl">Phone Number</label>
+            <div class="field-wrap-m">
+              <span class="field-icon-m material-symbols-outlined">call</span>
+              <input class="field-input-m" id="f-phone" placeholder="+91 98765 43210" autocomplete="tel"/>
+            </div>
+            <div class="field-err" id="err-phone"></div>
+          </div>
+          <div class="field-grp full">
+            <label class="field-lbl">Address Line 1</label>
+            <div class="field-wrap-m">
+              <span class="field-icon-m material-symbols-outlined">home</span>
+              <input class="field-input-m" id="f-line1" placeholder="House / Flat / Block No." autocomplete="address-line1"/>
+            </div>
+            <div class="field-err" id="err-line1"></div>
+          </div>
+          <div class="field-grp full">
+            <label class="field-lbl">Address Line 2 <span style="color:var(--txt3);font-weight:300">(optional)</span></label>
+            <div class="field-wrap-m">
+              <span class="field-icon-m material-symbols-outlined">apartment</span>
+              <input class="field-input-m" id="f-line2" placeholder="Street, Area, Landmark" autocomplete="address-line2"/>
+            </div>
+          </div>
+          <div class="field-grp">
+            <label class="field-lbl">City</label>
+            <div class="field-wrap-m">
+              <span class="field-icon-m material-symbols-outlined">location_city</span>
+              <input class="field-input-m" id="f-city" placeholder="Mumbai" autocomplete="address-level2"/>
+            </div>
+            <div class="field-err" id="err-city"></div>
+          </div>
+          <div class="field-grp">
+            <label class="field-lbl">State</label>
+            <div class="field-wrap-m">
+              <span class="field-icon-m material-symbols-outlined">map</span>
+              <select class="field-input-m" id="f-state">
+                <option value="">Select state</option>
+                <option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                <option>Assam</option><option>Bihar</option><option>Chhattisgarh</option>
+                <option>Goa</option><option>Gujarat</option><option>Haryana</option>
+                <option>Himachal Pradesh</option><option>Jharkhand</option>
+                <option>Karnataka</option><option>Kerala</option>
+                <option>Madhya Pradesh</option><option>Maharashtra</option>
+                <option>Manipur</option><option>Meghalaya</option><option>Mizoram</option>
+                <option>Nagaland</option><option>Odisha</option><option>Punjab</option>
+                <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
+                <option>Telangana</option><option>Tripura</option>
+                <option>Uttar Pradesh</option><option>Uttarakhand</option>
+                <option>West Bengal</option><option>Delhi</option>
+              </select>
+            </div>
+            <div class="field-err" id="err-state"></div>
+          </div>
+          <div class="field-grp">
+            <label class="field-lbl">PIN Code</label>
+            <div class="field-wrap-m">
+              <span class="field-icon-m material-symbols-outlined">pin</span>
+              <input class="field-input-m" id="f-pin" placeholder="400 001" maxlength="6" autocomplete="postal-code"/>
+            </div>
+            <div class="field-err" id="err-pin"></div>
+          </div>
+          <div class="field-grp">
+            <label class="field-lbl">Country</label>
+            <div class="field-wrap-m">
+              <span class="field-icon-m material-symbols-outlined">public</span>
+              <select class="field-input-m" id="f-country">
+                <option value="India" selected>India</option>
+                <option>United States</option><option>United Kingdom</option>
+                <option>UAE</option><option>Singapore</option><option>Australia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Default toggle -->
+        <div class="default-row" id="defaultRow" onclick="toggleDefault()">
+          <div class="custom-check" id="defaultCheck">
+            <span class="material-symbols-outlined">check</span>
+          </div>
+          <div class="default-row-text">Set as <span>default delivery address</span></div>
+        </div>
+
+        <div class="modal-divider"></div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-save" id="saveBtn">
+            <span class="material-symbols-outlined">save</span>Save Address
+          </button>
+          <button type="button" class="btn-cancel-m" onclick="closeModal('formModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DELETE CONFIRM MODAL ══ -->
+<div class="modal-overlay" id="deleteModal" onclick="handleOverlayClick(event,'deleteModal')">
+  <div class="delete-modal">
+    <div class="del-icon"><span class="material-symbols-outlined">delete_forever</span></div>
+    <div class="del-title">Remove Address?</div>
+    <p class="del-desc">You're about to remove <span class="del-addr-name" id="delAddrName"></span> from your saved addresses. This cannot be undone.</p>
+    <div class="del-actions">
+      <button class="btn-confirm-del" id="confirmDelBtn" onclick="confirmDelete()">
+        <span class="material-symbols-outlined">delete</span>Yes, Remove
+      </button>
+      <button class="btn-keep" onclick="closeModal('deleteModal')">Keep It</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+let addresses = [
+  { id: 1, type: 'home', name: 'Alexandra Chen', phone: '+91 98765 43210',
+    line1: 'Flat 12B, Oberoi Heights', line2: 'Andheri West',
+    city: 'Mumbai', state: 'Maharashtra', pin: '400053', country: 'India', isDefault: true },
+  { id: 2, type: 'work', name: 'Alexandra Chen', phone: '+91 91234 56789',
+    line1: '14th Floor, One BKC', line2: 'Bandra Kurla Complex',
+    city: 'Mumbai', state: 'Maharashtra', pin: '400051', country: 'India', isDefault: false },
+  { id: 3, type: 'other', name: 'Priya Nair (Mother)', phone: '+91 94400 12345',
+    line1: 'TC 22/1440, Kowdiar Palace Road', line2: 'Kowdiar',
+    city: 'Thiruvananthapuram', state: 'Kerala', pin: '695003', country: 'India', isDefault: false },
+];
+let nextId = 4;
+let deleteTargetId = null;
+let currentType = 'home';
+let isDefaultVal = false;
+let editingId = null;
+
+// ── RENDER ──
+function renderAddresses() {
+  const grid = document.getElementById('addressGrid');
+  grid.innerHTML = '';
+
+  if (addresses.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><span class="material-symbols-outlined">location_off</span></div>
+      <div class="empty-title">No addresses saved</div>
+      <p class="empty-sub">Add your first delivery address to get started</p>
+    </div>`;
+  }
+
+  addresses.forEach(addr => {
+    const card = document.createElement('div');
+    card.className = 'addr-card' + (addr.isDefault ? ' default-card' : '');
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-type-badge badge-${addr.type}">
+          <span class="material-symbols-outlined">${addr.type === 'home' ? 'home' : addr.type === 'work' ? 'business' : 'location_on'}</span>
+          ${addr.type.charAt(0).toUpperCase() + addr.type.slice(1)}
+        </div>
+        ${addr.isDefault ? `<div class="default-tag"><span class="material-symbols-outlined">star</span>Default</div>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="addr-name">${addr.name}</div>
+        <div class="addr-lines">
+          <div class="addr-line">
+            <span class="material-symbols-outlined">location_on</span>
+            <span>${addr.line1}${addr.line2 ? ', ' + addr.line2 : ''}</span>
+          </div>
+          <div class="addr-line">
+            <span class="material-symbols-outlined">near_me</span>
+            <span>${addr.city}, ${addr.state} — ${addr.pin}</span>
+          </div>
+          <div class="addr-line">
+            <span class="material-symbols-outlined">public</span>
+            <span>${addr.country}</span>
+          </div>
+        </div>
+        <div class="addr-phone">
+          <span class="material-symbols-outlined">call</span>${addr.phone}
+        </div>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-actions">
+        <button class="btn-edit" onclick="openModal('edit',${addr.id})">
+          <span class="material-symbols-outlined">edit</span>Edit
+        </button>
+        <button class="btn-delete" onclick="openDelete(${addr.id})">
+          <span class="material-symbols-outlined">delete</span>Remove
+        </button>
+        <button class="btn-set-default ${addr.isDefault ? 'is-default' : ''}" onclick="setDefault(${addr.id})">
+          <span class="material-symbols-outlined">${addr.isDefault ? 'star' : 'star'}</span>
+          ${addr.isDefault ? 'Default' : 'Set Default'}
+        </button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Add tile
+  const addTile = document.createElement('div');
+  addTile.className = 'addr-card-add';
+  addTile.onclick = () => openModal('add');
+  addTile.innerHTML = `
+    <div class="add-icon-wrap"><span class="material-symbols-outlined">add_location_alt</span></div>
+    <div class="add-label">Add New Address</div>
+    <div class="add-sublabel">Save a new delivery location</div>
+  `;
+  grid.appendChild(addTile);
+}
+
+// ── MODAL ──
+function openModal(mode, id) {
+  editingId = null;
+  resetForm();
+
+  if (mode === 'edit' && id) {
+    const addr = addresses.find(a => a.id === id);
+    if (!addr) return;
+    editingId = id;
+    document.getElementById('modalEyebrow').textContent = 'Edit Address';
+    document.getElementById('modalTitle').innerHTML = 'Edit <em>Address</em>';
+    setType(addr.type);
+    document.getElementById('f-name').value = addr.name;
+    document.getElementById('f-phone').value = addr.phone;
+    document.getElementById('f-line1').value = addr.line1;
+    document.getElementById('f-line2').value = addr.line2 || '';
+    document.getElementById('f-city').value = addr.city;
+    document.getElementById('f-state').value = addr.state;
+    document.getElementById('f-pin').value = addr.pin;
+    document.getElementById('f-country').value = addr.country;
+    isDefaultVal = addr.isDefault;
+    updateDefaultUI();
+  } else {
+    document.getElementById('modalEyebrow').textContent = 'New Address';
+    document.getElementById('modalTitle').innerHTML = 'Add <em>Address</em>';
+    isDefaultVal = addresses.length === 0;
+    updateDefaultUI();
+  }
+
+  document.getElementById('formModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e, id) {
+  if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+function resetForm() {
+  document.getElementById('addressForm').reset();
+  setType('home');
+  ['name','phone','line1','city','state','pin'].forEach(f => {
+    const el = document.getElementById('f-' + f);
+    const err = document.getElementById('err-' + f);
+    if (el) el.classList.remove('has-err');
+    if (err) err.innerHTML = '';
+  });
+}
+
+// ── TYPE SELECTOR ──
+function setType(type) {
+  currentType = type;
+  document.querySelectorAll('.type-btn').forEach(btn => {
+    btn.className = 'type-btn';
+    if (btn.dataset.type === type) btn.classList.add(`active-${type}`);
+  });
+}
+
+// ── DEFAULT TOGGLE ──
+function toggleDefault() {
+  isDefaultVal = !isDefaultVal;
+  updateDefaultUI();
+}
+function updateDefaultUI() {
+  const check = document.getElementById('defaultCheck');
+  check.classList.toggle('checked', isDefaultVal);
+}
+
+// ── VALIDATION ──
+function setFieldErr(fId, msg) {
+  const inp = document.getElementById('f-' + fId);
+  const err = document.getElementById('err-' + fId);
+  if (msg) { inp.classList.add('has-err'); err.innerHTML = `<span class="material-symbols-outlined">error</span>${msg}`; }
+  else { inp.classList.remove('has-err'); err.innerHTML = ''; }
+}
+function validateForm() {
+  let ok = true;
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const line1 = document.getElementById('f-line1').value.trim();
+  const city = document.getElementById('f-city').value.trim();
+  const state = document.getElementById('f-state').value;
+  const pin = document.getElementById('f-pin').value.trim();
+
+  if (!name) { setFieldErr('name','Full name is required'); ok = false; } else setFieldErr('name','');
+  if (!phone) { setFieldErr('phone','Phone number is required'); ok = false; }
+  else if (!/^[\+\d\s\-]{7,15}$/.test(phone)) { setFieldErr('phone','Enter a valid phone number'); ok = false; }
+  else setFieldErr('phone','');
+  if (!line1) { setFieldErr('line1','Address is required'); ok = false; } else setFieldErr('line1','');
+  if (!city) { setFieldErr('city','City is required'); ok = false; } else setFieldErr('city','');
+  if (!state) { setFieldErr('state','Please select a state'); ok = false; } else setFieldErr('state','');
+  if (!pin) { setFieldErr('pin','PIN code is required'); ok = false; }
+  else if (!/^\d{6}$/.test(pin)) { setFieldErr('pin','Enter a valid 6-digit PIN'); ok = false; }
+  else setFieldErr('pin','');
+  return ok;
+}
+
+// ── SUBMIT ──
+document.getElementById('addressForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>Saving...';
+
+  setTimeout(() => {
+    const data = {
+      type: currentType,
+      name: document.getElementById('f-name').value.trim(),
+      phone: document.getElementById('f-phone').value.trim(),
+      line1: document.getElementById('f-line1').value.trim(),
+      line2: document.getElementById('f-line2').value.trim(),
+      city: document.getElementById('f-city').value.trim(),
+      state: document.getElementById('f-state').value,
+      pin: document.getElementById('f-pin').value.trim(),
+      country: document.getElementById('f-country').value,
+      isDefault: isDefaultVal,
+    };
+
+    if (isDefaultVal) addresses.forEach(a => a.isDefault = false);
+
+    if (editingId) {
+      const idx = addresses.findIndex(a => a.id === editingId);
+      if (idx > -1) addresses[idx] = { ...addresses[idx], ...data };
+      showToast('success','check_circle','Address updated successfully');
+    } else {
+      data.id = nextId++;
+      addresses.push(data);
+      showToast('success','check_circle','New address saved');
+    }
+
+    renderAddresses();
+    closeModal('formModal');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined">save</span>Save Address';
+  }, 800);
+});
+
+// ── DELETE ──
+function openDelete(id) {
+  deleteTargetId = id;
+  const addr = addresses.find(a => a.id === id);
+  document.getElementById('delAddrName').textContent = `"${addr.name}'s ${addr.type} address"`;
+  document.getElementById('deleteModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function confirmDelete() {
+  const btn = document.getElementById('confirmDelBtn');
+  btn.innerHTML = '<div class="spinner"></div>Removing...';
+  setTimeout(() => {
+    addresses = addresses.filter(a => a.id !== deleteTargetId);
+    if (addresses.length && !addresses.find(a => a.isDefault)) addresses[0].isDefault = true;
+    renderAddresses();
+    closeModal('deleteModal');
+    showToast('error','delete','Address removed');
+    btn.innerHTML = '<span class="material-symbols-outlined">delete</span>Yes, Remove';
+  }, 600);
+}
+
+// ── SET DEFAULT ──
+function setDefault(id) {
+  addresses.forEach(a => a.isDefault = (a.id === id));
+  renderAddresses();
+  showToast('success','star','Default address updated');
+}
+
+// ── TOAST ──
+function showToast(type, icon, msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent = msg;
+  t.className = `toast ${type}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── LIVE PIN FILTER ──
+document.getElementById('f-pin').addEventListener('input', function() {
+  this.value = this.value.replace(/\D/g,'').slice(0,6);
+});
+
+// ── INIT ──
+renderAddresses();
+</script>
+</body>
+</html>

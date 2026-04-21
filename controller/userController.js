@@ -1,42 +1,44 @@
-import mongoose from "mongoose";
-import { registerService, userLoginLogic ,resetPasswordService, verifyOtpService} from "../service/userService.js";
-import { generateAndSendOtp } from "../service/userService.js";
+import { userModel } from "../model/usermodel.js"; 
+import {
+  registerService,
+  userLoginLogic,
+  resetPasswordService,
+  verifyOtpService,
+  generateAndSendOtp,
+} from "../service/userService.js";
+
 export async function userLandingLoad(req, res) {
   try {
-    if (req.session.user) {
-      return res.redirect("/homePage");
-    }
-
+    if (req.session.user) return res.redirect("/homePage");
     return res.render("Users/LandingPage");
   } catch (error) {
     console.log("Server error ", error);
     return res.redirect("/login");
   }
 }
+
 export async function userLoginLoad(req, res) {
   try {
-    if (req.session.user) {
-      return res.redirect("/homePage");
-    }
-
-    return res.render("Users/login");
+    if (req.session?.user) return res.redirect("/homePage");
+    return res.render("Users/login", { message: null });
   } catch (error) {
-    console.log(error);
-    res.redirect("/");
+    console.error("Login page load error:", error);
+    return res.status(500).render("Users/login", {
+      message: "Something went wrong. Please try again later.",
+    });
   }
 }
+
 export async function userSignUpLoad(req, res) {
   try {
-    if (req.session.user) {
-      return res.redirect("/homePage");
-    }
-
-    return res.render("Users/signUp");
+    if (req.session.user) return res.redirect("/homePage");
+    return res.render("Users/signUp", { message: null });
   } catch (error) {
     console.log(error);
     res.redirect("/");
   }
 }
+
 export async function userForgotPasswordLoad(req, res) {
   try {
     return res.render("Users/emailVerification");
@@ -45,15 +47,14 @@ export async function userForgotPasswordLoad(req, res) {
     res.redirect("Users/login");
   }
 }
+
 export async function otpPageLoad(req, res) {
   try {
-    if (!req.session.email) {
+    if (!req.session.email && !req.session.tempEmail) {
       return res.redirect("/login");
     }
-
-    return res.render("Users/otpPage", {
-      email: req.session.email,
-    });
+    const email = req.session.email || req.session.tempEmail;
+    return res.render("Users/otpPage", { email });
   } catch (error) {
     console.log(error);
     return res.redirect("/login");
@@ -62,16 +63,34 @@ export async function otpPageLoad(req, res) {
 
 export const registerController = async (req, res) => {
   try {
-    const result = await registerService(req.body);
+    const { fullName, email, phoneNumber, password } = req.body;
 
-    if (!result.success) {
-      return res.status(400).json(result);
+    
+    if (!fullName || !email || !password || !phoneNumber) {
+      return res.render("Users/signUp", { message: "All fields are required" });
     }
 
-    res.status(201).json(result);
+    const emailExists = await userModel.findOne({ email: email.toLowerCase() });
+    if (emailExists) {
+      return res.render("Users/signUp", { message: "Email already exists" });
+    }
+
+    const phoneExists = await userModel.findOne({ phoneNumber });
+    if (phoneExists) {
+      return res.render("Users/signUp", { message: "Phone number already exists" });
+    }
+
+    // Store user data in session — save to DB only AFTER OTP verified
+    req.session.tempUser = { fullName, email, password, phoneNumber };
+    req.session.tempEmail = email;
+    req.session.otpContext = "REGISTER";
+
+    await generateAndSendOtp(req, email);
+
+    return res.redirect("/otp");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error" });
+    return res.render("Users/signUp", { message: "Server error. Please try again." });
   }
 };
 
@@ -80,36 +99,19 @@ export const loginController = async (req, res) => {
     const result = await userLoginLogic(req, req.body.email, req.body.password);
     if (!result.success) {
       req.session.user = null;
-
-      return res.status(401).json({
-        success: false,
-        message: result.message,
-        field: result.field,
-      });
+      return res.status(401).json({ success: false, message: result.message, field: result.field });
     }
-
-    return res.status(200).json({
-      success: true,
-      redirect: "/homePage",
-    });
+    return res.status(200).json({ success: true, redirect: "/homePage" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
 export const homeLoad = (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.redirect("/login");
-    }
-
-    return res.render("Users/homePage", {
-      user: req.session.user,
-    });
+    if (!req.session.user) return res.redirect("/login");
+    return res.render("Users/homePage", { user: req.session.user });
   } catch (err) {
     console.log(err);
     return res.redirect("/login");
@@ -119,94 +121,125 @@ export const homeLoad = (req, res) => {
 export async function verifyEmailController(req, res) {
   try {
     const { email } = req.body;
-
     if (!email || !email.includes("@")) {
-      return res.status(400).send("Invalid email");
+      return res.status(400).json({ success: false, message: "Invalid email" });
     }
 
-    // store email in session
-    req.session.email = email;
+    const user = await userModel.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "No account found with this email" });
+    }
 
-    // generate OTP ONCE
+    req.session.email = email;
+    req.session.otpContext = "RESET_PASSWORD"; 
     await generateAndSendOtp(req, email);
 
-    return res.json({success:true,redirect:"/otp"})
+    return res.json({ success: true, redirect: "/otp" });
   } catch (error) {
     console.log(error);
     return res.redirect("/login");
   }
 }
 
-
-
-
-
-
-
-export async function resendOtpController(req, res) {
+export const verifyOtpController = async (req, res) => {
   try {
-    const email = req.session.email;
+    const result = await verifyOtpService(req);
 
-    if (!email) {
-      return res.status(400).send("Email not found in session");
+    if (!result.valid) {
+      return res.json({ success: false, message: result.message });
     }
 
+    const flow = req.session.otpContext;
+
+    //  REGISTER — create user NOW after OTP verified
+    if (flow === "REGISTER") {
+      const userData = req.session.tempUser;
+
+      if (!userData) {
+        return res.json({ success: false, message: "Session expired. Please sign up again." });
+      }
+
+      const register = await registerService(
+        userData.fullName,
+        userData.email,
+        userData.password,
+        userData.phoneNumber
+      );
+
+      if (!register.success) {
+        return res.json({ success: false, message: register.message });
+      }
+
+      // Clear all registration session data
+      req.session.otp = null;
+      req.session.otpExpires = null;
+      req.session.otpContext = null;
+      req.session.tempUser = null;
+      req.session.tempEmail = null;
+
+      return res.json({ success: true, message: "Account created!", redirect: "/login" });
+    }
+
+    // EMAIL UPDATE — userModel now imported at top
+    if (flow === "EMAIL_EDIT") {
+      const userId = req.session.user?.id;
+      const newEmail = req.session.tempEmail;
+
+      if (!userId || !newEmail) {
+        return res.json({ success: false, message: "Session expired" });
+      }
+
+      const user = await userModel.findById(userId)
+     
+      if (!user) {
+        return res.json({ success: false, message: "User not found" });
+      }
+
+      user.email = newEmail.toLowerCase();
+      await user.save();
+
+      //  Also update the session so UI reflects new email
+      req.session.user.email = newEmail.toLowerCase();
+
+      req.session.otp = null;
+      req.session.otpExpires = null;
+      req.session.otpContext = null;
+      req.session.tempEmail = null;
+
+      return res.json({ success: true, message: "Email updated!", redirect: "/profile" });
+    }
+
+    // RESET PASSWORD
+    if (flow === "RESET_PASSWORD") {
+      return res.json({ success: true, redirect: "/reset-password" });
+    }
+
+    return res.json({ success: false, message: "Invalid flow" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ success: false, message: "Server error" });
+  }
+};
+
+export async function resetPasswordLoad(req, res) {
+  try {
+
+    let isvalid= await userModel.findOne({email:req.session.email})
+    if (!req.session.email||!isvalid.isVerified) return res.redirect("/login");
     
-    if (req.session.otpExpires && Date.now() < req.session.otpExpires - 50000) {
-      return res.status(429).send("Please wait before resending OTP");
-    }
-
-    await generateAndSendOtp(req, email);
-
-    return res.json({success:true,redirect:"/reset-password"})
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send("Error resending OTP");
-  }
-}
-
-
-export async function verifyOtpForgotPasswordController(req, res) {
-  try {
-    await verifyOtpService(req);
-    return res.json({ success: true, redirect: "/reset-password" });
-  } catch (error) {
-    console.log(error);
-    return res.status(400).send(error.message);
-  }
-}
-
-
-
-
-
-
-export  async function resetPasswordLoad  (req, res)  {
-  
-  try {
-    if (!req.session.email) {
-      return res.redirect("/login");
-    }
-
     res.render("Users/resetPassword");
-
   } catch (err) {
     console.log(err);
     res.redirect("/login");
   }
-};
-
-
+}
 
 export const resetPassword = async (req, res) => {
   try {
     const { password, confirmPassword } = req.body;
     const email = req.session.email;
 
-    if (!email) {
-      return res.json({ success: false, message: "Session expired" });
-    }
-
+    if (!email) return res.json({ success: false, message: "Session expired" });
     if (password !== confirmPassword) {
       return res.json({ success: false, message: "Passwords do not match" });
     }
@@ -214,19 +247,29 @@ export const resetPassword = async (req, res) => {
     await resetPasswordService(email, password);
 
     req.session.email = null;
+    req.session.otpContext = null;
 
-    return res.json({
-      success: true,
-      message: "Password updated successfully"
-    });
-
+    return res.json({ success: true, message: "Password updated successfully" });
   } catch (err) {
     console.log(err);
     return res.json({ success: false, message: "Server error" });
   }
 };
 
+// In userProfileController.js or userController.js (wherever your router points)
+export const resendOtpController = async (req, res) => {
+  try {
+    const email = req.session.tempEmail || req.session.email;
 
+    if (!email) {
+      return res.json({ success: false, message: "Session expired. Please start over." });
+    }
 
+    await generateAndSendOtp(req, email);
 
-
+    return res.json({ success: true, message: "OTP resent successfully" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ success: false, message: "Server error" });
+  }
+};

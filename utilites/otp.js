@@ -19,14 +19,14 @@ export const sendOtpEmail = async (email, otp) => {
       html: `
         <h2>Your OTP Code</h2>
         <h1>${otp}</h1>
-        <p>This OTP is valid for 5 minutes.</p>
+        <p>This OTP is valid for 1 minutes.</p>
       `,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("✅ OTP sent to email");
+    console.log(" OTP sent to email");
 
   } catch (error) {
-    console.log("❌ Email error:", error);
+    console.log(" Email error:", error);
   }
 };

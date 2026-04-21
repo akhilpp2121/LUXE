@@ -2,6 +2,12 @@ import mongoose from "mongoose"
 
 const userSchema = new mongoose.Schema(
   {
+        googleId: {
+        type: String,
+        unique: true,
+        sparse: true   // allows users without googleId
+    },
+
     fullName: {
       type: String,
       required: true,
@@ -19,7 +25,7 @@ const userSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       unique: true,
-      sparse: true,
+      required:true
     },
 
     password: {
@@ -36,10 +42,9 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
-    isVerified: {
-      type: Boolean,
-      default: false,
+    isVerified:{
+      type:Boolean,
+      default:false
     },
 
     referredBy: {
@@ -58,6 +63,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+  type: String,
+  enum: ["active", "inactive", "blocked"],
+  default: "active"
+},
       otp:{
         type:String
     },

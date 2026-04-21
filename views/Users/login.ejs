@@ -285,6 +285,12 @@
                   ></div>
                 </div>
                 <p class="error-msg" id="passwordError"></p>
+                 <% if (typeof message !== 'undefined' && message) { %>
+  <div id="serverError" class="p-3 mb-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-[10px] font-bold tracking-[0.2em] uppercase text-center" role="alert" aria-live="polite">
+    <%= message %>
+  </div>
+<% } %>
+      
               </div>
             </div>
 

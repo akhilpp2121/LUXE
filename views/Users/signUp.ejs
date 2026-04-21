@@ -80,7 +80,7 @@
         <span id="bannerMsg"></span>
       </div>
 
-      <form id="registerForm" class="space-y-4" novalidate>
+      <form id="registerForm" class="space-y-4" novalidate method="post" action="/signUp">
 
         <!-- Full Name -->
         <div class="space-y-1">
@@ -107,9 +107,10 @@
           <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Phone Number</label>
           <div class="relative group">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">phone</span>
-            <input id="mobileno" name="mobileno" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your number" type="tel" autocomplete="tel"/>
+            <input id="phoneNumber" name="phoneNumber" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your number" type="tel" autocomplete="tel"/>
           </div>
-          <div class="err-msg" id="mobileno-err"></div>
+          <div class="err-msg" id="phoneNumber-err"></div>
+
         </div>
 
         <!-- Password -->
@@ -170,6 +171,12 @@
 </div>
 
 <script>
+
+  const backendMessage = "<%= message || '' %>";
+
+  if (backendMessage) {
+    showBanner('error', backendMessage);
+  }
   // ── Eye Toggle ──────────────────────────────────────────────────────────────
   const pwInput  = document.getElementById('password');
   const eyeBtn   = document.getElementById('eyeBtn');
@@ -217,7 +224,7 @@
       return setOk(id);
     }
 
-    if (id === 'mobileno') {
+    if (id === 'phoneNumber') {
       if (!val) return setErr(id, 'Phone number is required');
       if (!/^[0-9]{10}$/.test(val)) return setErr(id, 'Enter a valid 10-digit number');
       return setOk(id);
@@ -235,7 +242,7 @@
   }
 
   // Live re-validate on input (only after first blur/submit)
-  ['fullName', 'email', 'mobileno', 'password'].forEach(id => {
+  ['fullName', 'email', 'phoneNumber', 'password'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('blur',  () => { if (el.value) validateField(id); });
     el.addEventListener('input', () => { if (el.classList.contains('field-error')) validateField(id); });
@@ -258,54 +265,66 @@
 
   function hideBanner() {
     document.getElementById('responseBanner').className = 'banner';
-  }
+  
+  }  document.getElementById('registerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const ids = ['fullName', 'email', 'phoneNumber', 'password'];
+  const results = ids.map(id => validateField(id));
+
+  if (results.includes(false)) return;
+
+  
+  e.target.submit();
+});
+
 
   // ── Form Submit ─────────────────────────────────────────────────────────────
-  document.getElementById('registerForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideBanner();
+  // document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  //   e.preventDefault();
+  //   hideBanner();
 
-    const ids     = ['fullName', 'email', 'mobileno', 'password'];
-    const results = ids.map(id => validateField(id));
-    if (results.includes(false)) return;
+  //   const ids     = ['fullName', 'email', 'mobileno', 'password'];
+  //   const results = ids.map(id => validateField(id));
+  //   if (results.includes(false)) return;
 
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Creating account…';
+  //   const btn = document.getElementById('submitBtn');
+  //   btn.disabled = true;
+  //   btn.textContent = 'Creating account…';
 
-    const payload = {
-      fullName: document.getElementById('fullName').value.trim(),
-      email:    document.getElementById('email').value.trim(),
-      mobileno: document.getElementById('mobileno').value.trim(),
-      password: document.getElementById('password').value.trim(),
-    };
-    console.log("Sending:", payload);
+  //   const payload = {
+  //     fullName: document.getElementById('fullName').value.trim(),
+  //     email:    document.getElementById('email').value.trim(),
+  //     mobileno: document.getElementById('mobileno').value.trim(),
+  //     password: document.getElementById('password').value.trim(),
+  //   };
+  //   console.log("Sending:", payload);
 
 
-    try {
-      const res  = await fetch('http://localhost:5000/signUp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+  //   try {
+  //     const res  = await fetch('http://localhost:5000/signUp', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(payload),
+  //     });
 
-      const data = await res.json();
+  //     const data = await res.json();
 
-      if (data.success) {
-        showBanner('success', data.message || 'Account created! Redirecting you now…');
-        setTimeout(() => { window.location.href = '/login'; }, 2000);
-      } else {
-        showBanner('error', data.message || 'Something went wrong. Please try again.');
-        btn.disabled = false;
-        btn.textContent = 'Create Account';
-      }
+  //     if (data.success) {
+  //       showBanner('success', data.message || 'Account created! Redirecting you now…');
+  //       setTimeout(() => { window.location.href = '/otp'; }, 2000);
+  //     } else {
+  //       showBanner('error', data.message || 'Something went wrong. Please try again.');
+  //       btn.disabled = false;
+  //       btn.textContent = 'Create Account';
+  //     }
 
-    } catch {
-      showBanner('error', 'Unable to reach the server. Please check your connection.');
-      btn.disabled = false;
-      btn.textContent = 'Create Account';
-    }
-  });
+  //   } catch {
+  //     showBanner('error', 'Unable to reach the server. Please check your connection.');
+  //     btn.disabled = false;
+  //     btn.textContent = 'Create Account';
+  //   }
+  // });
 </script>
 </body>
 </html>

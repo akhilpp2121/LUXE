@@ -1,8 +1,9 @@
 import express, { Router } from "express";
+import { avatarUpload } from "../config/multer.js";
 
 const router = express.Router();
-import { userLandingLoad,userLoginLoad,userSignUpLoad ,userForgotPasswordLoad,registerController,loginController,homeLoad,otpPageLoad,verifyEmailController, resetPasswordLoad, resendOtpController,resetPassword,verifyOtpForgotPasswordController} from "../controller/userController.js";
-import { profileLoadPage, verifyOtpController,updateProfile , userProfileUpdate} from "../controller/userProfileController.js";
+import { userLandingLoad,userLoginLoad,userSignUpLoad ,userForgotPasswordLoad,registerController,loginController,homeLoad,otpPageLoad,verifyOtpController,resendOtpController,verifyEmailController, resetPasswordLoad,resetPassword} from "../controller/userController.js";
+import { profileLoadPage , userProfileUpdate, addressPageLoad, addAddressPageLoad,editProfileLoad,profileEditEmailLoad,deleteAvatar,uploadAvatar} from "../controller/userProfileController.js";
 
 router.get('/',userLandingLoad)
 router.get('/login',userLoginLoad)
@@ -18,9 +19,24 @@ router.post("/resend-otp",resendOtpController)
 router.get("/reset-password",resetPasswordLoad)
 router.post("/reset-password", resetPassword);
 router.get("/profile",profileLoadPage);
-router.post("/profile/update",userProfileUpdate);
+router.post("/profile/update",avatarUpload.single("avatar"),userProfileUpdate);
+router.get('/profile/edit',editProfileLoad)
+router.get('/profile/email-edit',profileEditEmailLoad)
+router.get("/address",addressPageLoad);
+router.get("/address/add",addAddressPageLoad)
 
-router.post("/verify-otp", verifyOtpController);
 
+
+
+ 
+// ── AVATAR ONLY (AJAX endpoints) ────────────────────────────────
+// Called by JS fetch() from the edit profile page
+router.post(
+  "/profile/avatar/upload",
+  avatarUpload.single("avatar"),
+  uploadAvatar
+);
+ 
+router.delete("/profile/avatar", deleteAvatar);
 
 export default router;
