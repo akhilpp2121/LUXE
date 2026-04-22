@@ -312,7 +312,7 @@ function hideLoader() {
 
         
     form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // ❗ stop normal form submit
+    e.preventDefault(); //  stop normal form submit
 
     const val = emailInput.value.trim();
     const err = getEmailError(val);
@@ -323,7 +323,7 @@ function hideLoader() {
         return;
     }
 
-    // 🔥 UI state
+    //  UI state
     showLoader();
     submitBtn.disabled = true;
     btnText.textContent = "Sending...";
@@ -340,7 +340,7 @@ function hideLoader() {
         const data = await res.json();
 
         if (data.success) {
-            showToast("OTP sent successfully ✅");
+            showToast("OTP sent successfully ");
 
            
             window.location.href = data.redirect;

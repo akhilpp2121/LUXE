@@ -153,7 +153,7 @@
     <a href="/address" class="sidebar-link">
       <span class="material-symbols-outlined">distance</span><span>Manage Address</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="/changePassword" class="sidebar-link">
       <span class="material-symbols-outlined">lock_reset</span><span>Change Password</span>
     </a>
     <a href="#" class="sidebar-link">
@@ -372,11 +372,14 @@ document.addEventListener('DOMContentLoaded', function () {
       return '';
     },
     phone(v) {
-      if (!v) return '';
-      const c = v.replace(/[\s\-()]/g, '');
-      if (!/^\+?[0-9]{7,15}$/.test(c)) return 'Enter a valid phone number';
-      return '';
-    }
+  if (!v) return '';
+  const c = v.replace(/[\s\-()]/g, '');
+  const digits = c.replace(/^\+/, '');           // strip leading + for length check
+  if (!/^\+?[0-9]{7,15}$/.test(c)) return 'Enter a valid phone number';
+  if (digits.length !== 10) return 'Phone number must be exactly 10 digits';
+  return '';
+},
+
   };
 
   function validateField(id) {

@@ -5,6 +5,7 @@ import { userModel } from "../model/usermodel.js";
 import path from "path";
 import fs from "fs";
 
+
 const deleteOldAvatar = (avatarPath) => {
   if (!avatarPath || avatarPath.includes("default-avatar")) return;
   const filePath = path.join(process.cwd(), "public", avatarPath.replace(/^\//, ""));

@@ -61,9 +61,12 @@ import {
 import {
   profileLoadPage, userProfileUpdate, addressPageLoad,
   addAddressPageLoad, editProfileLoad, profileEditEmailLoad,
-  deleteAvatar, uploadAvatar
+  deleteAvatar, uploadAvatar,
+  changePasswordLoad,
+  emailChangeProfileController,
+  changePasswordController
 } from "../controller/userProfileController.js";
-
+import { isUserAuthenticated } from "../middleware/user.js";
 const router = express.Router();
 
 // ── AUTH ──
@@ -82,6 +85,7 @@ router.get("/auth/google/callback",
 );
 
 
+
 // ── OTP / PASSWORD ──
 router.get("/email-verification", userForgotPasswordLoad);
 router.post("/email-verification", verifyEmailController);
@@ -91,6 +95,8 @@ router.post("/resend-otp", resendOtpController);
 router.get("/reset-password", resetPasswordLoad);
 router.post("/reset-password", resetPassword);
 
+router.use(isUserAuthenticated);
+
 // ── PAGES ──
 router.get("/homePage", homeLoad);
 router.get("/profile", profileLoadPage);
@@ -98,6 +104,9 @@ router.get("/profile/edit", editProfileLoad);
 router.get("/profile/email-edit", profileEditEmailLoad);
 router.get("/address", addressPageLoad);
 router.get("/address/add", addAddressPageLoad);
+router.get('/changePassword',changePasswordLoad);
+router.post('/change-password',changePasswordController)
+router.post('/profile/change-email',emailChangeProfileController);
 
 // ── PROFILE UPDATE (text fields only — no file) ──
 router.post("/profile/update", avatarUpload.none(), userProfileUpdate);

@@ -388,7 +388,7 @@
     });
   }
 
-  // ✅ FIX: Full reset — clears errors, re-enables inputs, resets attempts
+  //  FIX: Full reset — clears errors, re-enables inputs, resets attempts
   function fullReset() {
     attemptCount = 0;
     expired      = false;
@@ -463,7 +463,7 @@
       const res  = await fetch('/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',  // ✅ important for session cookies
+        credentials: 'include',  //  important for session cookies
         body: JSON.stringify({ otp: getValue() })
       });
       const data = await res.json();
@@ -475,11 +475,13 @@
         btnIcon.textContent = 'check_circle';
         setStatus('Verified successfully!', 'success');
         showToast('Success', 'success');
+          sessionStorage.setItem("message", data.message);
+
         setTimeout(() => { window.location.href = data.redirect || '/'; }, 800);
         return;
       }
 
-      // ❌ Failed
+      //  Failed
       attemptCount++;
       setAllState('is-error');
       const remaining = MAX_ATTEMPTS - attemptCount;
@@ -487,7 +489,7 @@
       if (remaining > 0) {
         setStatus(`${data.message || 'Incorrect code'}. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining.`, 'error');
         showToast('Incorrect OTP — try again', 'error');
-        // ✅ Clear inputs after wrong attempt so user re-enters cleanly
+        // Clear inputs after wrong attempt so user re-enters cleanly
         setTimeout(() => {
           inputs.forEach(i => { i.value = ''; i.classList.remove('filled','is-error'); });
           submitBtn.disabled = true;
@@ -518,7 +520,7 @@
   resendBtn.addEventListener('click', async () => {
     try {
       setStatus('Sending new OTP...', 'info');
-      resendBtn.disabled = true; // ✅ prevent double-click
+      resendBtn.disabled = true; 
 
       const res  = await fetch('/resend-otp', {
         method: 'POST',
@@ -536,7 +538,7 @@
 
       showToast('New OTP sent!', 'success');
 
-      // ✅ FIX: full reset THEN restart timer
+      
       fullReset();
       startTimer();
 

@@ -384,6 +384,8 @@ export const verifyEmailController = async (req, res) => {
 export const verifyOtpController = async (req, res) => {
   try {
     const result = await handleOtpVerifyService(req);
+    
+    
     return res.json(result);
   } catch (err) {
     console.error("verifyOtpController error:", err);

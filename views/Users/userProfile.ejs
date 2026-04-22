@@ -192,7 +192,7 @@
       <span class="material-symbols-outlined">distance</span>
       <span>Manage Address</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="/changePassword" class="sidebar-link">
       <span class="material-symbols-outlined">lock_reset</span>
       <span>Change Password</span>
     </a>
@@ -298,12 +298,26 @@
         </div>
         <% } %>
       </div>
+       <% if (message) { %>
+  <div id="flashMessage" class="success"><%= message %></div>
+<% } %>
+
 
      
 
     </div>
   </div>
 </main>
+
+<script>
+  const msg = document.getElementById("flashMessage");
+
+  if (msg) {
+    setTimeout(() => {
+      msg.style.display = "none";
+    }, 5000); 
+  }
+</script>
 
 </body>
 </html>
