@@ -59,12 +59,12 @@ import {
 } from "../controller/userController.js";
 
 import {
-  profileLoadPage, userProfileUpdate, addressPageLoad,
-  addAddressPageLoad, editProfileLoad, profileEditEmailLoad,
+  profileLoadPage, userProfileUpdate, addressPageLoad, editProfileLoad, profileEditEmailLoad,
   deleteAvatar, uploadAvatar,
   changePasswordLoad,
   emailChangeProfileController,
-  changePasswordController
+  changePasswordController,getAddressesController,addressAddController,addressEditController,addressDeleteController,addressSetDefaultController
+  
 } from "../controller/userProfileController.js";
 import { isUserAuthenticated } from "../middleware/user.js";
 const router = express.Router();
@@ -103,10 +103,15 @@ router.get("/profile", profileLoadPage);
 router.get("/profile/edit", editProfileLoad);
 router.get("/profile/email-edit", profileEditEmailLoad);
 router.get("/address", addressPageLoad);
-router.get("/address/add", addAddressPageLoad);
 router.get('/changePassword',changePasswordLoad);
 router.post('/change-password',changePasswordController)
 router.post('/profile/change-email',emailChangeProfileController);
+router.get('/addresses',              getAddressesController);
+router.post('/address/add',           addressAddController);
+router.put('/address/edit/:id',       addressEditController);
+router.delete('/address/delete/:id',  addressDeleteController);
+router.patch('/address/default/:id',  addressSetDefaultController);
+
 
 // ── PROFILE UPDATE (text fields only — no file) ──
 router.post("/profile/update", avatarUpload.none(), userProfileUpdate);

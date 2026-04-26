@@ -10,6 +10,8 @@ import {
   updateProfileService,
   uploadAvatarService,
   deleteAvatarService,
+  
+  
 } from "../service/userProfileService.js";
 import { generateAndSendOtp } from "../service/userService.js";
 import bcrypt from "bcrypt";
@@ -130,14 +132,7 @@ export const addressPageLoad = async (req, res) => {
   }
 };
 
-export const addAddressPageLoad = async (req, res) => {
-  try {
-    if (!req.session.user) return res.redirect("/login");
-    return res.render("Users/addAddress", { user: req.session.user });
-  } catch (err) {
-    return res.redirect("/login");
-  }
-};
+
 
 export const profileEditEmailLoad = async (req, res) => {
   try {
@@ -230,5 +225,83 @@ req.session.message = "Password changed successfully";
   } catch (error) {
     console.error(error);
     return res.redirect("/profile");
+  }
+};
+
+
+
+import {
+  getAllAddressesService,
+  addAddressService,
+  editAddressService,
+  deleteAddressService,
+  setDefaultAddressService,
+} from '../service/userProfileService.js'; // adjust path as needed
+
+/* ──────────────────────────────────────────────────────────
+   HELPER — sends a service error with the right status code
+────────────────────────────────────────────────────────── */
+const handleError = (res, error) => {
+  console.error('[Address Controller]', error.message);
+  const status = error.statusCode || 500;
+  const message = error.statusCode ? error.message : 'Internal server error.';
+  return res.status(status).json({ message });
+};
+
+export const getAddressesController = async (req, res) => {
+  try {
+    const userId = req.session.user?.id;  // ← changed
+    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const addresses = await getAllAddressesService(userId);
+    return res.status(200).json({ addresses });
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+export const addressAddController = async (req, res) => {
+  try {
+    const userId = req.session.user?.id;  // ← changed
+    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const newAddress = await addAddressService(userId, req.body);
+    return res.status(201).json({ message: 'Address added successfully.', address: newAddress });
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+export const addressEditController = async (req, res) => {
+  try {
+    const userId = req.session.user?.id;  // ← changed
+    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const { id } = req.params;
+    const updated = await editAddressService(userId, id, req.body);
+    return res.status(200).json({ message: 'Address updated successfully.', address: updated });
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+export const addressDeleteController = async (req, res) => {
+  try {
+    const userId = req.session.user?.id;  // ← changed
+    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const { id } = req.params;
+    const result = await deleteAddressService(userId, id);
+    return res.status(200).json({ message: 'Address removed successfully.', deletedId: result.deletedId });
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+export const addressSetDefaultController = async (req, res) => {
+  try {
+    const userId = req.session.user?.id;  // ← changed
+    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const { id } = req.params;
+    const updated = await setDefaultAddressService(userId, id);
+    return res.status(200).json({ message: 'Default address updated.', address: updated });
+  } catch (error) {
+    return handleError(res, error);
   }
 };
