@@ -1,9 +1,10 @@
-import "./config/env.js";  // ← MUST be line 1, before everything
+import "./config/env.js";  
 
 import express from "express";
 import session from "express-session";
 import passport from "./config/passport.js";
 import userRouter from "./routers/userRouter.js";
+import adminRouter from "./routers/adminRouter.js"
 import connect from "./config/db_config.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -34,15 +35,19 @@ app.use(session({
 }));
 
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 app.use((req, res, next) => {
-  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   next();
 });
 
+
 app.set("view engine", "ejs");
 app.use("/", userRouter);
+app.use('/admin',adminRouter)
 
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);

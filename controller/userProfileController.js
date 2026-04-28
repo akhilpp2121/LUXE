@@ -296,7 +296,7 @@ export const addressDeleteController = async (req, res) => {
 
 export const addressSetDefaultController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  // ← changed
+    const userId = req.session.user?.id;  
     if (!userId) return res.status(401).json({ message: 'Not authenticated' });
     const { id } = req.params;
     const updated = await setDefaultAddressService(userId, id);
@@ -305,3 +305,4 @@ export const addressSetDefaultController = async (req, res) => {
     return handleError(res, error);
   }
 };
+

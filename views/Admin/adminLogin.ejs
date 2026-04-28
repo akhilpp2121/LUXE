@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#7b9cff",
+                        "primary-container": "#7b9cff",
+                        "on-error-container": "#ffa8a3",
+                        "surface-container-high": "#141f38",
+                        "tertiary-dim": "#ef8fe5",
+                        "error": "#ff716c",
+                        "inverse-surface": "#faf8ff",
+                        "inverse-primary": "#0053dc",
+                        "error-dim": "#d7383b",
+                        "primary-dim": "#316bf3",
+                        "tertiary-fixed-dim": "#ef8fe5",
+                        "on-tertiary-fixed": "#480049",
+                        "on-error": "#490006",
+                        "surface-container-highest": "#192540",
+                        "tertiary": "#ffb4f4",
+                        "on-secondary-fixed": "#1c248e",
+                        "surface-container-low": "#091328",
+                        "background": "#060e20",
+                        "on-secondary-fixed-variant": "#3c45ab",
+                        "surface": "#060e20",
+                        "surface-tint": "#90abff",
+                        "secondary-dim": "#8b94ff",
+                        "outline": "#6d758c",
+                        "surface-container": "#0f1930",
+                        "secondary-fixed": "#cbceff",
+                        "tertiary-fixed": "#fe9cf4",
+                        "on-tertiary": "#722070",
+                        "surface-container-lowest": "#000000",
+                        "on-surface-variant": "#a3aac4",
+                        "primary": "#90abff",
+                        "outline-variant": "#40485d",
+                        "error-container": "#9f0519",
+                        "on-secondary-container": "#caccff",
+                        "secondary-fixed-dim": "#bbbfff",
+                        "primary-fixed-dim": "#658eff",
+                        "surface-bright": "#1f2b49",
+                        "on-background": "#dee5ff",
+                        "on-primary-fixed": "#000000",
+                        "on-primary": "#002873",
+                        "secondary": "#8b94ff",
+                        "on-tertiary-fixed-variant": "#711f6f",
+                        "surface-dim": "#060e20",
+                        "on-tertiary-container": "#661466",
+                        "on-primary-container": "#001e5a",
+                        "surface-variant": "#192540",
+                        "on-secondary": "#000478",
+                        "on-primary-fixed-variant": "#00266e",
+                        "inverse-on-surface": "#4d556b",
+                        "tertiary-container": "#fe9cf4",
+                        "secondary-container": "#313aa1",
+                        "on-surface": "#dee5ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(25, 37, 64, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary selection:text-on-primary min-h-screen flex flex-col">
+<header class="bg-[#060e20] flex justify-between items-center w-full px-8 py-6 max-w-full">
+<div class="font-['Manrope'] font-black text-white tracking-widest uppercase text-xl">
+            Luxe Admin
+        </div>
+<div class="flex gap-4">
+<button class="text-[#a3aac4] hover:bg-[#1f2b49] transition-colors duration-300 p-2 rounded-lg active:scale-95 opacity-80">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<button class="text-[#a3aac4] hover:bg-[#1f2b49] transition-colors duration-300 p-2 rounded-lg active:scale-95 opacity-80">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</button>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center relative px-6 py-12">
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+<div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-primary-dim opacity-[0.03] rounded-full blur-[120px]"></div>
+<div class="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-tertiary-dim opacity-[0.03] rounded-full blur-[120px]"></div>
+</div>
+<div class="w-full max-w-md relative">
+<div class="glass-panel border border-outline-variant/15 rounded-xl p-10 shadow-2xl">
+<div class="mb-10">
+<h1 class="font-headline text-3xl font-extrabold tracking-tight text-white mb-2">Executive Access</h1>
+<p class="text-on-surface-variant font-label text-sm uppercase tracking-widest">Luxe Executive Console</p>
+</div>
+<form class="space-y-8" action="/admin/login" method="post" autocomplete="off">
+<div>
+<label class="block text-on-surface-variant text-[0.75rem] font-medium uppercase tracking-wider mb-2" for="email">Administrator Email</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-b-2 border-outline-variant focus:border-primary text-white px-0 py-3 outline-none transition-all placeholder:text-outline-variant/50" id="email" placeholder="Enter Your Email" type="email" name="email" />
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<label class="block text-on-surface-variant text-[0.75rem] font-medium uppercase tracking-wider" for="password">Password</label>
+</div>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-b-2 border-outline-variant focus:border-primary text-white px-0 py-3 outline-none transition-all placeholder:text-outline-variant/50" id="password" placeholder="••••••••••••" type="password" name="password"/>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center group cursor-pointer">
+<input class="hidden peer" type="checkbox"/>
+<div class="w-5 h-5 border border-outline-variant rounded bg-surface-container-low peer-checked:bg-primary peer-checked:border-primary flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-[14px] text-on-primary-container opacity-0 peer-checked:opacity-100" data-icon="check">check</span>
+</div>
+<span class="ml-3 text-[0.8rem] text-on-surface-variant font-medium tracking-wide">Stay signed in</span>
+</label>
+</div>
+<button class="w-full py-4 rounded-xl bg-gradient-to-br from-primary-dim to-primary text-on-primary font-headline font-bold text-base tracking-wide shadow-lg shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all">
+                        Login 
+                    </button>
+</form>
+<div class="mt-12 flex items-center justify-center space-x-6 grayscale opacity-40">
+<img alt="security-badge" class="h-6" data-alt="minimalist white vector security shield icon with clean lines and sharp corners" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGAkRPjeflqy448BEj_uefmg43C9CYAYUCUZ4rNRmWFipLYAdLFJVI2sX4MIWKrIXXwuLI7lCJXq-iY4pjZcLeMg0NCBAPwy9MJRYiINLcDSjzgS8OQvKcvimKFfMMcho-tovv1_LCtEH1TlcyQrI95aHDxVMFuXUsXgOXNuaCwIsMn2p-i3YUmkRyh7eCKBFOqI5fEZhloW5H5k6R0E8kJjjimVkoyPYO2jX-tT70a0S1Sf-qo0MY_dvCdPz7GgHj7H1Xm_rW4nEq"/>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<img alt="compliance-badge" class="h-6" data-alt="minimalist white vector compliance checkmark emblem for high-end enterprise software" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFFlRu6JHO0FwHT9hHqWFPB7FsnObgjPmkaxsEKd4eFudzwKtHhYBMZbojRMFlzJTRuavoxqYHVXwrT-Lntf8fzAGGI1EOac0Z7Kgjrl3wUv60SIr49UB6YOzOzCATN2w0WOl5zPUAlJ5swDPv8UW4xzFxgj8hTIqweD7f29vNd-1syRgVZ0vDGAMz0ScUD-a5Vac1YKN-ACmQaM-vWoXXRi9zlzboyuAPiL4ANxJG9jtpg5tKlMQqRYmWzU6qsnbOrrNrl4R1ss2H"/>
+</div>
+</div>
+<div class="mt-8 text-center">
+<p class="text-on-surface-variant/40 text-[0.65rem] uppercase tracking-[0.2em]">Restricted Enterprise Environment</p>
+</div>
+</div>
+</main>
+<footer class="bg-[#060e20] border-t border-[#40485d]/10 flex flex-col md:flex-row justify-between items-center w-full px-12 py-8 gap-4">
+<div class="font-['Inter'] text-[0.75rem] font-medium uppercase tracking-wider text-[#a3aac4]">
+            © 2024 Luxe Executive Systems. All rights reserved.
+        </div>
+<div class="flex gap-8">
+<a class="font-['Inter'] text-[0.75rem] font-medium uppercase tracking-wider text-[#a3aac4] hover:text-white transition-colors active:opacity-70" href="#">Security Policy</a>
+<a class="font-['Inter'] text-[0.75rem] font-medium uppercase tracking-wider text-[#a3aac4] hover:text-white transition-colors active:opacity-70" href="#">Terms of Service</a>
+<a class="font-['Inter'] text-[0.75rem] font-medium uppercase tracking-wider text-[#a3aac4] hover:text-white transition-colors active:opacity-70" href="#">System Status</a>
+</div>
+</footer>
+
+<script>
+
+     window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      window.location.href = '/admin/login';
+    }
+  });
+</script>
+</body></html>
