@@ -303,16 +303,15 @@ function hideLoader() {
             err ? setError(err) : setSuccess();
         });
 
-        // Re-focus: clear success/error so user can re-type freely
+        
         emailInput.addEventListener('focus', () => {
             if (emailInput.classList.contains('input-success')) {
-                // keep success state — just let them keep editing
             }
         });
 
         
     form.addEventListener('submit', async (e) => {
-    e.preventDefault(); //  stop normal form submit
+    e.preventDefault(); 
 
     const val = emailInput.value.trim();
     const err = getEmailError(val);

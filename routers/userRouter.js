@@ -14,7 +14,8 @@ import {
   userLandingLoad, userLoginLoad, userSignUpLoad, userForgotPasswordLoad,
   registerController, loginController, homeLoad, otpPageLoad,
   verifyOtpController, resendOtpController, verifyEmailController,
-  resetPasswordLoad, resetPassword,googleCallback
+  resetPasswordLoad, resetPassword,googleCallback,
+  logoutUserController
 } from "../controller/userController.js";
 
 import {
@@ -57,26 +58,27 @@ router.post("/reset-password", resetPassword);
 // router.use(isUserAuthenticated);
 
 // ── PAGES ──
-router.get("/homePage", homeLoad);
-router.get("/profile", profileLoadPage);
-router.get("/profile/edit", editProfileLoad);
-router.get("/profile/email-edit", profileEditEmailLoad);
-router.get("/address", addressPageLoad);
-router.get('/changePassword',changePasswordLoad);
-router.post('/change-password',changePasswordController)
-router.post('/profile/change-email',emailChangeProfileController);
-router.get('/addresses',              getAddressesController);
-router.post('/address/add',           addressAddController);
-router.put('/address/edit/:id',       addressEditController);
-router.delete('/address/delete/:id',  addressDeleteController);
-router.patch('/address/default/:id',  addressSetDefaultController);
+router.get("/homePage",isUserAuthenticated, homeLoad);
+router.get("/profile",isUserAuthenticated, profileLoadPage);
+router.get("/profile/edit",isUserAuthenticated, editProfileLoad);
+router.get("/profile/email-edit",isUserAuthenticated, profileEditEmailLoad);
+router.get("/address",isUserAuthenticated, addressPageLoad);
+router.get('/changePassword',isUserAuthenticated,changePasswordLoad);
+router.post('/change-password',isUserAuthenticated,changePasswordController)
+router.post('/profile/change-email',isUserAuthenticated,emailChangeProfileController);
+router.get('/addresses',   isUserAuthenticated,           getAddressesController);
+router.post('/address/add',  isUserAuthenticated,         addressAddController);
+router.put('/address/edit/:id',  isUserAuthenticated,     addressEditController);
+router.delete('/address/delete/:id',isUserAuthenticated,  addressDeleteController);
+router.patch('/address/default/:id', isUserAuthenticated, addressSetDefaultController);
 
 
 // ── PROFILE UPDATE (text fields only — no file) ──
-router.post("/profile/update", avatarUpload.none(), userProfileUpdate);
+router.post("/profile/update",isUserAuthenticated, avatarUpload.none(), userProfileUpdate);
 
 
-router.post("/profile/avatar/upload", avatarUpload.single("avatar"), uploadAvatar);
-router.delete("/profile/avatar", deleteAvatar);
+router.post("/profile/avatar/upload",isUserAuthenticated, avatarUpload.single("avatar"), uploadAvatar);
+router.delete("/profile/avatar",isUserAuthenticated, deleteAvatar);
+router.get('/logout',logoutUserController);
 
 export default router;

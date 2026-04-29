@@ -214,10 +214,11 @@
     </a>
   </nav>
   <div class="sidebar-footer">
-    <a href="#">
-      <span class="material-symbols-outlined">logout</span>
-      <span>Sign Out</span>
-    </a>
+    <a href="/logout">
+  <span class="material-symbols-outlined">logout</span>
+  <span>Sign Out</span>
+</a>
+
   </div>
 </aside>
 
@@ -276,31 +277,8 @@
         </div>
       </div>
 
-      <!-- Address -->
-      <div class="detail-card">
-        <div class="card-title"><span class="ms material-symbols-outlined">location_on</span>Default Address</div>
-        <% if (user.defaultAddress) { %>
-        <div class="address-card">
-          <div class="addr-icon"><span class="ms material-symbols-outlined">home</span></div>
-          <div class="addr-info">
-            <div class="addr-name"><%= user.defaultAddress.name %></div>
-            <div class="addr-text">
-              <%= user.defaultAddress.line1 %><% if(user.defaultAddress.line2){ %>, <%= user.defaultAddress.line2 %><% } %><br/>
-              <%= user.defaultAddress.city %>, <%= user.defaultAddress.state %> <%= user.defaultAddress.postcode %><br/>
-              <%= user.defaultAddress.country %>
-            </div>
-            <div class="addr-default"><span class="ms material-symbols-outlined">check_circle</span>Default</div>
-          </div>
-        </div>
-        <% } else { %>
-        <div style="color:var(--txt3);font-size:.82rem;font-weight:300;text-align:center;padding:20px 0;">
-          No address saved. <a href="/address" style="color:var(--pri);text-decoration:none;">Add one</a>
-        </div>
-        <% } %>
-      </div>
-       <% if (message) { %>
-  <div id="flashMessage" class="success"><%= message %></div>
-<% } %>
+     
+      
 
 
      
@@ -308,15 +286,31 @@
     </div>
   </div>
 </main>
-
 <script>
-  const msg = document.getElementById("flashMessage");
-
-  if (msg) {
-    setTimeout(() => {
-      msg.style.display = "none";
-    }, 5000); 
+  function showToast(msg, type) {
+    type = type || "success";
+    const toast = document.createElement("div");
+    toast.innerText = msg;
+    toast.style.position = "fixed";
+    toast.style.bottom = "20px";
+    toast.style.right = "20px";
+    toast.style.padding = "12px 16px";
+    toast.style.borderRadius = "8px";
+    toast.style.color = "#fff";
+    toast.style.fontSize = "14px";
+    toast.style.zIndex = "9999";
+    toast.style.boxShadow = "0 8px 20px rgba(0,0,0,0.2)";
+    toast.style.background = type === "success" ? "#22c55e" : "#ef4444";
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // typeof guard prevents crash when flash is not passed
+    <% if (typeof flash !== 'undefined' && flash) { %>
+      showToast("<%= flash.text %>", "<%= flash.type %>");
+    <% } %>
+  });
 </script>
 
 </body>

@@ -13,23 +13,34 @@ import {
   
   
 } from "../service/userProfileService.js";
+
+import {
+  getAllAddressesService,
+  addAddressService,
+  editAddressService,
+  deleteAddressService,
+  setDefaultAddressService,
+} from '../service/userProfileService.js'; 
 import { generateAndSendOtp } from "../service/userService.js";
 import bcrypt from "bcrypt";
 
 
 // Profile page
+
+
 export const profileLoadPage = async (req, res) => {
   try {
-
     if (!req.session.user) return res.redirect("/login");
     const user = await getUserProfileService(req.session.user.id);
     if (!user) return res.redirect("/login");
-    const message = req.session.message;
 
-    
-    req.session.message = null;
+    const flash = req.session.flashMessage || null;
+    req.session.flashMessage = null;
 
-    return res.render("Users/userProfile", { user ,message});
+    //  save session after clearing flash
+    req.session.save(() => {
+      return res.render("Users/userProfile", { user: req.session.user, flash });
+    });
   } catch (err) {
     console.error("profileLoadPage error:", err);
     return res.redirect("/login");
@@ -49,7 +60,7 @@ export const editProfileLoad = async (req, res) => {
   }
 };
 
-// Name + Phone save
+
 export const userProfileUpdate = async (req, res) => {
   try {
     if (!req.session.user) return res.redirect("/login");
@@ -58,20 +69,32 @@ export const userProfileUpdate = async (req, res) => {
 
     if (!result.success) {
       const user = await getUserProfileService(req.session.user.id);
-      return res.render("Users/editProfile", { user, error: result.message, success: null });
+      return res.render("Users/editProfile", {
+        user,
+        error: result.message,
+        success: null
+      });
     }
 
-    // Session sync
     req.session.user.fullName    = result.fullName;
     req.session.user.phoneNumber = result.phoneNumber;
     req.session.user.avatar      = result.avatar;
 
-    return res.redirect("/profile");
+    // STAY ON SAME PAGE WITH SUCCESS
+    const updatedUser = await getUserProfileService(req.session.user.id);
+
+    return res.render("Users/editProfile", {
+      user: updatedUser,
+      error: null,
+      success: result.message
+    });
+
   } catch (err) {
     console.error("userProfileUpdate error:", err);
     return res.status(500).send("Server error");
   }
 };
+
 
 // Avatar upload (AJAX)
 export const uploadAvatar = async (req, res) => {
@@ -136,6 +159,8 @@ export const addressPageLoad = async (req, res) => {
 
 export const profileEditEmailLoad = async (req, res) => {
   try {
+    
+    
     if (!req.session.user) return res.redirect("/login");
     return res.render("Users/profileEditEmail", { user: req.session.user });
   } catch (err) {
@@ -144,6 +169,8 @@ export const profileEditEmailLoad = async (req, res) => {
 };
 
 export const emailChangeProfileController = async (req, res) => {
+  
+  
   try {
     const { newEmail, confirmEmail } = req.body;
 
@@ -204,7 +231,7 @@ export const changePasswordController = async (req, res) => {
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!isMatch) {
-      return res.redirect("/profile"); // wrong current password
+      return res.redirect("/profile"); 
     }
 
     // check new password match
@@ -218,9 +245,12 @@ export const changePasswordController = async (req, res) => {
     
 user.password = hashedPassword;
 await user.save();
-req.session.message = "Password changed successfully";
+req.session.flashMessage = { type: "success", text: "Password changed successfully!" };
 
-    return res.redirect("/profile");
+//  save session before redirect
+req.session.save(() => {
+  return res.redirect("/profile");
+});
 
   } catch (error) {
     console.error(error);
@@ -230,17 +260,9 @@ req.session.message = "Password changed successfully";
 
 
 
-import {
-  getAllAddressesService,
-  addAddressService,
-  editAddressService,
-  deleteAddressService,
-  setDefaultAddressService,
-} from '../service/userProfileService.js'; // adjust path as needed
 
-/* ──────────────────────────────────────────────────────────
-   HELPER — sends a service error with the right status code
-────────────────────────────────────────────────────────── */
+
+
 const handleError = (res, error) => {
   console.error('[Address Controller]', error.message);
   const status = error.statusCode || 500;
@@ -250,7 +272,7 @@ const handleError = (res, error) => {
 
 export const getAddressesController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  // ← changed
+    const userId = req.session.user?.id;  
     if (!userId) return res.status(401).json({ message: 'Not authenticated' });
     const addresses = await getAllAddressesService(userId);
     return res.status(200).json({ addresses });
@@ -261,7 +283,7 @@ export const getAddressesController = async (req, res) => {
 
 export const addressAddController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  // ← changed
+    const userId = req.session.user?.id;  
     if (!userId) return res.status(401).json({ message: 'Not authenticated' });
     const newAddress = await addAddressService(userId, req.body);
     return res.status(201).json({ message: 'Address added successfully.', address: newAddress });
@@ -272,7 +294,7 @@ export const addressAddController = async (req, res) => {
 
 export const addressEditController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  // ← changed
+    const userId = req.session.user?.id;  
     if (!userId) return res.status(401).json({ message: 'Not authenticated' });
     const { id } = req.params;
     const updated = await editAddressService(userId, id, req.body);
@@ -284,7 +306,7 @@ export const addressEditController = async (req, res) => {
 
 export const addressDeleteController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  // ← changed
+    const userId = req.session.user?.id;  
     if (!userId) return res.status(401).json({ message: 'Not authenticated' });
     const { id } = req.params;
     const result = await deleteAddressService(userId, id);

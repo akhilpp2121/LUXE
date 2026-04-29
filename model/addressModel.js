@@ -12,6 +12,10 @@ const addressSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    phoneNumber: {
+  type: String,
+  required: true
+},
 
     houseNumber: {
       type: String,

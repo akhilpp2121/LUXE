@@ -92,14 +92,24 @@
   .field label { font-family: 'Syne', sans-serif; font-size: .52rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--txt3); }
   .field-wrap { position: relative; }
   .field-wrap .fi { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--txt3); font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 300; pointer-events: none; }
-  .field input, .field select, .field textarea { background: var(--sur2); border: 1px solid var(--bord); border-radius: 8px; padding: 11px 14px 11px 40px; color: var(--txt); font-family: 'DM Sans', sans-serif; font-size: .875rem; font-weight: 400; width: 100%; outline: none; transition: all .2s; -webkit-appearance: none; }
+  .field input, .field select, .field textarea { background: var(--sur2); border: 1px solid var(--bord); border-radius: 8px; padding: 11px 14px ; color: var(--txt); font-family: 'DM Sans', sans-serif; font-size: .875rem; font-weight: 400; width: 100%; outline: none; transition: all .2s; -webkit-appearance: none; }
   .field textarea { padding: 11px 14px; resize: vertical; min-height: 80px; line-height: 1.5; }
   .field input:hover, .field select:hover, .field textarea:hover { border-color: var(--bord2); }
-  .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(58,111,247,.45); background: var(--sur3); }
+  /* .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(58,111,247,.45); background: var(--sur3); } */
+  
+
+  
   .field input.err, .field select.err { border-color: rgba(239,68,68,.4) !important; background: rgba(239,68,68,.04) !important; }
   .field .errt { color: var(--red); font-size: .68rem; min-height: 14px; display: flex; align-items: center; gap: 4px; }
   .field .errt .ms { font-size: 13px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 1, 'wght' 300; }
   .field select option { background: var(--sur2); color: var(--txt); }
+  .field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--pri);
+  box-shadow: 0 0 0 3px rgba(58,111,247,0.2);
+}
+
 
   .email-row { display: flex; align-items: flex-start; gap: 10px; }
   .email-row .field { flex: 1; }
@@ -113,6 +123,62 @@
   .btn-save .ms { font-size: 16px; font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 300; }
   .btn-cancel { display: flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--bord2); color: var(--txt2); border-radius: 8px; padding: 13px 24px; font-family: 'Syne', sans-serif; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: all .2s; text-decoration: none; }
   .btn-cancel:hover { background: var(--sur3); color: var(--txt); }
+
+
+  .flash {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 280px;
+  max-width: 350px;
+  background: var(--sur);
+  border: 1px solid var(--bord);
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 9999;
+  animation: slideIn .4s ease;
+}
+.flash.success {
+  border-left: 5px solid var(--green);
+}
+
+.flash.error {
+  border-left: 5px solid var(--red);
+}
+
+
+
+.flash .icon {
+  font-size: 22px;
+}
+
+.flash.success .icon {
+  color: #4CAF50;
+}
+
+.flash.error .icon {
+  color: #f44336;
+}
+
+.close-btn {
+  margin-left: auto;
+  cursor: pointer;
+  font-size: 18px;
+  color: #999;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 
   @keyframes fu { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   @media (max-width: 1100px) { .edit-layout { grid-template-columns: 1fr; } }
@@ -184,13 +250,7 @@
     <a href="/profile" class="back-link"><span class="ms material-symbols-outlined">arrow_back</span>Back to Profile</a>
   </div>
 
-  <% if (typeof success !== 'undefined' && success) { %>
-    <div class="flash success"><span class="ms material-symbols-outlined">check_circle</span><%= success %></div>
-  <% } %>
-  <% if (typeof error !== 'undefined' && error) { %>
-    <div class="flash error"><span class="ms material-symbols-outlined">error</span><%= error %></div>
-  <% } %>
-
+ 
   <div class="edit-layout">
 
     <!-- Avatar Card -->
@@ -280,18 +340,79 @@
         </div>
 
       </form>
+
     </div>
 
   </div>
+
+<% if (error) { %>
+  <div class="flash error">
+    <span class="material-symbols-outlined icon">error</span>
+    <span><%= error %></span>
+    <span class="close-btn" onclick="closeFlash(this)">×</span>
+  </div>
+<% } %>
+
+<% if (success) { %>
+  <div class="flash success">
+    <span class="material-symbols-outlined icon">check_circle</span>
+    <span><%= success %></span>
+    <span class="close-btn" onclick="closeFlash(this)">×</span>
+  </div>
+<% } %>
+
+
+
 </main>
 <script>
+function showToast(msg) {
+  const toast = document.createElement("div");
+  toast.innerText = msg;
+
+  toast.style.position = "fixed";
+  toast.style.bottom = "20px";
+  toast.style.right = "20px";
+  toast.style.background = "#4CAF50";
+  toast.style.color = "#fff";
+  toast.style.padding = "10px 15px";
+  toast.style.borderRadius = "5px";
+  toast.style.zIndex = "9999";
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+
+function closeFlash(btn) {
+    const el = btn.parentElement;
+    if (el) el.remove();
+  }
+
+  setTimeout(() => {
+    document.querySelectorAll(".flash").forEach(el => {
+      el.style.opacity = "0";
+      setTimeout(() => el.remove(), 500);
+    });
+  }, 3000);
+
+const successMsg = localStorage.getItem("success");
+
+if (successMsg) {
+  showToast(successMsg);
+  localStorage.removeItem("success");
+}
+
+
 document.addEventListener('DOMContentLoaded', function () {
 
   const avatarInput   = document.getElementById('avatarInput');
   const avatarPreview = document.getElementById('avatarPreview');
   const avatarErr     = document.getElementById('avatarErr');
   const uploadBtn     = document.getElementById('uploadBtn');
-  const removeBtn     = document.getElementById('removeAvatarBtn'); // ✅ declared ONCE
+  const removeBtn     = document.getElementById('removeAvatarBtn'); 
   const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=<%= encodeURIComponent(user.fullName || "User") %>&background=1a2338&color=c9a96e&size=100';
 
   // ── UPLOAD ──
@@ -322,6 +443,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (data.success) {
         avatarPreview.src = data.avatar + '?t=' + Date.now();
+        showToast(data.message)
       } else {
         avatarErr.textContent = data.message || 'Upload failed.';
         avatarPreview.src = DEFAULT_AVATAR;
@@ -350,6 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (data.success) {
           avatarPreview.src = DEFAULT_AVATAR;
+          showToast(data.message);
         } else {
           avatarErr.textContent = data.message || 'Could not remove avatar.';
         }

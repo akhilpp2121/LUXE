@@ -14,6 +14,11 @@ export const getUserProfileService = async (userId) => {
   return await userModel.findById(userId);
 };
 
+
+
+
+
+
 export const updateProfileService = async (req) => {
   try {
     const userId = req.session.user?.id;
@@ -24,36 +29,71 @@ export const updateProfileService = async (req) => {
 
     const { fullName, phoneNumber } = req.body;
 
+    let nameChanged = false;
+    let phoneChanged = false;
+
+    //  Name validation
     if (!fullName || fullName.trim().length < 3) {
       return { success: false, message: "Full name must be at least 3 characters" };
     }
-    user.fullName = fullName.trim();
 
+    if (user.fullName !== fullName.trim()) {
+      user.fullName = fullName.trim();
+      nameChanged = true;
+    }
+
+    //  Phone validation
     if (phoneNumber && phoneNumber.trim()) {
       const cleaned = phoneNumber.trim();
+
       if (!/^\+?[0-9]{10,15}$/.test(cleaned.replace(/[\s\-()]/g, ""))) {
         return { success: false, message: "Enter a valid phone number" };
       }
+
       const phoneExists = await userModel.findOne({
         phoneNumber: cleaned,
         _id: { $ne: userId },
       });
-      if (phoneExists) return { success: false, message: "Phone number already in use" };
-      user.phoneNumber = cleaned;
+
+      if (phoneExists) {
+        return { success: false, message: "Phone number already in use" };
+      }
+
+      if (user.phoneNumber !== cleaned) {
+        user.phoneNumber = cleaned;
+        phoneChanged = true;
+      }
     }
 
     await user.save();
+
+    
+    let message = "Profile updated successfully";
+
+    if (nameChanged && phoneChanged) {
+      message = "Name and phone number updated successfully";
+    } else if (nameChanged) {
+      message = "Name updated successfully";
+    } else if (phoneChanged) {
+      message = "Phone number updated successfully";
+    } else {
+      message = "No changes made";
+    }
+
     return {
       success: true,
+      message, 
       fullName: user.fullName,
       phoneNumber: user.phoneNumber,
       avatar: user.avatar,
     };
+
   } catch (error) {
     console.error("updateProfileService error:", error);
     return { success: false, message: "Server error" };
   }
 };
+
 
 export const uploadAvatarService = async (userId, file, currentAvatar) => {
   try {
@@ -62,9 +102,9 @@ export const uploadAvatarService = async (userId, file, currentAvatar) => {
     const user = await userModel.findByIdAndUpdate(
       userId,
       { avatar: newAvatarPath },
-      { returnDocument: 'after' }
+      {  returnDocument: "after"}
     );
-    return { success: true, avatar: user.avatar };
+    return { success: true, avatar: user.avatar,message: "Profile image updated successfully" };
   } catch (error) {
     console.error("uploadAvatarService error:", error);
     return { success: false, message: "Server error" };
@@ -75,7 +115,8 @@ export const deleteAvatarService = async (userId, currentAvatar) => {
   try {
     deleteOldAvatar(currentAvatar);
     await userModel.findByIdAndUpdate(userId, { avatar: "" });
-    return { success: true };
+    return { success: true, message: "image deleted successfully" };
+
   } catch (error) {
     console.error("deleteAvatarService error:", error);
     return { success: false, message: "Server error" };
@@ -90,14 +131,12 @@ export const getAllAddressesService = async (userId) => {
 export const addAddressService = async (userId, addressData) => {
   const { fullName, phoneNumber, houseNumber, streetName, landmark, city, state, pincode, country, isDefault } = addressData;
 
-  // Empty field check
   if (!fullName || !phoneNumber || !houseNumber || !streetName || !city || !state || !pincode || !country) {
     const error = new Error('All required fields must be provided.');
     error.statusCode = 400;
     throw error;
   }
 
-  // Phone: exactly 10 digits
   const phoneDigits = phoneNumber.replace(/\D/g, '');
   if (phoneDigits.length !== 10) {
     const error = new Error('Phone number must be exactly 10 digits.');
@@ -105,7 +144,6 @@ export const addAddressService = async (userId, addressData) => {
     throw error;
   }
 
-  // Pincode: exactly 6 digits
   if (!/^\d{6}$/.test(pincode)) {
     const error = new Error('Pincode must be exactly 6 digits.');
     error.statusCode = 400;
@@ -179,7 +217,7 @@ export const deleteAddressService = async (userId, addressId) => {
     throw error;
   }
 
-  await addressModel.findByIdAndDelete(addressId);  // ← fixed
+  await addressModel.findByIdAndDelete(addressId); 
 
   if (existing.isDefault) {
     const nextAddress = await addressModel.findOne({ userId }).sort({ createdAt: -1 });

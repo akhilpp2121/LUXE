@@ -281,7 +281,6 @@ export const verifyEmailService = async (req, email) => {
   }
 };
 
-// ─── REGISTER — pre-check (signup page validation) ──────────────────
 export const registerPreCheckService = async (req, fullName, email, password, phoneNumber) => {
   try {
     if (!fullName || !email || !password || !phoneNumber) {
@@ -353,7 +352,6 @@ if (flow === "CHANGE_EMAIL") {
   console.log(req.session);
   const userId   = req.session.user?.id;
   const newEmail = req.session.tempEmail;
-  console.log(userId);
   
 
   if (!userId || !newEmail) {
@@ -371,6 +369,10 @@ if (flow === "CHANGE_EMAIL") {
   req.session.otpExpires    = null;
   req.session.otpContext    = null;
   req.session.tempEmail  = null;
+
+  req.session.flashMessage = { type: "success", text: "Email updated successfully!" };
+  
+
 
   return {
     success: true,
