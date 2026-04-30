@@ -175,11 +175,15 @@ export const editAddressService = async (userId, addressId, addressData) => {
 
   // Phone: exactly 10 digits
   const phoneDigits = phoneNumber.replace(/\D/g, '');
-  if (phoneDigits.length !== 10) {
-    const error = new Error('Phone number must be exactly 10 digits.');
-    error.statusCode = 400;
-    throw error;
-  }
+
+if (phoneDigits.length !== 10) {
+  throw new Error('Phone number must be exactly 10 digits.');
+}
+
+if (/^(\d)\1{9}$/.test(phoneDigits)) {
+  throw new Error('Invalid phone number.');
+}
+
 
   // Pincode: exactly 6 digits
   if (!/^\d{6}$/.test(pincode)) {

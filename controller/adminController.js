@@ -117,38 +117,33 @@ export const userManagementPageLoad = async (req, res) => {
   }
 }
 
+
 export const updateUserStatusController = async (req, res) => {
-  if (!req.session.admin) {
-    return res.redirect('/admin/login');
-  }
+  if (!req.session.admin) return res.redirect('/admin/login');
+
+  const { id, isActive } = req.body;
 
   try {
-    const { id, isActive } = req.body;
-
     const result = await adminUserEditLogic(isActive, id);
-
-    if (!result.success) {
-      req.session.toast = { type: 'error', msg: 'Failed to update user' };
-      return res.redirect('/admin/users');
-    }
-
     const userName = result.user?.fullName || 'User';
 
-    req.session.toast = {
-      type: isActive === 'true' ? 'success' : 'warning',
-      msg: isActive === 'true'
-        ? `${userName} has been activated`
-        : `${userName} has been blocked`
-    };
+    req.session.toast = result.success
+      ? {
+          type: isActive === 'true' ? 'success' : 'warning',
+          msg: `${userName} has been ${isActive === 'true' ? 'activated' : 'blocked'}`
+        }
+      : { type: 'error', msg: 'Failed to update user' };
 
-    return res.redirect('/admin/users');
-
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     req.session.toast = { type: 'error', msg: 'Something went wrong' };
-    return res.redirect('/admin/users');
   }
+
+  res.redirect('/admin/users');
 };
+
+
+
 
 export const adminLogout = (req, res) => {
   req.session.destroy((err) => {
@@ -156,3 +151,4 @@ export const adminLogout = (req, res) => {
     return res.redirect('/admin/login');
   });
 };
+

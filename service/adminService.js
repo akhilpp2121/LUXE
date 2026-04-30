@@ -11,7 +11,7 @@ export const verifyAdminLogin = (email, password) => {
 export const adminUsersLogic = async (filter, pageNo, sort) => {
   try {
     const page       = parseInt(pageNo) || 1;
-    const limit      = 5;
+    const limit      = 3;
     const skip       = (page - 1) * limit;
     const total      = await userModel.countDocuments(filter);
     const totalPages = Math.ceil(total / limit);

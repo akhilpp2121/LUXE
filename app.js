@@ -5,7 +5,7 @@ import session from "express-session";
 import passport from "./config/passport.js";
 import userRouter from "./routers/userRouter.js";
 import adminRouter from "./routers/adminRouter.js"
-import connect from "./config/db_config.js";
+import connectDB from "./config/db_config.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -13,7 +13,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
-connect();
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

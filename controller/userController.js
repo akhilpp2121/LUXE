@@ -30,6 +30,9 @@ export const userForgotPasswordLoad = (req, res) => {
 };
 
 export const otpPageLoad = (req, res) => {
+  
+  
+  
   const email = req.session.email || req.session.tempEmail;
   if (!email) return res.redirect("/login");
   return res.render("Users/otpPage", { email });
@@ -41,6 +44,8 @@ export const homeLoad = (req, res) => {
 };
 
 export const registerController = async (req, res) => {
+  
+  
   try {
     const { fullName, email, phoneNumber, password } = req.body;
     const result = await registerPreCheckService(req, fullName, email, password, phoneNumber);
@@ -93,6 +98,8 @@ export async function googleCallback(req, res) {
 }
 
 export const verifyEmailController = async (req, res) => {
+ 
+  
   try {
     
     
@@ -105,7 +112,9 @@ export const verifyEmailController = async (req, res) => {
 };
 
 export const verifyOtpController = async (req, res) => {
-  try {
+  try { 
+  
+  
     const result = await handleOtpVerifyService(req);
     
     

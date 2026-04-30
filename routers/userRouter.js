@@ -73,7 +73,6 @@ router.delete('/address/delete/:id',isUserAuthenticated,  addressDeleteControlle
 router.patch('/address/default/:id', isUserAuthenticated, addressSetDefaultController);
 
 
-// ── PROFILE UPDATE (text fields only — no file) ──
 router.post("/profile/update",isUserAuthenticated, avatarUpload.none(), userProfileUpdate);
 
 

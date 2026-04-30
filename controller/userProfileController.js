@@ -145,7 +145,6 @@ export const deleteAvatar = async (req, res) => {
   }
 };
 
-// Other pages
 export const addressPageLoad = async (req, res) => {
   try {
     if (!req.session.user) return res.redirect("/login");
@@ -231,8 +230,13 @@ export const changePasswordController = async (req, res) => {
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!isMatch) {
-      return res.redirect("/profile"); 
-    }
+  req.session.flashMessage = { 
+    type: "error", 
+    text: "Current password is incorrect!" 
+  };
+  req.session.save(() => res.redirect("/profile"));
+  return; 
+}
 
     // check new password match
     if (newPassword !== confirmPassword) {
@@ -247,7 +251,9 @@ user.password = hashedPassword;
 await user.save();
 req.session.flashMessage = { type: "success", text: "Password changed successfully!" };
 
-//  save session before redirect
+
+
+
 req.session.save(() => {
   return res.redirect("/profile");
 });
@@ -275,6 +281,8 @@ export const getAddressesController = async (req, res) => {
     const userId = req.session.user?.id;  
     if (!userId) return res.status(401).json({ message: 'Not authenticated' });
     const addresses = await getAllAddressesService(userId);
+    
+    
     return res.status(200).json({ addresses });
   } catch (error) {
     return handleError(res, error);

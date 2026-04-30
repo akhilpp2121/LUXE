@@ -496,12 +496,27 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     phone(v) {
   if (!v) return '';
-  const c = v.replace(/[\s\-()]/g, '');
-  const digits = c.replace(/^\+/, '');           // strip leading + for length check
-  if (!/^\+?[0-9]{7,15}$/.test(c)) return 'Enter a valid phone number';
-  if (digits.length !== 10) return 'Phone number must be exactly 10 digits';
+
+  const value = v.trim();
+
+  // remove spaces, hyphens, brackets
+  const cleaned = value.replace(/[\s\-()]/g, '');
+
+  // must be digits, optional +
+  if (!/^\+?[0-9]{7,15}$/.test(cleaned)) {
+    return 'Enter a valid phone number';
+  }
+
+  const digits = cleaned.replace(/^\+/, '');
+
+  //  reject all same digits like 0000000, 1111111
+  if (/^(\d)\1+$/.test(digits)) {
+    return 'Invalid phone number';
+  }
+
   return '';
 },
+
 
   };
 

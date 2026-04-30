@@ -739,7 +739,7 @@
             <option value="oldest" <%= sort==='oldest'?'selected':'' %>>Oldest First</option>
           </select>
           <button type="submit" class="btn-filter">Apply</button>
-          <a href="/admin/users" class="btn-reset">Reset</a>
+          <a href="/admin/users" class="btn-reset">clear</a>
         </div>
       </form>
 
@@ -798,14 +798,25 @@
                     : '—' %>
                 </td>
                 <td>
-                  <form action="/admin/users/edit" method="POST" class="action-form">
+                  <!-- <form action="/admin/users/edit" method="POST" class="action-form">
                     <input type="hidden" name="id" value="<%= user._id %>" />
                     <select name="isActive" class="action-select">
                       <option value="true"  <%= user.isActive  ? 'selected' : '' %>>Active</option>
                       <option value="false" <%= !user.isActive ? 'selected' : '' %>>Block</option>
                     </select>
                     <button type="submit" class="btn-action">Save</button>
-                  </form>
+                  </form> -->
+
+<form action="/admin/users/edit" method="POST" class="action-form">
+    <input type="hidden" name="id" value="<%= user._id %>" />
+    <select name="isActive" class="action-select"
+      data-current="<%= user.isActive ? 'true' : 'false' %>"
+      onchange="openModal(this)">
+      <option value="true"  <%= user.isActive  ? 'selected' : '' %>>Active</option>
+      <option value="false" <%= !user.isActive ? 'selected' : '' %>>Block</option>
+    </select>
+  </form>
+
                 </td>
               </tr>
               <% }) %>
@@ -862,36 +873,66 @@
     </div>
   </div>
 
-  <script>
+  <!-- Confirmation Modal -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);
+  z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#1e1e28;border:1px solid #2a2a38;border-radius:10px;
+    padding:20px 22px;width:250px;font-family:'DM Sans',sans-serif;text-align:center;">
+    <p id="modal-msg" style="font-size:13px;color:#e8e8f0;margin:0 0 14px;line-height:1.5;"></p>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeModal()" style="flex:1;padding:7px;background:transparent;
+        border:1px solid #2a2a38;border-radius:7px;color:#7c7c96;font-size:12px;
+        font-family:'DM Sans',sans-serif;cursor:pointer;">Cancel</button>
+      <button id="modal-btn" style="flex:1;padding:7px;border-radius:7px;font-size:12px;
+        font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid;"></button>
+    </div>
+  </div>
+</div>
 
-    document.addEventListener('DOMContentLoaded', function() {
-  const toast = document.getElementById('toast');
-  console.log('Toast found:', toast); // ← add this to debug
-  
-  if (toast) {
-    
-    
-    const timer = setTimeout(() => {
-      
-      toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(12px)';
-      setTimeout(() => toast.remove(), 400);
-    }, 5000);
+<script>
+  let _sel = null;
 
-   
-    toast.addEventListener('click', () => {
-      clearTimeout(timer);
-      toast.remove();
-    });
+  function openModal(el) {
+    _sel = el;
+    const isBlock = el.value === 'false';
+    document.getElementById('modal-msg').textContent =
+      isBlock ? 'Block this user?' : 'Activate this user?';
+    const btn = document.getElementById('modal-btn');
+    btn.textContent      = isBlock ? 'Block' : 'Activate';
+    btn.style.background = isBlock ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.12)';
+    btn.style.borderColor= isBlock ? 'rgba(248,113,113,0.4)'  : 'rgba(52,211,153,0.4)';
+    btn.style.color      = isBlock ? '#f87171' : '#34d399';
+    btn.onclick = () => el.closest('form').submit();
+    document.getElementById('modal').style.display = 'flex';
   }
-});
 
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) window.location.reload();
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+    if (_sel) _sel.value = _sel.dataset.current; // revert dropdown
+  }
+
+  document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
   });
-   
-  </script>
+
+  // Toast auto-dismiss
+  document.addEventListener('DOMContentLoaded', function () {
+    const toast = document.getElementById('toast');
+    if (toast) {
+      const timer = setTimeout(() => {
+        toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(12px)';
+        setTimeout(() => toast.remove(), 400);
+      }, 5000);
+      toast.addEventListener('click', () => { clearTimeout(timer); toast.remove(); });
+    }
+  });
+
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) window.location.reload();
+  });
+</script>
  
 </body>
 </html>

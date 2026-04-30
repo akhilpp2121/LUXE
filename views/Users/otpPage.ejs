@@ -311,7 +311,7 @@
   const otpForm        = document.getElementById('otpForm');
   const emailDisplay   = document.getElementById('emailDisplay');
 
-  // ✅ FIX: Email from EJS server variable, not URL param
+  //  FIX: Email from EJS server variable, not URL param
   const serverEmail = '<%= typeof email !== "undefined" ? email : "" %>';
   if (serverEmail) {
     emailDisplay.textContent = serverEmail;
@@ -467,6 +467,8 @@
         body: JSON.stringify({ otp: getValue() })
       });
       const data = await res.json();
+      console.log(data);
+      
 
       if (data.success) {
         clearInterval(timerInterval);
@@ -497,7 +499,7 @@
         }, 600);
       } else {
         setStatus('Too many failed attempts. Request a new code.', 'error');
-        showToast('Blocked — request new code', 'error');
+        showToast(' — request new code', 'error');
         inputs.forEach(i => { i.disabled = true; i.classList.add('opacity-40'); });
         clearInterval(timerInterval);
         resendBtn.disabled       = false;

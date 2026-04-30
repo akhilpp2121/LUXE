@@ -449,7 +449,8 @@
   'use strict';
 
   const CURRENT_EMAIL = 'alexandra.chen@gmail.com';
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const EMAIL_RE =
+  /^[A-Za-z0-9](?:[A-Za-z0-9._%+-]{0,62}[A-Za-z0-9])?@[A-Za-z0-9-]+\.[A-Za-z]{2,}$/;
 
   const form      = document.getElementById('emailForm');
   const newInput  = document.getElementById('newEmail');
