@@ -182,3 +182,37 @@ export const logoutUserController = (req, res) => {
     return res.redirect("/login");
   });
 };
+
+
+// product
+
+export const productLisitingLoad = async(req,res)=>{
+    try{
+        let filter = {},sortOption = {}
+        if(req.query.color){
+            filter.color = req.query.color
+        }
+        if(req.query.size){
+            filter.size = req.query.size
+        }
+        if(req.query.price){
+            filter.price = Number(req.query.price)
+        }
+        filter["stock"] = {$gt:0}
+        let products = await ProductsLoad(filter)
+        if(!products.success){
+            return res.render("User/productListingPage",{error:products.message,product:[]})
+        }
+        return res.render("User/product-listing",{
+            product:products.data,
+            error:'',
+            color:products.color,
+            size:products.size,
+            colorValue:req.query.color||"",
+            sizeValue:req.query.size||""
+        })
+    }catch(e){
+        console.log("Server error ",e)
+        return res.render("User/product-listing",{product:[],error:'Server error',color:'',size:''})
+    }
+}

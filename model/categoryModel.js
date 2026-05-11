@@ -17,11 +17,7 @@ const categorySchema=new schema({
         required:true,
         default:true
     },
-    offer:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"offer",
-        default:null
-    }
+    
 },{timestamps:true})
 
 

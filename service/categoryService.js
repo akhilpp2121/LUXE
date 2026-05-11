@@ -8,7 +8,7 @@ export const categoryModelLoad = async (filter, sort, pageNo) => {
     const limit = 5;
     const skip  = (page - 1) * limit;
 
-    const total      = await categoryModel.countDocuments(filter);  // ← pass filter
+    const total      = await categoryModel.countDocuments(filter);  
     const totalPages = Math.ceil(total / limit);
 
     const data = await categoryModel.find(filter).sort(sort).skip(skip).limit(limit);
@@ -18,6 +18,16 @@ export const categoryModelLoad = async (filter, sort, pageNo) => {
 
 export const categoryDataLoad = async (filter) => {
     try {
+        const data = await categoryModel.find(filter);  // ← find returns array ✓
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, message: "Database error", data: [] };
+    }
+};
+
+
+export const categoryFindOne = async (filter) => {
+    try {
         const data = await categoryModel.findOne(filter);
         if (!data) return { success: false, message: "Category not found" };
         return { success: true, data };
@@ -25,6 +35,8 @@ export const categoryDataLoad = async (filter) => {
         return { success: false, message: "Database error" };
     }
 };
+
+
 
 export const adminCategoryAddLogic = async (categoryName, description, isActive) => {
     try {
@@ -46,22 +58,13 @@ export const adminCategoryAddLogic = async (categoryName, description, isActive)
 
         return { success: true };
     } catch (error) {
-        console.log("DB ERROR:", error.message);   // ← this will reveal the real problem
+        console.log("DB ERROR:", error.message);   
         return { success: false, message: "Database error" };
     }
 };
 
 
-export const adminCategoryDeleteLogic = async (id) => {
-    try {
-        const deleted = await categoryModel.findByIdAndDelete(id);
-        if (!deleted) return { success: false, message: "Category not found" };
-        return { success: true };
-    } catch (error) {
-        console.log("DB ERROR:", error.message);
-        return { success: false, message: "Database error" };
-    }
-};
+
 export const adminCategoryEditLogic = async (id, categoryName, description, isActive) => {
     try {
         // Check for duplicate name, excluding the current category

@@ -4,8 +4,8 @@ import {
     adminCategoryAddLogic,
     categoryModelLoad,
     categoryDataLoad,
-    adminCategoryDeleteLogic,
-    adminCategoryEditLogic
+    adminCategoryEditLogic,
+    categoryFindOne
 
 } from "../service/categoryService.js";
 
@@ -25,11 +25,12 @@ export const adminCategoryLoad = async (req, res) => {
     if (req.query.sort === "oldest") sortOption = { createdAt: 1 };
 
     const data = await categoryModelLoad(filter, sortOption, req.query.page);
+   
 
     return res.render("Admin/categoryPage", {
         data:        data.data,
         error:       "",
-        status:      req.query.status || "",   // ← fixed: was String(filter.isActive)
+        status:      req.query.status || "",   
         search:      req.query.search  || "",
         sort:        req.query.sort    || "latest",
         currentPage: data.currentPage,
@@ -50,7 +51,9 @@ export const addCategoryPageLoad = async (req, res) => {
 
 export const editCategoryPageLoad = async (req, res) => {
     const id = req.params.id;
-    const result = await categoryDataLoad({ _id: id });
+    const result = await categoryFindOne({ _id: id });
+    
+    
     if (!result.success) return res.send(result.message);
     const category = result.data;
     res.render("Admin/editCategory", {
@@ -65,7 +68,7 @@ export const editCategoryPageLoad = async (req, res) => {
 
 export const adminCategoryAdd = async (req, res) => {
     try {
-        console.log("req.body →", req.body);   // ← add this temporarily to confirm body arrives
+        console.log("req.body →", req.body);  
 
         const { categoryName, description, status } = req.body;
 
@@ -73,8 +76,7 @@ export const adminCategoryAdd = async (req, res) => {
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
-        const isActive = status === "active";   // ← convert string to boolean
-
+        const isActive = status === "active";   
         const result = await adminCategoryAddLogic(categoryName, description, isActive);
 
         if (!result.success) {
@@ -90,16 +92,7 @@ export const adminCategoryAdd = async (req, res) => {
 };
 
 
-export const adminCategoryDelete = async (req, res) => {
-    try {
-        const { id } = req.params;
-     await adminCategoryDeleteLogic(id)
-        return res.json({ success: true });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ success: false, message: "Server error" });
-    }
-};
+
 
 
 

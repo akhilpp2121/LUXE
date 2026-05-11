@@ -96,19 +96,19 @@
             <p class="text-primary-dim text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Executive Portal</p>
         </div>
         <nav class="flex flex-col gap-2 px-4">
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="#">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="/admin/dashboard">
                 <span class="material-symbols-outlined text-lg opacity-70">dashboard</span><span>Dashboard</span>
             </a>
             <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="#">
                 <span class="material-symbols-outlined text-lg opacity-70">shopping_cart</span><span>Orders</span>
             </a>
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="#">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="/admin/products">
                 <span class="material-symbols-outlined text-lg opacity-70">inventory_2</span><span>Products</span>
             </a>
-            <a class="text-white bg-primary-dim/10 border border-primary-dim/20 shadow-[0_0_15px_rgba(49,107,243,0.1)] px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-bold flex items-center gap-4" href="#">
+            <a class="text-white bg-primary-dim/10 border border-primary-dim/20 shadow-[0_0_15px_rgba(49,107,243,0.1)] px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-bold flex items-center gap-4" href="/admin/category">
                 <span class="material-symbols-outlined text-lg text-primary">category</span><span>Categories</span>
             </a>
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="#">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="/admin/users">
                 <span class="material-symbols-outlined text-lg opacity-70">group</span><span>Users</span>
             </a>
             <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="#">
@@ -118,17 +118,7 @@
                 <span class="material-symbols-outlined text-lg opacity-70">image</span><span>Banners</span>
             </a>
         </nav>
-        <div class="mt-auto px-6">
-            <div class="p-3 bg-surface-container-high/50 border border-white/5 rounded-2xl flex items-center gap-3 hover:bg-surface-container-high transition-colors cursor-pointer">
-                <div class="w-10 h-10 rounded-full overflow-hidden bg-primary-dim ring-2 ring-primary/20">
-                    <img alt="Executive Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5sG-4-9mVDGCmpCFYeMKRkrtoXTifu_PVBvx8_Ymy0fwuTahffRpSpdw_S2yRgQHgsI_6RdzSRG5ZI2lTb7pITxv-YVrMmvAb2HH97iZYCEmpyfZy68O3jl8O8MU4x7nnUnTVrtUHMzhVpZW2wjQb5uZeb4XVIwvheUld6szMXPZ6l-3Ru0o9QANxpUOkA5qXYhoDhlXkWIcwyBZn6hmF56DH7bO62G5kh5FkTKDG0x6QByItmUhMW0cJUHLxit2tRdm9arJElsxE" />
-                </div>
-                <div class="overflow-hidden">
-                    <p class="text-sm font-bold text-white truncate font-['Outfit']">Alexander Pierce</p>
-                    <p class="text-[10px] text-primary tracking-wider uppercase">Administrator</p>
-                </div>
-            </div>
-        </div>
+      
     </aside>
 
     <!-- Main Content -->
@@ -203,7 +193,8 @@
             <% } %>
 
             <!-- Active Filters Banner -->
-            <% if (search || status || sort !== 'latest') { %>
+            <!-- <% if (search || status || sort !== 'latest') { %>
+            
             <div class="mb-4 flex items-center gap-3 flex-wrap">
                 <span class="text-xs text-on-surface-variant font-semibold uppercase tracking-widest">Active filters:</span>
                 <% if (search) { %>
@@ -227,7 +218,7 @@
                 </span>
                 <% } %>
             </div>
-            <% } %>
+            <% } %> -->
 
             <div class="bg-surface-container-high/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
                 <div class="overflow-x-auto">
@@ -277,29 +268,20 @@
                                 </td>
 
                                 <!-- Actions -->
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center justify-end gap-2">
+                                <!-- Actions -->
+<td class="px-8 py-5">
+    <div class="flex items-center justify-end gap-2">
 
-                                        <!-- Edit -->
-                                        <a href="/admin/editCategory/<%= cat._id %>" class="tooltip-wrap">
-                                            <button class="p-2.5 rounded-xl bg-surface-container-low border border-white/5 hover:bg-primary-dim/20 hover:border-primary/30 text-on-surface-variant hover:text-primary transition-all">
-                                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                            </button>
-                                            <span class="tooltip-text">Edit</span>
-                                        </a>
+        <!-- Edit -->
+        <a href="/admin/editCategory/<%= cat._id %>" class="tooltip-wrap">
+            <button class="p-2.5 rounded-xl bg-surface-container-low border border-white/5 hover:bg-primary-dim/20 hover:border-primary/30 text-on-surface-variant hover:text-primary transition-all">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+            </button>
+            <span class="tooltip-text">Edit</span>
+        </a>
 
-                                        <!-- Delete -->
-                                        <div class="tooltip-wrap">
-                                            <button
-                                                onclick="confirmDelete('<%= cat._id %>', '<%= cat.categoryName %>')"
-                                                class="p-2.5 rounded-xl bg-surface-container-low border border-white/5 hover:bg-error/20 hover:border-error/30 text-on-surface-variant hover:text-error transition-all">
-                                                <span class="material-symbols-outlined text-[18px]">delete</span>
-                                            </button>
-                                            <span class="tooltip-text">Delete</span>
-                                        </div>
-
-                                    </div>
-                                </td>
+        <!-- Toggle Active / Inactive -->
+        
                             </tr>
                             <% }) %>
 
@@ -371,74 +353,48 @@
         </section>
     </main>
 
-    <script>
-        // ── Search ──────────────────────────────────────────────────────────
-        let searchTimer;
-        document.getElementById('searchInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') triggerSearch();
-        });
-        document.getElementById('searchInput').addEventListener('input', function() {
-            clearTimeout(searchTimer);
-            searchTimer = setTimeout(() => triggerSearch(), 500);
-        });
+   <script>
+    // ── Search ──────────────────────────────────────────────────────────
+    document.getElementById('searchInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') triggerSearch();
+    });
 
-        function triggerSearch() {
-            const params = new URLSearchParams(window.location.search);
-            params.set('search', document.getElementById('searchInput').value.trim());
-            params.set('status', document.getElementById('statusFilter').value);
-            params.set('sort', document.getElementById('sortFilter').value);
-            params.set('page', 1);
-            window.location.search = params.toString();
-        }
+    async function triggerSearch() {
+        const search = document.getElementById('searchInput').value.trim();
+        const status = document.getElementById('statusFilter').value;
+        const sort = document.getElementById('sortFilter').value;
 
-        // ── Filters ─────────────────────────────────────────────────────────
-        function applyFilters() {
-            const params = new URLSearchParams();
-            params.set('search', document.getElementById('searchInput').value.trim());
-            params.set('status', document.getElementById('statusFilter').value);
-            params.set('sort', document.getElementById('sortFilter').value);
-            params.set('page', 1);
-            window.location.search = params.toString();
-        }
+        const res = await fetch(`/admin/category?search=${search}&status=${status}&sort=${sort}`);
+        const html = await res.text();
 
-        function clearFilters() {
-            window.location.href = '/admin/category';
-        }
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
-        // ── Delete ──────────────────────────────────────────────────────────
-        function confirmDelete(id, categoryName) {
-            Swal.fire({
-                title: 'Delete category?',
-                html: `<span style="color:#a3aac4">This will permanently delete <strong style="color:#dee5ff">${categoryName}</strong>. This action cannot be undone.</span>`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete',
-                cancelButtonText: 'Cancel',
-                background: '#0f1930',
-                color: '#dee5ff',
-                confirmButtonColor: '#ff716c',
-                cancelButtonColor: '#40485d',
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const res = await fetch('/admin/category/' + id, { method: 'DELETE' });
-                        const json = await res.json();
-                        if (json.success) {
-                            const row = document.getElementById('row-' + id);
-                            row.style.transition = 'opacity 0.3s, transform 0.3s';
-                            row.style.opacity = '0';
-                            row.style.transform = 'translateX(20px)';
-                            setTimeout(() => row.remove(), 300);
-                            Swal.fire({ toast: true, icon: 'success', title: 'Category deleted', position: 'top-right', showConfirmButton: false, timer: 2000 });
-                        } else {
-                            Swal.fire({ toast: true, icon: 'error', title: json.message || 'Delete failed', position: 'top-right', showConfirmButton: false, timer: 2500 });
-                        }
-                    } catch {
-                        Swal.fire({ toast: true, icon: 'error', title: 'Network error', position: 'top-right', showConfirmButton: false, timer: 2500 });
-                    }
-                }
-            });
-        }
-    </script>
+        const newTable = doc.querySelector('tbody').innerHTML;
+        document.querySelector('tbody').innerHTML = newTable;
+    }
+
+    // ── Filters ─────────────────────────────────────────────────────────
+    function applyFilters() {
+        const params = new URLSearchParams();
+
+        const search = document.getElementById('searchInput').value.trim();
+        const status = document.getElementById('statusFilter').value;
+        const sort = document.getElementById('sortFilter').value;
+
+        if (search) params.set('search', search);
+        if (status) params.set('status', status);
+        if (sort) params.set('sort', sort);
+
+        params.set('page', 1);
+
+        window.location.search = params.toString();
+    }
+
+    function clearFilters() {
+        window.location.href = '/admin/category';
+    }
+
+</script>
 </body>
 </html>
