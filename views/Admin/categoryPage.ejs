@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
+
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -69,8 +69,6 @@
             -webkit-backdrop-filter: blur(24px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-
-        /* Tooltip */
         .tooltip-wrap { position: relative; }
         .tooltip-wrap .tooltip-text {
             visibility: hidden; opacity: 0;
@@ -84,12 +82,13 @@
         .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
-<body class="bg-background text-on-background relative">
+<body class="bg-background text-on-surface relative">
 
+    <!-- Background glows -->
     <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] pointer-events-none z-0"></div>
     <div class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-tertiary/10 blur-[120px] pointer-events-none z-0"></div>
 
-    <!-- Sidebar -->
+    <!-- ── Sidebar ───────────────────────────────────────────────────── -->
     <aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#091328]/90 backdrop-blur-xl border-r border-white/5 sidebar-scroll flex flex-col gap-2 py-8 z-50">
         <div class="px-8 mb-10">
             <h1 class="font-['Outfit'] text-3xl font-black text-white tracking-tight drop-shadow-md">Luxe Admin</h1>
@@ -118,107 +117,84 @@
                 <span class="material-symbols-outlined text-lg opacity-70">image</span><span>Banners</span>
             </a>
         </nav>
-      
     </aside>
 
-    <!-- Main Content -->
+    <!-- ── Main Content ──────────────────────────────────────────────── -->
     <main class="ml-64 min-h-screen pb-20 relative z-10">
 
-        <!-- Top Header -->
-        <header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 glass-panel flex justify-between items-center px-10 py-4 gap-4">
-            <div class="flex items-center gap-4 flex-1 min-w-0">
-                <h2 class="font-['Outfit'] text-2xl font-bold text-white tracking-wide flex-shrink-0">Categories</h2>
+        <!-- ── Top Header with Form ──────────────────────────────────── -->
+        <header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 glass-panel px-10 py-4">
+            <form method="GET" action="/admin/category" class="flex items-center justify-between gap-3 w-full">
 
-                <!-- Search Bar -->
-                <div class="flex items-center gap-2 flex-1 max-w-sm">
-                    <div class="relative flex-1 group">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <h2 class="font-['Outfit'] text-2xl font-bold text-white tracking-wide flex-shrink-0">Categories</h2>
+
+                    <!-- Search -->
+                    <div class="relative flex-1 max-w-sm group">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl transition-colors group-focus-within:text-primary">search</span>
                         <input
-                            id="searchInput"
-                            class="w-full bg-surface-container-low/50 border border-white/5 focus:bg-surface-container focus:border-primary/50 focus:ring-4 focus:ring-primary/10 text-sm py-2.5 pl-10 pr-4 text-white placeholder-on-surface-variant rounded-xl transition-all outline-none"
-                            placeholder="Search categories..."
+                            name="search"
                             type="text"
                             value="<%= search %>"
+                            placeholder="Search categories..."
+                            class="w-full bg-surface-container-low/50 border border-white/5 focus:bg-surface-container focus:border-primary/50 focus:ring-4 focus:ring-primary/10 text-sm py-2.5 pl-10 pr-4 text-white placeholder-on-surface-variant rounded-xl transition-all outline-none"
                         />
                     </div>
-                    <button onclick="triggerSearch()" class="bg-primary-dim hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md flex items-center gap-1.5 flex-shrink-0">
-                        <span class="material-symbols-outlined text-[16px]">search</span>
-                        Search
-                    </button>
                 </div>
-            </div>
 
-            <div class="flex items-center gap-3 flex-shrink-0">
+                <div class="flex items-center gap-3 flex-shrink-0">
 
-                <select id="statusFilter"
-                    class="bg-surface-container-low border border-white/10 text-on-surface-variant text-sm py-2.5 px-3 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer">
-                    <option value="" <%- status == "" ? "selected" : "" %>>All Status</option>
-                    <option value="true" <%- status == "true" ? "selected" : "" %>>Active</option>
-                    <option value="false" <%- status == "false" ? "selected" : "" %>>Inactive</option>
-                </select>
+                    <!-- Status Filter -->
+                    <select name="status"
+                        class="bg-surface-container-low border border-white/10 text-on-surface-variant text-sm py-2.5 px-3 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer">
+                        <option value="" <%- status === "" ? "selected" : "" %>>All Status</option>
+                        <option value="true" <%- status === "true" ? "selected" : "" %>>Active</option>
+                        <option value="false" <%- status === "false" ? "selected" : "" %>>Inactive</option>
+                    </select>
 
-                <select id="sortFilter"
-                    class="bg-surface-container-low border border-white/10 text-on-surface-variant text-sm py-2.5 px-3 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer">
-                    <option value="latest" <%- sort === "latest" ? "selected" : "" %>>Latest</option>
-                    <option value="oldest" <%- sort === "oldest" ? "selected" : "" %>>Oldest</option>
-                </select>
+                    <!-- Sort Filter -->
+                    <select name="sort"
+                        class="bg-surface-container-low border border-white/10 text-on-surface-variant text-sm py-2.5 px-3 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer">
+                        <option value="latest" <%- sort === "latest" ? "selected" : "" %>>Latest</option>
+                        <option value="oldest" <%- sort === "oldest" ? "selected" : "" %>>Oldest</option>
+                    </select>
 
-                <!-- Apply Filters -->
-                <button onclick="applyFilters()" class="bg-surface-container-high border border-white/10 hover:bg-surface-bright text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
-                    Apply
-                </button>
+                    <!-- Reset page to 1 on new filter -->
+                    <input type="hidden" name="page" value="1" />
 
-                <!-- Clear Filters -->
-                <button onclick="clearFilters()" class="bg-error/10 hover:bg-error/20 border border-error/30 text-error px-4 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 transition-all">
-                    <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-                    <span class="text-sm">Clear</span>
-                </button>
+                    <!-- Apply / Submit -->
+                    <button type="submit"
+                        class="bg-surface-container-high border border-white/10 hover:bg-surface-bright text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
+                        Apply
+                    </button>
 
-                <!-- Add Category -->
-                <a href="/admin/addCategory" class="primary-gradient text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary-dim/30 whitespace-nowrap">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    <span class="text-sm tracking-wide">Add Category</span>
-                </a>
-            </div>
+                    <!-- Clear Filters -->
+                    <a href="/admin/category"
+                        class="bg-error/10 hover:bg-error/20 border border-error/30 text-error px-4 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 transition-all">
+                        <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                        <span class="text-sm">Clear</span>
+                    </a>
+
+                    <!-- Add Category -->
+                    <a href="/admin/addCategory"
+                        class="primary-gradient text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary-dim/30 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                        <span class="text-sm tracking-wide">Add Category</span>
+                    </a>
+
+                </div>
+            </form>
         </header>
 
-        <!-- Content Body -->
+        <!-- ── Content Body ──────────────────────────────────────────── -->
         <section class="mt-28 px-10">
 
-            <% if(error) { %>
+            <% if (error) { %>
             <script>
-                Swal.fire({ toast: true, icon: 'error', title: '<%=error%>', position: 'top-right', showConfirmButton: false, timer: 3000 });
+                Swal.fire({ toast: true, icon: 'error', title: '<%= error %>', position: 'top-right', showConfirmButton: false, timer: 3000 });
             </script>
             <% } %>
-
-            <!-- Active Filters Banner -->
-            <!-- <% if (search || status || sort !== 'latest') { %>
-            
-            <div class="mb-4 flex items-center gap-3 flex-wrap">
-                <span class="text-xs text-on-surface-variant font-semibold uppercase tracking-widest">Active filters:</span>
-                <% if (search) { %>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-                    <span class="material-symbols-outlined text-[13px]">search</span>
-                    "<%= search %>"
-                </span>
-                <% } %>
-                <% if (status === 'true') { %>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-                    Active only
-                </span>
-                <% } else if (status === 'false') { %>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-outline-variant/20 border border-outline-variant/30 text-on-surface-variant text-xs font-semibold">
-                    Inactive only
-                </span>
-                <% } %>
-                <% if (sort === 'oldest') { %>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-bright border border-white/10 text-on-surface-variant text-xs font-semibold">
-                    Oldest first
-                </span>
-                <% } %>
-            </div>
-            <% } %> -->
 
             <div class="bg-surface-container-high/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
                 <div class="overflow-x-auto">
@@ -232,6 +208,21 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
+
+                            <% if (data.length === 0) { %>
+                            <tr>
+                                <td colspan="4" class="px-8 py-16 text-center">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <span class="material-symbols-outlined text-5xl text-on-surface-variant/30">category</span>
+                                        <p class="text-on-surface-variant font-semibold">No categories found</p>
+                                        <% if (search || status) { %>
+                                        <a href="/admin/category" class="text-primary text-sm hover:underline">Clear filters</a>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% } %>
+
                             <% data.forEach(cat => { %>
                             <tr class="hover:bg-surface-bright/40 transition-colors group" id="row-<%= cat._id %>">
 
@@ -268,48 +259,44 @@
                                 </td>
 
                                 <!-- Actions -->
-                                <!-- Actions -->
-<td class="px-8 py-5">
-    <div class="flex items-center justify-end gap-2">
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center justify-end gap-2">
 
-        <!-- Edit -->
-        <a href="/admin/editCategory/<%= cat._id %>" class="tooltip-wrap">
-            <button class="p-2.5 rounded-xl bg-surface-container-low border border-white/5 hover:bg-primary-dim/20 hover:border-primary/30 text-on-surface-variant hover:text-primary transition-all">
-                <span class="material-symbols-outlined text-[18px]">edit</span>
-            </button>
-            <span class="tooltip-text">Edit</span>
-        </a>
+                                        <!-- Edit -->
+                                        <a href="/admin/editCategory/<%= cat._id %>" class="tooltip-wrap">
+                                            <button class="p-2.5 rounded-xl bg-surface-container-low border border-white/5 hover:bg-primary-dim/20 hover:border-primary/30 text-on-surface-variant hover:text-primary transition-all">
+                                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                                            </button>
+                                            <span class="tooltip-text">Edit</span>
+                                        </a>
 
-        <!-- Toggle Active / Inactive -->
-        
+                                       
+                                        
+
+                                    </div>
+                                </td>
+
                             </tr>
                             <% }) %>
 
-                            <% if (data.length === 0) { %>
-                            <tr>
-                                <td colspan="4" class="px-8 py-16 text-center">
-                                    <div class="flex flex-col items-center gap-3">
-                                        <span class="material-symbols-outlined text-5xl text-on-surface-variant/30">category</span>
-                                        <p class="text-on-surface-variant font-semibold">No categories found</p>
-                                        <% if (search || status) { %>
-                                        <button onclick="clearFilters()" class="text-primary text-sm hover:underline">Clear filters</button>
-                                        <% } %>
-                                    </div>
-                                </td>
-                            </tr>
-                            <% } %>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Pagination -->
+                <!-- ── Pagination ─────────────────────────────────────── -->
                 <div class="px-8 py-5 bg-surface-container-low/30 border-t border-white/5 flex items-center justify-between">
                     <p class="text-on-surface-variant text-xs font-semibold tracking-wide">
-                        Showing <span class="text-white font-bold"><%= totalUser === 0 ? 0 : (currentPage - 1) * 5 + 1 %></span>
-                        – <span class="text-white font-bold"><%= Math.min(currentPage * 5, totalUser) %></span>
-                        of <span class="text-white font-bold"><%= totalUser %></span> categories
+                        Showing
+                        <span class="text-white font-bold"><%= totalCount === 0 ? 0 : (currentPage - 1) * 4 + 1 %></span>
+                        –
+                        <span class="text-white font-bold"><%= Math.min(currentPage * 4, totalCount) %></span>
+                        of
+                        <span class="text-white font-bold"><%= totalCount %></span>
+                        categories
                     </p>
+
                     <div class="flex items-center gap-1.5">
+
                         <!-- Prev -->
                         <% if (currentPage > 1) { %>
                         <a href="?page=<%= currentPage - 1 %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
@@ -318,7 +305,7 @@
                             </button>
                         </a>
                         <% } else { %>
-                        <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container text-on-surface-variant opacity-30 cursor-not-allowed" disabled>
+                        <button disabled class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container text-on-surface-variant opacity-30 cursor-not-allowed">
                             <span class="material-symbols-outlined text-sm">chevron_left</span>
                         </button>
                         <% } %>
@@ -328,7 +315,9 @@
                             <% for (let i = 1; i <= totalPage; i++) { %>
                             <a href="?page=<%= i %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
                                 <button class="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-xs transition-all
-                                    <%= i === currentPage ? 'bg-primary-dim text-white shadow-lg shadow-primary-dim/20' : 'border border-transparent hover:border-white/10 hover:bg-surface-container text-on-surface-variant hover:text-white' %>">
+                                    <%= i === currentPage
+                                        ? 'bg-primary-dim text-white shadow-lg shadow-primary-dim/20'
+                                        : 'border border-transparent hover:border-white/10 hover:bg-surface-container text-on-surface-variant hover:text-white' %>">
                                     <%= i %>
                                 </button>
                             </a>
@@ -343,58 +332,16 @@
                             </button>
                         </a>
                         <% } else { %>
-                        <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container text-on-surface-variant opacity-30 cursor-not-allowed" disabled>
+                        <button disabled class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container text-on-surface-variant opacity-30 cursor-not-allowed">
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </button>
                         <% } %>
+
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-   <script>
-    // ── Search ──────────────────────────────────────────────────────────
-    document.getElementById('searchInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') triggerSearch();
-    });
-
-    async function triggerSearch() {
-        const search = document.getElementById('searchInput').value.trim();
-        const status = document.getElementById('statusFilter').value;
-        const sort = document.getElementById('sortFilter').value;
-
-        const res = await fetch(`/admin/category?search=${search}&status=${status}&sort=${sort}`);
-        const html = await res.text();
-
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-
-        const newTable = doc.querySelector('tbody').innerHTML;
-        document.querySelector('tbody').innerHTML = newTable;
-    }
-
-    // ── Filters ─────────────────────────────────────────────────────────
-    function applyFilters() {
-        const params = new URLSearchParams();
-
-        const search = document.getElementById('searchInput').value.trim();
-        const status = document.getElementById('statusFilter').value;
-        const sort = document.getElementById('sortFilter').value;
-
-        if (search) params.set('search', search);
-        if (status) params.set('status', status);
-        if (sort) params.set('sort', sort);
-
-        params.set('page', 1);
-
-        window.location.search = params.toString();
-    }
-
-    function clearFilters() {
-        window.location.href = '/admin/category';
-    }
-
-</script>
 </body>
 </html>

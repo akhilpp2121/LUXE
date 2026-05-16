@@ -10,56 +10,64 @@ import {
   productFindById,
   updatedProducts,
   upsertVariant, 
-  updateVariantStatuses       
+  updateVariantStatuses    ,
+  generateUniqueSKU   
 } from "../service/productsService.js";
 import { categoryDataLoad } from "../service/categoryService.js";
 import Variant from "../model/variantModel.js";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GET /admin/products
-// ─────────────────────────────────────────────────────────────────────────────
+
+
 export const adminProductPageLoad = async (req, res) => {
-  let filter = {};
-  let sortOption = { createdAt: -1 };
+  const searchQuery = req.query.search?.trim() || "";
+  const sort        = req.query.sort || "latest";
+  const sortOption  = sort === "oldest" ? { createdAt: 1 } : { createdAt: -1 };
+
+  // Build filter
+  const filter = {};
+  if (searchQuery) {
+    filter.$or = [{ name: { $regex: searchQuery, $options: "i" } }];
+  }
 
   const categoryResult = await categoryDataLoad({ isActive: true });
   const categories = categoryResult.success ? categoryResult.data : [];
 
-  if (req.query.search && req.query.search.trim() !== "") {
-    filter.$or = [{ name: { $regex: req.query.search, $options: "i" } }];
-  }
-  if (req.query.sort === "oldest") sortOption = { createdAt: 1 };
+  const products = await productModelLoad(filter, sortOption, req.query.page);
 
-  let products = await productModelLoad(filter, sortOption, req.query.page);
+ 
+
+  const commonData = {
+    categories,
+    sort,
+    searchQuery,
+    activePage: "products",
+  };
 
   if (!products.success) {
     return res.render("Admin/productPage", {
+      ...commonData,
       error: "ERROR WHILE LOADING",
       data: [],
-      categories: [],
-      sort: req.query.sort || "latest",
       currentPage: 1,
       totalUser: 0,
       totalPage: 1,
-      searchQuery: req.query.search || "",
-      activePage: "products",
     });
   }
 
   return res.render("Admin/productPage", {
+    ...commonData,
     error: "",
     data: products.data,
-    categories,
-    sort: req.query.sort || "latest",
     currentPage: products.currentPage,
     totalUser: products.totalUser,
     totalPage: products.totalPages,
-    searchQuery: req.query.search || "",
-    activePage: "products",
   });
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+
+
+
+// // ─────────────────────────────────────────────────────────────────────────────
 // GET /admin/product-add
 // ─────────────────────────────────────────────────────────────────────────────
 export const addProductPageLoad = async (req, res) => {
@@ -93,15 +101,16 @@ export const editProductPageLoad = async (req, res) => {
   });
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /admin/product-add
-// ─────────────────────────────────────────────────────────────────────────────
+
+
+
 export const adminProductsAdd = async (req, res) => {
   try {
     let { productName, category, description } = req.body;
-    const isActive= true;
+    const isActive = true;
     const variants = {};
 
+    // ── Parse body ──
     for (let key in req.body) {
       const match = key.match(/^variants\[(\d+)\]\.(.+)$/);
       if (match) {
@@ -112,6 +121,7 @@ export const adminProductsAdd = async (req, res) => {
       }
     }
 
+    // ── Parse files ──
     if (req.files && req.files.length > 0) {
       req.files.forEach((file) => {
         const match = file.fieldname.match(/^variants\[(\d+)\]\.images$/);
@@ -126,39 +136,62 @@ export const adminProductsAdd = async (req, res) => {
       });
     }
 
-    const finalVariants = Object.values(variants).map((v) => ({
-      color: v.color?.trim(),
-      size: v.size?.trim(),
-      sku: v.sku?.trim(),
-      stock: Number(v.stock),
-      price: Number(v.price),
-      discount: v.discount ? Number(v.discount) : 0,
-      images: v.images || [],
-      isActive:true
-    }));
-
+    // ── VALIDATE FIRST (before any async SKU generation) ──
     if (!productName || productName.trim().length < 3)
       return res.status(400).json({ success: false, message: "Product name must be at least 3 characters" });
     if (!category || category === "select category")
       return res.status(400).json({ success: false, message: "Please select a valid category" });
-    if (!finalVariants.length)
+
+    const rawVariants = Object.values(variants);
+    if (!rawVariants.length)
       return res.status(400).json({ success: false, message: "At least one variant is required" });
 
-    for (let v of finalVariants) {
-      if (!v.color || !v.size || !v.sku)
-        return res.status(400).json({ success: false, message: "Color, Size and SKU are required" });
-      if (isNaN(v.price) || v.price <= 0)
+    
+    for (let v of rawVariants) {
+      if (!v.color?.trim() || !v.size?.trim())
+        return res.status(400).json({ success: false, message: "Color and Size are required for every variant" });
+      if (isNaN(Number(v.price)) || Number(v.price) <= 0)
         return res.status(400).json({ success: false, message: "Invalid price" });
-      if (isNaN(v.stock) || v.stock < 0)
+      if (isNaN(Number(v.stock)) || Number(v.stock) < 0)
         return res.status(400).json({ success: false, message: "Invalid stock value" });
-      if (v.images.length < 3)
-        return res.status(400).json({ success: false, message: "Each variant must have at least 3 images" });
+      if (!v.images || v.images.length < 3)
+        return res.status(400).json({ success: false, message: "Each variant needs at least 3 images" });
     }
 
-    const result = await adminProductsAddLogic(productName.trim(), category, description?.trim(), isActive, finalVariants);
+    const addKeys = rawVariants.map(v => `${v.color.trim().toLowerCase()}|${v.size.trim().toLowerCase()}`);
+    if (addKeys.length !== new Set(addKeys).size)
+      return res.status(400).json({ success: false, message: "Two or more variants have the same color and size" });
+
+
+    
+    const finalVariants = await Promise.all(
+      rawVariants.map(async (v, i) => {
+        const sku = await generateUniqueSKU(
+          productName.trim(),
+          v.color,
+          v.size,
+          i + 1
+        );
+        return {
+          color:    v.color.trim(),
+          size:     v.size.trim(),
+          sku,
+          stock:    Number(v.stock),
+          price:    Number(v.price),
+          discount: v.discount ? Number(v.discount) : 0,
+          images:   v.images,
+          isActive: true,
+        };
+      })
+    );
+
+    const result = await adminProductsAddLogic(
+      productName.trim(), category, description?.trim(), isActive, finalVariants
+    );
     if (!result.success) return res.status(400).json(result);
 
     return res.status(200).json({ success: true, message: "Product added successfully", redirect: "/admin/products" });
+
   } catch (error) {
     console.error("Add Product Error:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
@@ -199,8 +232,11 @@ export const adminProductsEdit = async (req, res) => {
       }
     }
     const variantsArr = Object.values(variantsMap);
+     const editKeys = variantsArr.map(v => `${v.color?.trim().toLowerCase()}|${v.size?.trim().toLowerCase()}`);
+    if (editKeys.length !== new Set(editKeys).size)
+      return res.status(400).json({ success: false, message: "Two or more variants have the same color and size" });
 
-    // ── Group uploaded images by variant index ────────────────────────────────
+
     const imagesByVariant = {};
     if (req.files && req.files.length > 0) {
       req.files.forEach((file) => {
@@ -238,14 +274,13 @@ export const adminProductsEdit = async (req, res) => {
         price:    Number(v.price),
         discount: v.discount ? Number(v.discount) : 0,
         SKU:      v.sku ? v.sku.trim() : "",
-        isActive:v.isActive==="true"
+        
       };
 
       
 let existingImages = req.body[`variants[${i}].existingImages`];
 if (!existingImages) existingImages = [];
 else if (!Array.isArray(existingImages)) existingImages = [existingImages];
-// Filter out empty strings (slots that were replaced by a new upload)
 existingImages = existingImages.filter(p => p && p.trim() !== '');
 
 const newImages = imagesByVariant[i] || [];

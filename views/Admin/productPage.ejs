@@ -28,191 +28,101 @@
   ::-webkit-scrollbar-thumb { background: #1f2b49; border-radius: 10px; }
   .glass-effect { background: rgba(25, 37, 64, 0.7); backdrop-filter: blur(20px); }
   .luxe-gradient { background: linear-gradient(135deg, #316bf3 0%, #90abff 100%); }
-  #searchWrapper:focus-within .search-btn { border-color: #90abff; }
   .search-btn { transition: all 0.15s ease; }
   .search-btn:active { transform: scale(0.93); }
- #resetBtn {
-    transition: all 0.15s ease;
-  }
   .logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 18px;
-  border-radius: 8px;
-  border: none;
-  background: linear-gradient(135deg, #ff4d4d, #cc0000);
-  color: #fff;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
-}
-
-.logout-btn:hover {
-  background: linear-gradient(135deg, #ff1a1a, #990000);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 0, 0, 0.3);
-}
-
-.logout-btn:active {
-  transform: scale(0.96);
-}
-
-.logout-icon {
-  width: 18px;
-  height: 18px;
-}
+    display: flex; align-items: center; gap: 10px; padding: 10px 18px;
+    border-radius: 8px; border: none;
+    background: linear-gradient(135deg, #ff4d4d, #cc0000);
+    color: #fff; font-weight: 600; font-size: 14px; cursor: pointer;
+    transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255,0,0,0.2);
+  }
+  .logout-btn:hover {
+    background: linear-gradient(135deg, #ff1a1a, #990000);
+    transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,0,0,0.3);
+  }
+  .logout-btn:active { transform: scale(0.96); }
 </style>
 </head>
 <body class="bg-background text-on-background font-body antialiased min-h-screen">
 
-<!-- SideNavBar -->
-<!-- <aside class="h-screen w-64 fixed left-0 top-0 bg-[#091328] dark:bg-slate-950 flex flex-col py-8 px-4 z-50">
-
-  <div class="mb-10 px-4">
-    <h1 class="font-['Manrope'] font-extrabold text-xl tracking-tighter text-white">LUXE Admin</h1>
-    <p class="text-on-surface-variant text-[10px] uppercase tracking-widest mt-1">Premium Command</p>
-  </div>
-  <nav class="flex-1 space-y-1">
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">dashboard</span>Dashboard
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">shopping_cart</span>Orders
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white border-l-4 border-[#90abff] bg-[#1f2b49] font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">inventory_2</span>Products
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">group</span>Users
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">monitoring</span>Analytics
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">confirmation_number</span>Coupons
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">category</span>Categories
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">local_offer</span>Offers
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight" href="#">
-      <span class="material-symbols-outlined text-lg">ad_units</span>Banners
-    </a>
-    
-    <div class="logout-section">
-    <form action="/admin/logout" method="POST">
-      <button type="submit" class="logout-btn">
-        <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-          <path d="M16 17l5-5-5-5"/>
-          <path d="M21 12H9"/>
-        </svg>
-        <span>Logout</span>
-      </button>
-    </form>
-  </div>
-  </nav>
-  <div class="mt-auto px-4 pt-8 border-t border-outline-variant/10">
-    <div class="flex items-center gap-3">
-      
-    </div>
-  </div>
-</aside> -->
-
-
-
-
+<!-- Sidebar -->
 <aside class="h-screen w-64 fixed left-0 top-0 bg-[#091328] dark:bg-slate-950 flex flex-col py-8 px-4 z-50">
 
-  <!-- LOGO -->
   <div class="mb-10 px-4">
     <h1 class="font-['Manrope'] font-extrabold text-xl tracking-tighter text-white">LUXE Admin</h1>
     <p class="text-on-surface-variant text-[10px] uppercase tracking-widest mt-1">Premium Command</p>
   </div>
 
-  <!-- MENU -->
   <nav class="flex-1 space-y-1">
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm" href="/admin/dashboard">
       <span class="material-symbols-outlined text-lg">dashboard</span>Dashboard
     </a>
-
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm" href="#">
       <span class="material-symbols-outlined text-lg">shopping_cart</span>Orders
     </a>
-
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white border-l-4 border-[#90abff] bg-[#1f2b49] font-bold text-sm" href="#">
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white border-l-4 border-[#90abff] bg-[#1f2b49] font-bold text-sm" href="/admin/products">
       <span class="material-symbols-outlined text-lg">inventory_2</span>Products
     </a>
-
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm" href="/admin/users">
       <span class="material-symbols-outlined text-lg">group</span>Users
     </a>
-
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm" href="#">
       <span class="material-symbols-outlined text-lg">monitoring</span>Analytics
     </a>
-
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm" href="#">
       <span class="material-symbols-outlined text-lg">confirmation_number</span>Coupons
     </a>
-
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm" href="/admin/category">
       <span class="material-symbols-outlined text-lg">category</span>Categories
     </a>
-
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm" href="#">
       <span class="material-symbols-outlined text-lg">local_offer</span>Offers
     </a>
-
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm" href="#">
       <span class="material-symbols-outlined text-lg">ad_units</span>Banners
     </a>
   </nav>
 
-  <!-- LOGOUT (NOW AT BOTTOM ) -->
   <div class="mt-auto px-4 pt-6 border-t border-[#1f2a44]">
     <form action="/admin/logout" method="POST">
-  <button type="submit"
-    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight">
-    
-    <span class="material-symbols-outlined text-lg">logout</span>
-    Logout
-  </button>
-</form>
+      <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight">
+        <span class="material-symbols-outlined text-lg">logout</span>
+        Logout
+      </button>
+    </form>
   </div>
 
 </aside>
-<!-- Main Content Wrapper -->
+
+<!-- Main Content -->
 <main class="ml-64 min-h-screen relative">
 
-  <!-- TopNavBar -->
+  <!-- Top Nav -->
   <header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-[#060e20]/70 backdrop-blur-xl shadow-2xl shadow-blue-900/10 flex items-center justify-between px-8 z-40">
     <div class="flex items-center gap-6">
       <h2 class="font-['Manrope'] font-semibold text-lg text-[#90abff]">Products</h2>
 
-      <!-- Search Bar -->
-      <div id="searchWrapper" class="flex items-center gap-0">
+      <!-- Search Form — submits to BE, zero JS involved -->
+      <form action="/admin/products" method="GET" class="flex items-center gap-0">
+
+        <!-- Preserve sort across searches -->
+        <input type="hidden" name="sort" value="<%= sort || 'latest' %>" />
+        <input type="hidden" name="page" value="1" />
+
         <div class="relative flex items-center">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm pointer-events-none">search</span>
           <input
-            id="searchInput"
+            name="search"
             class="w-80 bg-surface-container-lowest border-b-2 border-transparent focus:border-primary py-2 pl-10 pr-3 text-sm text-on-surface transition-all outline-none rounded-l-sm"
             placeholder="Search product portfolio..."
             type="text"
-            oninput="onSearchInput(this.value)"
-            onkeydown="onSearchKeydown(event)"
             value="<%= searchQuery || '' %>"
           />
         </div>
+
         <button
-          id="searchBtn"
-          onclick="triggerSearch()"
-          title="Search"
+          type="submit"
           class="search-btn flex items-center justify-center gap-1.5 h-[38px] px-4 bg-primary/15 border-b-2 border-transparent hover:bg-primary/25 hover:border-primary text-primary font-['Inter'] font-bold text-xs transition-colors rounded-r-sm"
           style="border-left: 1px solid rgba(64,72,93,0.4);"
         >
@@ -220,17 +130,17 @@
           Search
         </button>
 
-        <!-- Reset Button -->
-        <button
-          id="resetBtn"
-          onclick="triggerReset()"
-          title="Clear search"
-          class="search-btn flex items-center justify-center gap-1.5 h-[38px] px-3 ml-2 bg-error/10 border border-error/20 hover:bg-error/20 hover:border-error/40 text-error font-['Inter'] font-bold text-xs rounded-sm"
-        >
+      </form>
+
+      <!-- Reset — simple link, clears search, keeps sort -->
+      <% if (searchQuery) { %>
+        <a href="/admin/products?sort=<%= sort || 'latest' %>&page=1"
+          class="search-btn flex items-center justify-center gap-1.5 h-[38px] px-3 bg-error/10 border border-error/20 hover:bg-error/20 hover:border-error/40 text-error font-['Inter'] font-bold text-xs rounded-sm">
           <span class="material-symbols-outlined text-sm">close</span>
           Reset
-        </button>
-      </div>
+        </a>
+      <% } %>
+
     </div>
 
     <div class="flex items-center gap-4">
@@ -255,26 +165,28 @@
 
     <!-- Filter Controls -->
     <div class="flex items-center justify-between mb-8">
-      <div class="flex items-center gap-4">
-        <form action="/admin/products" method="GET" class="flex gap-3">
-          <div class="bg-surface-container-high rounded-lg px-4 py-2 flex items-center gap-3 border border-outline-variant/5">
-            <span class="material-symbols-outlined text-on-surface-variant text-sm">sort</span>
-            <select
-              name="sort"
-              onchange="this.form.submit()"
-              class="text-xs font-bold text-on-surface bg-transparent outline-none cursor-pointer"
-            >
-              <option value="latest" class="bg-surface-container-high" <%= sort === 'latest' ? 'selected' : '' %>>🕐 Latest</option>
-              <option value="oldest" class="bg-surface-container-high" <%= sort === 'oldest' ? 'selected' : '' %>>⏰ Oldest</option>
-            </select>
-            <span class="material-symbols-outlined text-xs text-on-surface-variant">expand_more</span>
-          </div>
-        </form>
-      </div>
+
+      <!-- Sort Form — preserves search across sort changes -->
+      <form action="/admin/products" method="GET" class="flex gap-3">
+        <input type="hidden" name="search" value="<%= searchQuery || '' %>" />
+        <input type="hidden" name="page" value="1" />
+
+        <div class="bg-surface-container-high rounded-lg px-4 py-2 flex items-center gap-3 border border-outline-variant/5">
+          <span class="material-symbols-outlined text-on-surface-variant text-sm">sort</span>
+          <select
+            name="sort"
+            onchange="this.form.submit()"
+            class="text-xs font-bold text-on-surface bg-transparent outline-none cursor-pointer"
+          >
+            <option value="latest" class="bg-surface-container-high" <%= sort === 'latest' ? 'selected' : '' %>>🕐 Latest</option>
+            <option value="oldest" class="bg-surface-container-high" <%= sort === 'oldest' ? 'selected' : '' %>>⏰ Oldest</option>
+          </select>
+          <span class="material-symbols-outlined text-xs text-on-surface-variant">expand_more</span>
+        </div>
+      </form>
+
       <div class="text-on-surface-variant text-xs font-medium">
-        Total
-        <span class="text-on-surface font-bold"><%= totalUser %></span>
-        products
+        Total <span class="text-on-surface font-bold"><%= totalUser %></span> products
       </div>
     </div>
 
@@ -285,14 +197,19 @@
           <tr class="bg-surface-container-low/50">
             <th class="px-8 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Product</th>
             <th class="px-8 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Category</th>
+            <th class="px-8 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Status</th>
             <th class="px-8 py-5 text-right text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-outline-variant/10">
 
           <% if (data && data.length > 0) { %>
-            <% data.forEach(product => { %>
+            <% data.forEach(function(product) { %>
+
               <tr class="group hover:bg-surface-bright/50 transition-colors">
+                
+
+                <!-- Product Name + Image -->
                 <td class="px-8 py-5">
                   <div class="flex items-center gap-4">
                     <% if (product.images && product.images.length > 0) { %>
@@ -308,20 +225,41 @@
                     <% } %>
                     <div>
                       <p class="text-sm font-bold text-white mb-0.5"><%= product.name %></p>
-                      <p class="text-[10px] text-on-surface-variant">
-                        <%= product.isListed ? 'Active product' : 'Unlisted product' %>
-                      </p>
-                      <p class="text-[10px] text-on-surface-variant">
-                        SKU: <%= product.variants && product.variants.length > 0 && product.variants[0].SKU ? product.variants[0].SKU : '—' %>
-</p>
                     </div>
                   </div>
                 </td>
+
+                <!-- Category -->
                 <td class="px-8 py-5">
                   <span class="text-[10px] font-bold text-primary uppercase tracking-widest px-2.5 py-1 bg-primary/10 rounded">
-                  <%= product.categoryId ? product.categoryId.categoryName : 'No Category' %>
+                    <%= product.categoryId ? product.categoryId.categoryName : 'No Category' %>
                   </span>
                 </td>
+
+         <!-- Status -->
+<td class="px-8 py-5">
+  <%
+    const allVariantsInactive = !product.variants || 
+      product.variants.length === 0 || 
+      product.variants.every(function(v) { return v.isActive === false; });
+
+    const isEffectivelyActive = product.isActive === true && !allVariantsInactive;
+  %>
+
+  <% if (isEffectivelyActive) { %>
+    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+      Active
+    </span>
+  <% } else { %>
+    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-error/10 text-error">
+      <span class="w-1.5 h-1.5 rounded-full bg-error inline-block"></span>
+      Inactive
+    </span>
+  <% } %>
+
+</td>
+                <!-- Actions -->
                 <td class="px-8 py-5 text-right">
                   <div class="flex items-center justify-end gap-3">
                     <a href="/admin/editProducts/<%= product._id %>">
@@ -331,16 +269,21 @@
                     </a>
                   </div>
                 </td>
+
               </tr>
             <% }) %>
           <% } else { %>
             <tr>
-              <td colspan="3" class="px-8 py-16 text-center">
+              <td colspan="4" class="px-8 py-16 text-center">
                 <div class="flex flex-col items-center gap-3">
                   <span class="material-symbols-outlined text-4xl text-on-surface-variant">inventory_2</span>
                   <p class="text-sm font-bold text-on-surface-variant">No products found</p>
                   <% if (searchQuery) { %>
                     <p class="text-xs text-on-surface-variant/60">No results for "<%= searchQuery %>"</p>
+                    <a href="/admin/products?sort=<%= sort || 'latest' %>&page=1"
+                      class="mt-2 text-xs font-bold text-primary hover:underline">
+                      Clear search
+                    </a>
                   <% } %>
                 </div>
               </td>
@@ -350,103 +293,56 @@
         </tbody>
       </table>
 
-      <!-- Pagination -->
-      <div class="px-8 py-6 bg-surface-container-low/30 flex items-center justify-between">
+      <!-- Pagination — pure BE links, no JS -->
+      <% if (totalPage > 1) { %>
+        <div class="px-8 py-6 bg-surface-container-low/30 flex items-center justify-between">
 
-        <% if (currentPage > 1) { %>
-          <a href="/admin/products?page=<%= currentPage - 1 %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
-            <button class="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
-              <span class="material-symbols-outlined text-sm">chevron_left</span>Previous
-            </button>
-          </a>
-        <% } else { %>
-          <button class="px-4 py-2 text-xs font-bold text-on-surface-variant/30 flex items-center gap-2 cursor-not-allowed">
-            <span class="material-symbols-outlined text-sm">chevron_left</span>Previous
-          </button>
-        <% } %>
-
-        <div class="flex items-center gap-2">
-          <% for (let i = 1; i <= totalPage; i++) { %>
-            <a href="/admin/products?page=<%= i %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
-              <button class="w-8 h-8 rounded-lg text-xs font-bold <%= currentPage === i ? 'luxe-gradient text-white' : 'hover:bg-surface-bright text-on-surface-variant' %>">
-                <%= i %>
+          <!-- Previous -->
+          <% if (currentPage > 1) { %>
+            <a href="/admin/products?page=<%= currentPage - 1 %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
+              <button class="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">chevron_left</span>Previous
               </button>
             </a>
+          <% } else { %>
+            <button disabled class="px-4 py-2 text-xs font-bold text-on-surface-variant/30 flex items-center gap-2 cursor-not-allowed">
+              <span class="material-symbols-outlined text-sm">chevron_left</span>Previous
+            </button>
           <% } %>
-        </div>
 
-        <% if (currentPage < totalPage) { %>
-          <a href="/admin/products?page=<%= currentPage + 1 %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
-            <button class="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
+          <!-- Page Numbers -->
+          <div class="flex items-center gap-2">
+            <% for (let i = 1; i <= totalPage; i++) { %>
+              <a href="/admin/products?page=<%= i %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
+                <button class="w-8 h-8 rounded-lg text-xs font-bold <%= currentPage === i ? 'luxe-gradient text-white' : 'hover:bg-surface-bright text-on-surface-variant' %>">
+                  <%= i %>
+                </button>
+              </a>
+            <% } %>
+          </div>
+
+          <!-- Next -->
+          <% if (currentPage < totalPage) { %>
+            <a href="/admin/products?page=<%= currentPage + 1 %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
+              <button class="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
+                Next<span class="material-symbols-outlined text-sm">chevron_right</span>
+              </button>
+            </a>
+          <% } else { %>
+            <button disabled class="px-4 py-2 text-xs font-bold text-on-surface-variant/30 flex items-center gap-2 cursor-not-allowed">
               Next<span class="material-symbols-outlined text-sm">chevron_right</span>
             </button>
-          </a>
-        <% } else { %>
-          <button class="px-4 py-2 text-xs font-bold text-on-surface-variant/30 flex items-center gap-2 cursor-not-allowed">
-            Next<span class="material-symbols-outlined text-sm">chevron_right</span>
-          </button>
-        <% } %>
+          <% } %>
 
-      </div>
+        </div>
+      <% } %>
+
     </div>
-  </div>
-
-  <!-- Floating Toast -->
-  
-    
   </div>
 
 </main>
 
-<script>
-  const input = document.getElementById('searchInput');
-  const resetBtn = document.getElementById('resetBtn');
+<!-- NO <script> block — everything is server-driven -->
 
-  function updateResetBtn() {
-    if (input.value.trim().length > 0) {
-      resetBtn.classList.add('visible');
-    } else {
-      resetBtn.classList.remove('visible');
-    }
-  }
-
-  function onSearchInput(value) {
-    updateResetBtn();
-  }
-
-  function onSearchKeydown(event) {
-    if (event.key === 'Enter') triggerSearch();
-    if (event.key === 'Escape') triggerReset();
-  }
-
-  function triggerSearch() {
-    const value = input.value.trim();
-    const params = new URLSearchParams(window.location.search);
-    if (value) {
-      params.set('search', value);
-    } else {
-      params.delete('search');
-    }
-    params.set('page', 1);
-    window.location.search = params.toString();
-  }
-
-  function triggerReset() {
-    input.value = '';
-    input.focus();
-    updateResetBtn();
-
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('search')) {
-      params.delete('search');
-      params.set('page', 1);
-      window.location.search = params.toString();
-    }
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    updateResetBtn();
-  });
-</script>
 </body>
 </html>

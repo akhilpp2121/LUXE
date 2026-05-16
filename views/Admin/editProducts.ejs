@@ -1280,68 +1280,81 @@
     return ok;
   }
 
-  // ─────────────────────────────────────────────
-  //  SUBMIT
-  // ─────────────────────────────────────────────
   document.getElementById('productForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var valid = Object.keys(fields).every(function (f) { return validate(f); });
-    if (!validateVariants()) valid = false;
+  e.preventDefault();
 
-    if (!valid) {
-      Swal.fire({
-        toast: true, icon: 'error',
-        title: 'Please fix the validation errors',
-        position: 'top-right', showConfirmButton: false, timer: 3000,
-        background: '#0f1930', color: '#dee5ff',
-      });
-      return;
-    }
+  var form = this; // ← capture before any await
 
-    var confirm = await Swal.fire({
-      title: 'Save Changes?',
-      text: 'This will update the product details permanently.',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Save',
-      cancelButtonText: 'Review Again',
+  var valid = Object.keys(fields).every(function (f) { return validate(f); });
+  if (!validateVariants()) valid = false;
+
+  if (!valid) {
+    Swal.fire({
+      toast: true, icon: 'error',
+      title: 'Please fix the validation errors',
+      position: 'top-right', showConfirmButton: false, timer: 3000,
       background: '#0f1930', color: '#dee5ff',
     });
+    return;
+  }
 
-    if (!confirm.isConfirmed) return;
+  var confirmed = await Swal.fire({
+    title: 'Save Changes?',
+    text: 'This will update the product details permanently.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Save',
+    cancelButtonText: 'Review Again',
+    background: '#0f1930', color: '#dee5ff',
+  });
 
-    document.getElementById('loadingOverlay').classList.add('active');
+  if (!confirmed.isConfirmed) return;
 
-    try {
-      var fd  = new FormData(this);
-      var res = await fetch('/admin/product-edit/<%= product._id %>', { method: 'POST', body: fd });
-      document.getElementById('loadingOverlay').classList.remove('active');
-      var result = await res.json();
+  document.getElementById('loadingOverlay').classList.add('active');
 
-      if (result.success) {
-        await Swal.fire({
-          icon: 'success', title: 'Product Updated!',
-          text: result.message || 'Changes saved successfully.',
-          confirmButtonColor: '#316bf3', confirmButtonText: 'Back to Products',
-          background: '#0f1930', color: '#dee5ff',
-        });
-        window.location.href = result.redirect || '/admin/products';
-      } else {
-        Swal.fire({
-          toast: true, icon: 'error', title: result.message,
-          position: 'top-right', showConfirmButton: false, timer: 3000,
-          background: '#0f1930', color: '#dee5ff',
-        });
-      }
-    } catch (err) {
-      document.getElementById('loadingOverlay').classList.remove('active');
+  try {
+    // Disable status toggles before building FormData so they are excluded,
+    // then immediately re-enable — this prevents the backend from reading
+    // checkbox absence as "deactivated"
+    var toggles = document.querySelectorAll('.variant-status-toggle');
+    toggles.forEach(function (t) { t.disabled = true; });
+
+    var fd = new FormData(form); // ← use captured 'form', not 'this'
+
+    toggles.forEach(function (t) { t.disabled = false; });
+
+    var res = await fetch('/admin/product-edit/<%= product._id %>', {
+      method: 'POST',
+      body: fd,
+    });
+
+    document.getElementById('loadingOverlay').classList.remove('active');
+    var result = await res.json();
+
+    if (result.success) {
+      await Swal.fire({
+        icon: 'success', title: 'Product Updated!',
+        text: result.message || 'Changes saved successfully.',
+        confirmButtonColor: '#316bf3', confirmButtonText: 'Back to Products',
+        background: '#0f1930', color: '#dee5ff',
+      });
+      window.location.href = result.redirect || '/admin/products';
+    } else {
       Swal.fire({
-        toast: true, icon: 'error', title: 'Network error. Please retry.',
+        toast: true, icon: 'error', title: result.message,
         position: 'top-right', showConfirmButton: false, timer: 3000,
         background: '#0f1930', color: '#dee5ff',
       });
     }
-  });
+  } catch (err) {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    Swal.fire({
+      toast: true, icon: 'error', title: 'Network error. Please retry.',
+      position: 'top-right', showConfirmButton: false, timer: 3000,
+      background: '#0f1930', color: '#dee5ff',
+    });
+  }
+});
 
   // ── Active sidebar ──────────────────────────────────────────────
   (function () {

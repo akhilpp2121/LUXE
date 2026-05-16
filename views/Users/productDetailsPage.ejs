@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title><%= product ? product.name + ' — LUXE' : 'LUXE' %></title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          primary: "#1152d4",
+          "primary-dark": "#0d3fa8",
+          "bg-light": "#f6f6f8",
+          "bg-dark": "#101622",
+        },
+        fontFamily: {
+          display: ["Manrope", "sans-serif"],
+          serif: ["Cormorant Garamond", "Georgia", "serif"],
+        },
+      },
+    },
+  }
+</script>
+<style>
+  /* ── Base ── */
+  body { font-family: 'Manrope', sans-serif; }
+  .msym { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Redirect overlay ── */
+  #redirect-overlay {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    background: rgba(10,14,26,0.97);
+    align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem;
+  }
+  #redirect-overlay.active { display: flex; }
+
+  /* ── Accordion ── */
+  .acc-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.3s; opacity: 0; }
+  .acc-body.open { max-height: 400px; opacity: 1; }
+  .acc-icon { transition: transform 0.3s; }
+  .acc-btn.open .acc-icon { transform: rotate(180deg); }
+
+  /* ── Thumbnail strip ── */
+  .thumb-item {
+    width: 68px; height: 78px; flex-shrink: 0;
+    border-radius: 8px; overflow: hidden; cursor: pointer;
+    border: 2px solid transparent; background: #1e293b;
+    transition: border-color 0.15s;
+  }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-item.active { border-color: #1152d4; box-shadow: 0 0 0 2px rgba(17,82,212,0.3); }
+
+  /* ── Main image wrap ── */
+  #main-wrap {
+    position: relative; width: 100%; aspect-ratio: 3/4;
+    border-radius: 12px; overflow: hidden; background: #1e293b;
+    cursor: crosshair;
+  }
+  #main-img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block; pointer-events: none; user-select: none;
+  }
+
+  /* ── Lens box ── */
+  #lens-box {
+    position: absolute;
+    width: 120px; height: 120px;
+    border: 1.5px solid rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.12);
+    pointer-events: none; display: none;
+    border-radius: 4px; box-sizing: border-box; z-index: 10;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.35);
+  }
+
+  /* ── Zoom panel (real ecommerce style) ── */
+  #zoom-panel {
+    position: absolute;
+    top: 0; left: calc(100% + 16px);
+    width: 380px; height: 100%;
+    border-radius: 12px; overflow: hidden;
+    background: #1e293b;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: none; z-index: 20;
+  }
+
+  /* The actual zoomed image — positioned absolutely, moved via translate */
+  #zoom-inner {
+    position: absolute;
+    top: 0; left: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  #zoom-inner img {
+    display: block;
+  }
+
+  /* Placeholder shown before hover */
+  #zoom-hint {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px; color: #64748b; font-size: 13px;
+    pointer-events: none;
+  }
+
+  /* ── Hint badge ── */
+  #zoom-hint-badge {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(0,0,0,0.55); color: #fff;
+    font-size: 11px; font-weight: 600;
+    padding: 5px 12px; border-radius: 20px;
+    display: flex; align-items: center; gap: 5px;
+    pointer-events: none; z-index: 5;
+  }
+
+  /* ── Mobile zoom overlay ── */
+  #mob-zoom {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(10,14,26,0.97);
+    align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+  }
+  #mob-zoom.active { display: flex; }
+  #mob-zoom-img { max-width: 92vw; max-height: 78vh; object-fit: contain; border-radius: 10px; touch-action: none; }
+
+  /* ── Color btn ── */
+  .color-btn {
+    padding: 6px 14px; border-radius: 8px;
+    border: 2px solid #334155; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; text-transform: capitalize;
+  }
+  .color-btn.active { border-color: #1152d4; background: rgba(17,82,212,0.12); color: #1152d4; }
+
+  /* ── Size btn ── */
+  .size-btn {
+    width: 46px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; border: 1.5px solid #334155;
+    background: transparent; color: #cbd5e1;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .size-btn:hover:not(.oos):not(.selected) { border-color: #1152d4; color: #1152d4; }
+  .size-btn.selected { border: 2px solid #1152d4; background: rgba(17,82,212,0.15); color: #1152d4; }
+  .size-btn.oos {
+    border-color: #1e293b; color: #334155;
+    cursor: not-allowed; text-decoration: line-through; position: relative;
+  }
+  .size-btn.oos::after {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(51,65,85,0.2) 4px, rgba(51,65,85,0.2) 5px);
+    border-radius: inherit;
+  }
+
+  /* ── Highlight card ── */
+  .highlight {
+    border: 1px solid rgba(17,82,212,0.15);
+    background: rgba(17,82,212,0.05);
+    border-radius: 10px; padding: 12px;
+    display: flex; align-items: flex-start; gap: 10px; transition: all 0.2s;
+  }
+  .highlight:hover { border-color: rgba(17,82,212,0.35); background: rgba(17,82,212,0.1); }
+
+  /* ── Stock pulse ── */
+  @keyframes pulse-amber { 0%,100%{opacity:1} 50%{opacity:0.45} }
+  .pulse { animation: pulse-amber 2s infinite; }
+
+  /* ── Related card ── */
+  .rel-card .rel-img { transition: transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94); }
+  .rel-card:hover .rel-img { transform: scale(1.06); }
+  .rel-card .rel-add { opacity: 0; transform: translateY(6px); transition: all 0.2s; }
+  .rel-card:hover .rel-add { opacity: 1; transform: translateY(0); }
+
+  /* ── Fade-up animations ── */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+  .fu { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+  .d1{animation-delay:0.05s} .d2{animation-delay:0.15s} .d3{animation-delay:0.25s} .d4{animation-delay:0.4s}
+
+  /* ── Sold-out overlay ── */
+  #sold-overlay {
+    display: none; position: absolute; inset: 0;
+    background: rgba(0,0,0,0.55);
+    background-image: repeating-linear-gradient(-45deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px);
+    border-radius: 12px;
+    align-items: center; justify-content: center; flex-direction: column; gap: 10px; z-index: 5;
+  }
+  #sold-overlay.show { display: flex; }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 antialiased font-display min-h-screen">
+
+<!-- ══ REDIRECT OVERLAY ══ -->
+<div id="redirect-overlay">
+  <div class="text-center space-y-4">
+    <span class="material-symbols-outlined msym text-6xl text-slate-500">inventory_2</span>
+    <h2 class="text-2xl font-bold text-white">This product is no longer available</h2>
+    <p class="text-slate-400 text-sm">Redirecting in <span id="countdown" class="text-primary font-bold">5</span>s…</p>
+    <div class="w-48 h-1 bg-slate-800 rounded-full mx-auto overflow-hidden">
+      <div id="redirect-bar" class="h-full bg-primary rounded-full" style="width:0%;transition:width 5s linear"></div>
+    </div>
+    <button onclick="window.location.href='/product-listing'"
+            class="mt-4 px-6 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-dark transition-colors">
+      Go to Collection
+    </button>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast">
+  <div class="flex items-center gap-3 bg-slate-900 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl">
+    <span id="toast-icon" class="material-symbols-outlined msym text-green-400">check_circle</span>
+    <span id="toast-msg" class="text-sm font-semibold"></span>
+  </div>
+</div>
+
+<!-- ══ MOBILE ZOOM OVERLAY ══ -->
+<div id="mob-zoom" role="dialog" aria-label="Zoomed product image">
+  <div class="flex items-center justify-between w-full px-5 pb-3">
+    <span id="mob-zoom-counter" class="text-slate-400 text-sm">1 / 1</span>
+    <button onclick="closeMobZoom()" class="p-2 rounded-full bg-white/10 text-white">
+      <span class="material-symbols-outlined msym">close</span>
+    </button>
+  </div>
+  <img id="mob-zoom-img" src="" alt="Zoomed product"/>
+  <div class="flex items-center gap-6 pt-3">
+    <button onclick="mobPrev()" class="p-2 rounded-full bg-white/10 text-white">
+      <span class="material-symbols-outlined msym">chevron_left</span>
+    </button>
+    <button onclick="mobNext()" class="p-2 rounded-full bg-white/10 text-white">
+      <span class="material-symbols-outlined msym">chevron_right</span>
+    </button>
+  </div>
+  <p class="text-slate-500 text-xs mt-2">Swipe or use arrows to navigate</p>
+</div>
+
+<!-- ══════════════════════════ PAGE SHELL ══════════════════════════ -->
+<div class="flex flex-col min-h-screen">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 border-b border-slate-800 bg-bg-dark/80 backdrop-blur-md px-6 lg:px-20 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+      <div class="flex items-center gap-12">
+        <a href="/" class="flex items-center gap-2 text-primary">
+          <span class="material-symbols-outlined msym text-3xl">diamond</span>
+          <span class="text-white text-2xl font-extrabold tracking-tight">LUXE</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/product-listing" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">New Arrivals</a>
+          <a href="/product-listing" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Collections</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/product-listing" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym">search</span>
+        </a>
+        <a href="/cart" class="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym">shopping_bag</span>
+          <span id="cart-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full items-center justify-center">0</span>
+        </a>
+        <a href="/profile" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym">person</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <% if (product) { %>
+  <main class="max-w-7xl mx-auto w-full px-6 lg:px-20 py-8 lg:py-12 flex-1">
+
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-8 fu d1">
+      <a href="/" class="hover:text-primary transition-colors">Home</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <a href="/product-listing" class="hover:text-primary transition-colors">Shop</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <% if (product.categoryId) { %>
+        <a href="/product-listing?category=<%= product.categoryId._id %>" class="hover:text-primary transition-colors">
+          <%= product.categoryId.categoryName %>
+        </a>
+        <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <% } %>
+      <span class="text-slate-200 font-medium"><%= product.name %></span>
+    </nav>
+
+    <% if (error) { %>
+      <div class="mb-6 px-4 py-3 rounded-lg bg-red-900/20 border border-red-800 text-red-400 text-sm font-medium">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <!-- ══ MAIN PRODUCT GRID ══ -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14">
+
+      <!-- ══ GALLERY COLUMN ══ -->
+      <div class="lg:col-span-7 fu d2">
+        <div class="flex flex-col-reverse md:flex-row gap-4">
+
+          <!-- Thumbnail strip -->
+          <div id="thumb-strip"
+               class="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-1 md:pb-0"
+               style="max-height:500px"></div>
+
+          <!-- Main image + zoom panel -->
+          <div class="flex-1 relative" id="gallery-area">
+            <div id="main-wrap">
+              <img id="main-img" src="" alt="<%= product.name %>"/>
+
+              <!-- Lens overlay -->
+              <div id="lens-box"></div>
+
+              <!-- Sold-out overlay -->
+              <div id="sold-overlay">
+                <span class="material-symbols-outlined msym text-5xl text-white opacity-80">block</span>
+                <span class="text-white font-bold text-xl tracking-widest uppercase">Sold Out</span>
+              </div>
+
+              <!-- Desktop zoom hint -->
+              <div id="zoom-hint-badge" class="hidden md:flex">
+                <span class="material-symbols-outlined msym text-sm">zoom_in</span> Hover to zoom
+              </div>
+
+              <!-- Mobile tap-to-zoom -->
+              <button onclick="openMobZoom(currentIdx)"
+                      class="md:hidden absolute bottom-4 right-4 flex items-center gap-1.5 bg-black/60 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                <span class="material-symbols-outlined msym text-sm">zoom_in</span> Tap to zoom
+              </button>
+            </div>
+
+            <!-- Desktop zoom panel — rendered beside the main image -->
+            <div id="zoom-panel">
+              <!-- The actual high-res image, moved via CSS translate -->
+              <div id="zoom-inner">
+                <img id="zoom-img" src="" alt="Zoomed view"/>
+              </div>
+              <!-- Placeholder shown before hover -->
+              <div id="zoom-hint">
+                <span class="material-symbols-outlined msym text-4xl text-slate-600">zoom_in</span>
+                <span class="text-slate-500 text-sm">Hover over image to zoom</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ PRODUCT INFO COLUMN ══ -->
+      <div class="lg:col-span-5 flex flex-col gap-6 fu d3">
+
+        <!-- Title + wishlist -->
+        <div class="space-y-3">
+          <div class="flex justify-between items-start gap-4">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-primary mb-1">LUXE Collection</p>
+              <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight uppercase font-serif">
+                <%= product.name %>
+              </h1>
+            </div>
+            <button id="wishlist-btn" onclick="toggleWishlist()"
+                    class="p-2 text-slate-400 hover:text-red-500 transition-colors flex-shrink-0 mt-1">
+              <span class="material-symbols-outlined msym text-2xl">favorite</span>
+            </button>
+          </div>
+          <% if (product.description) { %>
+            <p class="text-sm text-slate-400 leading-relaxed"><%= product.description %></p>
+          <% } %>
+        </div>
+
+        <!-- Price -->
+        <div id="price-section" class="space-y-1">
+          <%
+            const ep = (defaultVariant.discount && defaultVariant.discount < defaultVariant.price)
+                       ? defaultVariant.discount : defaultVariant.price;
+            const savePct = (defaultVariant.discount && defaultVariant.discount < defaultVariant.price)
+                            ? Math.round((defaultVariant.price - defaultVariant.discount) / defaultVariant.price * 100) : 0;
+          %>
+          <div class="flex items-center flex-wrap gap-3">
+            <span id="display-price" class="text-3xl font-bold text-primary">
+              ₹<%= ep.toLocaleString('en-IN') %>
+            </span>
+            <span id="display-original"
+                  class="text-slate-500 line-through text-lg font-medium <%= savePct ? '' : 'hidden' %>">
+              ₹<%= defaultVariant.price.toLocaleString('en-IN') %>
+            </span>
+            <span id="display-save"
+                  class="bg-emerald-500/15 text-emerald-400 text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider <%= savePct ? '' : 'hidden' %>">
+              <%= savePct %>% off
+            </span>
+          </div>
+          <p class="text-xs text-slate-500">Inclusive of all taxes · Free shipping above ₹999</p>
+        </div>
+
+        <!-- Stock info -->
+        <div id="stock-info" class="flex items-center gap-3 py-3 border-t border-b border-slate-800"></div>
+
+        <!-- Color selector -->
+        <div class="space-y-3">
+          <p class="text-xs font-bold uppercase tracking-widest text-slate-500">
+            Color: <span id="selected-color-label" class="text-slate-200 capitalize"><%= defaultVariant.color || '' %></span>
+          </p>
+          <div class="flex flex-wrap gap-2" id="color-swatches">
+            <% variants.forEach(function(v) {
+                 const isDef = defaultVariant._id.toString() === v._id.toString();
+               %>
+              <button
+                class="color-btn <%= isDef ? 'active' : '' %>"
+                data-color="<%= v.color %>"
+                data-variant-id="<%= v._id %>"
+                onclick="selectColor(this)"
+              ><%= v.color %></button>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Size selector -->
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-500">Select Size</p>
+            <button class="text-xs text-primary font-bold uppercase tracking-wider hover:underline underline-offset-4">Size Guide</button>
+          </div>
+          <div id="size-grid" class="flex flex-wrap gap-2"></div>
+          <p id="size-error" class="hidden text-xs text-red-400 font-semibold flex items-center gap-1">
+            <span class="material-symbols-outlined msym text-sm">error</span> Please select a size.
+          </p>
+        </div>
+
+        <!-- Quantity -->
+        <div class="flex items-center gap-4">
+          <p class="text-xs font-bold uppercase tracking-widest text-slate-500">Qty</p>
+          <div class="flex items-center border border-slate-700 rounded-lg overflow-hidden">
+            <button onclick="changeQty(-1)" class="px-3 py-2 hover:bg-slate-800 transition-colors text-slate-300">
+              <span class="material-symbols-outlined msym text-sm">remove</span>
+            </button>
+            <span id="qty-display" class="px-4 py-2 text-sm font-bold border-x border-slate-700 min-w-[48px] text-center">1</span>
+            <button onclick="changeQty(1)" class="px-3 py-2 hover:bg-slate-800 transition-colors text-slate-300">
+              <span class="material-symbols-outlined msym text-sm">add</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Cart actions -->
+        <div id="cart-actions" class="space-y-3 pt-1"></div>
+
+        <!-- Highlights -->
+        <div class="space-y-2 pt-1">
+          <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Why You'll Love It</p>
+          <div class="highlight">
+            <span class="material-symbols-outlined msym text-primary mt-0.5">workspace_premium</span>
+            <div>
+              <p class="text-sm font-bold text-white">Premium Quality</p>
+              <p class="text-xs text-slate-400 mt-0.5">Crafted with the finest materials for lasting comfort and style.</p>
+            </div>
+          </div>
+          <div class="highlight">
+            <span class="material-symbols-outlined msym text-primary mt-0.5">local_shipping</span>
+            <div>
+              <p class="text-sm font-bold text-white">Free Shipping & Returns</p>
+              <p class="text-xs text-slate-400 mt-0.5">Free delivery on orders above ₹999. Easy 30-day returns.</p>
+            </div>
+          </div>
+          <div class="highlight">
+            <span class="material-symbols-outlined msym text-primary mt-0.5">verified_user</span>
+            <div>
+              <p class="text-sm font-bold text-white">100% Authentic</p>
+              <p class="text-xs text-slate-400 mt-0.5">Every product is verified and quality-checked before dispatch.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accordion -->
+        <div class="border-t border-slate-800 mt-2">
+          <div class="border-b border-slate-800">
+            <button class="acc-btn flex w-full items-center justify-between py-4 text-left font-bold text-sm uppercase tracking-wider text-slate-300 hover:text-primary transition-colors"
+                    onclick="toggleAcc(this)">
+              <span>Product Details</span>
+              <span class="material-symbols-outlined msym acc-icon text-slate-500">expand_more</span>
+            </button>
+            <div class="acc-body">
+              <div class="pb-5 text-sm text-slate-400 leading-relaxed">
+                <%= product.description || 'No additional details available.' %>
+              </div>
+            </div>
+          </div>
+          <div class="border-b border-slate-800">
+            <button class="acc-btn flex w-full items-center justify-between py-4 text-left font-bold text-sm uppercase tracking-wider text-slate-300 hover:text-primary transition-colors"
+                    onclick="toggleAcc(this)">
+              <span>Shipping & Returns</span>
+              <span class="material-symbols-outlined msym acc-icon text-slate-500">expand_more</span>
+            </button>
+            <div class="acc-body">
+              <div class="pb-5 text-sm text-slate-400 leading-relaxed space-y-1.5">
+                <p>• Free standard shipping on orders above ₹999</p>
+                <p>• Express delivery available at checkout</p>
+                <p>• 30-day hassle-free returns for unworn items</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /info col -->
+    </div><!-- /main grid -->
+
+    <!-- ══ RELATED PRODUCTS ══ -->
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+    <section class="mt-24 fu d4">
+      <div class="flex items-baseline justify-between gap-4 border-b border-slate-800 pb-6 mb-10">
+        <h2 class="text-3xl font-extrabold uppercase tracking-tight font-serif">Complete the Look</h2>
+        <a href="/product-listing" class="text-primary font-bold flex items-center gap-2 hover:gap-3 transition-all text-sm">
+          VIEW ALL <span class="material-symbols-outlined msym text-sm">arrow_forward</span>
+        </a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <% relatedProducts.forEach(function(r) {
+             const rp = (r.discount && r.discount < r.price) ? r.discount : r.price;
+             const rSave = (r.discount && r.discount < r.price)
+                           ? Math.round((r.price - r.discount) / r.price * 100) : 0;
+           %>
+          <div class="rel-card cursor-pointer group" onclick="window.location.href='/product-details/<%= r.productId %>'">
+            <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-slate-800">
+              <% if (r.image) { %>
+                <img src="/uploads/<%= r.image %>" alt="<%= r.name %>"
+                     class="rel-img w-full h-full object-cover"
+                     onerror="this.src='https://placehold.co/400x533/1e293b/64748b?text=No+Image'"/>
+              <% } else { %>
+                <div class="rel-img w-full h-full flex items-center justify-center text-slate-600">
+                  <span class="material-symbols-outlined msym text-4xl">image_not_supported</span>
+                </div>
+              <% } %>
+              <% if (r.stockState === 'sold_out') { %>
+                <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <span class="text-white font-bold text-xs uppercase tracking-widest bg-black/60 px-3 py-1 rounded-full">Sold Out</span>
+                </div>
+              <% } else { %>
+                <button class="rel-add absolute bottom-3 right-3 p-2 bg-white/90 text-slate-900 rounded-full shadow-lg"
+                        onclick="event.stopPropagation(); showToast('<%= r.name %> added to cart','check_circle','text-green-400')">
+                  <span class="material-symbols-outlined msym text-sm">add_shopping_cart</span>
+                </button>
+              <% } %>
+              <% if (rSave) { %>
+                <span class="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                  <%= rSave %>% off
+                </span>
+              <% } %>
+            </div>
+            <h3 class="font-bold text-white text-sm mb-1"><%= r.name %></h3>
+            <div class="flex items-center gap-2">
+              <p class="text-slate-300 text-sm font-semibold <%= r.stockState === 'sold_out' ? 'line-through opacity-50' : '' %>">
+                ₹<%= rp.toLocaleString('en-IN') %>
+              </p>
+              <% if (rSave) { %>
+                <span class="text-xs text-emerald-400 font-bold"><%= rSave %>% off</span>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+  </main>
+  <% } %>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="bg-slate-900/60 mt-20 px-6 lg:px-20 py-16 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-primary">
+          <span class="material-symbols-outlined msym text-3xl">diamond</span>
+          <span class="text-white text-2xl font-extrabold tracking-tight">LUXE</span>
+        </div>
+        <p class="text-slate-500 text-sm leading-relaxed">Redefining modern elegance through sustainable craftsmanship and timeless design.</p>
+      </div>
+      <div>
+        <h4 class="font-bold text-white mb-6 uppercase tracking-wider text-xs">Customer Care</h4>
+        <ul class="space-y-3 text-sm text-slate-500">
+          <li><a href="#" class="hover:text-primary transition-colors">Contact Us</a></li>
+          <li><a href="#" class="hover:text-primary transition-colors">Shipping Info</a></li>
+          <li><a href="#" class="hover:text-primary transition-colors">Returns & Exchanges</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-white mb-6 uppercase tracking-wider text-xs">Company</h4>
+        <ul class="space-y-3 text-sm text-slate-500">
+          <li><a href="#" class="hover:text-primary transition-colors">About Luxe</a></li>
+          <li><a href="#" class="hover:text-primary transition-colors">Sustainability</a></li>
+          <li><a href="#" class="hover:text-primary transition-colors">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-white mb-6 uppercase tracking-wider text-xs">Newsletter</h4>
+        <p class="text-sm text-slate-500 mb-4">Join for exclusive early access and style updates.</p>
+        <div class="flex gap-2">
+          <input class="flex-1 bg-slate-800 border-none rounded-lg px-4 py-2 text-sm text-white focus:ring-2 focus:ring-primary outline-none"
+                 placeholder="Email address" type="email"/>
+          <button class="bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary-dark transition-colors">JOIN</button>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 uppercase tracking-widest">
+      <p>© 2025 Luxe Menswear. All Rights Reserved.</p>
+      <div class="flex gap-8">
+        <a href="#" class="hover:text-primary">Privacy Policy</a>
+        <a href="#" class="hover:text-primary">Terms of Service</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /page shell -->
+
+<!-- ══════════════════════════════════════════════════
+     SERVER → CLIENT DATA INJECTION
+══════════════════════════════════════════════════ -->
+<script>
+  const IS_UNAVAILABLE = <%- JSON.stringify(unavailable) %>;
+  <% if (product) { %>
+  const ALL_VARIANTS   = <%- JSON.stringify(allVariants) %>;
+  const COLOR_VARIANTS = <%- JSON.stringify(variants) %>;
+  const PRODUCT_NAME   = <%- JSON.stringify(product.name) %>;
+  const PRODUCT_ID     = <%- JSON.stringify(product._id) %>;
+  <% } else { %>
+  const ALL_VARIANTS   = [];
+  const COLOR_VARIANTS = [];
+  const PRODUCT_NAME   = '';
+  const PRODUCT_ID     = '';
+  <% } %>
+  <% if (defaultVariant) { %>
+  let activeVariant = <%- JSON.stringify(defaultVariant) %>;
+  <% } else { %>
+  let activeVariant = null;
+  <% } %>
+
+  let selectedSize = activeVariant?.size ?? '';
+  let qty          = 1;
+  let wishlisted   = false;
+  let currentIdx   = 0;
+  let cartCount    = 0;
+
+  /* ── Helpers ── */
+  function getImages()     { return (activeVariant?.images ?? []).map(i => '/uploads/' + i); }
+  function getStockState() { return activeVariant?.stockState ?? 'unavailable'; }
+  function getStockCount() { return activeVariant?.stock ?? 0; }
+
+  /* ════════════════════════════════════════════════
+     INIT
+  ════════════════════════════════════════════════ */
+  document.addEventListener('DOMContentLoaded', () => {
+    if (IS_UNAVAILABLE || !activeVariant) { triggerRedirect(); return; }
+    renderThumbs();
+    renderSizeGrid();
+    renderStockInfo();
+    renderCartActions();
+    initDesktopZoom();
+  });
+
+  /* ════════════════════════════════════════════════
+     THUMBNAIL STRIP
+  ════════════════════════════════════════════════ */
+  function renderThumbs() {
+    const strip  = document.getElementById('thumb-strip');
+    const images = getImages();
+    strip.innerHTML = '';
+    images.forEach((src, i) => {
+      const d   = document.createElement('div');
+      d.className = 'thumb-item' + (i === 0 ? ' active' : '');
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'View ' + (i + 1);
+      d.appendChild(img);
+      d.onclick = () => selectImage(i);
+      strip.appendChild(d);
+    });
+    if (images.length) selectImage(0);
+  }
+
+  function selectImage(idx) {
+    const images = getImages();
+    if (!images.length) return;
+    currentIdx = idx;
+
+    const mainImg = document.getElementById('main-img');
+    mainImg.src = images[idx];
+
+    /* Keep zoom image in sync */
+    const zoomImg = document.getElementById('zoom-img');
+    if (zoomImg) zoomImg.src = images[idx];
+
+    /* Reset zoom panel back to placeholder state */
+    const zoomPanel = document.getElementById('zoom-panel');
+    const zoomHint  = document.getElementById('zoom-hint');
+    const hintBadge = document.getElementById('zoom-hint-badge');
+    const lensBox   = document.getElementById('lens-box');
+    if (zoomPanel)  zoomPanel.style.display = 'none';
+    if (lensBox)    lensBox.style.display   = 'none';
+    if (zoomHint)   zoomHint.style.display  = 'flex';
+    if (hintBadge)  hintBadge.style.display = '';
+
+    document.querySelectorAll('.thumb-item').forEach((t, i) =>
+      t.classList.toggle('active', i === idx));
+  }
+
+  /* ════════════════════════════════════════════════
+     DESKTOP ZOOM  — CSS translate approach
+     (same technique used by Amazon, Myntra, Flipkart)
+     No canvas. No cross-origin issues. No pixelation.
+  ════════════════════════════════════════════════ */
+  function initDesktopZoom() {
+    const ZOOM_FACTOR = 2.5;   /* magnification level */
+    const LENS_W = 120;        /* lens width  in px   */
+    const LENS_H = 120;        /* lens height in px   */
+
+    const mainWrap  = document.getElementById('main-wrap');
+    const lensBox   = document.getElementById('lens-box');
+    const zoomPanel = document.getElementById('zoom-panel');
+    const zoomInner = document.getElementById('zoom-inner');
+    const zoomImg   = document.getElementById('zoom-img');
+    const zoomHint  = document.getElementById('zoom-hint');
+    const hintBadge = document.getElementById('zoom-hint-badge');
+    if (!mainWrap || !zoomPanel || !zoomInner || !zoomImg) return;
+
+    /* ── mouseenter: show panel, size the zoom image ── */
+    mainWrap.addEventListener('mouseenter', () => {
+      const mainImg = document.getElementById('main-img');
+      if (!mainImg.complete || !mainImg.naturalWidth) return;
+
+      const rect = mainWrap.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+      const natW = mainImg.naturalWidth;
+      const natH = mainImg.naturalHeight;
+
+      /*
+       * object-fit:cover scales the image so its shorter dimension
+       * fills the container. We replicate that scale here so the
+       * zoomed image perfectly matches what's visible.
+       */
+      const coverScale = Math.max(W / natW, H / natH);
+      const renderedW  = natW * coverScale;
+      const renderedH  = natH * coverScale;
+
+      /* Size the zoom image to ZOOM_FACTOR × the rendered dimensions */
+      zoomImg.style.width  = (renderedW * ZOOM_FACTOR) + 'px';
+      zoomImg.style.height = (renderedH * ZOOM_FACTOR) + 'px';
+
+      lensBox.style.display  = 'block';
+      zoomPanel.style.display = 'block';
+      if (zoomHint)  zoomHint.style.display  = 'none';
+      if (hintBadge) hintBadge.style.display = 'none';
+    });
+
+    /* ── mouseleave: hide panel ── */
+    mainWrap.addEventListener('mouseleave', () => {
+      lensBox.style.display   = 'none';
+      zoomPanel.style.display = 'none';
+      if (zoomHint)  zoomHint.style.display  = 'flex';
+      if (hintBadge) hintBadge.style.display = '';
+    });
+
+    /* ── mousemove: move lens + translate zoom image ── */
+    mainWrap.addEventListener('mousemove', e => {
+      const mainImg = document.getElementById('main-img');
+      if (!mainImg.complete || !mainImg.naturalWidth) return;
+
+      const rect = mainWrap.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+
+      /* Mouse position relative to the image container */
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      /* Clamp lens so it never overflows the image edges */
+      let lx = mx - LENS_W / 2;
+      let ly = my - LENS_H / 2;
+      lx = Math.max(0, Math.min(W - LENS_W, lx));
+      ly = Math.max(0, Math.min(H - LENS_H, ly));
+
+      lensBox.style.left = lx + 'px';
+      lensBox.style.top  = ly + 'px';
+
+      /*
+       * Compute how far (0→1) the lens is across the image.
+       * We use lx / (W - LENS_W) so ratio = 0 when lens is at
+       * the far left and 1 when it's at the far right.
+       */
+      const ratioX = (W  === LENS_W) ? 0 : lx / (W  - LENS_W);
+      const ratioY = (H  === LENS_H) ? 0 : ly / (H  - LENS_H);
+
+      const panelRect = zoomPanel.getBoundingClientRect();
+      const panW = panelRect.width  || 380;
+      const panH = panelRect.height || 507;
+
+      const zoomedW = parseFloat(zoomImg.style.width)  || (W * ZOOM_FACTOR);
+      const zoomedH = parseFloat(zoomImg.style.height) || (H * ZOOM_FACTOR);
+
+      /*
+       * Maximum translation: the zoomed image can slide left/up
+       * until its right/bottom edge aligns with the panel right/bottom.
+       */
+      const maxOffX = Math.max(0, zoomedW - panW);
+      const maxOffY = Math.max(0, zoomedH - panH);
+
+      const offsetX = -(ratioX * maxOffX);
+      const offsetY = -(ratioY * maxOffY);
+
+      zoomInner.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px)';
+    });
+  }
+
+  /* ════════════════════════════════════════════════
+     MOBILE ZOOM OVERLAY
+  ════════════════════════════════════════════════ */
+  function openMobZoom(idx) {
+    const images = getImages();
+    if (!images.length) return;
+    currentIdx = idx;
+    document.getElementById('mob-zoom-img').src = images[idx];
+    document.getElementById('mob-zoom-counter').textContent = (idx + 1) + ' / ' + images.length;
+    document.getElementById('mob-zoom').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobZoom() {
+    document.getElementById('mob-zoom').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function mobPrev() {
+    const images = getImages();
+    openMobZoom((currentIdx - 1 + images.length) % images.length);
+  }
+  function mobNext() {
+    const images = getImages();
+    openMobZoom((currentIdx + 1) % images.length);
+  }
+
+  /* ════════════════════════════════════════════════
+     COLOR SELECTOR
+  ════════════════════════════════════════════════ */
+  function selectColor(btn) {
+    const color = btn.dataset.color;
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('selected-color-label').textContent = color;
+
+    const colorVariants = ALL_VARIANTS.filter(v => v.color === color);
+    if (!colorVariants.length) return;
+
+    const keepSize = colorVariants.find(v => v.size === selectedSize && v.stock > 0)
+                  || colorVariants.find(v => v.stock > 0)
+                  || colorVariants[0];
+
+    activeVariant = keepSize;
+    selectedSize  = activeVariant.size;
+
+    renderThumbs();
+    updatePrice();
+    renderSizeGrid();
+    renderStockInfo();
+    renderCartActions();
+  }
+
+  /* ════════════════════════════════════════════════
+     SIZE GRID
+  ════════════════════════════════════════════════ */
+  function renderSizeGrid() {
+    const grid = document.getElementById('size-grid');
+    grid.innerHTML = '';
+
+    const activeColor   = activeVariant?.color ?? '';
+    const colorVariants = ALL_VARIANTS.filter(v => v.color === activeColor);
+    const seen = new Set(), sizeRows = [];
+    for (const v of colorVariants) {
+      if (seen.has(v.size)) continue;
+      seen.add(v.size);
+      sizeRows.push(v);
+    }
+
+    sizeRows.forEach(v => {
+      const isSelected    = v.size === selectedSize;
+      const isUnavailable = v.stock <= 0 || v.stockState === 'sold_out';
+      const btn = document.createElement('button');
+      btn.className = 'size-btn' +
+        (isUnavailable ? ' oos' : isSelected ? ' selected' : '');
+      btn.textContent = v.size;
+      btn.disabled    = isUnavailable;
+      if (isUnavailable) btn.title = 'Size ' + v.size + ' is out of stock';
+      if (!isUnavailable) {
+        btn.onclick = () => {
+          activeVariant = v;
+          selectedSize  = v.size;
+          document.getElementById('size-error').classList.add('hidden');
+          updatePrice();
+          renderSizeGrid();
+          renderStockInfo();
+          renderCartActions();
+        };
+      }
+      grid.appendChild(btn);
+    });
+  }
+
+  /* ════════════════════════════════════════════════
+     PRICE
+  ════════════════════════════════════════════════ */
+  function updatePrice() {
+    if (!activeVariant) return;
+    const { price, discount } = activeVariant;
+    const ep      = (discount && discount < price) ? discount : price;
+    const savePct = (discount && discount < price)
+                    ? Math.round((price - discount) / price * 100) : 0;
+
+    document.getElementById('display-price').textContent = '₹' + ep.toLocaleString('en-IN');
+    const origEl = document.getElementById('display-original');
+    const saveEl = document.getElementById('display-save');
+    if (savePct) {
+      origEl.textContent = '₹' + price.toLocaleString('en-IN');
+      saveEl.textContent = savePct + '% off';
+      origEl.classList.remove('hidden');
+      saveEl.classList.remove('hidden');
+    } else {
+      origEl.classList.add('hidden');
+      saveEl.classList.add('hidden');
+    }
+  }
+
+  /* ════════════════════════════════════════════════
+     STOCK INFO
+  ════════════════════════════════════════════════ */
+  function renderStockInfo() {
+    const state = getStockState();
+    const count = getStockCount();
+    const el    = document.getElementById('stock-info');
+    const so    = document.getElementById('sold-overlay');
+
+    const map = {
+      in_stock:
+        `<span class="material-symbols-outlined msym text-emerald-400" style="font-variation-settings:'FILL' 1">check_circle</span>
+         <span class="text-sm font-bold text-emerald-400">In Stock</span>
+         <span class="text-xs text-slate-500">· Ships in 1–2 business days</span>`,
+      low_stock:
+        `<span class="material-symbols-outlined msym text-amber-400 pulse" style="font-variation-settings:'FILL' 1">warning</span>
+         <span class="text-sm font-bold text-amber-400">Only ${count} left!</span>
+         <span class="text-xs text-slate-500">· Order soon</span>`,
+      sold_out:
+        `<span class="material-symbols-outlined msym text-red-400" style="font-variation-settings:'FILL' 1">cancel</span>
+         <span class="text-sm font-bold text-red-400">Sold Out</span>`,
+      unavailable:
+        `<span class="material-symbols-outlined msym text-slate-500">block</span>
+         <span class="text-sm font-bold text-slate-500">Currently Unavailable</span>`,
+    };
+    el.innerHTML = map[state] ?? '';
+    so.classList.toggle('show', state === 'sold_out');
+  }
+
+  /* ════════════════════════════════════════════════
+     CART ACTIONS
+  ════════════════════════════════════════════════ */
+  function renderCartActions() {
+    const el    = document.getElementById('cart-actions');
+    const state = getStockState();
+
+    if (state === 'sold_out' || state === 'unavailable') {
+      el.innerHTML = `
+        <button disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl
+                                flex items-center justify-center gap-2 cursor-not-allowed text-sm">
+          <span class="material-symbols-outlined msym">block</span>
+          ${state === 'sold_out' ? 'SOLD OUT' : 'UNAVAILABLE'}
+        </button>`;
+    } else {
+      el.innerHTML = `
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button onclick="addToCart()"
+                  class="flex-1 bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl
+                         shadow-xl shadow-primary/20 transition-all active:scale-95
+                         flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined msym">shopping_cart</span> ADD TO CART
+          </button>
+          <button onclick="buyNow()"
+                  class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white
+                         font-bold py-4 rounded-xl transition-all active:scale-95
+                         flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined msym">bolt</span> BUY NOW
+          </button>
+        </div>`;
+    }
+  }
+
+  /* ════════════════════════════════════════════════
+     INTERACTIONS
+  ════════════════════════════════════════════════ */
+  function addToCart() {
+    if (!selectedSize) {
+      document.getElementById('size-error').classList.remove('hidden');
+      return;
+    }
+    cartCount += qty;
+    const badge = document.getElementById('cart-badge');
+    badge.textContent = cartCount;
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+    showToast(
+      'Added ' + qty + '× ' + PRODUCT_NAME + ' (' + activeVariant.color + ', ' + selectedSize + ') to cart',
+      'check_circle', 'text-green-400'
+    );
+    if (getStockState() === 'low_stock') {
+      activeVariant = { ...activeVariant, stock: Math.max(0, activeVariant.stock - qty) };
+      if (activeVariant.stock === 0) activeVariant.stockState = 'sold_out';
+      renderStockInfo();
+      renderCartActions();
+    }
+  }
+
+  function buyNow() {
+    if (!selectedSize) {
+      document.getElementById('size-error').classList.remove('hidden');
+      return;
+    }
+    showToast('Redirecting to checkout…', 'bolt', 'text-amber-400');
+    setTimeout(() => {
+      window.location.href = '/checkout?product=' + PRODUCT_ID + '&variant=' + activeVariant._id + '&qty=' + qty;
+    }, 800);
+  }
+
+  function changeQty(delta) {
+    qty = Math.max(1, Math.min(getStockCount() || 10, qty + delta));
+    document.getElementById('qty-display').textContent = qty;
+  }
+
+  function toggleWishlist() {
+    wishlisted = !wishlisted;
+    const btn  = document.querySelector('#wishlist-btn span');
+    btn.style.fontVariationSettings = wishlisted ? "'FILL' 1" : "'FILL' 0";
+    btn.parentElement.classList.toggle('text-red-500',   wishlisted);
+    btn.parentElement.classList.toggle('text-slate-400', !wishlisted);
+    showToast(
+      wishlisted ? 'Saved to Wishlist' : 'Removed from Wishlist',
+      wishlisted ? 'favorite' : 'heart_broken',
+      wishlisted ? 'text-red-400' : 'text-slate-400'
+    );
+  }
+
+  function toggleAcc(btn) {
+    const body   = btn.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    document.querySelectorAll('.acc-body.open').forEach(b => {
+      b.classList.remove('open');
+      b.previousElementSibling.classList.remove('open');
+    });
+    if (!isOpen) {
+      body.classList.add('open');
+      btn.classList.add('open');
+    }
+  }
+
+  /* ════════════════════════════════════════════════
+     TOAST
+  ════════════════════════════════════════════════ */
+  let _toastTimer;
+  function showToast(msg, icon, iconCls) {
+    document.getElementById('toast-msg').textContent = msg;
+    const ic = document.getElementById('toast-icon');
+    ic.textContent = icon;
+    ic.className   = 'material-symbols-outlined msym ' + iconCls;
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() =>
+      document.getElementById('toast').classList.remove('show'), 2800);
+  }
+
+  /* ════════════════════════════════════════════════
+     REDIRECT
+  ════════════════════════════════════════════════ */
+  function triggerRedirect() {
+    document.getElementById('redirect-overlay').classList.add('active');
+    let t = 5;
+    const bar = document.getElementById('redirect-bar');
+    const cnt = document.getElementById('countdown');
+    setTimeout(() => { if (bar) bar.style.width = '100%'; }, 100);
+    const iv = setInterval(() => {
+      t--;
+      if (cnt) cnt.textContent = t;
+      if (t <= 0) { clearInterval(iv); window.location.href = '/product-listing'; }
+    }, 1000);
+  }
+
+  /* ── Keyboard navigation for mobile zoom overlay ── */
+  document.addEventListener('keydown', e => {
+    const mo = document.getElementById('mob-zoom');
+    if (!mo.classList.contains('active')) return;
+    if (e.key === 'Escape')     closeMobZoom();
+    if (e.key === 'ArrowLeft')  mobPrev();
+    if (e.key === 'ArrowRight') mobNext();
+  });
+</script>
+</body>
+</html>

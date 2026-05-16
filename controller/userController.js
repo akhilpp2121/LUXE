@@ -9,6 +9,8 @@ import {
   canLoadResetPassword,
   resendOtpService,
 } from "../service/userService.js";
+import { variantDataLoad } from "../service/productsService.js";
+import { getHomePageData,getProductDetailData } from "../service/userProductService.js";
 
 export const userLandingLoad = (req, res) => {
   if (req.session.user) return res.redirect("/homePage");
@@ -38,10 +40,22 @@ export const otpPageLoad = (req, res) => {
   return res.render("Users/otpPage", { email });
 };
 
-export const homeLoad = (req, res) => {
-  if (!req.session.user) return res.redirect("/login");
-  return res.render("Users/homePage", { user: req.session.user });
+export const homeLoad = async (req, res) => {
+  try {
+    if (!req.session.user) return res.redirect("/login");
+
+    const { products } = await getHomePageData();
+
+    return res.render("Users/homePage", {
+      user: req.session.user,
+      product: products,
+    });
+  } catch (error) {
+    console.error("Home page load error:", error);
+    return res.status(500).render("error", { message: "Something went wrong" });
+  }
 };
+
 
 export const registerController = async (req, res) => {
   
@@ -186,33 +200,113 @@ export const logoutUserController = (req, res) => {
 
 // product
 
-export const productLisitingLoad = async(req,res)=>{
-    try{
-        let filter = {},sortOption = {}
-        if(req.query.color){
-            filter.color = req.query.color
-        }
-        if(req.query.size){
-            filter.size = req.query.size
-        }
-        if(req.query.price){
-            filter.price = Number(req.query.price)
-        }
-        filter["stock"] = {$gt:0}
-        let products = await ProductsLoad(filter)
-        if(!products.success){
-            return res.render("User/productListingPage",{error:products.message,product:[]})
-        }
-        return res.render("User/product-listing",{
-            product:products.data,
-            error:'',
-            color:products.color,
-            size:products.size,
-            colorValue:req.query.color||"",
-            sizeValue:req.query.size||""
-        })
-    }catch(e){
-        console.log("Server error ",e)
-        return res.render("User/product-listing",{product:[],error:'Server error',color:'',size:''})
+
+import { getFilteredProducts } from "../service/userProductService.js";
+export const productListingLoad = async (req, res) => {
+  try {
+    const data = await getFilteredProducts(req.query);
+
+    const buildPagination = (current, total) => {
+      if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+      const pages = new Set([1, total, current]);
+      for (let i = current - 1; i <= current + 1; i++) {
+        if (i >= 1 && i <= total) pages.add(i);
+      }
+
+      const sorted = [...pages].sort((a, b) => a - b);
+      const result = [];
+
+      for (let i = 0; i < sorted.length; i++) {
+        if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('…');
+        result.push(sorted[i]);
+      }
+
+      return result;
+    };
+
+    return res.render("Users/productListingPage", {
+      product: data.products,
+      searchValue: data.filters.search,
+      sortValue: data.filters.sort,
+      categoryValue: data.filters.category,
+      minPrice: data.filters.minPrice,
+      maxPrice: data.filters.maxPrice,
+      categories: data.categories,
+      currentPage: data.currentPage,
+      totalPages: data.totalPages,
+      totalProducts: data.total,
+      paginationPages: buildPagination(data.currentPage, data.totalPages),
+      productsPerPage: data.LIMIT,
+      error: "",
+    });
+
+  } catch (err) {
+    console.error("productListingLoad:", err);
+
+    res.render("Users/productListingPage", {
+      product: [],
+      searchValue: "",
+      sortValue: "",
+      categoryValue: "",
+      minPrice: "",
+      maxPrice: "",
+      categories: [],
+      currentPage: 1,
+      totalPages: 1,
+      totalProducts: 0,
+      paginationPages: [1],
+      productsPerPage: 9,
+      error: "Server error",
+    });
+  }
+};
+
+
+
+
+// ============================================================
+//  controllers/productDetailController.js
+// ============================================================
+
+
+export const productDetailLoad = async (req, res) => {
+  const { productId } = req.params;
+
+  try {
+    const data = await getProductDetailData(productId);
+
+    if (!data.success && data.reason === "not_found") {
+      return res.status(404).render("Users/404", { message: "Product not found" });
     }
-}
+
+    if (!data.success && data.reason === "unavailable") {
+      return res.render("Users/productDetailsPage", {
+        product: null, variants: [], allVariants: [],
+        defaultVariant: null, sizes: [], colors: [],
+        relatedProducts: [], unavailable: true, error: "",
+      });
+    }
+
+    return res.render("Users/productDetailsPage", {
+      product:         data.product,
+      variants:        data.variants,       // unique per color
+      allVariants:     data.allVariants,    // all variants
+      defaultVariant:  data.defaultVariant,
+      sizes:           data.sizes,
+      colors:          data.colors,
+      relatedProducts: data.relatedProducts,
+      unavailable:     false,
+      error:           "",
+    });
+
+  } catch (err) {
+    console.error("productDetailLoad error:", err);
+    return res.status(500).render("Users/productDetailsPage", {
+      product: null, variants: [], allVariants: [],
+      defaultVariant: null, sizes: [], colors: [],
+      relatedProducts: [], unavailable: false,
+      error: "Something went wrong. Please try again.",
+    });
+  }
+};

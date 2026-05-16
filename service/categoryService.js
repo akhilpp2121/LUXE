@@ -5,20 +5,22 @@ import categoryModel from "../model/categoryModel.js";
 
 export const categoryModelLoad = async (filter, sort, pageNo) => {
     const page  = parseInt(pageNo) || 1;
-    const limit = 5;
+    const limit = 4;
     const skip  = (page - 1) * limit;
 
     const total      = await categoryModel.countDocuments(filter);  
     const totalPages = Math.ceil(total / limit);
+    
+    
 
     const data = await categoryModel.find(filter).sort(sort).skip(skip).limit(limit);
 
-    return { success: true, data, currentPage: page, totalPages, totalUser: total };
+    return { success: true, data, currentPage: page, totalPages, totalCount: total };
 };
 
 export const categoryDataLoad = async (filter) => {
     try {
-        const data = await categoryModel.find(filter);  // ← find returns array ✓
+        const data = await categoryModel.find(filter); 
         return { success: true, data };
     } catch (error) {
         return { success: false, message: "Database error", data: [] };
@@ -39,14 +41,10 @@ export const categoryFindOne = async (filter) => {
 
 
 export const adminCategoryAddLogic = async (categoryName, description, isActive) => {
-    try {
-        console.log("checking for existing:", categoryName);
-        
+    try {        
         const existing = await categoryModel.findOne({
             categoryName: { $regex: `^${categoryName}$`, $options: "i" }
         });
-
-        console.log("existing found:", existing);
 
         if (existing) {
             return { success: false, message: "Category already exists" };
@@ -54,7 +52,7 @@ export const adminCategoryAddLogic = async (categoryName, description, isActive)
 
         const newCategory = new categoryModel({ categoryName, description, isActive });
         const saved = await newCategory.save();
-        console.log("saved:", saved);
+        
 
         return { success: true };
     } catch (error) {
@@ -67,7 +65,7 @@ export const adminCategoryAddLogic = async (categoryName, description, isActive)
 
 export const adminCategoryEditLogic = async (id, categoryName, description, isActive) => {
     try {
-        // Check for duplicate name, excluding the current category
+
         const existing = await categoryModel.findOne({
             categoryName: { $regex: `^${categoryName}$`, $options: "i" },
             _id: { $ne: id }

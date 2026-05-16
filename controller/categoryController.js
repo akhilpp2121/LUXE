@@ -10,34 +10,50 @@ import {
 } from "../service/categoryService.js";
 
 export const adminCategoryLoad = async (req, res) => {
-    let filter = {};
+   try {
+
+    const searchQuery = req.query.search?.trim() || "";
+    const status = req.query.status;
+    const sort = req.query.sort;
+
+    const filter = {};
+
     let sortOption = { createdAt: -1 };
 
-    if (req.query.status === "true")       filter.isActive = true;
-    else if (req.query.status === "false") filter.isActive = false;
-
-    if (req.query.search && req.query.search.trim() !== "") {
-        filter.$or = [
-            { categoryName: { $regex: req.query.search, $options: "i" } }
-        ];
+    if (searchQuery) {
+        filter.categoryName = { $regex: searchQuery, $options: "i" };
     }
 
-    if (req.query.sort === "oldest") sortOption = { createdAt: 1 };
+    if (status === "true")       filter.isActive = true;
+    else if (status === "false") filter.isActive = false;
+
+    if (sort === "oldest") sortOption = { createdAt: 1 };
 
     const data = await categoryModelLoad(filter, sortOption, req.query.page);
-   
 
     return res.render("Admin/categoryPage", {
         data:        data.data,
         error:       "",
-        status:      req.query.status || "",   
-        search:      req.query.search  || "",
-        sort:        req.query.sort    || "latest",
+        status:      req.query.status || "",
+        search:      req.query.search || "",
+        sort:        req.query.sort   || "latest",
         currentPage: data.currentPage,
-        totalUser:   data.totalUser,
+        totalCount:  data.totalCount,
         totalPage:   data.totalPages,
         activePage:  "category",
     });
+
+   } catch (error) {
+    console.log(error); 
+
+    return res.render("Admin/categoryPage", {
+        error: "Something went wrong",
+        data: [],
+        totalCount: 0,
+        totalPage: 0,
+        currentPage: 1
+    });
+   }
 };
 
 export const addCategoryPageLoad = async (req, res) => {
@@ -68,7 +84,7 @@ export const editCategoryPageLoad = async (req, res) => {
 
 export const adminCategoryAdd = async (req, res) => {
     try {
-        console.log("req.body →", req.body);  
+
 
         const { categoryName, description, status } = req.body;
 
@@ -78,6 +94,8 @@ export const adminCategoryAdd = async (req, res) => {
 
         const isActive = status === "active";   
         const result = await adminCategoryAddLogic(categoryName, description, isActive);
+        
+        
 
         if (!result.success) {
             return res.status(409).json({ success: false, message: result.message });

@@ -16,7 +16,8 @@ import {
   verifyOtpController, resendOtpController, verifyEmailController,
   resetPasswordLoad, resetPassword,googleCallback,
   logoutUserController,
-  productLisitingLoad
+  productListingLoad,
+  productDetailLoad
 } from "../controller/userController.js";
 
 import {
@@ -81,6 +82,12 @@ router.post("/profile/avatar/upload",isUserAuthenticated, avatarUpload.single("a
 router.delete("/profile/avatar",isUserAuthenticated, deleteAvatar);
 router.get('/logout',logoutUserController);
 
-router.get('/product-listing',productLisitingLoad)
+router.get("/product-listing",isUserAuthenticated, productListingLoad);
+router.get("/product-details/:productId", isUserAuthenticated, productDetailLoad);
+
+
+
+
+
 
 export default router;

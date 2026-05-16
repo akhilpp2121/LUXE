@@ -683,11 +683,31 @@
               </button>
             </div>
 
-            <div class="field" style="margin-bottom: 18px;">
+            <!-- <div class="field" style="margin-bottom: 18px;">
               <label>SKU *</label>
               <input type="text" name="variants[0].sku" placeholder="e.g. RFTR-001-RED-M"/>
               <span class="error-msg sku-error"></span>
-            </div>
+            </div> -->
+            <div class="field" style="margin-bottom: 18px;">
+  <label style="display:flex;align-items:center;justify-content:space-between;">
+    SKU
+    <span style="color:var(--primary);font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;background:rgba(144,171,255,.1);padding:2px 8px;border-radius:4px;">Auto-generated</span>
+  </label>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <input type="text" name="variants[0].sku" class="sku-input"
+           placeholder="Fill name + color + size…"
+           readonly
+           style="flex:1;cursor:default;color:var(--primary);font-family:monospace;font-size:13px;letter-spacing:.5px;"/>
+    <button type="button" class="btn-regen-sku"
+            title="Regenerate SKU"
+            style="width:38px;height:38px;flex-shrink:0;border-radius:9px;border:1px solid var(--outline-variant);
+                   background:var(--surface-bright);color:var(--primary);cursor:pointer;font-size:17px;
+                   display:flex;align-items:center;justify-content:center;transition:all .2s;">
+      ↻
+    </button>
+  </div>
+  <span class="error-msg sku-error"></span>
+</div>
 
             <div class="grid-2" style="margin-bottom: 18px;">
               <div class="field">
@@ -781,12 +801,12 @@
   </main>
 </div>
 
+
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script>
-  // ─────────────────────────────────────────────
-  //  CROP STATE
-  // ─────────────────────────────────────────────
   var cropperInstance = null;
   var pendingInput    = null;
   var pendingArea     = null;
@@ -794,100 +814,59 @@
   var cropModal = document.getElementById('cropModal');
   var cropImg   = document.getElementById('cropImage');
 
-  // ── Open crop modal ──
-  // Key fix: set onload BEFORE setting src so the event always fires
   function openCrop(file, inputEl, areaEl) {
     pendingInput = inputEl;
     pendingArea  = areaEl;
 
     var reader = new FileReader();
     reader.onload = function (ev) {
-      // Destroy old cropper first
-      if (cropperInstance) {
-        cropperInstance.destroy();
-        cropperInstance = null;
-      }
-
-      // CRITICAL: attach onload BEFORE setting src
+      if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
       cropImg.onload = function () {
-        cropperInstance = new Cropper(cropImg, {
-          aspectRatio: 1,
-          viewMode: 1,
-          background: false,
-        });
+        cropperInstance = new Cropper(cropImg, { aspectRatio: 1, viewMode: 1, background: false });
       };
-
-      // Now set src — onload will fire after image renders
       cropImg.src = ev.target.result;
-
-      // Show modal
       cropModal.classList.add('open');
     };
     reader.readAsDataURL(file);
   }
 
-  // ── Apply crop ──
   document.getElementById('cropApply').addEventListener('click', function () {
     if (!cropperInstance) return;
-
     cropperInstance.getCroppedCanvas({ width: 500, height: 500 }).toBlob(function (blob) {
       var croppedFile = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
-
-      // Inject cropped file back into the hidden <input type="file">
       var dt = new DataTransfer();
       dt.items.add(croppedFile);
       pendingInput.files = dt.files;
-
-      // Mark this input as having a cropped file (for validation)
       pendingInput.dataset.cropped = 'true';
-
-      // Show preview
       var preview = pendingArea.querySelector('.preview-image');
       preview.src = URL.createObjectURL(croppedFile);
       pendingArea.classList.add('has-image');
-
       var label = pendingArea.querySelector('.file-name');
       if (label) label.textContent = 'cropped.jpg';
-
-      // Close WITHOUT resetting input value — file must stay injected
       closeCropModal(false);
     }, 'image/jpeg', 0.92);
   });
 
-  // ── Cancel crop ──
   document.getElementById('cropCancel').addEventListener('click', function () {
-    // Reset input on cancel so same file can be picked again
     closeCropModal(true);
   });
 
-  // resetInput=true on cancel, false on apply
   function closeCropModal(resetInput) {
     cropModal.classList.remove('open');
-    if (cropperInstance) {
-      cropperInstance.destroy();
-      cropperInstance = null;
-    }
-    if (resetInput && pendingInput) {
-      pendingInput.value = '';
-    }
+    if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+    if (resetInput && pendingInput) pendingInput.value = '';
     pendingInput = null;
     pendingArea  = null;
   }
 
-  // ─────────────────────────────────────────────
-  //  BIND IMAGE UPLOAD AREAS
-  //  pointer-events:none on all children (set in CSS) means
-  //  every click on the card lands on .img-upload itself.
-  //  We simply call input.click() from there — no bubbling issues.
-  // ─────────────────────────────────────────────
+  // ─── ALLOWED IMAGE TYPES ───
+  var ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
   function bindUploadAreas(container) {
     container.querySelectorAll('.image-upload-area').forEach(function (area) {
       var input = area.querySelector('.image-input');
 
-      // One clean click handler — children have pointer-events:none in CSS
-      // so e.target is always the .img-upload div itself
       area.addEventListener('click', function () {
-        // Don't open picker if crop modal is already open
         if (cropModal.classList.contains('open')) return;
         input.click();
       });
@@ -895,19 +874,27 @@
       input.addEventListener('change', function (e) {
         var file = e.target.files[0];
         if (!file) return;
-        // Do NOT reset value here — openCrop reads the file asynchronously
-        // Value is reset inside closeCropModal() after everything is done
+
+        // ── File type validation ──
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          Swal.fire({
+            toast: true, icon: 'error',
+            title: 'Invalid file type — use JPG, PNG, or WEBP',
+            position: 'top-right', showConfirmButton: false, timer: 3500,
+            background: '#0f1930', color: '#dee5ff',
+          });
+          e.target.value = '';
+          return;
+        }
+
         openCrop(file, input, area);
       });
     });
   }
 
-  // Bind the first variant's upload areas on page load
   bindUploadAreas(document);
 
-  // ─────────────────────────────────────────────
-  //  VARIANT MANAGEMENT
-  // ─────────────────────────────────────────────
+  // ─── VARIANT MANAGEMENT ───
   var variantIndex = 1;
 
   document.getElementById('addVariantBtn').addEventListener('click', function () {
@@ -915,41 +902,22 @@
     var first     = container.querySelector('.variant-group');
     var clone     = first.cloneNode(true);
 
-    // Re-index all named inputs
     clone.querySelectorAll('[name]').forEach(function (el) {
       el.name = el.name.replace(/\[\d+\]/, '[' + variantIndex + ']');
       if (!el.classList.contains('image-input')) el.value = '';
     });
-
-    // Reset image previews
-    clone.querySelectorAll('.preview-image').forEach(function (img) {
-      img.src = '';
-    });
-    clone.querySelectorAll('.image-upload-area').forEach(function (a) {
-      a.classList.remove('has-image');
-    });
-    clone.querySelectorAll('.image-input').forEach(function (inp) {
-      inp.value = '';
-      delete inp.dataset.cropped;
-    });
-    clone.querySelectorAll('.ms-upload, .image-upload-area p').forEach(function (el) {
-      el.style.display = '';
-    });
+    clone.querySelectorAll('.preview-image').forEach(function (img) { img.src = ''; });
+    clone.querySelectorAll('.image-upload-area').forEach(function (a) { a.classList.remove('has-image'); });
+    clone.querySelectorAll('.image-input').forEach(function (inp) { inp.value = ''; delete inp.dataset.cropped; });
+    clone.querySelectorAll('.ms-upload, .image-upload-area p').forEach(function (el) { el.style.display = ''; });
     clone.querySelectorAll('.file-name').forEach(function (el) { el.textContent = ''; });
     clone.querySelectorAll('.error-msg').forEach(function (el) { el.textContent = ''; });
-
     clone.querySelector('.variant-title').textContent = 'Variant ' + (variantIndex + 1);
     clone.querySelector('.badge-num').textContent = variantIndex + 1;
     clone.querySelector('.delete-variant-btn').classList.remove('hidden');
-
-    // Re-bind upload areas (cloneNode does NOT copy event listeners)
     bindUploadAreas(clone);
-
-    clone.querySelectorAll('.delete-variant-btn').forEach(function (b) {
-      b.onclick = function () { deleteVariant(this); };
-    });
-
-    container.appendChild(clone);
+    clone.querySelectorAll('.delete-variant-btn').forEach(function (b) { b.onclick = function () { deleteVariant(this); }; });
+    document.getElementById('variantsContainer').appendChild(clone);
     variantIndex++;
     updateDeleteButtons();
   });
@@ -981,9 +949,7 @@
     });
   }
 
-  // ─────────────────────────────────────────────
-  //  VALIDATION
-  // ─────────────────────────────────────────────
+  // ─── BASIC FIELD VALIDATION ───
   var fields = {
     name:        document.getElementById('p-name'),
     category:    document.getElementById('category'),
@@ -1020,9 +986,11 @@
     fields[f].addEventListener('blur',  function () { validate(f); });
   });
 
+  // ─── VARIANT VALIDATION (with price > discount check) ───
   function validateVariants() {
     var ok = true;
     document.querySelectorAll('.variant-group').forEach(function (v) {
+
       var color    = v.querySelector('[name*="color"]');
       var colorErr = v.querySelector('.color-error');
       if (!color.value.trim()) { colorErr.textContent = 'Color is required'; ok = false; }
@@ -1033,26 +1001,36 @@
       if (!size.value) { sizeErr.textContent = 'Size is required'; ok = false; }
       else sizeErr.textContent = '';
 
-      var sku    = v.querySelector('[name*="sku"]');
-      var skuErr = v.querySelector('.sku-error');
-      if (!sku.value.trim()) { skuErr.textContent = 'SKU is required'; ok = false; }
-      else skuErr.textContent = '';
+
+var skuErr = v.querySelector('.sku-error');
+if (skuErr) skuErr.textContent = '';
 
       var stock    = v.querySelector('[name*="stock"]');
       var stockErr = v.querySelector('.stock-error');
       if (!stock.value || +stock.value < 0) { stockErr.textContent = 'Valid stock required'; ok = false; }
       else stockErr.textContent = '';
 
-      var price    = v.querySelector('[name*="price"]');
+      var price    = v.querySelector('[name*=".price"]');
+      var discount = v.querySelector('[name*=".discount"]');
       var priceErr = v.querySelector('.price-error');
-      if (!price.value || +price.value <= 0) { priceErr.textContent = 'Valid price required'; ok = false; }
-      else priceErr.textContent = '';
+      var priceVal    = +price.value;
+      var discountVal = discount && discount.value ? +discount.value : 0;
+
+      if (!price.value || priceVal <= 0) {
+        priceErr.textContent = 'Valid price required';
+        ok = false;
+      } else if (discount && discount.value && discountVal >= priceVal) {
+        // ── NEW: discount must be less than price ──
+        priceErr.textContent = 'Discounted price must be less than the original price';
+        ok = false;
+      } else {
+        priceErr.textContent = '';
+      }
 
       var imgs   = v.querySelectorAll('.image-input');
       var imgErr = v.querySelector('.variant-images-error');
       var count  = 0;
       imgs.forEach(function (i) {
-        // Count if: has a real file selected OR has a cropped file injected
         if ((i.files && i.files.length > 0) || i.dataset.cropped === 'true') count++;
       });
       if (count < 3) { imgErr.textContent = 'All 3 images required (' + count + '/3)'; ok = false; }
@@ -1061,9 +1039,7 @@
     return ok;
   }
 
-  // ─────────────────────────────────────────────
-  //  SUBMIT
-  // ─────────────────────────────────────────────
+  // ─── SUBMIT ───
   document.getElementById('productForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     var valid = Object.keys(fields).every(function (f) { return validate(f); });
