@@ -44,18 +44,25 @@ export const homeLoad = async (req, res) => {
   try {
     if (!req.session.user) return res.redirect("/login");
 
-    const { products } = await getHomePageData();
+    const searchQuery = req.query.search || '';
+
+    const { products } = await getHomePageData(searchQuery);
+
+    const flashMessage = req.session.flashMessage || null;
+    req.session.flashMessage = null;
 
     return res.render("Users/homePage", {
       user: req.session.user,
+      flashMessage,
       product: products,
+      searchQuery, 
     });
+
   } catch (error) {
     console.error("Home page load error:", error);
     return res.status(500).render("error", { message: "Something went wrong" });
   }
 };
-
 
 export const registerController = async (req, res) => {
   
@@ -200,11 +207,13 @@ export const logoutUserController = (req, res) => {
 
 // product
 
-
+import { getCartCount } from "../service/cartService.js";
 import { getFilteredProducts } from "../service/userProductService.js";
 export const productListingLoad = async (req, res) => {
   try {
     const data = await getFilteredProducts(req.query);
+
+    const cartCount = await getCartCount(req.session.user?._id);
 
     const buildPagination = (current, total) => {
       if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -227,6 +236,7 @@ export const productListingLoad = async (req, res) => {
 
     return res.render("Users/productListingPage", {
       product: data.products,
+      cartCount: cartCount,
       searchValue: data.filters.search,
       sortValue: data.filters.sort,
       categoryValue: data.filters.category,
@@ -246,6 +256,8 @@ export const productListingLoad = async (req, res) => {
 
     res.render("Users/productListingPage", {
       product: [],
+       cartCount: 0,   
+
       searchValue: "",
       sortValue: "",
       categoryValue: "",

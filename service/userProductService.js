@@ -2,44 +2,150 @@ import Variant from "../model/variantModel.js";
 import Category from "../model/categoryModel.js"
 import Product from "../model/productsModel.js"
 
-export const getHomePageData = async () => {
-  try {
-    const all = await Variant.find({}).populate("productId").lean();
+// export const getHomePageData = async () => {
+//   try {
+//     const all = await Variant.find({}).populate("productId").lean();
 
     
     
 
     
    
+//     const seenProducts = new Set();
+//     const unique = [];
+
+//     for (const v of all) {                          
+//       if (unique.length >= 8) break;
+
+//       if (!v.productId) continue;                   
+//       if (!v.productId.isActive) continue;          
+//       if (!v.isActive) continue;                    
+//       if (v.stock <= 0) continue;                   
+
+//       const pid = v.productId._id.toString();
+//       if (!seenProducts.has(pid)) {
+//         seenProducts.add(pid);
+//         unique.push({
+//           ...v,
+//           save: v.price - v.discount
+//         });
+//       }
+//     }
+
+//     return { success: true, products: unique };
+//   } catch (error) {
+//     console.error("getHomePageData error:", error);
+//     return { success: false, products: [] };
+//   }
+// };
+
+// export const getHomePageData = async (searchQuery = '') => {
+//   try {
+//     let variantFilter = { isActive: true, stock: { $gt: 0 } };
+
+//     if (searchQuery) {
+//       // Find matching product IDs by name
+//       const matchingProducts = await Product.find({
+//         isActive: true,
+//         name: { $regex: searchQuery, $options: 'i' }
+//       }).select('_id');
+
+//       const matchingProductIds = matchingProducts.map(p => p._id);
+
+//       if (matchingProductIds.length === 0) {
+//         // No products matched the search
+//         return { success: true, products: [] };
+//       }
+
+//       variantFilter.productId = { $in: matchingProductIds };
+//     }
+
+//     const all = await Variant.find(variantFilter).populate({
+//       path: "productId",
+//       populate: {
+//         path: "categoryId"
+//       }
+//     }).lean();
+
+//     const seenProducts = new Set();
+//     const unique = [];
+
+//     for (const v of all) {
+//       if (unique.length >= 8) break;
+
+//       if (!v.productId) continue;
+//       if (!v.productId.isActive) continue;
+//       if (!v.productId.categoryId) continue;
+//       if (!v.productId.categoryId.isActive) continue;
+
+//       const pid = v.productId._id.toString();
+//       if (!seenProducts.has(pid)) {
+//         seenProducts.add(pid);
+//         unique.push({
+//           ...v,
+//           save: v.price - v.discount > 0 ? v.price - v.discount : 0
+//         });
+//       }
+//     }
+
+//     return { success: true, products: unique };
+
+//   } catch (error) {
+//     console.error("getHomePageData error:", error);
+//     return { success: false, products: [] };
+//   }
+// };
+export const getHomePageData = async (searchQuery = '') => {
+  try {
+    let variantFilter = { isActive: true, stock: { $gt: 0 } };
+
+    if (searchQuery) {
+      const matchingProducts = await Product.find({
+        isActive: true,
+        name: { $regex: searchQuery, $options: 'i' }
+      }).select('_id');
+
+      const matchingProductIds = matchingProducts.map(p => p._id);
+
+      if (matchingProductIds.length === 0) {
+        return { success: true, products: [] };
+      }
+
+      variantFilter.productId = { $in: matchingProductIds };
+    }
+
+    const all = await Variant.find(variantFilter).populate({
+      path: "productId",
+      populate: { path: "categoryId" }
+    }).lean();
+
     const seenProducts = new Set();
     const unique = [];
 
-    for (const v of all) {                          
+    for (const v of all) {
       if (unique.length >= 8) break;
-
-      if (!v.productId) continue;                   
-      if (!v.productId.isActive) continue;          
-      if (!v.isActive) continue;                    
-      if (v.stock <= 0) continue;                   
+      if (!v.productId) continue;
+      if (!v.productId.isActive) continue;
+      if (!v.productId.categoryId) continue;
+      if (!v.productId.categoryId.isActive) continue;
 
       const pid = v.productId._id.toString();
       if (!seenProducts.has(pid)) {
         seenProducts.add(pid);
         unique.push({
           ...v,
-          save: v.price - v.discount
+          save: v.price - v.discount > 0 ? v.price - v.discount : 0
         });
       }
     }
 
     return { success: true, products: unique };
+
   } catch (error) {
     console.error("getHomePageData error:", error);
     return { success: false, products: [] };
   }
 };
-
-
 
 export const getFilteredProducts = async (query) => {
   const search   = (query.search || "").trim();
@@ -93,8 +199,8 @@ export const getFilteredProducts = async (query) => {
 
 
   // PRICE FILTER
-  if (minPrice) variants = variants.filter(v => v.price >= +minPrice);
-  if (maxPrice) variants = variants.filter(v => v.price <= +maxPrice);
+  if (minPrice) variants = variants.filter(v => v.discount >= +minPrice);
+  if (maxPrice) variants = variants.filter(v => v.discount <= +maxPrice);
 
 
 

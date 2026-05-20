@@ -15,7 +15,6 @@
         colors: {
           primary: "#1152d4",
           "primary-dark": "#0d3fa8",
-          "bg-light": "#f6f6f8",
           "bg-dark": "#101622",
         },
         fontFamily: {
@@ -27,14 +26,13 @@
   }
 </script>
 <style>
-  /* ── Base ── */
   body { font-family: 'Manrope', sans-serif; }
   .msym { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
   /* ── Toast ── */
   #toast {
     position: fixed; bottom: 2rem; left: 50%;
-    transform: translateX(-50%) translateY(100px);
+    transform: translateX(-50%) translateY(120px);
     z-index: 9999;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     pointer-events: none;
@@ -64,68 +62,52 @@
   }
   .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .thumb-item.active { border-color: #1152d4; box-shadow: 0 0 0 2px rgba(17,82,212,0.3); }
+  .thumb-item:hover:not(.active) { border-color: #334155; }
+
+  /* ── Gallery area ── */
+  #gallery-area {
+    position: relative;
+    flex: 1;
+  }
 
   /* ── Main image wrap ── */
+  /* CHANGED: removed zoom-panel-related overflow:visible and crosshair;
+     now uses overflow:hidden to clip the scaled image (Raftaara method) */
   #main-wrap {
-    position: relative; width: 100%; aspect-ratio: 3/4;
-    border-radius: 12px; overflow: hidden; background: #1e293b;
-    cursor: crosshair;
-  }
-  #main-img {
-    width: 100%; height: 100%; object-fit: cover;
-    display: block; pointer-events: none; user-select: none;
-  }
-
-  /* ── Lens box ── */
-  #lens-box {
-    position: absolute;
-    width: 120px; height: 120px;
-    border: 1.5px solid rgba(255,255,255,0.9);
-    background: rgba(255,255,255,0.12);
-    pointer-events: none; display: none;
-    border-radius: 4px; box-sizing: border-box; z-index: 10;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.35);
-  }
-
-  /* ── Zoom panel (real ecommerce style) ── */
-  #zoom-panel {
-    position: absolute;
-    top: 0; left: calc(100% + 16px);
-    width: 380px; height: 100%;
-    border-radius: 12px; overflow: hidden;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3/4;
+    border-radius: 12px;
+    overflow: hidden;        /* clips the zoomed image inside the box */
     background: #1e293b;
-    border: 1px solid rgba(255,255,255,0.08);
-    display: none; z-index: 20;
+    cursor: crosshair;       /* signals zoom is available */
+    user-select: none;
   }
 
-  /* The actual zoomed image — positioned absolutely, moved via translate */
-  #zoom-inner {
-    position: absolute;
-    top: 0; left: 0;
-    transform-origin: 0 0;
-    will-change: transform;
-  }
-  #zoom-inner img {
+  /* CHANGED: removed transform-origin:center fixed; now set dynamically by JS on mousemove */
+  #main-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
     display: block;
-  }
-
-  /* Placeholder shown before hover */
-  #zoom-hint {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 10px; color: #64748b; font-size: 13px;
     pointer-events: none;
+    user-select: none;
+    transition: opacity 0.2s;
+    transform-origin: center center;
   }
 
-  /* ── Hint badge ── */
+  /* ── Lens box — REMOVED (not used in Raftaara method) ── */
+
+  /* ── Zoom panel — REMOVED (not used in Raftaara method) ── */
+
+  /* ── Hint badge on main image ── */
   #zoom-hint-badge {
     position: absolute; bottom: 12px; left: 12px;
-    background: rgba(0,0,0,0.55); color: #fff;
+    background: rgba(0,0,0,0.6); color: #fff;
     font-size: 11px; font-weight: 600;
     padding: 5px 12px; border-radius: 20px;
     display: flex; align-items: center; gap: 5px;
     pointer-events: none; z-index: 5;
+    transition: opacity 0.2s;
   }
 
   /* ── Mobile zoom overlay ── */
@@ -135,7 +117,17 @@
     align-items: center; justify-content: center; flex-direction: column; gap: 16px;
   }
   #mob-zoom.active { display: flex; }
-  #mob-zoom-img { max-width: 92vw; max-height: 78vh; object-fit: contain; border-radius: 10px; touch-action: none; }
+  #mob-zoom-img { max-width: 92vw; max-height: 78vh; object-fit: contain; border-radius: 10px; }
+
+  /* ── Sold-out overlay ── */
+  #sold-overlay {
+    display: none; position: absolute; inset: 0;
+    background: rgba(0,0,0,0.55);
+    background-image: repeating-linear-gradient(-45deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px);
+    border-radius: 12px;
+    align-items: center; justify-content: center; flex-direction: column; gap: 10px; z-index: 6;
+  }
+  #sold-overlay.show { display: flex; }
 
   /* ── Color btn ── */
   .color-btn {
@@ -144,18 +136,18 @@
     color: #94a3b8; font-size: 12px; font-weight: 600;
     cursor: pointer; transition: all 0.15s; text-transform: capitalize;
   }
-  .color-btn.active { border-color: #1152d4; background: rgba(17,82,212,0.12); color: #1152d4; }
+  .color-btn.active { border-color: #1152d4; background: rgba(17,82,212,0.12); color: #60a5fa; }
 
   /* ── Size btn ── */
   .size-btn {
-    width: 46px; height: 40px;
+    width: 50px; height: 42px;
     display: flex; align-items: center; justify-content: center;
     border-radius: 8px; border: 1.5px solid #334155;
     background: transparent; color: #cbd5e1;
     font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
   }
-  .size-btn:hover:not(.oos):not(.selected) { border-color: #1152d4; color: #1152d4; }
-  .size-btn.selected { border: 2px solid #1152d4; background: rgba(17,82,212,0.15); color: #1152d4; }
+  .size-btn:hover:not(.oos):not(.selected) { border-color: #1152d4; color: #60a5fa; }
+  .size-btn.selected { border: 2px solid #1152d4; background: rgba(17,82,212,0.18); color: #60a5fa; }
   .size-btn.oos {
     border-color: #1e293b; color: #334155;
     cursor: not-allowed; text-decoration: line-through; position: relative;
@@ -190,15 +182,10 @@
   .fu { animation: fadeUp 0.5s ease forwards; opacity: 0; }
   .d1{animation-delay:0.05s} .d2{animation-delay:0.15s} .d3{animation-delay:0.25s} .d4{animation-delay:0.4s}
 
-  /* ── Sold-out overlay ── */
-  #sold-overlay {
-    display: none; position: absolute; inset: 0;
-    background: rgba(0,0,0,0.55);
-    background-image: repeating-linear-gradient(-45deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px);
-    border-radius: 12px;
-    align-items: center; justify-content: center; flex-direction: column; gap: 10px; z-index: 5;
+  /* ── Make the gallery column leave enough space for zoom panel on desktop ── */
+  @media (min-width: 1024px) {
+    .gallery-outer { overflow: visible !important; }
   }
-  #sold-overlay.show { display: flex; }
 </style>
 </head>
 <body class="bg-bg-dark text-slate-100 antialiased font-display min-h-screen">
@@ -235,7 +222,7 @@
       <span class="material-symbols-outlined msym">close</span>
     </button>
   </div>
-  <img id="mob-zoom-img" src="" alt="Zoomed product"/>
+  <img id="mob-zoom-img" src="" alt="Zoomed product" style="max-width:92vw;max-height:78vh;object-fit:contain;border-radius:10px;"/>
   <div class="flex items-center gap-6 pt-3">
     <button onclick="mobPrev()" class="p-2 rounded-full bg-white/10 text-white">
       <span class="material-symbols-outlined msym">chevron_left</span>
@@ -247,7 +234,7 @@
   <p class="text-slate-500 text-xs mt-2">Swipe or use arrows to navigate</p>
 </div>
 
-<!-- ══════════════════════════ PAGE SHELL ══════════════════════════ -->
+<!-- ══════════════ PAGE SHELL ══════════════ -->
 <div class="flex flex-col min-h-screen">
 
   <!-- HEADER -->
@@ -268,9 +255,14 @@
           <span class="material-symbols-outlined msym">search</span>
         </a>
         <a href="/cart" class="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
-          <span class="material-symbols-outlined msym">shopping_bag</span>
-          <span id="cart-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full items-center justify-center">0</span>
-        </a>
+  <span class="material-symbols-outlined msym">shopping_cart</span>
+  <% if (locals.cart > 0) { %>
+    <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+      <%= locals.cart %>
+    </span>
+  <% } %>
+</a>
+        
         <a href="/profile" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
           <span class="material-symbols-outlined msym">person</span>
         </a>
@@ -303,24 +295,24 @@
     <% } %>
 
     <!-- ══ MAIN PRODUCT GRID ══ -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-16">
 
       <!-- ══ GALLERY COLUMN ══ -->
-      <div class="lg:col-span-7 fu d2">
+      <div class="fu d2 gallery-outer" style="overflow:visible;">
         <div class="flex flex-col-reverse md:flex-row gap-4">
 
-          <!-- Thumbnail strip -->
+          <!-- Thumbnail strip (vertical on desktop, horizontal on mobile) -->
           <div id="thumb-strip"
-               class="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-1 md:pb-0"
-               style="max-height:500px"></div>
+               class="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-1 md:pb-0 flex-shrink-0"
+               style="max-height:520px;"></div>
 
-          <!-- Main image + zoom panel -->
-          <div class="flex-1 relative" id="gallery-area">
+          <!-- #gallery-area: position:relative -->
+          <div id="gallery-area">
+            <!-- Main image box -->
             <div id="main-wrap">
               <img id="main-img" src="" alt="<%= product.name %>"/>
 
-              <!-- Lens overlay -->
-              <div id="lens-box"></div>
+              <!-- REMOVED: #lens-box (not needed for Raftaara zoom method) -->
 
               <!-- Sold-out overlay -->
               <div id="sold-overlay">
@@ -328,37 +320,28 @@
                 <span class="text-white font-bold text-xl tracking-widest uppercase">Sold Out</span>
               </div>
 
-              <!-- Desktop zoom hint -->
+              <!-- Desktop: hover-to-zoom badge -->
               <div id="zoom-hint-badge" class="hidden md:flex">
                 <span class="material-symbols-outlined msym text-sm">zoom_in</span> Hover to zoom
               </div>
 
-              <!-- Mobile tap-to-zoom -->
+              <!-- Mobile: tap-to-zoom button -->
               <button onclick="openMobZoom(currentIdx)"
-                      class="md:hidden absolute bottom-4 right-4 flex items-center gap-1.5 bg-black/60 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                      class="md:hidden absolute bottom-4 right-4 flex items-center gap-1.5 bg-black/60 text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
                 <span class="material-symbols-outlined msym text-sm">zoom_in</span> Tap to zoom
               </button>
             </div>
 
-            <!-- Desktop zoom panel — rendered beside the main image -->
-            <div id="zoom-panel">
-              <!-- The actual high-res image, moved via CSS translate -->
-              <div id="zoom-inner">
-                <img id="zoom-img" src="" alt="Zoomed view"/>
-              </div>
-              <!-- Placeholder shown before hover -->
-              <div id="zoom-hint">
-                <span class="material-symbols-outlined msym text-4xl text-slate-600">zoom_in</span>
-                <span class="text-slate-500 text-sm">Hover over image to zoom</span>
-              </div>
-            </div>
-          </div>
+            <!-- REMOVED: #zoom-panel, #zoom-placeholder, #zoom-inner
+                 (the separate side panel is replaced by the in-place scale zoom) -->
+
+          </div><!-- /#gallery-area -->
 
         </div>
-      </div>
+      </div><!-- /gallery column -->
 
       <!-- ══ PRODUCT INFO COLUMN ══ -->
-      <div class="lg:col-span-5 flex flex-col gap-6 fu d3">
+      <div class="flex flex-col gap-6 fu d3">
 
         <!-- Title + wishlist -->
         <div class="space-y-3">
@@ -380,7 +363,7 @@
         </div>
 
         <!-- Price -->
-        <div id="price-section" class="space-y-1">
+        <div class="space-y-1">
           <%
             const ep = (defaultVariant.discount && defaultVariant.discount < defaultVariant.price)
                        ? defaultVariant.discount : defaultVariant.price;
@@ -429,7 +412,6 @@
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <p class="text-xs font-bold uppercase tracking-widest text-slate-500">Select Size</p>
-            <button class="text-xs text-primary font-bold uppercase tracking-wider hover:underline underline-offset-4">Size Guide</button>
           </div>
           <div id="size-grid" class="flex flex-wrap gap-2"></div>
           <p id="size-error" class="hidden text-xs text-red-400 font-semibold flex items-center gap-1">
@@ -544,10 +526,15 @@
                   <span class="text-white font-bold text-xs uppercase tracking-widest bg-black/60 px-3 py-1 rounded-full">Sold Out</span>
                 </div>
               <% } else { %>
-                <button class="rel-add absolute bottom-3 right-3 p-2 bg-white/90 text-slate-900 rounded-full shadow-lg"
+                <!-- <button class="rel-add absolute bottom-3 right-3 p-2 bg-white/90 text-slate-900 rounded-full shadow-lg"
                         onclick="event.stopPropagation(); showToast('<%= r.name %> added to cart','check_circle','text-green-400')">
                   <span class="material-symbols-outlined msym text-sm">add_shopping_cart</span>
-                </button>
+                </button> -->
+                <a href="/cart" 
+   class="rel-add absolute bottom-3 right-3 p-2 bg-white/90 text-slate-900 rounded-full shadow-lg"
+   onclick="event.stopPropagation(); showToast('<%= r.name %> added to cart','check_circle','text-green-400'); return false;">
+  <span class="material-symbols-outlined msym text-sm">add_shopping_cart</span>
+</a>
               <% } %>
               <% if (rSave) { %>
                 <span class="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
@@ -600,13 +587,7 @@
         </ul>
       </div>
       <div>
-        <h4 class="font-bold text-white mb-6 uppercase tracking-wider text-xs">Newsletter</h4>
-        <p class="text-sm text-slate-500 mb-4">Join for exclusive early access and style updates.</p>
-        <div class="flex gap-2">
-          <input class="flex-1 bg-slate-800 border-none rounded-lg px-4 py-2 text-sm text-white focus:ring-2 focus:ring-primary outline-none"
-                 placeholder="Email address" type="email"/>
-          <button class="bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary-dark transition-colors">JOIN</button>
-        </div>
+       
       </div>
     </div>
     <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 uppercase tracking-widest">
@@ -620,9 +601,7 @@
 
 </div><!-- /page shell -->
 
-<!-- ══════════════════════════════════════════════════
-     SERVER → CLIENT DATA INJECTION
-══════════════════════════════════════════════════ -->
+
 <script>
   const IS_UNAVAILABLE = <%- JSON.stringify(unavailable) %>;
   <% if (product) { %>
@@ -648,26 +627,72 @@
   let currentIdx   = 0;
   let cartCount    = 0;
 
-  /* ── Helpers ── */
   function getImages()     { return (activeVariant?.images ?? []).map(i => '/uploads/' + i); }
   function getStockState() { return activeVariant?.stockState ?? 'unavailable'; }
   function getStockCount() { return activeVariant?.stock ?? 0; }
 
-  /* ════════════════════════════════════════════════
-     INIT
-  ════════════════════════════════════════════════ */
+
+  async function addToCart() {
+  if (!selectedSize) {
+    document.getElementById('size-error').classList.remove('hidden');
+    document.getElementById('size-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  try {
+    const res = await fetch('/cart/add-cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        variantId: activeVariant._id,   
+        qty: qty
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      showToast(data.message || 'Failed to add to cart', 'error', 'text-red-400');
+      return;
+    }
+
+    // Update badge
+    cartCount += qty;
+    const badge = document.getElementById('cart-badge');
+    badge.textContent = cartCount;
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+
+    showToast(
+      'Added ' + qty + '× ' + PRODUCT_NAME +
+      ' (' + activeVariant.color + ', ' + selectedSize + ') to cart',
+      'check_circle', 'text-green-400'
+    );
+
+    // Optimistically decrement low-stock display
+    if (getStockState() === 'low_stock') {
+      activeVariant = { ...activeVariant, stock: Math.max(0, activeVariant.stock - qty) };
+      if (activeVariant.stock === 0) activeVariant.stockState = 'sold_out';
+      renderStockInfo();
+      renderCartActions();
+    }
+
+  } catch (err) {
+    console.error('Add to cart error:', err);
+    showToast('Something went wrong. Please try again.', 'error', 'text-red-400');
+  }
+}
+
   document.addEventListener('DOMContentLoaded', () => {
     if (IS_UNAVAILABLE || !activeVariant) { triggerRedirect(); return; }
     renderThumbs();
     renderSizeGrid();
     renderStockInfo();
     renderCartActions();
-    initDesktopZoom();
+    initDesktopZoom();   /* ← zoom init (Raftaara method) */
   });
 
-  /* ════════════════════════════════════════════════
-     THUMBNAIL STRIP
-  ════════════════════════════════════════════════ */
+ 
   function renderThumbs() {
     const strip  = document.getElementById('thumb-strip');
     const images = getImages();
@@ -693,135 +718,54 @@
     const mainImg = document.getElementById('main-img');
     mainImg.src = images[idx];
 
-    /* Keep zoom image in sync */
-    const zoomImg = document.getElementById('zoom-img');
-    if (zoomImg) zoomImg.src = images[idx];
-
-    /* Reset zoom panel back to placeholder state */
-    const zoomPanel = document.getElementById('zoom-panel');
-    const zoomHint  = document.getElementById('zoom-hint');
-    const hintBadge = document.getElementById('zoom-hint-badge');
-    const lensBox   = document.getElementById('lens-box');
-    if (zoomPanel)  zoomPanel.style.display = 'none';
-    if (lensBox)    lensBox.style.display   = 'none';
-    if (zoomHint)   zoomHint.style.display  = 'flex';
-    if (hintBadge)  hintBadge.style.display = '';
+    /* Reset zoom state when image changes */
+    mainImg.style.transform       = 'scale(1)';
+    mainImg.style.transformOrigin = 'center center';
 
     document.querySelectorAll('.thumb-item').forEach((t, i) =>
       t.classList.toggle('active', i === idx));
   }
 
-  /* ════════════════════════════════════════════════
-     DESKTOP ZOOM  — CSS translate approach
-     (same technique used by Amazon, Myntra, Flipkart)
-     No canvas. No cross-origin issues. No pixelation.
-  ════════════════════════════════════════════════ */
+ 
   function initDesktopZoom() {
-    const ZOOM_FACTOR = 2.5;   /* magnification level */
-    const LENS_W = 120;        /* lens width  in px   */
-    const LENS_H = 120;        /* lens height in px   */
+  
+    if ('ontouchstart' in window) return;
+
+    const ZOOM_LEVEL = 2.5;
 
     const mainWrap  = document.getElementById('main-wrap');
-    const lensBox   = document.getElementById('lens-box');
-    const zoomPanel = document.getElementById('zoom-panel');
-    const zoomInner = document.getElementById('zoom-inner');
-    const zoomImg   = document.getElementById('zoom-img');
-    const zoomHint  = document.getElementById('zoom-hint');
+    const mainImg   = document.getElementById('main-img');
     const hintBadge = document.getElementById('zoom-hint-badge');
-    if (!mainWrap || !zoomPanel || !zoomInner || !zoomImg) return;
 
-    /* ── mouseenter: show panel, size the zoom image ── */
+    if (!mainWrap || !mainImg) return;
+
+    mainWrap.addEventListener('mousemove', (e) => {
+      const rect = mainWrap.getBoundingClientRect();
+
+      /* Cursor position as percentage inside the container */
+      const x = ((e.clientX - rect.left) / rect.width)  * 100;
+      const y = ((e.clientY - rect.top)  / rect.height) * 100;
+
+      /* Zoom origin follows the cursor */
+      mainImg.style.transformOrigin = `${x}% ${y}%`;
+      mainImg.style.transform       = `scale(${ZOOM_LEVEL})`;
+    });
+
     mainWrap.addEventListener('mouseenter', () => {
-      const mainImg = document.getElementById('main-img');
-      if (!mainImg.complete || !mainImg.naturalWidth) return;
-
-      const rect = mainWrap.getBoundingClientRect();
-      const W = rect.width;
-      const H = rect.height;
-      const natW = mainImg.naturalWidth;
-      const natH = mainImg.naturalHeight;
-
-      /*
-       * object-fit:cover scales the image so its shorter dimension
-       * fills the container. We replicate that scale here so the
-       * zoomed image perfectly matches what's visible.
-       */
-      const coverScale = Math.max(W / natW, H / natH);
-      const renderedW  = natW * coverScale;
-      const renderedH  = natH * coverScale;
-
-      /* Size the zoom image to ZOOM_FACTOR × the rendered dimensions */
-      zoomImg.style.width  = (renderedW * ZOOM_FACTOR) + 'px';
-      zoomImg.style.height = (renderedH * ZOOM_FACTOR) + 'px';
-
-      lensBox.style.display  = 'block';
-      zoomPanel.style.display = 'block';
-      if (zoomHint)  zoomHint.style.display  = 'none';
-      if (hintBadge) hintBadge.style.display = 'none';
+      if (hintBadge) hintBadge.style.opacity = '0';
     });
 
-    /* ── mouseleave: hide panel ── */
     mainWrap.addEventListener('mouseleave', () => {
-      lensBox.style.display   = 'none';
-      zoomPanel.style.display = 'none';
-      if (zoomHint)  zoomHint.style.display  = 'flex';
-      if (hintBadge) hintBadge.style.display = '';
-    });
-
-    /* ── mousemove: move lens + translate zoom image ── */
-    mainWrap.addEventListener('mousemove', e => {
-      const mainImg = document.getElementById('main-img');
-      if (!mainImg.complete || !mainImg.naturalWidth) return;
-
-      const rect = mainWrap.getBoundingClientRect();
-      const W = rect.width;
-      const H = rect.height;
-
-      /* Mouse position relative to the image container */
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      /* Clamp lens so it never overflows the image edges */
-      let lx = mx - LENS_W / 2;
-      let ly = my - LENS_H / 2;
-      lx = Math.max(0, Math.min(W - LENS_W, lx));
-      ly = Math.max(0, Math.min(H - LENS_H, ly));
-
-      lensBox.style.left = lx + 'px';
-      lensBox.style.top  = ly + 'px';
-
-      /*
-       * Compute how far (0→1) the lens is across the image.
-       * We use lx / (W - LENS_W) so ratio = 0 when lens is at
-       * the far left and 1 when it's at the far right.
-       */
-      const ratioX = (W  === LENS_W) ? 0 : lx / (W  - LENS_W);
-      const ratioY = (H  === LENS_H) ? 0 : ly / (H  - LENS_H);
-
-      const panelRect = zoomPanel.getBoundingClientRect();
-      const panW = panelRect.width  || 380;
-      const panH = panelRect.height || 507;
-
-      const zoomedW = parseFloat(zoomImg.style.width)  || (W * ZOOM_FACTOR);
-      const zoomedH = parseFloat(zoomImg.style.height) || (H * ZOOM_FACTOR);
-
-      /*
-       * Maximum translation: the zoomed image can slide left/up
-       * until its right/bottom edge aligns with the panel right/bottom.
-       */
-      const maxOffX = Math.max(0, zoomedW - panW);
-      const maxOffY = Math.max(0, zoomedH - panH);
-
-      const offsetX = -(ratioX * maxOffX);
-      const offsetY = -(ratioY * maxOffY);
-
-      zoomInner.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px)';
+      /* Reset zoom */
+      mainImg.style.transform       = 'scale(1)';
+      mainImg.style.transformOrigin = 'center center';
+      if (hintBadge) hintBadge.style.opacity = '1';
     });
   }
 
-  /* ════════════════════════════════════════════════
-     MOBILE ZOOM OVERLAY
-  ════════════════════════════════════════════════ */
+  /* ════════════════════════════════
+     MOBILE ZOOM
+  ════════════════════════════════ */
   function openMobZoom(idx) {
     const images = getImages();
     if (!images.length) return;
@@ -836,17 +780,15 @@
     document.body.style.overflow = '';
   }
   function mobPrev() {
-    const images = getImages();
-    openMobZoom((currentIdx - 1 + images.length) % images.length);
+    openMobZoom((currentIdx - 1 + getImages().length) % getImages().length);
   }
   function mobNext() {
-    const images = getImages();
-    openMobZoom((currentIdx + 1) % images.length);
+    openMobZoom((currentIdx + 1) % getImages().length);
   }
 
-  /* ════════════════════════════════════════════════
+  /* ════════════════════════════════
      COLOR SELECTOR
-  ════════════════════════════════════════════════ */
+  ════════════════════════════════ */
   function selectColor(btn) {
     const color = btn.dataset.color;
     document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
@@ -870,9 +812,9 @@
     renderCartActions();
   }
 
-  /* ════════════════════════════════════════════════
+  /* ════════════════════════════════
      SIZE GRID
-  ════════════════════════════════════════════════ */
+  ════════════════════════════════ */
   function renderSizeGrid() {
     const grid = document.getElementById('size-grid');
     grid.innerHTML = '';
@@ -890,8 +832,7 @@
       const isSelected    = v.size === selectedSize;
       const isUnavailable = v.stock <= 0 || v.stockState === 'sold_out';
       const btn = document.createElement('button');
-      btn.className = 'size-btn' +
-        (isUnavailable ? ' oos' : isSelected ? ' selected' : '');
+      btn.className = 'size-btn' + (isUnavailable ? ' oos' : isSelected ? ' selected' : '');
       btn.textContent = v.size;
       btn.disabled    = isUnavailable;
       if (isUnavailable) btn.title = 'Size ' + v.size + ' is out of stock';
@@ -910,16 +851,15 @@
     });
   }
 
-  /* ════════════════════════════════════════════════
+  /* ════════════════════════════════
      PRICE
-  ════════════════════════════════════════════════ */
+  ════════════════════════════════ */
   function updatePrice() {
     if (!activeVariant) return;
     const { price, discount } = activeVariant;
     const ep      = (discount && discount < price) ? discount : price;
     const savePct = (discount && discount < price)
                     ? Math.round((price - discount) / price * 100) : 0;
-
     document.getElementById('display-price').textContent = '₹' + ep.toLocaleString('en-IN');
     const origEl = document.getElementById('display-original');
     const saveEl = document.getElementById('display-save');
@@ -934,9 +874,9 @@
     }
   }
 
-  /* ════════════════════════════════════════════════
+  /* ════════════════════════════════
      STOCK INFO
-  ════════════════════════════════════════════════ */
+  ════════════════════════════════ */
   function renderStockInfo() {
     const state = getStockState();
     const count = getStockCount();
@@ -963,9 +903,9 @@
     so.classList.toggle('show', state === 'sold_out');
   }
 
-  /* ════════════════════════════════════════════════
+  /* ════════════════════════════════
      CART ACTIONS
-  ════════════════════════════════════════════════ */
+  ════════════════════════════════ */
   function renderCartActions() {
     const el    = document.getElementById('cart-actions');
     const state = getStockState();
@@ -986,44 +926,20 @@
                          flex items-center justify-center gap-2 text-sm">
             <span class="material-symbols-outlined msym">shopping_cart</span> ADD TO CART
           </button>
-          <button onclick="buyNow()"
-                  class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white
-                         font-bold py-4 rounded-xl transition-all active:scale-95
-                         flex items-center justify-center gap-2 text-sm">
-            <span class="material-symbols-outlined msym">bolt</span> BUY NOW
-          </button>
+         
         </div>`;
     }
   }
 
-  /* ════════════════════════════════════════════════
+  /* ════════════════════════════════
      INTERACTIONS
-  ════════════════════════════════════════════════ */
-  function addToCart() {
-    if (!selectedSize) {
-      document.getElementById('size-error').classList.remove('hidden');
-      return;
-    }
-    cartCount += qty;
-    const badge = document.getElementById('cart-badge');
-    badge.textContent = cartCount;
-    badge.classList.remove('hidden');
-    badge.classList.add('flex');
-    showToast(
-      'Added ' + qty + '× ' + PRODUCT_NAME + ' (' + activeVariant.color + ', ' + selectedSize + ') to cart',
-      'check_circle', 'text-green-400'
-    );
-    if (getStockState() === 'low_stock') {
-      activeVariant = { ...activeVariant, stock: Math.max(0, activeVariant.stock - qty) };
-      if (activeVariant.stock === 0) activeVariant.stockState = 'sold_out';
-      renderStockInfo();
-      renderCartActions();
-    }
-  }
+  ════════════════════════════════ */
+  
 
   function buyNow() {
     if (!selectedSize) {
       document.getElementById('size-error').classList.remove('hidden');
+      document.getElementById('size-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     showToast('Redirecting to checkout…', 'bolt', 'text-amber-400');
@@ -1063,9 +979,7 @@
     }
   }
 
-  /* ════════════════════════════════════════════════
-     TOAST
-  ════════════════════════════════════════════════ */
+ 
   let _toastTimer;
   function showToast(msg, icon, iconCls) {
     document.getElementById('toast-msg').textContent = msg;
@@ -1078,9 +992,7 @@
       document.getElementById('toast').classList.remove('show'), 2800);
   }
 
-  /* ════════════════════════════════════════════════
-     REDIRECT
-  ════════════════════════════════════════════════ */
+  
   function triggerRedirect() {
     document.getElementById('redirect-overlay').classList.add('active');
     let t = 5;
@@ -1094,7 +1006,6 @@
     }, 1000);
   }
 
-  /* ── Keyboard navigation for mobile zoom overlay ── */
   document.addEventListener('keydown', e => {
     const mo = document.getElementById('mob-zoom');
     if (!mo.classList.contains('active')) return;

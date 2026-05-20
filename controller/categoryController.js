@@ -113,7 +113,6 @@ export const adminCategoryAdd = async (req, res) => {
 
 
 
-
 export const adminCategoryEdit = async (req, res) => {
     try {
         const { id } = req.params;
@@ -138,3 +137,4 @@ export const adminCategoryEdit = async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error" });
     }
 };
+

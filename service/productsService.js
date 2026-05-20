@@ -161,21 +161,18 @@ export const updatedProducts=async({productId,name,categoryId,description})=>{
 
 
 
-
-// 
+ 
 
 export const upsertVariant = async ({ productId, variantId, variantData }) => {
   try {
     const { isActive, ...safeData } = variantData;
 
-    // ── Duplicate check: same product + same color (case-insensitive) + same size ──
     const duplicateQuery = {
       productId,
       color: { $regex: new RegExp(`^${safeData.color}$`, "i") },
       size: safeData.size,
     };
     if (variantId) {
-      // Exclude the current variant from the check (it's allowed to keep its own color+size)
       duplicateQuery._id = { $ne: variantId };
     }
     const duplicate = await Variant.findOne(duplicateQuery);
@@ -190,15 +187,14 @@ export const upsertVariant = async ({ productId, variantId, variantData }) => {
       const updated = await Variant.findByIdAndUpdate(
         variantId,
         { $set: safeData },
-        { new: true }
+        { returnDocument: 'after' }
+
       );
       if (!updated) return { success: false, message: "Variant not found" };
       return { success: true, data: updated };
     } else {
-      // const created = await Variant.create({ ...safeData, productId, isActive: true });
-      // return { success: true, data: created };
+      
      const created = await Variant.create({ ...safeData, productId, isActive: true });
-  //  push new variant _id into product's variants array
   await Product.findByIdAndUpdate(productId, { $push: { variants: created._id } });
   return { success: true, data: created };
 

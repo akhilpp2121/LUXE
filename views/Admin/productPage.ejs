@@ -237,13 +237,14 @@
                 </td>
 
          <!-- Status -->
-<td class="px-8 py-5">
-  <%
-    const allVariantsInactive = !product.variants || 
-      product.variants.length === 0 || 
-      product.variants.every(function(v) { return v.isActive === false; });
 
-    const isEffectivelyActive = product.isActive === true && !allVariantsInactive;
+
+         <td class="px-8 py-5">
+  <%
+    const hasVariants = product.variants && product.variants.length > 0;
+
+    const isEffectivelyActive = hasVariants &&
+      product.variants.some(function(v) { return v.isActive === true; });
   %>
 
   <% if (isEffectivelyActive) { %>
@@ -257,7 +258,6 @@
       Inactive
     </span>
   <% } %>
-
 </td>
                 <!-- Actions -->
                 <td class="px-8 py-5 text-right">

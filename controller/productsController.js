@@ -23,7 +23,6 @@ export const adminProductPageLoad = async (req, res) => {
   const sort        = req.query.sort || "latest";
   const sortOption  = sort === "oldest" ? { createdAt: 1 } : { createdAt: -1 };
 
-  // Build filter
   const filter = {};
   if (searchQuery) {
     filter.$or = [{ name: { $regex: searchQuery, $options: "i" } }];
@@ -136,7 +135,7 @@ export const adminProductsAdd = async (req, res) => {
       });
     }
 
-    // ── VALIDATE FIRST (before any async SKU generation) ──
+    
     if (!productName || productName.trim().length < 3)
       return res.status(400).json({ success: false, message: "Product name must be at least 3 characters" });
     if (!category || category === "select category")
@@ -198,7 +197,7 @@ export const adminProductsAdd = async (req, res) => {
   }
 };
 
-// POST /admin/product-edit/:id
+
 export const adminProductsEdit = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -220,7 +219,6 @@ export const adminProductsEdit = async (req, res) => {
     if (!editData.success)
       return res.status(400).json({ success: false, message: editData.message });
 
-    
     const variantsMap = {};
     for (let key in req.body) {
       const match = key.match(/^variants\[(\d+)\]\.(.+)$/);
@@ -232,10 +230,10 @@ export const adminProductsEdit = async (req, res) => {
       }
     }
     const variantsArr = Object.values(variantsMap);
-     const editKeys = variantsArr.map(v => `${v.color?.trim().toLowerCase()}|${v.size?.trim().toLowerCase()}`);
+
+    const editKeys = variantsArr.map(v => `${v.color?.trim().toLowerCase()}|${v.size?.trim().toLowerCase()}`);
     if (editKeys.length !== new Set(editKeys).size)
       return res.status(400).json({ success: false, message: "Two or more variants have the same color and size" });
-
 
     const imagesByVariant = {};
     if (req.files && req.files.length > 0) {
@@ -244,7 +242,6 @@ export const adminProductsEdit = async (req, res) => {
         if (match) {
           const idx = parseInt(match[1], 10);
           if (!imagesByVariant[idx]) imagesByVariant[idx] = [];
-          // ── FIX: normalize path same way as add ──────────────────────────
           const normalized = file.path
             ? file.path.replace(/\\/g, "/").replace(/^.*uploads\//, "")
             : file.filename;
@@ -258,6 +255,7 @@ export const adminProductsEdit = async (req, res) => {
     for (let i = 0; i < variantsArr.length; i++) {
       const v = variantsArr[i];
 
+      // ── validation ──
       if (!v.color || !v.color.trim())
         return res.status(400).json({ success: false, message: `Variant ${i + 1}: color is required` });
       if (!v.size)
@@ -267,28 +265,32 @@ export const adminProductsEdit = async (req, res) => {
       if (!v.price || Number(v.price) <= 0)
         return res.status(400).json({ success: false, message: `Variant ${i + 1}: valid price is required` });
 
-      const variantData = {
-        color:    v.color.trim(),
-        size:     v.size,
-        stock:    Number(v.stock),
-        price:    Number(v.price),
-        discount: v.discount ? Number(v.discount) : 0,
-        SKU:      v.sku ? v.sku.trim() : "",
-        
-      };
+      // ── image check ──
+      let existingImages = req.body[`variants[${i}].existingImages`];
+      if (!existingImages) existingImages = [];
+      else if (!Array.isArray(existingImages)) existingImages = [existingImages];
+      existingImages = existingImages.filter(p => p && p.trim() !== '');
 
-      
-let existingImages = req.body[`variants[${i}].existingImages`];
-if (!existingImages) existingImages = [];
-else if (!Array.isArray(existingImages)) existingImages = [existingImages];
-existingImages = existingImages.filter(p => p && p.trim() !== '');
+      const newImages = imagesByVariant[i] || [];
+      const mergedImages = [...existingImages, ...newImages];
 
-const newImages = imagesByVariant[i] || [];
+      if (mergedImages.length < 3)
+        return res.status(400).json({ success: false, message: `Variant ${i + 1}: needs at least 3 images` });
 
-const mergedImages = [...existingImages, ...newImages];
-if (mergedImages.length > 0) {
-  variantData.images = mergedImages;
-}
+const rawSku = Array.isArray(v.sku) ? v.sku[0] : v.sku;
+
+const sku = rawSku && String(rawSku).trim()
+  ? String(rawSku).trim()
+  : await generateUniqueSKU(productName.trim(), v.color, v.size, i + 1);
+const variantData = {
+  color:    v.color.trim(),
+  size:     v.size,
+  stock:    Number(v.stock),
+  price:    Number(v.price),
+  discount: v.discount ? Number(v.discount) : 0,
+  SKU:      sku,
+  images:   mergedImages,
+};
 
       const result = await upsertVariant({
         productId,
@@ -316,9 +318,10 @@ if (mergedImages.length > 0) {
 };
 
 
-
 export const updateProductStatus = async (req, res) => {
   try {
+    console.log(req.params);
+    
     const { productId } = req.params;
     const { changes } = req.body;
 

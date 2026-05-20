@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Your Cart — LUXE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          primary: "#1152d4",
+          "primary-dark": "#0d3fa8",
+          "bg-dark": "#101622",
+        },
+        fontFamily: {
+          display: ["Manrope", "sans-serif"],
+          serif: ["Cormorant Garamond", "Georgia", "serif"],
+        },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Manrope', sans-serif; }
+  .msym { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Fade-up ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fu { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+  .d1 { animation-delay: 0.05s; }
+  .d2 { animation-delay: 0.12s; }
+  .d3 { animation-delay: 0.20s; }
+  .d4 { animation-delay: 0.28s; }
+
+  /* ── Cart item card ── */
+  .cart-item {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #1e293b;
+    background: #0d1322;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .cart-item:hover { border-color: #1e3a6e; background: #0f1829; }
+  .cart-item.invalid { opacity: 0.6; }
+
+  /* ── Qty stepper ── */
+  .qty-btn {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; border: 1px solid #334155;
+    background: transparent; color: #94a3b8;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .qty-btn:hover { border-color: #1152d4; color: #60a5fa; background: rgba(17,82,212,0.1); }
+  .qty-btn:disabled { border-color: #1e293b; color: #334155; cursor: not-allowed; }
+
+  /* ── Remove btn ── */
+  .remove-btn {
+    padding: 6px; border-radius: 8px;
+    border: none; background: transparent;
+    color: #475569; cursor: pointer; transition: all 0.15s;
+  }
+  .remove-btn:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+
+  /* ── Summary card ── */
+  .summary-card {
+    background: #0d1322;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: sticky;
+    top: 88px;
+  }
+
+  /* ── Divider ── */
+  .divider { border-color: #1e293b; }
+
+  /* ── Empty state ── */
+  .empty-icon { font-size: 72px; color: #1e293b; }
+
+  /* ── Pulse ── */
+  @keyframes pulse-slow { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .pulse { animation: pulse-slow 2s infinite; }
+
+  /* ── Out-of-stock badge ── */
+  .oos-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(239,68,68,0.12); color: #f87171;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  /* ── Unavailable badge ── */
+  .unavail-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(100,116,139,0.15); color: #94a3b8;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  /* mobile: stack cart item */
+  @media (max-width: 480px) {
+    .cart-item { grid-template-columns: 72px 1fr; }
+    .cart-item-actions { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+  }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 antialiased min-h-screen">
+
+<!-- ══ TOAST ══ -->
+<div id="toast">
+  <div class="flex items-center gap-3 bg-slate-900 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl">
+    <span id="toast-icon" class="material-symbols-outlined msym text-green-400">check_circle</span>
+    <span id="toast-msg" class="text-sm font-semibold"></span>
+  </div>
+</div>
+
+<div class="flex flex-col min-h-screen">
+
+  <!-- ══ HEADER ══ -->
+  <header class="sticky top-0 z-50 border-b border-slate-800 bg-bg-dark/80 backdrop-blur-md px-6 lg:px-20 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+      <div class="flex items-center gap-12">
+        <a href="/" class="flex items-center gap-2 text-primary">
+          <span class="material-symbols-outlined msym text-3xl">diamond</span>
+          <span class="text-white text-2xl font-extrabold tracking-tight">LUXE</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/product-listing" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">New Arrivals</a>
+          <a href="/product-listing" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Collections</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/product-listing" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym">search</span>
+        </a>
+        <a href="/cart" class="relative p-2 text-primary hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+          <% if (cart > 0) { %>
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+              <%= cart %>
+            </span>
+          <% } %>
+        </a>
+        <a href="/profile" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym">person</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full px-6 lg:px-20 py-10 flex-1">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-8 fu d1">
+      <a href="/" class="hover:text-primary transition-colors">Home</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <span class="text-slate-200 font-semibold">Your Cart</span>
+    </nav>
+
+    <!-- Page title -->
+    <div class="flex items-baseline gap-4 mb-10 fu d1">
+      <h1 class="text-4xl font-extrabold uppercase tracking-tight font-serif">Shopping Bag</h1>
+      <% if (data && data.length > 0) { %>
+        <span class="text-slate-500 text-sm font-semibold"><%= data.length %> item<%= data.length !== 1 ? 's' : '' %></span>
+      <% } %>
+    </div>
+
+    <% if (!data || data.length === 0) { %>
+      <!-- ══ EMPTY STATE ══ -->
+      <div class="flex flex-col items-center justify-center py-28 fu d2">
+        <span class="material-symbols-outlined empty-icon mb-6">shopping_bag</span>
+        <h2 class="text-2xl font-bold text-slate-400 mb-2">Your bag is empty</h2>
+        <p class="text-slate-600 text-sm mb-8">Looks like you haven't added anything yet.</p>
+        <a href="/product-listing"
+           class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg shadow-primary/20">
+          <span class="material-symbols-outlined msym text-sm">arrow_back</span>
+          Continue Shopping
+        </a>
+      </div>
+
+    <% } else { %>
+      <!-- ══ CART LAYOUT ══ -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+        <!-- ── LEFT: Cart Items ── -->
+        <div class="lg:col-span-2 flex flex-col gap-4">
+
+          <% data.forEach((item, index) => { %>
+          <%
+            const variant  = item.variantId;
+            const product  = variant?.productId;
+            const category = product?.categoryId;
+
+            const inStock  = (variant?.stock ?? 0) > 0;
+            const itemPrice = variant?.price || 0;
+            const itemQty   = item.quantity || 1;
+            const lineTotal = itemPrice * itemQty;
+
+            const rawImg = variant?.images?.[0];
+            const imgSrc = rawImg ? '/uploads/' + rawImg : null;
+
+            /* single flag — covers all invalid conditions */
+            const isInvalid = !product?.isActive
+                           || !variant?.isActive
+                           || !category?.isActive
+                           || !inStock;
+          %>
+
+          <div class="cart-item fu <%= isInvalid ? 'invalid' : '' %>"
+               style="animation-delay: <%= 0.1 + index * 0.07 %>s;"
+               id="cart-item-<%= item._id %>">
+
+            <!-- ── Product image ── -->
+            <div class="relative w-24 h-28 rounded-lg overflow-hidden bg-slate-800 flex-shrink-0">
+              <% if (imgSrc) { %>
+                <img
+                  src="<%= imgSrc %>"
+                  alt="<%= product?.name || 'Product' %>"
+                  class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                  onerror="this.onerror=null;this.src='https://placehold.co/96x112/1e293b/475569?text=IMG';"
+                />
+              <% } else { %>
+                <div class="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-1">
+                  <span class="material-symbols-outlined msym text-3xl">image_not_supported</span>
+                  <span class="text-[9px] uppercase tracking-widest">No Image</span>
+                </div>
+              <% } %>
+
+              <!-- Out of stock overlay -->
+              <% if (!inStock) { %>
+                <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <span class="text-white text-[9px] font-bold uppercase tracking-widest text-center px-1">Out of Stock</span>
+                </div>
+              <% } %>
+
+              <!-- Unavailable overlay (inactive product / variant / category) -->
+              <% if (inStock && (!product?.isActive || !variant?.isActive || !category?.isActive)) { %>
+                <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <span class="text-white text-[9px] font-bold uppercase tracking-widest text-center px-1">Unavailable</span>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- ── Product info ── -->
+            <div class="flex flex-col gap-1.5 min-w-0">
+              <a href="/product-details/<%= product?._id %>"
+                 class="text-white font-bold text-sm leading-tight hover:text-primary transition-colors line-clamp-2">
+                <%= product?.name || 'Unknown Product' %>
+              </a>
+
+              <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                <% if (variant?.color) { %>
+                  <span class="text-xs text-slate-500 capitalize">
+                    <span class="text-slate-600">Color:</span> <%= variant.color %>
+                  </span>
+                <% } %>
+                <% if (variant?.size) { %>
+                  <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                  <span class="text-xs text-slate-500">
+                    <span class="text-slate-600">Size:</span> <%= variant.size %>
+                  </span>
+                <% } %>
+              </div>
+
+              <!-- Status badge -->
+              <% if (!inStock) { %>
+                <span class="oos-badge mt-1">
+                  <span class="material-symbols-outlined msym" style="font-size:12px;">block</span>
+                  Out of stock
+                </span>
+              <% } else if (!product?.isActive || !variant?.isActive || !category?.isActive) { %>
+                <span class="unavail-badge mt-1">
+                  <span class="material-symbols-outlined msym" style="font-size:12px;">hide_source</span>
+                  Unavailable
+                </span>
+              <% } else if (variant.stock < 5) { %>
+                <span class="text-amber-400 text-xs font-semibold pulse mt-1">
+                  Only <%= variant.stock %> left
+                </span>
+              <% } %>
+
+              <!-- ── Qty stepper ── -->
+              <div class="cart-item-actions flex items-center gap-3 mt-2">
+                <div class="flex items-center gap-1.5 border border-slate-800 rounded-lg px-1 py-1">
+
+                  <!-- minus -->
+                  <button class="qty-btn"
+                          onclick="changeQty('<%= item._id %>','<%= variant?._id %>',-1,<%= itemQty %>,<%= variant?.stock || 0 %>)"
+                          <%= (itemQty <= 1 || isInvalid) ? 'disabled' : '' %>>
+                    <span class="material-symbols-outlined msym text-sm">remove</span>
+                  </button>
+
+                  <span id="qty-<%= item._id %>"
+                        class="text-sm font-bold text-white min-w-[24px] text-center">
+                    <%= itemQty %>
+                  </span>
+
+                  <!-- plus -->
+                   <button class="qty-btn"
+        onclick="changeQty('<%= item._id %>','<%= variant?._id %>',1,<%= itemQty %>,<%= variant?.stock || 0 %>)"
+        <%= isInvalid ? 'disabled' : '' %>>
+  <span class="material-symbols-outlined msym text-sm">add</span>
+</button>
+                 
+                </div>
+
+                <button class="remove-btn"
+                        onclick="removeItem('<%= item._id %>')"
+                        title="Remove item">
+                  <span class="material-symbols-outlined msym text-xl">delete_outline</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ── Line price ── -->
+            <div class="flex flex-col items-end justify-between gap-2 self-stretch">
+              <% if (isInvalid) { %>
+                <p class="text-slate-600 font-bold text-base line-through whitespace-nowrap">
+                  ₹<%= lineTotal.toLocaleString('en-IN') %>
+                </p>
+              <% } else { %>
+                <p class="text-white font-bold text-base whitespace-nowrap">
+                  ₹<span id="line-total-<%= item._id %>"><%= lineTotal.toLocaleString('en-IN') %></span>
+                </p>
+                <% if (itemQty > 1) { %>
+                  <p class="text-xs text-slate-600">₹<%= itemPrice.toLocaleString('en-IN') %> each</p>
+                <% } %>
+              <% } %>
+            </div>
+
+          </div>
+          <% }) %>
+
+          <!-- Continue shopping -->
+          <a href="/product-listing"
+             class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors mt-2 w-fit">
+            <span class="material-symbols-outlined msym text-sm">arrow_back</span>
+            Continue Shopping
+          </a>
+        </div>
+
+        <!-- ── RIGHT: Order Summary ── -->
+        <div class="fu d3">
+          <div class="summary-card">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-5">Order Summary</h2>
+
+            <!-- Subtotal -->
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-sm text-slate-400">Subtotal</span>
+              <span class="text-sm font-semibold text-white" id="summary-subtotal">
+                ₹<%= (price || 0).toLocaleString('en-IN') %>
+              </span>
+            </div>
+
+            <!-- Shipping -->
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-sm text-slate-400">Shipping</span>
+              <% if ((price || 0) >= 999) { %>
+                <span class="text-sm font-semibold text-emerald-400">Free</span>
+              <% } else { %>
+                <span class="text-sm font-semibold text-white">₹99</span>
+              <% } %>
+            </div>
+
+            <hr class="divider my-4"/>
+
+            <!-- Total -->
+            <div class="flex justify-between items-center mb-6">
+              <span class="text-base font-bold text-white">Total</span>
+              <span class="text-xl font-extrabold text-primary" id="summary-total">
+                <%
+                  const shipping = (price || 0) >= 999 ? 0 : 99;
+                  const total    = (price || 0) + shipping;
+                %>
+                ₹<%= total.toLocaleString('en-IN') %>
+              </span>
+            </div>
+
+            <!-- Free shipping nudge -->
+            <% if ((price || 0) < 999) { %>
+              <div class="flex items-start gap-2 bg-slate-800/60 rounded-lg p-3 mb-5">
+                <span class="material-symbols-outlined msym text-amber-400 text-sm mt-0.5">info</span>
+                <p class="text-xs text-slate-400">
+                  Add <span class="text-white font-bold">₹<%= (999 - (price || 0)).toLocaleString('en-IN') %></span> more for free shipping.
+                </p>
+              </div>
+            <% } else { %>
+              <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 mb-5">
+                <span class="material-symbols-outlined msym text-emerald-400 text-sm" style="font-variation-settings:'FILL' 1">check_circle</span>
+                <p class="text-xs text-emerald-400 font-semibold">You qualify for free shipping!</p>
+              </div>
+            <% } %>
+
+            <!-- Checkout button -->
+            <a href="/checkout"
+               class="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark
+                      text-white font-bold py-4 rounded-xl transition-all
+                      shadow-xl shadow-primary/20 active:scale-95 text-sm">
+              <span class="material-symbols-outlined msym text-sm">lock</span>
+              Proceed to Checkout
+            </a>
+
+            <p class="text-center text-xs text-slate-600 mt-4 flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined msym text-xs">verified_user</span>
+              Secure & encrypted checkout
+            </p>
+          </div>
+        </div>
+
+      </div><!-- /grid -->
+    <% } %>
+
+  </main>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="bg-slate-900/60 mt-20 px-6 lg:px-20 py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 uppercase tracking-widest">
+      <div class="flex items-center gap-2 text-primary">
+        <span class="material-symbols-outlined msym">diamond</span>
+        <span class="text-white font-extrabold tracking-tight">LUXE</span>
+      </div>
+      <p>© 2025 Luxe Menswear. All Rights Reserved.</p>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-primary transition-colors">Privacy</a>
+        <a href="#" class="hover:text-primary transition-colors">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  /* ── TOAST ── */
+  let _toastTimer;
+  function showToast(msg, icon = 'check_circle', cls = 'text-green-400') {
+    document.getElementById('toast-msg').textContent = msg;
+    const ic = document.getElementById('toast-icon');
+    ic.textContent = icon;
+    ic.className   = 'material-symbols-outlined msym ' + cls;
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() =>
+      document.getElementById('toast').classList.remove('show'), 2800);
+  }
+
+  /* ── CHANGE QUANTITY ── */
+  async function changeQty(cartId, variantId, delta, currentQty, maxStock) {
+    // block inactive / out-of-stock items completely
+    if (maxStock <= 0) {
+      return showToast('This item is no longer available', 'block', 'text-red-400');
+    }
+
+    const newQty = currentQty + delta;
+    if (newQty < 1) return;
+    if (newQty > maxStock) {
+      return showToast(`Only ${maxStock} item(s) available in stock`, 'inventory_2', 'text-amber-400');
+    }
+    if (newQty > 10) {
+      return showToast('Maximum 10 items allowed per order', 'block', 'text-amber-400');
+    }
+
+    const row = document.getElementById('cart-item-' + cartId);
+    if (!row) return;
+
+    const qtyEl               = document.getElementById('qty-' + cartId);
+    const [minusBtn, plusBtn] = row.querySelectorAll('.qty-btn');
+
+    /* optimistic update */
+    qtyEl.textContent = newQty;
+    minusBtn.disabled = newQty <= 1;
+    plusBtn.disabled  = newQty >= maxStock || newQty >= 10;
+    minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${newQty},${maxStock})`);
+    plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${newQty},${maxStock})`);
+
+    try {
+      const res  = await fetch('/cart/update-quantity', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cartId, variantId, quantity: newQty })
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        /* rollback */
+        qtyEl.textContent = currentQty;
+        minusBtn.disabled = currentQty <= 1;
+        plusBtn.disabled  = currentQty >= maxStock || currentQty >= 10;
+        minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${currentQty},${maxStock})`);
+        plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${currentQty},${maxStock})`);
+        return showToast(data.message || 'Could not update', 'error', 'text-red-400');
+      }
+
+      if (data.unitPrice) {
+        const lineEl = document.getElementById('line-total-' + cartId);
+        if (lineEl) lineEl.textContent = (data.unitPrice * newQty).toLocaleString('en-IN');
+      }
+
+      updateSummary();
+      showToast('Cart updated', 'check_circle', 'text-green-400');
+
+    } catch (err) {
+      /* rollback */
+      qtyEl.textContent = currentQty;
+      minusBtn.disabled = currentQty <= 1;
+      plusBtn.disabled  = currentQty >= maxStock || currentQty >= 10;
+      minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${currentQty},${maxStock})`);
+      plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${currentQty},${maxStock})`);
+      showToast('Something went wrong', 'error', 'text-red-400');
+    }
+  }
+
+  /* ── REMOVE ITEM ── */
+  async function removeItem(cartId) {
+    try {
+      const res  = await fetch('/cart/remove-cart', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: cartId })
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        return showToast(data.message || 'Failed to remove', 'error', 'text-red-400');
+      }
+
+      document.getElementById('cart-item-' + cartId)?.remove();
+      showToast('Item removed', 'check_circle', 'text-green-400');
+      updateSummary();
+
+      if (document.querySelectorAll('[id^="cart-item-"]').length === 0) {
+        location.reload();
+      }
+
+    } catch (err) {
+      showToast('Something went wrong', 'error', 'text-red-400');
+    }
+  }
+
+  /* ── UPDATE SUMMARY ── */
+  /* only sums line-total elements — invalid items have no line-total id */
+  function updateSummary() {
+    let subtotal = 0;
+    document.querySelectorAll('[id^="line-total-"]').forEach(el => {
+      subtotal += parseInt(el.textContent.replace(/,/g, '')) || 0;
+    });
+    const shipping = subtotal >= 999 ? 0 : 99;
+    document.getElementById('summary-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
+    document.getElementById('summary-total').textContent    = '₹' + (subtotal + shipping).toLocaleString('en-IN');
+  }
+</script>
+
+</body>
+</html>

@@ -801,13 +801,26 @@
 
               <input type="hidden" name="variants[<%= i %>].variantId" value="<%= variant._id %>"/>
 
-              <div class="field" style="margin-bottom: 18px;">
-                <label>SKU</label>
-                <input type="text" name="variants[<%= i %>].sku"
-                  value="<%= variant.SKU || '' %>"
-                  placeholder="e.g. RFTR-001-RED-M"/>
-                <span class="error-msg sku-error"></span>
-              </div>
+               <div class="field" style="margin-bottom: 18px;">
+  <label style="display:flex;align-items:center;justify-content:space-between;">
+    SKU
+    <span style="color:var(--primary);font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;background:rgba(144,171,255,.1);padding:2px 8px;border-radius:4px;">Auto-generated</span>
+  </label>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <input type="text" name="variants[0].sku" class="sku-input"
+           placeholder="Fill name + color + size…"
+           readonly
+           style="flex:1;cursor:default;color:var(--primary);font-family:monospace;font-size:13px;letter-spacing:.5px;"/>
+    <button type="button" class="btn-regen-sku"
+            title="Regenerate SKU"
+            style="width:38px;height:38px;flex-shrink:0;border-radius:9px;border:1px solid var(--outline-variant);
+                   background:var(--surface-bright);color:var(--primary);cursor:pointer;font-size:17px;
+                   display:flex;align-items:center;justify-content:center;transition:all .2s;">
+      ↻
+    </button>
+  </div>
+  <span class="error-msg sku-error"></span>
+</div>
 
               <div class="grid-2" style="margin-bottom: 18px;">
                 <div class="field">

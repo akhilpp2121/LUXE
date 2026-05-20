@@ -63,6 +63,10 @@ export const adminCategoryAddLogic = async (categoryName, description, isActive)
 
 
 
+
+
+
+
 export const adminCategoryEditLogic = async (id, categoryName, description, isActive) => {
     try {
 
@@ -90,3 +94,4 @@ export const adminCategoryEditLogic = async (id, categoryName, description, isAc
         return { success: false, message: "Database error" };
     }
 };
+

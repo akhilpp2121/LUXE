@@ -5,6 +5,7 @@ import session from "express-session";
 import passport from "./config/passport.js";
 import userRouter from "./routers/userRouter.js";
 import adminRouter from "./routers/adminRouter.js"
+import cartRouter from './routers/cartRouter.js'
 import connectDB from "./config/db_config.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -48,6 +49,7 @@ app.use((req, res, next) => {
 app.set("view engine", "ejs");
 app.use("/", userRouter);
 app.use('/admin',adminRouter)
+app.use('/cart',cartRouter)
 
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
