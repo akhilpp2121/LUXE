@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Product — LUXE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:                   #060e20;
+      --surface-lowest:       #000000;
+      --surface-low:          #091328;
+      --surface:              #0f1930;
+      --surface-high:         #141f38;
+      --surface-highest:      #192540;
+      --surface-bright:       #1f2b49;
+      --outline-variant:      #40485d;
+      --primary:              #90abff;
+      --primary-dim:          #316bf3;
+      --secondary:            #8b94ff;
+      --tertiary-container:   #fe9cf4;
+      --on-bg:                #dee5ff;
+      --on-surface:           #dee5ff;
+      --on-surface-variant:   #a3aac4;
+      --error:                #d7383b;
+      --error-container:      #9f0519;
+      --on-error-container:   #ffa8a3;
+      --success:              #4caf7d;
+      --success-bg:           rgba(76,175,125,.12);
+      --warning:              #f0a500;
+      --warning-bg:           rgba(240,165,0,.12);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--on-surface);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── CROP MODAL ── */
+    #cropModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    #cropModal.open { display: flex; }
+
+    .crop-container {
+      background: var(--surface);
+      border: 1px solid var(--outline-variant);
+      padding: 24px;
+      border-radius: 16px;
+      max-width: 520px;
+      width: 92%;
+      box-shadow: 0 24px 60px rgba(0,0,0,.6);
+    }
+
+    .crop-container h3 {
+      font-size: 14px; font-weight: 600;
+      color: var(--on-bg);
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .crop-image-wrap {
+      max-height: 380px;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #000;
+    }
+
+    #cropImage { display: block; max-width: 100%; }
+
+    .crop-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .crop-actions button {
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: all .2s;
+    }
+
+    #cropCancel {
+      background: var(--surface-high);
+      border: 1px solid var(--outline-variant) !important;
+      color: var(--on-surface-variant);
+    }
+    #cropCancel:hover { background: var(--surface-bright); color: var(--on-bg); }
+
+    #cropApply {
+      background: linear-gradient(135deg, var(--primary-dim), var(--secondary));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(49,107,243,.35);
+    }
+    #cropApply:hover { transform: translateY(-1px); }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(6,14,32,.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--outline-variant);
+      padding: 0 28px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 12px; }
+    .nav-logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--primary-dim), var(--secondary));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px; font-weight: 600; color: #fff;
+    }
+    .nav-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 21px; font-weight: 600;
+      color: var(--on-bg); letter-spacing: .4px;
+    }
+    .nav-title span {
+      font-style: italic;
+      background: linear-gradient(90deg, var(--primary), var(--tertiary-container));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-bell {
+      width: 36px; height: 36px;
+      border-radius: 10px; border: 1px solid var(--outline-variant);
+      background: var(--surface-high);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative;
+      color: var(--on-surface-variant);
+      transition: background .2s;
+    }
+    .nav-bell:hover { background: var(--surface-bright); color: var(--primary); }
+    .nav-bell-dot {
+      position: absolute; top: 7px; right: 7px;
+      width: 7px; height: 7px;
+      background: var(--tertiary-container);
+      border-radius: 50%; border: 2px solid var(--bg);
+    }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; min-height: calc(100vh - 60px); }
+
+    /* ── SIDEBAR ── */
+    aside {
+      width: 220px; flex-shrink: 0;
+      background: var(--surface-lowest);
+      border-right: 1px solid var(--outline-variant);
+      padding: 24px 0;
+      display: flex; flex-direction: column;
+      position: sticky; top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+    .sidebar-section { padding: 0 12px; margin-bottom: 20px; }
+    .sidebar-label {
+      font-size: 9.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--on-surface-variant);
+      padding: 0 10px; margin-bottom: 6px;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px;
+      border-radius: var(--radius-sm);
+      color: var(--on-surface-variant);
+      font-size: 13px; font-weight: 500;
+      text-decoration: none; cursor: pointer;
+      transition: all .18s; position: relative;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-link:hover { background: var(--surface-high); color: var(--on-bg); }
+    .sidebar-link.active {
+      background: var(--surface-bright);
+      color: var(--primary);
+      border-left: 3px solid var(--primary);
+    }
+    .sidebar-link .ms {
+      font-family: 'Material Symbols Outlined';
+      font-size: 18px;
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1; flex-shrink: 0;
+    }
+    .sidebar-link.active .ms {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* ── MAIN ── */
+    main { flex: 1; padding: 36px 44px; overflow-y: auto; }
+
+    .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+    .page-icon {
+      width: 50px; height: 50px;
+      background: linear-gradient(135deg, var(--primary-dim), var(--secondary));
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 22px;
+      box-shadow: 0 8px 24px rgba(49,107,243,.3);
+    }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px; font-weight: 600; color: var(--on-bg);
+    }
+    .page-subtitle { font-size: 11.5px; color: var(--primary); font-weight: 500; margin-top: 2px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--outline-variant);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 600; color: var(--on-bg);
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .card-title-icon {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      background: var(--surface-high);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary); font-size: 13px;
+      border: 1px solid var(--outline-variant);
+    }
+
+    /* ── STATUS TABLE ── */
+    .status-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--outline-variant);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .status-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .status-table thead tr { background: var(--surface-low); }
+    .status-table thead th {
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.2px;
+      color: var(--on-surface-variant);
+      border-bottom: 1px solid var(--outline-variant);
+    }
+    .status-table thead th:first-child { border-radius: 8px 0 0 0; }
+    .status-table thead th:last-child  { border-radius: 0 8px 0 0; text-align: center; }
+    .status-table tbody tr {
+      border-bottom: 1px solid rgba(64,72,93,.35);
+      transition: background .15s;
+    }
+    .status-table tbody tr:last-child { border-bottom: none; }
+    .status-table tbody tr:hover { background: var(--surface-high); }
+    .status-table tbody td {
+      padding: 14px 16px;
+      color: var(--on-surface);
+      vertical-align: middle;
+    }
+    .status-table tbody td:last-child { text-align: center; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+    }
+    .badge-active {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(76,175,125,.25);
+    }
+    .badge-inactive {
+      background: rgba(215,56,59,.1);
+      color: var(--on-error-container);
+      border: 1px solid rgba(215,56,59,.2);
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* Toggle switch */
+    .toggle-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: rgba(215,56,59,.3);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background .25s;
+      border: 1px solid rgba(215,56,59,.3);
+    }
+    .toggle input:checked ~ .toggle-track {
+      background: rgba(76,175,125,.3);
+      border-color: rgba(76,175,125,.4);
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: var(--on-error-container);
+      border-radius: 50%;
+      transition: transform .25s, background .25s;
+      pointer-events: none;
+    }
+    .toggle input:checked ~ .toggle-track .toggle-thumb {
+      transform: translateX(20px);
+      background: var(--success);
+    }
+    .toggle-label { font-size: 12px; font-weight: 600; color: var(--on-surface-variant); min-width: 52px; }
+
+    /* ── GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+    /* ── INPUTS ── */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label {
+      font-size: 10.5px; font-weight: 700;
+      color: var(--on-surface-variant);
+      text-transform: uppercase; letter-spacing: .8px;
+    }
+    input, select, textarea {
+      background: var(--surface-high);
+      border: 1px solid var(--outline-variant);
+      border-radius: 9px;
+      padding: 11px 13px;
+      color: var(--on-surface);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none; width: 100%;
+      -webkit-appearance: none;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input::placeholder, textarea::placeholder { color: var(--on-surface-variant); opacity: .6; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(144,171,255,.1);
+      background: var(--surface-bright);
+    }
+    select { cursor: pointer; }
+    select option { background: var(--surface-high); }
+    textarea { resize: none; }
+    .error-msg { font-size: 11px; color: var(--on-error-container); min-height: 14px; }
+
+    /* ── VARIANT CARD ── */
+    .variant-card {
+      background: var(--surface-low);
+      border: 1px solid var(--outline-variant);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 16px;
+      animation: slideIn .3s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .variant-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .variant-badge { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--on-bg); }
+    .badge-num {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--primary-dim), var(--secondary));
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .btn-delete {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 13px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--error-container);
+      background: rgba(159,5,25,.12);
+      color: var(--on-error-container);
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-delete:hover { background: rgba(159,5,25,.25); }
+    .btn-delete.hidden { display: none; }
+
+    /* ── IMAGE UPLOAD ── (identical to add-product) ── */
+    .img-upload {
+      border: 1.5px dashed var(--outline-variant);
+      border-radius: 11px;
+      height: 110px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px;
+      background: var(--surface-high);
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+    .img-upload:hover { border-color: var(--primary); background: rgba(144,171,255,.06); }
+
+    /* ALL children non-interactive — clicks always land on the .img-upload div */
+    .img-upload * { pointer-events: none; }
+
+    .img-upload .ms-upload {
+      color: var(--primary); font-size: 22px;
+      font-family: 'Material Symbols Outlined';
+    }
+    .img-upload p { font-size: 10.5px; font-weight: 600; color: var(--on-surface-variant); }
+    .img-upload .file-name {
+      font-size: 9.5px; color: #658eff;
+      max-width: 90%; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* hidden real file input */
+    .img-upload input[type=file] { display: none; }
+
+    .preview-image {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; border-radius: 11px;
+      display: none;
+    }
+
+    .preview-edit-badge {
+      position: absolute; bottom: 6px; right: 6px;
+      background: rgba(0,0,0,.65);
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 10px; font-weight: 600; color: #fff;
+      display: none;
+    }
+
+    /* has-image state */
+    .img-upload.has-image .preview-image      { display: block; }
+    .img-upload.has-image .preview-edit-badge { display: block; }
+    .img-upload.has-image .ms-upload,
+    .img-upload.has-image p                   { display: none; }
+
+    /* ── BUTTONS ── */
+    .btn-add-variant {
+      width: 100%; padding: 13px;
+      border-radius: var(--radius);
+      border: 1.5px dashed var(--outline-variant);
+      background: transparent;
+      color: var(--on-surface-variant);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 20px;
+    }
+    .btn-add-variant:hover { border-color: var(--primary); color: var(--primary); background: rgba(144,171,255,.05); }
+
+    .actions { display: flex; justify-content: flex-end; gap: 12px; padding-top: 4px; margin-bottom: 40px; }
+    .btn-cancel {
+      padding: 11px 22px;
+      border-radius: 9px;
+      border: 1px solid var(--outline-variant);
+      background: var(--surface-high);
+      color: var(--on-surface-variant);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: all .2s;
+    }
+    .btn-cancel:hover { background: var(--surface-bright); color: var(--on-bg); }
+    .btn-submit {
+      padding: 11px 26px;
+      border-radius: 9px; border: none;
+      background: linear-gradient(135deg, var(--primary-dim) 0%, var(--secondary) 100%);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 20px rgba(49,107,243,.35);
+      transition: all .2s;
+    }
+    .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(49,107,243,.45); }
+
+    /* ── LOADING OVERLAY ── */
+    #loadingOverlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(6,14,32,.85);
+      backdrop-filter: blur(8px);
+      z-index: 9998;
+      align-items: center; justify-content: center;
+    }
+    #loadingOverlay.active { display: flex; }
+    .spinner-wrap { text-align: center; }
+    .spinner {
+      width: 50px; height: 50px;
+      border: 3px solid rgba(144,171,255,.15);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-wrap p { font-size: 14px; color: var(--on-bg); }
+    .spinner-wrap small { font-size: 12px; color: var(--on-surface-variant); margin-top: 4px; display: block; }
+
+    .swal2-popup {
+      background: var(--surface) !important;
+      color: var(--on-bg) !important;
+      border: 1px solid var(--outline-variant) !important;
+      border-radius: 18px !important;
+    }
+    .swal2-confirm { background: var(--primary-dim) !important; border-radius: 8px !important; }
+    .swal2-cancel  { background: var(--surface-high) !important; border-radius: 8px !important; color: var(--on-surface-variant) !important; }
+
+    aside::-webkit-scrollbar { width: 4px; }
+    aside::-webkit-scrollbar-track { background: transparent; }
+    aside::-webkit-scrollbar-thumb { background: var(--outline-variant); border-radius: 4px; }
+
+    .changed-indicator {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--warning);
+      margin-left: 6px;
+      vertical-align: middle;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .has-changes .changed-indicator { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- ── CROP MODAL ── -->
+<div id="cropModal">
+  <div class="crop-container">
+    <h3><i class="fas fa-crop-alt" style="color:var(--primary);"></i> Crop Image</h3>
+    <div class="crop-image-wrap">
+      <img id="cropImage" alt="crop source" />
+    </div>
+    <div class="crop-actions">
+      <button type="button" id="cropCancel">
+        <i class="fas fa-times" style="margin-right:5px;"></i>Cancel
+      </button>
+      <button type="button" id="cropApply">
+        <i class="fas fa-check" style="margin-right:5px;"></i>Apply Crop
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay">
+  <div class="spinner-wrap">
+    <div class="spinner"></div>
+    <p>Saving changes…</p>
+    <small>Please wait while we update the product</small>
+  </div>
+</div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">L</div>
+    <span class="nav-title"> <span>LUXE</span></span>
+  </div>
+  <div class="nav-bell">
+    <i class="far fa-bell"></i>
+    <span class="nav-bell-dot"></span>
+  </div>
+</nav>
+
+<!-- ── LAYOUT ── -->
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside>
+    <div class="sidebar-section">
+      <p class="sidebar-label">Overview</p>
+      <a class="sidebar-link" href="/admin/dashboard">
+        <span class="ms">dashboard</span>Dashboard
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <p class="sidebar-label">Catalogue</p>
+      <a class="sidebar-link active" href="/admin/products">
+        <span class="ms">inventory_2</span>Products
+      </a>
+      <a class="sidebar-link" href="/admin/categories">
+        <span class="ms">category</span>Categories
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <p class="sidebar-label">Commerce</p>
+      <a class="sidebar-link" href="/admin/orders">
+        <span class="ms">shopping_cart</span>Orders
+      </a>
+      <a class="sidebar-link" href="/admin/users">
+        <span class="ms">group</span>Customers
+      </a>
+      <a class="sidebar-link" href="/admin/coupons">
+        <span class="ms">confirmation_number</span>Coupons
+      </a>
+      <a class="sidebar-link" href="/admin/offers">
+        <span class="ms">local_offer</span>Offers
+      </a>
+      <a class="sidebar-link" href="/admin/banners">
+        <span class="ms">ad_units</span>Banners
+      </a>
+      <a class="sidebar-link" href="/admin/analytics">
+        <span class="ms">monitoring</span>Analytics
+      </a>
+    </div>
+    <div class="sidebar-section" style="margin-top: auto;">
+  <p class="sidebar-label">Account</p>
+
+  <form action="/admin/logout" method="POST" style="margin:0;">
+    <button type="submit" class="sidebar-link" style="width:100%; text-align:left; background:none; border:none;">
+      <span class="ms">logout</span>
+      Logout
+    </button>
+  </form>
+
+</div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main>
+    <div style="max-width: 860px; margin: 0 auto;">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-icon">
+          <i class="fas fa-pen"></i>
+        </div>
+        <div>
+          <h1 class="page-title">Edit Product</h1>
+          <p class="page-subtitle">Update details for <strong style="color:var(--on-bg);"><%= product.name %></strong></p>
+        </div>
+      </div>
+
+      <!-- ── STATUS TABLE ── -->
+      <div class="status-table-wrap">
+        <div class="card-title" style="margin-bottom:16px;">
+          <div class="card-title-icon"><i class="fas fa-sliders-h"></i></div>
+          Variant Status Control
+          <span class="changed-indicator" id="statusChangedDot"></span>
+        </div>
+        <table class="status-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Color</th>
+              <th>Size</th>
+              <th>Stock</th>
+              <th>Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="statusTableBody">
+            <% product.variants.forEach(function(variant, i) { %>
+              <tr>
+                <td style="color:var(--on-surface-variant); font-size:12px;">
+                  <div class="badge-num" style="display:inline-flex;"><%= i + 1 %></div>
+                </td>
+                <td style="font-weight:600;"><%= variant.color %></td>
+                <td><%= variant.size %></td>
+                <td>
+                  <span style="font-weight:600; color:<%= variant.stock > 0 ? 'var(--success)' : 'var(--on-error-container)' %>;">
+                    <%= variant.stock %>
+                  </span>
+                  <span style="font-size:11px; color:var(--on-surface-variant);"> units</span>
+                </td>
+                <td style="font-weight:600;">₹<%= variant.price.toLocaleString() %></td>
+                <td>
+                  <div class="toggle-wrap">
+                    <label class="toggle">
+                      <input
+                        type="checkbox"
+                        class="variant-status-toggle"
+                        data-index="<%= i %>"
+                        data-variant-id="<%= variant._id %>"
+                        data-original="<%= variant.isActive ? 'true' : 'false' %>"
+                        <%= variant.isActive ? 'checked' : '' %>
+                      />
+                      <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                      </div>
+                    </label>
+                    <span class="toggle-label" id="toggle-label-<%= i %>">
+                      <%= variant.isActive ? 'Active' : 'Inactive' %>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <!-- Status save bar -->
+        <div id="statusSaveBar" style="display:none; margin-top:18px; padding-top:16px; border-top:1px solid var(--outline-variant); align-items:center; justify-content:space-between;">
+          <span style="font-size:12px; color:var(--warning); display:flex; align-items:center; gap:6px;">
+            <i class="fas fa-circle-exclamation"></i>
+            You have unsaved status changes
+          </span>
+          <div style="display:flex; gap:10px;">
+            <button type="button" id="discardStatusBtn" class="btn-cancel" style="padding:8px 16px; font-size:12px;">
+              Discard
+            </button>
+            <button type="button" id="saveStatusBtn" class="btn-submit" style="padding:8px 18px; font-size:12px;">
+              <i class="fas fa-check"></i> Save Status
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── EDIT FORM ── -->
+      <form id="productForm" enctype="multipart/form-data">
+
+        <!-- Basic Info -->
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-icon"><i class="fas fa-info"></i></div>
+            Basic Information
+          </div>
+
+          <div class="grid-2" style="margin-bottom: 18px;">
+            <div class="field">
+              <label for="p-name">Product Name *</label>
+              <input id="p-name" type="text" name="productName"
+                value="<%= product.name %>"
+                placeholder="e.g. Silk Kurta Set"/>
+              <span id="name-error" class="error-msg"></span>
+            </div>
+            <div class="field">
+              <label for="category">Category *</label>
+              <select id="category" name="category">
+                <option value="">Select Category</option>
+                <% category.forEach(function(cat) { %>
+                  <option value="<%= cat._id %>"
+                    <%= product.categoryId && product.categoryId._id && product.categoryId._id.toString() === cat._id.toString() ? 'selected' : '' %>>
+                    <%= cat.categoryName %>
+                  </option>
+                <% }) %>
+              </select>
+              <span id="category-error" class="error-msg"></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4"
+              placeholder="Describe the product — fabric, style, occasion…"><%= product.description %></textarea>
+            <span id="description-error" class="error-msg"></span>
+          </div>
+        </div>
+
+        <!-- Variants -->
+        <div id="variantsContainer">
+          <% product.variants.forEach(function(variant, i) { %>
+            <div class="variant-card variant-group">
+              <div class="variant-header">
+                <div class="variant-badge">
+                  <div class="badge-num"><%= i + 1 %></div>
+                  <span class="variant-title">Variant <%= i + 1 %></span>
+                </div>
+                <button type="button"
+                  class="btn-delete delete-variant-btn <%= product.variants.length <= 1 ? 'hidden' : '' %>"
+                  onclick="deleteVariant(this)">
+                  <i class="fas fa-trash-alt"></i> Remove
+                </button>
+              </div>
+
+              <input type="hidden" name="variants[<%= i %>].variantId" value="<%= variant._id %>"/>
+
+               <div class="field" style="margin-bottom: 18px;">
+  <label style="display:flex;align-items:center;justify-content:space-between;">
+    SKU
+    <span style="color:var(--primary);font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;background:rgba(144,171,255,.1);padding:2px 8px;border-radius:4px;">Auto-generated</span>
+  </label>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <input type="text" name="variants[0].sku" class="sku-input"
+           placeholder="Fill name + color + size…"
+           readonly
+           style="flex:1;cursor:default;color:var(--primary);font-family:monospace;font-size:13px;letter-spacing:.5px;"/>
+    <button type="button" class="btn-regen-sku"
+            title="Regenerate SKU"
+            style="width:38px;height:38px;flex-shrink:0;border-radius:9px;border:1px solid var(--outline-variant);
+                   background:var(--surface-bright);color:var(--primary);cursor:pointer;font-size:17px;
+                   display:flex;align-items:center;justify-content:center;transition:all .2s;">
+      ↻
+    </button>
+  </div>
+  <span class="error-msg sku-error"></span>
+</div>
+
+              <div class="grid-2" style="margin-bottom: 18px;">
+                <div class="field">
+                  <label>Color *</label>
+                  <input type="text" name="variants[<%= i %>].color"
+                    value="<%= variant.color %>"
+                    placeholder="e.g. Midnight Blue"/>
+                  <span class="error-msg color-error"></span>
+                </div>
+                <div class="field">
+                  <label>Size *</label>
+                  <select name="variants[<%= i %>].size">
+                    <option value="">Select Size</option>
+                    <% var sizes = ['Small','Medium','Large','XL','XXL']; sizes.forEach(function(s) { %>
+                      <option <%= variant.size === s ? 'selected' : '' %>><%= s %></option>
+                    <% }) %>
+                  </select>
+                  <span class="error-msg size-error"></span>
+                </div>
+                <div class="field">
+                  <label>Stock Quantity *</label>
+                  <input type="number" name="variants[<%= i %>].stock"
+                    value="<%= variant.stock %>"
+                    placeholder="e.g. 50"/>
+                  <span class="error-msg stock-error"></span>
+                </div>
+                <div class="field">
+                  <label>Original Price *</label>
+                  <input type="number" name="variants[<%= i %>].price"
+                    value="<%= variant.price %>"
+                    placeholder="₹ 0.00"/>
+                  <span class="error-msg price-error"></span>
+                </div>
+                <div class="field">
+                  <label>Discounted Price</label>
+                  <input type="number" name="variants[<%= i %>].discount"
+                    value="<%= variant.discount || '' %>"
+                    placeholder="₹ 0.00"/>
+                </div>
+              </div>
+
+              <!-- Images -->
+              <div>
+                <label style="display:block; margin-bottom:12px;">
+                  Product Images *
+                  <span style="color:var(--on-surface-variant); font-weight:400; text-transform:none; letter-spacing:0;">
+                    (3 required — upload new to replace)
+                  </span>
+                </label>
+                <div class="grid-3">
+                  <% for (var j = 0; j < 3; j++) { %>
+                    <%
+                      var hasImg = variant.images && variant.images[j] ? true : false;
+                      var imgSrc = hasImg ? '/uploads/' + variant.images[j] : '';
+                      var imgPath = hasImg ? variant.images[j] : '';
+                    %>
+                    <div class="img-upload image-upload-area <%= hasImg ? 'has-image' : '' %>">
+                      <img class="preview-image" src="<%= imgSrc %>" alt="preview"/>
+                      <span class="preview-edit-badge">
+                        <i class="fas fa-pen" style="font-size:9px;margin-right:3px;"></i>Change
+                      </span>
+                      <span class="ms-upload">cloud_upload</span>
+                      <p>Image <%= j + 1 %></p>
+                      <span class="file-name"><%= hasImg ? '✓ Existing image' : '' %></span>
+
+                      <!-- Tracks which existing server image occupies this slot.
+                           Cleared to '' when the user picks a new file, so the
+                           backend knows a replacement was provided. -->
+                      <input
+                        type="hidden"
+                        class="existing-image-input"
+                        name="variants[<%= i %>].existingImages"
+                        value="<%= imgPath %>"
+                      />
+
+                      <input type="file" name="variants[<%= i %>].images" accept="image/*" class="image-input"/>
+                    </div>
+                  <% } %>
+                </div>
+                <span class="error-msg variant-images-error" style="margin-top:8px; display:block;"></span>
+              </div>
+
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- Add Variant -->
+        <button type="button" id="addVariantBtn" class="btn-add-variant">
+          <i class="fas fa-plus-circle"></i> Add Another Variant
+        </button>
+
+        <!-- Actions -->
+        <div class="actions">
+          <a href="/admin/products" style="text-decoration:none;">
+            <button type="button" class="btn-cancel">
+              <i class="fas fa-times" style="margin-right:6px;"></i>Cancel
+            </button>
+          </a>
+          <button type="submit" class="btn-submit">
+            <i class="fas fa-check-circle"></i> Save Changes
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+  // ─────────────────────────────────────────────
+  //  CROP STATE
+  // ─────────────────────────────────────────────
+  var cropperInstance = null;
+  var pendingInput    = null;
+  var pendingArea     = null;
+
+  var cropModal = document.getElementById('cropModal');
+  var cropImg   = document.getElementById('cropImage');
+
+  // ── Open crop modal ──
+  function openCrop(file, inputEl, areaEl) {
+    pendingInput = inputEl;
+    pendingArea  = areaEl;
+
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+      }
+
+      // Attach onload BEFORE setting src so it always fires
+      cropImg.onload = function () {
+        cropperInstance = new Cropper(cropImg, {
+          aspectRatio: 1,
+          viewMode: 1,
+          background: false,
+        });
+      };
+
+      cropImg.src = ev.target.result;
+      cropModal.classList.add('open');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── Apply crop ──
+  document.getElementById('cropApply').addEventListener('click', function () {
+    if (!cropperInstance) return;
+
+    cropperInstance.getCroppedCanvas({ width: 500, height: 500 }).toBlob(function (blob) {
+      var croppedFile = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
+
+      // Inject cropped file back into the hidden <input type="file">
+      var dt = new DataTransfer();
+      dt.items.add(croppedFile);
+      pendingInput.files = dt.files;
+
+      // Mark as having a cropped file (used in validation)
+      pendingInput.dataset.cropped = 'true';
+
+      // Clear the existing-image path so backend knows this slot was replaced
+      var existingInput = pendingArea.querySelector('.existing-image-input');
+      if (existingInput) existingInput.value = '';
+
+      // Show preview + apply has-image state
+      var preview = pendingArea.querySelector('.preview-image');
+      preview.src = URL.createObjectURL(croppedFile);
+      pendingArea.classList.add('has-image');
+
+      var label = pendingArea.querySelector('.file-name');
+      if (label) label.textContent = 'cropped.jpg';
+
+      closeCropModal(false);
+    }, 'image/jpeg', 0.92);
+  });
+
+  // ── Cancel crop ──
+  document.getElementById('cropCancel').addEventListener('click', function () {
+    closeCropModal(true);
+  });
+
+  // resetInput=true on cancel so same file can be re-picked; false after apply
+  function closeCropModal(resetInput) {
+    cropModal.classList.remove('open');
+    if (cropperInstance) {
+      cropperInstance.destroy();
+      cropperInstance = null;
+    }
+    if (resetInput && pendingInput) {
+      pendingInput.value = '';
+    }
+    pendingInput = null;
+    pendingArea  = null;
+  }
+
+  // ─────────────────────────────────────────────
+  //  BIND IMAGE UPLOAD AREAS
+  //  pointer-events:none on all children (set in CSS) means
+  //  every click on the card lands on .img-upload itself.
+  // ─────────────────────────────────────────────
+  function bindUploadAreas(container) {
+    container.querySelectorAll('.image-upload-area').forEach(function (area) {
+      var input = area.querySelector('.image-input');
+
+      area.addEventListener('click', function () {
+        if (cropModal.classList.contains('open')) return;
+        input.click();
+      });
+
+      input.addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        openCrop(file, input, area);
+      });
+    });
+  }
+
+  // Bind existing variant upload areas on page load
+  bindUploadAreas(document);
+
+  // ─────────────────────────────────────────────
+  //  VARIANT MANAGEMENT
+  // ─────────────────────────────────────────────
+  var variantIndex = document.querySelectorAll('.variant-group').length;
+
+  document.getElementById('addVariantBtn').addEventListener('click', function () {
+    var container = document.getElementById('variantsContainer');
+    var first     = container.querySelector('.variant-group');
+    var clone     = first.cloneNode(true);
+
+    // Re-index all named inputs
+    clone.querySelectorAll('[name]').forEach(function (el) {
+      el.name = el.name.replace(/\[\d+\]/, '[' + variantIndex + ']');
+      if (!el.classList.contains('image-input')) el.value = '';
+    });
+
+    // Reset image previews + clear existing paths on new variant
+    clone.querySelectorAll('.preview-image').forEach(function (img) {
+      img.src = '';
+    });
+    clone.querySelectorAll('.image-upload-area').forEach(function (a) {
+      a.classList.remove('has-image');
+    });
+    clone.querySelectorAll('.existing-image-input').forEach(function (inp) {
+      inp.value = '';
+    });
+    clone.querySelectorAll('.image-input').forEach(function (inp) {
+      inp.value = '';
+      delete inp.dataset.cropped;
+    });
+    clone.querySelectorAll('.ms-upload, .image-upload-area p').forEach(function (el) {
+      el.style.display = '';
+    });
+    clone.querySelectorAll('.file-name').forEach(function (el) { el.textContent = ''; });
+    clone.querySelectorAll('.error-msg').forEach(function (el) { el.textContent = ''; });
+
+    // Clear variantId hidden field on cloned new variant
+    var variantIdInput = clone.querySelector('[name*="variantId"]');
+    if (variantIdInput) variantIdInput.value = '';
+
+    clone.querySelector('.variant-title').textContent = 'Variant ' + (variantIndex + 1);
+    clone.querySelector('.badge-num').textContent = variantIndex + 1;
+    clone.querySelector('.delete-variant-btn').classList.remove('hidden');
+
+    // Re-bind upload areas (cloneNode does NOT copy event listeners)
+    bindUploadAreas(clone);
+
+    clone.querySelectorAll('.delete-variant-btn').forEach(function (b) {
+      b.onclick = function () { deleteVariant(this); };
+    });
+
+    container.appendChild(clone);
+    variantIndex++;
+    updateDeleteButtons();
+  });
+
+  function deleteVariant(btn) {
+    var container = document.getElementById('variantsContainer');
+    if (container.querySelectorAll('.variant-group').length > 1) {
+      btn.closest('.variant-group').remove();
+      reindexVariants();
+    }
+  }
+
+  function reindexVariants() {
+    document.querySelectorAll('.variant-group').forEach(function (v, i) {
+      v.querySelector('.variant-title').textContent = 'Variant ' + (i + 1);
+      v.querySelector('.badge-num').textContent = i + 1;
+      v.querySelectorAll('[name]').forEach(function (el) {
+        el.name = el.name.replace(/variants\[\d+\]/, 'variants[' + i + ']');
+      });
+    });
+    variantIndex = document.querySelectorAll('.variant-group').length;
+    updateDeleteButtons();
+  }
+
+  function updateDeleteButtons() {
+    var all = document.querySelectorAll('.variant-group');
+    document.querySelectorAll('.delete-variant-btn').forEach(function (btn) {
+      btn.classList.toggle('hidden', all.length <= 1);
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  //  STATUS TOGGLE LOGIC
+  // ─────────────────────────────────────────────
+  var statusSaveBar    = document.getElementById('statusSaveBar');
+  var statusChangedDot = document.getElementById('statusChangedDot');
+
+  function checkStatusChanges() {
+    var hasChanges = Array.from(document.querySelectorAll('.variant-status-toggle'))
+      .some(function (t) { return t.checked.toString() !== t.dataset.original; });
+    statusSaveBar.style.display = hasChanges ? 'flex' : 'none';
+    statusChangedDot.parentElement.classList.toggle('has-changes', hasChanges);
+  }
+
+  document.querySelectorAll('.variant-status-toggle').forEach(function (toggle) {
+    toggle.addEventListener('change', function () {
+      var label = document.getElementById('toggle-label-' + this.dataset.index);
+      label.textContent = this.checked ? 'Active' : 'Inactive';
+      checkStatusChanges();
+    });
+  });
+
+  document.getElementById('discardStatusBtn').addEventListener('click', function () {
+    document.querySelectorAll('.variant-status-toggle').forEach(function (toggle) {
+      var original = toggle.dataset.original === 'true';
+      toggle.checked = original;
+      var label = document.getElementById('toggle-label-' + toggle.dataset.index);
+      label.textContent = original ? 'Active' : 'Inactive';
+    });
+    checkStatusChanges();
+  });
+
+  document.getElementById('saveStatusBtn').addEventListener('click', async function () {
+    var changes = Array.from(document.querySelectorAll('.variant-status-toggle'))
+      .filter(function (t) { return t.checked.toString() !== t.dataset.original; })
+      .map(function (t) { return { variantId: t.dataset.variantId, isActive: t.checked }; });
+
+    var confirm = await Swal.fire({
+      title: 'Confirm Status Update',
+      html: `
+        <p style="font-size:13px; color:var(--on-surface-variant); margin-bottom:14px;">
+          You're about to update <strong style="color:var(--on-bg);">${changes.length} variant${changes.length > 1 ? 's' : ''}</strong>:
+        </p>
+        <div style="display:flex; flex-direction:column; gap:8px; max-height:180px; overflow-y:auto;">
+          ${changes.map(function(c) { return `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--surface-high); border-radius:8px; font-size:12px;">
+              <span style="color:var(--on-bg);">Variant ID: ${c.variantId.slice(-6)}</span>
+              <span class="badge ${c.isActive ? 'badge-active' : 'badge-inactive'}">
+                <span class="badge-dot"></span>${c.isActive ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+          `; }).join('')}
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Update',
+      cancelButtonText: 'Cancel',
+      background: '#0f1930',
+      color: '#dee5ff',
+      width: 420,
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    document.getElementById('loadingOverlay').classList.add('active');
+
+    try {
+      var res = await fetch('/admin/product-status/<%= product._id %>', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ changes: changes }),
+      });
+      document.getElementById('loadingOverlay').classList.remove('active');
+      var result = await res.json();
+
+      if (result.success) {
+        document.querySelectorAll('.variant-status-toggle').forEach(function (t) {
+          t.dataset.original = t.checked.toString();
+        });
+        checkStatusChanges();
+        Swal.fire({
+          toast: true, icon: 'success', title: 'Status updated successfully',
+          position: 'top-right', showConfirmButton: false, timer: 2500,
+          background: '#0f1930', color: '#dee5ff',
+        });
+      } else {
+        Swal.fire({
+          toast: true, icon: 'error', title: result.message || 'Update failed',
+          position: 'top-right', showConfirmButton: false, timer: 3000,
+          background: '#0f1930', color: '#dee5ff',
+        });
+      }
+    } catch (err) {
+      document.getElementById('loadingOverlay').classList.remove('active');
+      Swal.fire({
+        toast: true, icon: 'error', title: 'Network error. Please retry.',
+        position: 'top-right', showConfirmButton: false, timer: 3000,
+        background: '#0f1930', color: '#dee5ff',
+      });
+    }
+  });
+
+  // ─────────────────────────────────────────────
+  //  VALIDATION
+  // ─────────────────────────────────────────────
+  var fields = {
+    name:        document.getElementById('p-name'),
+    category:    document.getElementById('category'),
+    description: document.getElementById('description'),
+  };
+  var errors = {
+    name:        document.getElementById('name-error'),
+    category:    document.getElementById('category-error'),
+    description: document.getElementById('description-error'),
+  };
+
+  function validate(field) {
+    var v   = fields[field].value.trim();
+    var err = errors[field];
+    switch (field) {
+      case 'name':
+        if (v.length < 3) { err.textContent = 'Name must be at least 3 characters'; return false; }
+        err.textContent = ''; return true;
+      case 'category':
+        if (!v) { err.textContent = 'Please select a category'; return false; }
+        err.textContent = ''; return true;
+      case 'description':
+        if (!v)             { err.textContent = 'Description is required'; return false; }
+        if (v.length < 5)   { err.textContent = 'At least 5 characters'; return false; }
+        if (v.length > 300) { err.textContent = 'Too long — max 300 characters'; return false; }
+        err.textContent = ''; return true;
+      default: return true;
+    }
+  }
+
+  Object.keys(fields).forEach(function (f) {
+    fields[f].addEventListener('input', function () { validate(f); });
+    fields[f].addEventListener('blur',  function () { validate(f); });
+  });
+
+  function validateVariants() {
+    var ok = true;
+    document.querySelectorAll('.variant-group').forEach(function (v) {
+      var color    = v.querySelector('[name*="color"]');
+      var colorErr = v.querySelector('.color-error');
+      if (!color.value.trim()) { colorErr.textContent = 'Color is required'; ok = false; }
+      else colorErr.textContent = '';
+
+      var size    = v.querySelector('[name*="size"]');
+      var sizeErr = v.querySelector('.size-error');
+      if (!size.value) { sizeErr.textContent = 'Size is required'; ok = false; }
+      else sizeErr.textContent = '';
+
+      var stock    = v.querySelector('[name*="stock"]');
+      var stockErr = v.querySelector('.stock-error');
+      if (!stock.value || +stock.value < 0) { stockErr.textContent = 'Valid stock required'; ok = false; }
+      else stockErr.textContent = '';
+
+      var price    = v.querySelector('[name*="price"]');
+      var priceErr = v.querySelector('.price-error');
+      if (!price.value || +price.value <= 0) { priceErr.textContent = 'Valid price required'; ok = false; }
+      else priceErr.textContent = '';
+    });
+    return ok;
+  }
+
+  document.getElementById('productForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  var form = this; // ← capture before any await
+
+  var valid = Object.keys(fields).every(function (f) { return validate(f); });
+  if (!validateVariants()) valid = false;
+
+  if (!valid) {
+    Swal.fire({
+      toast: true, icon: 'error',
+      title: 'Please fix the validation errors',
+      position: 'top-right', showConfirmButton: false, timer: 3000,
+      background: '#0f1930', color: '#dee5ff',
+    });
+    return;
+  }
+
+  var confirmed = await Swal.fire({
+    title: 'Save Changes?',
+    text: 'This will update the product details permanently.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Save',
+    cancelButtonText: 'Review Again',
+    background: '#0f1930', color: '#dee5ff',
+  });
+
+  if (!confirmed.isConfirmed) return;
+
+  document.getElementById('loadingOverlay').classList.add('active');
+
+  try {
+    // Disable status toggles before building FormData so they are excluded,
+    // then immediately re-enable — this prevents the backend from reading
+    // checkbox absence as "deactivated"
+    var toggles = document.querySelectorAll('.variant-status-toggle');
+    toggles.forEach(function (t) { t.disabled = true; });
+
+    var fd = new FormData(form); // ← use captured 'form', not 'this'
+
+    toggles.forEach(function (t) { t.disabled = false; });
+
+    var res = await fetch('/admin/product-edit/<%= product._id %>', {
+      method: 'POST',
+      body: fd,
+    });
+
+    document.getElementById('loadingOverlay').classList.remove('active');
+    var result = await res.json();
+
+    if (result.success) {
+      await Swal.fire({
+        icon: 'success', title: 'Product Updated!',
+        text: result.message || 'Changes saved successfully.',
+        confirmButtonColor: '#316bf3', confirmButtonText: 'Back to Products',
+        background: '#0f1930', color: '#dee5ff',
+      });
+      window.location.href = result.redirect || '/admin/products';
+    } else {
+      Swal.fire({
+        toast: true, icon: 'error', title: result.message,
+        position: 'top-right', showConfirmButton: false, timer: 3000,
+        background: '#0f1930', color: '#dee5ff',
+      });
+    }
+  } catch (err) {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    Swal.fire({
+      toast: true, icon: 'error', title: 'Network error. Please retry.',
+      position: 'top-right', showConfirmButton: false, timer: 3000,
+      background: '#0f1930', color: '#dee5ff',
+    });
+  }
+});
+
+  // ── Active sidebar ──────────────────────────────────────────────
+  (function () {
+    var path  = window.location.pathname;
+    var links = document.querySelectorAll('.sidebar-link');
+    links.forEach(function (link) {
+      link.classList.remove('active');
+      if (link.getAttribute('href') && path.startsWith(link.getAttribute('href'))) {
+        link.classList.add('active');
+      }
+    });
+  })();
+</script>
+</body>
+</html>

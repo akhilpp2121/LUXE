@@ -14,13 +14,10 @@ const categorySchema=new schema({
     },
     isActive:{
         type:Boolean,
-        required:true
+        required:true,
+        default:true
     },
-    offer:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"offer",
-        default:null
-    }
+    
 },{timestamps:true})
 
 

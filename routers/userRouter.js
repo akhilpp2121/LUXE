@@ -15,7 +15,9 @@ import {
   registerController, loginController, homeLoad, otpPageLoad,
   verifyOtpController, resendOtpController, verifyEmailController,
   resetPasswordLoad, resetPassword,googleCallback,
-  logoutUserController
+  logoutUserController,
+  productListingLoad,
+  productDetailLoad
 } from "../controller/userController.js";
 
 import {
@@ -28,8 +30,8 @@ import {
 } from "../controller/userProfileController.js";
 import { isUserAuthenticated } from "../middleware/user.js";
 const router = express.Router();
+import { attachCart } from "../middleware/cartMiddleware.js";
 
-// ── AUTH ──
 router.get("/", userLandingLoad);
 router.get("/login", userLoginLoad);
 router.get("/signUp", userSignUpLoad);
@@ -55,10 +57,9 @@ router.post("/resend-otp", resendOtpController);
 router.get("/reset-password", resetPasswordLoad);
 router.post("/reset-password", resetPassword);
 
-// router.use(isUserAuthenticated);
 
 // ── PAGES ──
-router.get("/homePage",isUserAuthenticated, homeLoad);
+router.get("/homePage",isUserAuthenticated, attachCart,homeLoad);
 router.get("/profile",isUserAuthenticated, profileLoadPage);
 router.get("/profile/edit",isUserAuthenticated, editProfileLoad);
 router.get("/profile/email-edit",isUserAuthenticated, profileEditEmailLoad);
@@ -79,5 +80,13 @@ router.post("/profile/update",isUserAuthenticated, avatarUpload.none(), userProf
 router.post("/profile/avatar/upload",isUserAuthenticated, avatarUpload.single("avatar"), uploadAvatar);
 router.delete("/profile/avatar",isUserAuthenticated, deleteAvatar);
 router.get('/logout',logoutUserController);
+
+router.get("/product-listing",isUserAuthenticated,attachCart, productListingLoad);
+router.get("/product-details/:productId", isUserAuthenticated, attachCart, productDetailLoad);
+
+
+
+
+
 
 export default router;

@@ -1,288 +1,311 @@
 <!DOCTYPE html>
-
-<html class="dark" lang="en"><head>
+<html class="dark" lang="en">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#1152d4",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#1152d4",
+                    "background-light": "#f6f6f8",
+                    "background-dark": "#101622",
+                },
+                fontFamily: {
+                    "display": ["Manrope", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
                 },
             },
-        }
-    </script>
+        },
+    }
+</script>
 <style>
-        body {
-            font-family: 'Manrope', sans-serif;
-        }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-    </style>
+    body { font-family: 'Manrope', sans-serif; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .search-wrap input {
+    width: 300px;
+    background: transparent;
+    border: 0.5px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    padding: 10px 44px 10px 42px;
+    font-size: 13px;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .search-wrap input::placeholder { color: rgba(255,255,255,0.35); }
+  .search-wrap input:focus {
+    border-color: #1152d4;
+    background: rgba(17,82,212,0.08);
+    box-shadow: 0 0 0 3px rgba(17,82,212,0.15);
+  }
+   .search-wrap .ic-search {
+    position: absolute; left: 14px;
+    font-size: 16px; color: rgba(255,255,255,0.35);
+    pointer-events: none; transition: color 0.2s;
+  }
+  .search-wrap:focus-within .ic-search { color: #1152d4; }
+  .search-wrap button {
+    position: absolute; right: 8px;
+    background: #1152d4; border: none; border-radius: 999px;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.2s, transform 0.15s;
+    padding: 0;
+  }
+  .search-wrap button:hover { background: #0e44b0; transform: scale(1.05); }
+</style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
-<!-- Sticky Navigation Bar -->
+
+<!-- Header -->
 <header class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
-<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-<div class="flex items-center gap-12">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-3xl">diamond</span>
-<h1 class="text-2xl font-800 tracking-tighter text-slate-900 dark:text-white uppercase">Luxe</h1>
-</div>
-<nav class="hidden md:flex items-center gap-8">
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Collections</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">New Arrivals</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">About</a>
-</nav>
-</div>
-<div class="flex items-center gap-6">
-<div class="hidden lg:flex items-center bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-2 w-64 border border-transparent focus-within:border-primary transition-all">
-<span class="material-symbols-outlined text-slate-400 text-xl">search</span>
-<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-500" placeholder="Search luxury..." type="text"/>
-</div>
-<div class="flex items-center gap-4">
-<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative">
-<span class="material-symbols-outlined">favorite</span>
-</button>
-<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative">
-<span class="material-symbols-outlined">shopping_cart</span>
-<span class="absolute top-1 right-1 bg-primary text-[10px] text-white w-4 h-4 flex items-center justify-center rounded-full"></span>
-</button>
-<button class="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700">
-<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-<a href="/profile" class="flex items-center gap-2">
-  <span class="material-symbols-outlined text-slate-500">person</span>
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-12">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-3xl">diamond</span>
+               <a href="/homepage" class="text-2xl font-bold tracking-tighter text-slate-900 dark:text-white uppercase hover:text-gray-500 transition">
+  Luxe
 </a>
+            </div>
+            <nav class="hidden md:flex items-center gap-8">
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="/product-listing">Collections</a>
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">New Arrivals</a>
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">About</a>
+            </nav>
+        </div>
 
-</div>
-</button>
-</div>
-</div>
-</div>
-</header>
-<main>
-<!-- Hero Section -->
-<section class="relative w-full h-[85vh] overflow-hidden">
-<div class="absolute inset-0 bg-cover bg-center" data-alt="Male model in premium linen shirt and shorts standing on a balcony" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAJtx5iykZ8DNnG4JOd-R63qiKb68-RxlTSQX0QOls5TgddIkRvoktGm2jTTYDQWbOI_iBKAWkLLxsIlHxE3VQ35E53IOoBpgkxyz-XmUqYOEuBPsLVhqgZ8cv_y4VIZLEDejPHScxDSwxl4CRDjRL_CbbOSSXEilDLCRrU2bUlKDT-ihr5VfUFI84Qg9hMUhD_VhhSWhe8bA4dLoHxkmt3EKtg9KFEdTcBL6metIaPBtOSIusleR1KG7jHBqWnWJ0WERSndazUH_MF');">
-<div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
-</div>
-<div class="relative h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
-<div class="max-w-2xl">
-<span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Summer Editorial 2024</span>
-<h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Elevated Essentials</h2>
-<p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Experience the pinnacle of modern luxury with our meticulously crafted seasonal collection.</p>
-<!-- <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
-                        <a href="/views/Users/login.ejs">Shop Now</a>
-                    </button> -->
-                    <a href="/login">
-  <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
-    Shop Now
+<form method="GET" action="/homepage" class="search-wrap relative flex items-center"
+  onsubmit="const i=this.querySelector('[name=search]'); i.value=i.value.trim();">
+  <span class="material-symbols-outlined ic-search">search</span>
+  <input
+    name="search"
+    type="text"
+    placeholder="Search products..."
+    value="<%= searchQuery || '' %>"
+  />
+  <button type="submit" aria-label="Search">
+    <span class="material-symbols-outlined" style="font-size:16px; color:#fff;">arrow_forward</span>
   </button>
-</a>
+</form>
+        
+            <div class="flex items-center gap-4">
+                <button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">favorite</span>
+                </button>
 
-</div>
-</div>
-</section>
-<!-- Featured Categories -->
-<section class="py-24 max-w-7xl mx-auto px-6">
-<div class="flex items-end justify-between mb-12">
-<div>
-<h3 class="text-3xl font-800 mb-2">Featured Categories</h3>
-<p class="text-slate-500">Curated selections for the discerning gentleman.</p>
-</div>
-<a class="text-primary font-bold hover:underline flex items-center gap-1" href="#">View all <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
-</div>
-<div class="grid grid-cols-2 md:grid-cols-5 gap-4 h-[400px]">
-<div class="relative rounded-xl overflow-hidden group cursor-pointer border border-slate-200 dark:border-slate-800">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="High quality dress shirts display" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXvO1zcrsnmIxGpfkgdCCDOmv2_FVbe-5HxDdqCDWNLAgIjV4Gi4Tr3CM1z3vIfv629u3JBQ8RGjAhhin0idUnwD4cCqyM6AcUaBsbPeObqc4B6ib7uQNhDhFYo1RAQ-tGx_Nulymk7ZXeM5E_1uda44uwCmUh_PAbvB7-L9wU4J9Sz9YDrEImSA0FVzxfmWfYQ4DfY-UzHJ95bswA6-db3QGFJD6rP08FLPjCygE3trSgGZkFnuPHHexwwNcF1ksCDy4mDcTJpPJt');"></div>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-<div class="absolute bottom-6 left-6">
-<p class="text-white text-xl font-bold">Shirts</p>
-</div>
-</div>
-<div class="relative rounded-xl overflow-hidden group cursor-pointer border border-slate-200 dark:border-slate-800">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Luxury tailored trousers" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCOkdt7jKjjSfarsR3093vYSmPf_LajAvjtjjYzhhJ_DD8LpONTJgwIWZVtsH3zlLF5cFO1qRmCldsq8TcuQE9xHe0tm0g8FdNWtT2Bf1Pk6Nywf1hdo_G2G51wtdd5Zyhu4DsWYpnFtLdt7lvCUdbMGwDgEBckMpAZ6HapopWWkCPg92cobvYnyjpz1I5HWGx2t3t3fv67eO-2EKwFWkY5frnvBoOWrO85Z3SUSJpPVqYfn5DjM3eNwrsayppY136AT0DKaKzLXkG4');"></div>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-<div class="absolute bottom-6 left-6">
-<p class="text-white text-xl font-bold">Pants</p>
-</div>
-</div>
-<div class="relative rounded-xl overflow-hidden group cursor-pointer border border-slate-200 dark:border-slate-800">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Minimalist luxury t-shirts" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCZRBwFsvGOOb0Qs5SBEpggYwQf2559fZDazB9MpaqCzeb9MD7qOMxWKt-EGXiFe_P1iYfquPtafNoUFIaHjeTZC_g3iR_xaSSmuKdJF7miuzfs8LdjJ7rJmzewUlXuD0wzgCFUqUr37DxrzzvjPgisxkeay9lghhkrbNBL4p3gj9B2KvuZc7l5u2F1AdQ-twl4CLJ-JNFiDgZ-DmdsjviKVc2oLSbnMA3fpFTQYEdLdEScGdwb48SDUYnfMkxQY0lG2LmHQxR3AhqY');"></div>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-<div class="absolute bottom-6 left-6">
-<p class="text-white text-xl font-bold">T-Shirts</p>
-</div>
-</div>
-<div class="relative rounded-xl overflow-hidden group cursor-pointer border border-slate-200 dark:border-slate-800">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Traditional high-end silk kurta" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAXmeMt2nwbboE47UH6mXYdgNzM4wVRvXIMW7I684C2wv5YebVCDorjVuO9wa59glc-odbbKm_tT6PpltuoHPUvXf6-o-b4gkvUz9lDoqXtn24ky63qmTkdkbDifIkC16PPwHUSdOXtKi8CqBycZHqD6LU1zK1Yqv7MMC7Xc_I5Di_kFMA5x6wb1SeoD6YmaJscHf4QWYXyFLcMZSqy9s5ZKsKS6idOgUUqAC_UO9BCH9MJNpS6ncVPK_7ZdpSxOhWHCnHXgN0bJQYT');"></div>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-<div class="absolute bottom-6 left-6">
-<p class="text-white text-xl font-bold">Kurtas</p>
-</div>
-</div>
-<div class="relative rounded-xl overflow-hidden group cursor-pointer border border-slate-200 dark:border-slate-800">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Premium casual shorts" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCqgt8oTv_F4J2ODByrasYtT2VedmlMF7aYOOOy3n4YLOQzaY8aUeNaepcKDHRlvgW-gKkhy6McR5-q7c24reFIFoqJWH4lmfrQwyAOCK463RGcAUKd15xighFW-5QtcjmTD8dBZOwko9J3qMlGr_HeHHOHybV3kQY_y28cWSB1cC6i9R9YxXgWSRUnRJcFdK8EaUV6j-WVXXvm-WMay_Oxfvd4OdOo9mfBOcfKaYyaoL1kKNGcx2I2UtOGSPeeiBTJUuDqLZKEA7J6');"></div>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-<div class="absolute bottom-6 left-6">
-<p class="text-white text-xl font-bold">Shorts</p>
-</div>
-</div>
-</div>
-</section>
-<!-- New Arrivals Section -->
-<section class="py-24 bg-slate-50 dark:bg-slate-900/50">
-<div class="max-w-7xl mx-auto px-6">
-<div class="mb-12">
-<h3 class="text-3xl font-800 mb-2">New Arrivals</h3>
-<p class="text-slate-500">The latest additions to our permanent collection.</p>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-<!-- Product Card 1 -->
-<div class="bg-white dark:bg-background-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 group shadow-sm">
-<div class="h-80 overflow-hidden relative">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Premium white linen shirt" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDs6PqG-REdrFnD0oKZT0aFaH9DOu-eBNYtRBIeru3dMzYf0T8zf1v1f8ClxTksPC2IJ6Y__OohuiRcUx8cjbxVcP7Zx5UgeV5fNIZPPyf65YnpXXeNBV4m1WnLFVpVScHr6bVtZZTcHHAchE6hSzySXXiJLJar1VG_A8cCpW6twxEc5g-PnilNuBPGYZz8py1wPIb8CHLl-Irzv0aTaS94eSZkWkZrAy7aO-fP0RjYEvLBLCP0ve61_NUkb622fuFaVb4eiTZAPT-F');"></div>
-<button class="absolute top-4 right-4 bg-white/80 dark:bg-black/40 backdrop-blur-sm p-2 rounded-full hover:text-red-500 transition-colors">
-<span class="material-symbols-outlined text-xl">favorite</span>
-</button>
-</div>
-<div class="p-6">
-<p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">Summer Collection</p>
-<h4 class="text-lg font-bold mb-1">Linen Shirt</h4><p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Breathable, premium linen perfect for warm summer days and relaxed evenings.</p>
-<p class="text-primary font-800 text-xl mb-6">$120.00</p>
-<button class="w-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-primary dark:hover:bg-primary dark:hover:text-white transition-all">
-<span class="material-symbols-outlined text-sm">shopping_bag</span>
-                                Add to Cart
-                            </button>
-</div>
-</div>
-<!-- Product Card 2 -->
-<div class="bg-white dark:bg-background-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 group shadow-sm">
-<div class="h-80 overflow-hidden relative">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Navy tailored chinos" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAZS2spW92d-Bt9S7FT9MUCobqWofmYzAfCvjalsNAxvl4YDd9bjVR9wqfj8iSLPbuJo_x_ssBPgmmdmrogy3qKt0ifaHiaNB9tYO3CVUntiZGsBe6UonCUPHVjn-UsmK9vGgMscK7Cw7v-YwckXMigTPGE-KyEZ_VXVBCPtTfH2PZ3mgRNdUf_mJzQsMLz9o99zYnvgQQHae41Llds01pObU44mUSauqpKBApSnbpKl00MnNQruwMYuCVH8SooYlTJzFvLmgxvbOk_');"></div>
-<button class="absolute top-4 right-4 bg-white/80 dark:bg-black/40 backdrop-blur-sm p-2 rounded-full hover:text-red-500 transition-colors">
-<span class="material-symbols-outlined text-xl">favorite</span>
-</button>
-</div>
-<div class="p-6">
-<p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">Tailored</p>
-<h4 class="text-lg font-bold mb-1">Tailored Chinos</h4><p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">A classic fit crafted from high-quality stretch cotton for all-day comfort and style.</p>
-<p class="text-primary font-800 text-xl mb-6">$145.00</p>
-<button class="w-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-primary dark:hover:bg-primary dark:hover:text-white transition-all">
-<span class="material-symbols-outlined text-sm">shopping_bag</span>
-                                Add to Cart
-                            </button>
-</div>
-</div>
-<!-- Product Card 3 -->
-<div class="bg-white dark:bg-background-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 group shadow-sm">
-<div class="h-80 overflow-hidden relative">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Exquisite silk kurta" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAkq2ewGfumOiyJarGLrkWv5EpfsNGF9DuIGM0QrSPtShgZsabNH6i8m4IUa7ieDyKNVdzGFOlHPipV5CAQfhJtSim_f2F8v6oemxxji0hg4myGDNdCEwlPsUrWygRofwSWkwLTmrBXTtFPv2qwJ6AgBsvUn96cyEZusQvxjzDpoCdmsvnnyPC5WRZCxSbCi3MlW_O61ilWFpvdlZ2aJA5KnEUNPP51kGVhnK7Nh3F5Yjdjqo8gKYhn3F2zi3aNyPi6-81-ruRCQB6j');"></div>
-<button class="absolute top-4 right-4 bg-white/80 dark:bg-black/40 backdrop-blur-sm p-2 rounded-full hover:text-red-500 transition-colors">
-<span class="material-symbols-outlined text-xl">favorite</span>
-</button>
-</div>
-<div class="p-6">
-<p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">Heritage</p>
-<h4 class="text-lg font-bold mb-1">Silk Kurta</h4><p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Handcrafted from pure mulberry silk with intricate traditional embroidery details.</p>
-<p class="text-primary font-800 text-xl mb-6">$195.00</p>
-<button class="w-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-primary dark:hover:bg-primary dark:hover:text-white transition-all">
-<span class="material-symbols-outlined text-sm">shopping_bag</span>
-                                Add to Cart
-                            </button>
-</div>
-</div>
-<!-- Product Card 4 -->
-<div class="bg-white dark:bg-background-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 group shadow-sm">
-<div class="h-80 overflow-hidden relative">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Light beige casual shorts" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCwcvrY7WlhQUglbyQWL1sK6J2-yIIEhrX4tq9QN3SunVJfnJ4QXMPPsh9cHA8j4VnJBBi69mPeKRtOOmOR0ZHazSlcWNiSM1MV0RUA0sbWiFZkxwITwXcjj585-kzspEx6C1WQXx9DA1aHe8NxiHTTZzuQLsLdIf7f8EcaAxuUnnKtmXZdzXKWp9KhiYmdHt_EveaGHWNtw1nQuAqiP5zRtjUOxQvu76A30VATV_uhVi7QpXagOA9CH6-RmJgazZUgdPTDM-zgZXRZ');"></div>
-<button class="absolute top-4 right-4 bg-white/80 dark:bg-black/40 backdrop-blur-sm p-2 rounded-full hover:text-red-500 transition-colors">
-<span class="material-symbols-outlined text-xl">favorite</span>
-</button>
-</div>
-<div class="p-6">
-<p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">Relaxed</p>
-<h4 class="text-lg font-bold mb-1">Casual Shorts</h4><p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Lightweight and versatile shorts designed for ultimate comfort during summer outings.</p>
-<p class="text-primary font-800 text-xl mb-6">$85.00</p>
-<button class="w-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-primary dark:hover:bg-primary dark:hover:text-white transition-all">
-<span class="material-symbols-outlined text-sm">shopping_bag</span>
-                                Add to Cart
-                            </button>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- Referral Program Banner -->
+               <a href="/cart" class="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+  <span class="material-symbols-outlined msym">shopping_cart</span>
+  <% if (locals.cart > 0) { %>
+    <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+      <%= locals.cart %>
+    </span>
+  <% } %>
+</a>
+              
+                <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                    <a href="/profile">
+                        <span class="material-symbols-outlined text-slate-500">person</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+
+    <!-- Hero Section -->
+    <section class="relative w-full h-[85vh] overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAJtx5iykZ8DNnG4JOd-R63qiKb68-RxlTSQX0QOls5TgddIkRvoktGm2jTTYDQWbOI_iBKAWkLLxsIlHxE3VQ35E53IOoBpgkxyz-XmUqYOEuBPsLVhqgZ8cv_y4VIZLEDejPHScxDSwxl4CRDjRL_CbbOSSXEilDLCRrU2bUlKDT-ihr5VfUFI84Qg9hMUhD_VhhSWhe8bA4dLoHxkmt3EKtg9KFEdTcBL6metIaPBtOSIusleR1KG7jHBqWnWJ0WERSndazUH_MF');">
+            <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+        </div>
+        <div class="relative h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+            <div class="max-w-2xl">
+                <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Summer Editorial 2024</span>
+                <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Elevated Essentials</h2>
+                <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Experience the pinnacle of modern luxury with our meticulously crafted seasonal collection.</p>
+                <a href="/product-listing">
+                    <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
+                        Shop Now
+                    </button>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Products -->
+    <section class="py-24 max-w-7xl mx-auto px-6">
+        <div class="flex items-end justify-between mb-12">
+            <div>
+                <h3 class="text-3xl font-800 mb-2">Popular Right Now</h3>
+                <p class="text-slate-500">Curated selections for the discerning gentleman.</p>
+            </div>
+            <a class="text-primary font-bold hover:underline flex items-center gap-1" href="/product-listing">
+                View all <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <% product.forEach(p => { %>
+            <div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm group">
+
+                <!-- Image -->
+                <div class="h-48 md:h-56 overflow-hidden relative">
+                    <a href="/product-details/<%= p.productId._id %>?size=<%= p.size %>&color=<%= p.color %>">
+                        <img
+                            src="/uploads/<%= p.images[0] %>"
+                            alt="<%= p.productId.name %>"
+                            loading="lazy"
+                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    </a>
+                </div>
+
+                <!-- Info -->
+                <div class="p-3">
+                    <h3 class="font-semibold text-sm mb-1 truncate"><%= p.productId.name %></h3>
+                    <p class="text-xs text-slate-500 mb-1 truncate"><%= p.size %> | <%= p.color %></p>
+
+                    <div class="flex items-center gap-2 mb-1">
+                        <% if (p.save > 0) { %>
+                            <p class="text-sm font-bold">₹<%= p.discount %></p>
+                            <p class="text-xs text-slate-400 line-through">₹<%= p.price %></p>
+                        <% } else { %>
+                            <p class="text-sm font-bold">₹<%= p.price %></p>
+                        <% } %>
+                    </div>
+
+                    <% if (p.save > 0) { %>
+                        <p class="text-green-600 text-xs mb-2">Save ₹<%= p.save %></p>
+                    <% } %>
+
+                    <button
+                        onclick="addToCart('<%= p._id %>')"
+                        class="w-full py-2 px-3 rounded-lg font-medium text-xs bg-black text-white hover:bg-gray-800 flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined" style="font-size:14px">shopping_bag</span>
+                        Add to Cart
+                    </button>
+                </div>
+
+            </div>
+            <% }) %>
+        </div>
+    </section>
+
 </main>
+
 <!-- Footer -->
 <footer class="bg-slate-50 dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 pt-20 pb-10">
-<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-<div>
-<div class="flex items-center gap-2 mb-8">
-<span class="material-symbols-outlined text-primary text-3xl">diamond</span>
-<h2 class="text-2xl font-800 tracking-tighter uppercase">Luxe</h2>
-</div>
-<p class="text-slate-500 leading-relaxed mb-6">Redefining modern luxury through sustainable practices and timeless design. Every piece tells a story of craftsmanship.</p>
-<div class="flex items-center gap-4">
-<a class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-primary hover:border-primary hover:text-white transition-all" href="#"><span class="material-symbols-outlined text-xl">brand_family</span></a>
-<a class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-primary hover:border-primary hover:text-white transition-all" href="#"><span class="material-symbols-outlined text-xl">share</span></a>
-<a class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-primary hover:border-primary hover:text-white transition-all" href="#"><span class="material-symbols-outlined text-xl">rss_feed</span></a>
-</div>
-</div>
-<div>
-<h4 class="font-bold mb-8 uppercase text-sm tracking-widest">Shop</h4>
-<ul class="space-y-4 text-slate-500">
-<li><a class="hover:text-primary transition-colors" href="#">New Arrivals</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Best Sellers</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Menswear</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Accessories</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Gift Cards</a></li>
-</ul>
-</div>
-<div>
-<h4 class="font-bold mb-8 uppercase text-sm tracking-widest">Customer Care</h4>
-<ul class="space-y-4 text-slate-500">
-<li><a class="hover:text-primary transition-colors" href="#">Order Status</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Returns &amp; Exchanges</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Shipping Information</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Size Guide</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Contact Us</a></li>
-</ul>
-</div>
-<div>
-
-</div>
-</div>
-<div class="max-w-7xl mx-auto px-6 pt-10 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
-<p>© 2024 Luxe Apparel Co. All rights reserved.</p>
-<div class="flex items-center gap-8">
-<a class="hover:text-slate-200 transition-colors" href="#">Privacy Policy</a>
-<a class="hover:text-slate-200 transition-colors" href="#">Terms of Service</a>
-<a class="hover:text-slate-200 transition-colors" href="#">Accessibility</a>
-</div>
-</div>
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div>
+            <div class="flex items-center gap-2 mb-8">
+                <span class="material-symbols-outlined text-primary text-3xl">diamond</span>
+                <h2 class="text-2xl font-800 tracking-tighter uppercase">Luxe</h2>
+            </div>
+            <p class="text-slate-500 leading-relaxed mb-6">Redefining modern luxury through sustainable practices and timeless design.</p>
+            <div class="flex items-center gap-4">
+                <a class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-primary hover:border-primary hover:text-white transition-all" href="#">
+                    <span class="material-symbols-outlined text-xl">brand_family</span>
+                </a>
+                <a class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-primary hover:border-primary hover:text-white transition-all" href="#">
+                    <span class="material-symbols-outlined text-xl">share</span>
+                </a>
+                <a class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-primary hover:border-primary hover:text-white transition-all" href="#">
+                    <span class="material-symbols-outlined text-xl">rss_feed</span>
+                </a>
+            </div>
+        </div>
+        <div>
+            <h4 class="font-bold mb-8 uppercase text-sm tracking-widest">Shop</h4>
+            <ul class="space-y-4 text-slate-500">
+                <li><a class="hover:text-primary transition-colors" href="#">New Arrivals</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Best Sellers</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Menswear</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Accessories</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Gift Cards</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-bold mb-8 uppercase text-sm tracking-widest">Customer Care</h4>
+            <ul class="space-y-4 text-slate-500">
+                <li><a class="hover:text-primary transition-colors" href="#">Order Status</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Returns & Exchanges</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Shipping Information</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Size Guide</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Contact Us</a></li>
+            </ul>
+        </div>
+        <div></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 pt-10 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+        <p>© 2024 Luxe Apparel Co. All rights reserved.</p>
+        <div class="flex items-center gap-8">
+            <a class="hover:text-slate-200 transition-colors" href="#">Privacy Policy</a>
+            <a class="hover:text-slate-200 transition-colors" href="#">Terms of Service</a>
+            <a class="hover:text-slate-200 transition-colors" href="#">Accessibility</a>
+        </div>
+    </div>
 </footer>
-</body></html>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);z-index:9999;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;">
+    <div class="flex items-center gap-3 bg-slate-900 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl">
+        <span id="toast-icon" class="material-symbols-outlined text-green-400">check_circle</span>
+        <span id="toast-msg" class="text-sm font-semibold"></span>
+    </div>
+</div>
+
+<script>
+
+
+
+    let _toastTimer;
+
+    function showToast(msg, icon = 'check_circle', iconCls = 'text-green-400') {
+        document.getElementById('toast-msg').textContent = msg;
+        const ic = document.getElementById('toast-icon');
+        ic.textContent = icon;
+        ic.className = 'material-symbols-outlined ' + iconCls;
+        document.getElementById('toast').style.transform = 'translateX(-50%) translateY(0)';
+        clearTimeout(_toastTimer);
+        _toastTimer = setTimeout(() => {
+            document.getElementById('toast').style.transform = 'translateX(-50%) translateY(120px)';
+        }, 2800);
+    }
+
+    async function addToCart(variantId) {
+        try {
+            const res = await fetch('/cart/add-cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ variantId, qty: 1 })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                showToast(data.message || 'Added to cart!', 'check_circle', 'text-green-400');
+            } else {
+                showToast(data.message || 'Failed to add', 'error', 'text-red-400');
+            }
+
+        } catch (err) {
+            showToast('Something went wrong', 'error', 'text-red-400');
+        }
+    }
+</script>
+
+</body>
+</html>

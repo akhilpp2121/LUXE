@@ -5,7 +5,21 @@ import bcrypt from "bcrypt";
 import { userModel } from "../model/usermodel.js";
 import { sendOtpEmail } from "../utilites/otp.js";
 
+
+
+
+
+export const findUserByEmail = (email) => userModel.findOne({ email });
+export const findUserBlocked = (userId) => {
+  return userModel.findOne({ _id: userId, isBlocked: true });
+};
+
+
 // ─── REGISTER ───────────────────────────────────────────────────────
+
+
+
+
 export const registerService = async (fullName, email, password, phoneNumber) => {
   
   
@@ -262,7 +276,6 @@ if (flow === "CHANGE_EMAIL") {
  
 };
 
-// ─── RESET PASSWORD — page load check ───────────────────────────────
 export const canLoadResetPassword = async (req) => {
   try {
     if (!req.session.email) return false;
@@ -273,7 +286,6 @@ export const canLoadResetPassword = async (req) => {
   }
 };
 
-// ─── RESEND OTP ──────────────────────────────────────────────────────
 export const resendOtpService = async (req) => {
   try {
     const email = req.session.tempEmail || req.session.email;
