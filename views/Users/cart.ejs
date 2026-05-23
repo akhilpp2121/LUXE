@@ -212,24 +212,28 @@
 
           <% data.forEach((item, index) => { %>
           <%
-            const variant  = item.variantId;
-            const product  = variant?.productId;
-            const category = product?.categoryId;
+  const variant  = item.variantId;
+  const product  = variant?.productId;
+  const category = product?.categoryId;
 
-            const inStock  = (variant?.stock ?? 0) > 0;
-            const itemPrice = variant?.price || 0;
-            const itemQty   = item.quantity || 1;
-            const lineTotal = itemPrice * itemQty;
+  const inStock = (variant?.stock ?? 0) > 0;
 
-            const rawImg = variant?.images?.[0];
-            const imgSrc = rawImg ? '/uploads/' + rawImg : null;
+  const itemPrice = (variant?.discount && variant.discount < variant?.price)
+    ? variant.discount
+    : (variant?.price || 0);
+    const originalPrice=variant?.price
 
-            /* single flag — covers all invalid conditions */
-            const isInvalid = !product?.isActive
-                           || !variant?.isActive
-                           || !category?.isActive
-                           || !inStock;
-          %>
+  const itemQty   = item.quantity || 1;
+  const lineTotal = itemPrice * itemQty;
+
+  const rawImg = variant?.images?.[0];
+  const imgSrc = rawImg ? '/uploads/' + rawImg : null;
+
+  const isInvalid = !product?.isActive
+                 || !variant?.isActive
+                 || !category?.isActive
+                 || !inStock;
+%>
 
           <div class="cart-item fu <%= isInvalid ? 'invalid' : '' %>"
                style="animation-delay: <%= 0.1 + index * 0.07 %>s;"
@@ -338,20 +342,22 @@
             </div>
 
             <!-- ── Line price ── -->
-            <div class="flex flex-col items-end justify-between gap-2 self-stretch">
-              <% if (isInvalid) { %>
-                <p class="text-slate-600 font-bold text-base line-through whitespace-nowrap">
-                  ₹<%= lineTotal.toLocaleString('en-IN') %>
-                </p>
-              <% } else { %>
-                <p class="text-white font-bold text-base whitespace-nowrap">
-                  ₹<span id="line-total-<%= item._id %>"><%= lineTotal.toLocaleString('en-IN') %></span>
-                </p>
-                <% if (itemQty > 1) { %>
-                  <p class="text-xs text-slate-600">₹<%= itemPrice.toLocaleString('en-IN') %> each</p>
-                <% } %>
-              <% } %>
-            </div>
+            <!-- ── Line price ── -->
+<div class="flex flex-col items-end justify-between gap-2 self-stretch">
+  <% if (isInvalid) { %>
+    <p class="text-slate-600 font-bold text-base line-through whitespace-nowrap">
+      ₹<%= lineTotal.toLocaleString('en-IN') %>
+    </p>
+  <% } else { %>
+    <p class="text-white font-bold text-base whitespace-nowrap">
+      ₹<span id="line-total-<%= item._id %>"><%= lineTotal.toLocaleString('en-IN') %></span>
+    </p>
+    <% if (itemQty > 1) { %>
+      <p class="text-xs text-slate-600">₹<%= itemPrice.toLocaleString('en-IN') %> each</p>
+    <% } %>
+  <% } %>
+  
+</div>
 
           </div>
           <% }) %>
@@ -454,7 +460,10 @@
 
 </div>
 
-<script>
+<!-- <script>
+
+
+
   /* ── TOAST ── */
   let _toastTimer;
   function showToast(msg, icon = 'check_circle', cls = 'text-green-400') {
@@ -506,14 +515,21 @@
       const data = await res.json();
 
       if (!data.success) {
-        /* rollback */
-        qtyEl.textContent = currentQty;
-        minusBtn.disabled = currentQty <= 1;
-        plusBtn.disabled  = currentQty >= maxStock || currentQty >= 10;
-        minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${currentQty},${maxStock})`);
-        plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${currentQty},${maxStock})`);
-        return showToast(data.message || 'Could not update', 'error', 'text-red-400');
-      }
+
+
+  qtyEl.textContent = currentQty;
+  minusBtn.disabled = currentQty <= 1;
+  plusBtn.disabled  = currentQty >= maxStock || currentQty >= 10;
+  minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${currentQty},${maxStock})`);
+  plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${currentQty},${maxStock})`);
+
+  if (res.status === 401) {
+    return showToast(data.message, 'block', 'text-red-400');
+  }
+
+  return showToast(data.message || 'Could not update', 'error', 'text-red-400');
+}
+
 
       if (data.unitPrice) {
         const lineEl = document.getElementById('line-total-' + cartId);
@@ -571,6 +587,161 @@
     const shipping = subtotal >= 999 ? 0 : 99;
     document.getElementById('summary-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
     document.getElementById('summary-total').textContent    = '₹' + (subtotal + shipping).toLocaleString('en-IN');
+  }
+</script> -->
+
+
+<script>
+  /* ─────────────────────────────────────────
+     TOAST
+  ───────────────────────────────────────── */
+  let _toastTimer;
+
+  function showToast(msg, icon = 'check_circle', cls = 'text-green-400') {
+    document.getElementById('toast-msg').textContent = msg;
+    const ic = document.getElementById('toast-icon');
+    ic.textContent = icon;
+    ic.className   = 'material-symbols-outlined msym ' + cls;
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(
+      () => document.getElementById('toast').classList.remove('show'),
+      2800
+    );
+  }
+
+  /* ─────────────────────────────────────────
+     LOCK all cart controls (called on 401)
+  ───────────────────────────────────────── */
+  function lockCart(message) {
+    document.querySelectorAll('.qty-btn, .remove-btn').forEach(btn => {
+      btn.disabled = true;
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.4';
+    });
+    showToast(message, 'block', 'text-red-400');
+  }
+
+  /* ─────────────────────────────────────────
+     ROLLBACK a single cart row's qty UI
+  ───────────────────────────────────────── */
+  function rollbackQty(cartId, variantId, qty, maxStock) {
+    const qtyEl = document.getElementById('qty-' + cartId);
+    const row   = document.getElementById('cart-item-' + cartId);
+    if (!qtyEl || !row) return;
+
+    const [minusBtn, plusBtn] = row.querySelectorAll('.qty-btn');
+    qtyEl.textContent = qty;
+    minusBtn.disabled = qty <= 1;
+    plusBtn.disabled  = qty >= maxStock || qty >= 10;
+    minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${qty},${maxStock})`);
+    plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${qty},${maxStock})`);
+  }
+
+  /* ─────────────────────────────────────────
+     CHANGE QUANTITY
+  ───────────────────────────────────────── */
+  async function changeQty(cartId, variantId, delta, currentQty, maxStock) {
+
+    /* ── Client-side guards ── */
+    if (maxStock <= 0) {
+      return showToast('This item is no longer available', 'block', 'text-red-400');
+    }
+
+    const newQty = currentQty + delta;
+    if (newQty < 1) return;
+
+    if (newQty > maxStock) {
+      return showToast(`Only ${maxStock} item(s) available in stock`, 'inventory_2', 'text-amber-400');
+    }
+    if (newQty > 10) {
+      return showToast('Maximum 10 items allowed per order', 'block', 'text-amber-400');
+    }
+
+    /* ── Optimistic update ── */
+    const row    = document.getElementById('cart-item-' + cartId);
+    const qtyEl  = document.getElementById('qty-' + cartId);
+    if (!row || !qtyEl) return;
+
+    const [minusBtn, plusBtn] = row.querySelectorAll('.qty-btn');
+    qtyEl.textContent = newQty;
+    minusBtn.disabled = newQty <= 1;
+    plusBtn.disabled  = newQty >= maxStock || newQty >= 10;
+    minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${newQty},${maxStock})`);
+    plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${newQty},${maxStock})`);
+
+    /* ── API call ── */
+    try {
+      const res  = await fetch('/cart/update-quantity', {
+        method : 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ cartId, variantId, quantity: newQty })
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        rollbackQty(cartId, variantId, currentQty, maxStock);
+
+        if (res.status === 401) return lockCart(data.message);
+        return showToast(data.message || 'Could not update', 'error', 'text-red-400');
+      }
+
+      /* ── Update line price ── */
+      if (data.unitPrice) {
+        const lineEl = document.getElementById('line-total-' + cartId);
+        if (lineEl) lineEl.textContent = (data.unitPrice * newQty).toLocaleString('en-IN');
+      }
+
+      updateSummary();
+      showToast('Cart updated', 'check_circle', 'text-green-400');
+
+    } catch {
+      rollbackQty(cartId, variantId, currentQty, maxStock);
+      showToast('Something went wrong', 'error', 'text-red-400');
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     REMOVE ITEM
+  ───────────────────────────────────────── */
+  async function removeItem(cartId) {
+    try {
+      const res  = await fetch('/cart/remove-cart', {
+        method : 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ id: cartId })
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        if (res.status === 401) return lockCart(data.message);
+        return showToast(data.message || 'Failed to remove', 'error', 'text-red-400');
+      }
+
+      document.getElementById('cart-item-' + cartId)?.remove();
+      showToast('Item removed', 'check_circle', 'text-green-400');
+      updateSummary();
+
+      if (document.querySelectorAll('[id^="cart-item-"]').length === 0) {
+        location.reload();
+      }
+
+    } catch {
+      showToast('Something went wrong', 'error', 'text-red-400');
+    }
+  }
+
+  
+  function updateSummary() {
+    let subtotal = 0;
+    document.querySelectorAll('[id^="line-total-"]').forEach(el => {
+      subtotal += parseInt(el.textContent.replace(/,/g, '')) || 0;
+    });
+    const shipping = subtotal >= 999 ? 0 : 99;
+    document.getElementById('summary-subtotal').textContent =
+      '₹' + subtotal.toLocaleString('en-IN');
+    document.getElementById('summary-total').textContent =
+      '₹' + (subtotal + shipping).toLocaleString('en-IN');
   }
 </script>
 

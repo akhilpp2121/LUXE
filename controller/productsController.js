@@ -66,9 +66,7 @@ export const adminProductPageLoad = async (req, res) => {
 
 
 
-// // ─────────────────────────────────────────────────────────────────────────────
-// GET /admin/product-add
-// ─────────────────────────────────────────────────────────────────────────────
+
 export const addProductPageLoad = async (req, res) => {
   let data = await categoryDataLoad({ isActive: true });
   if (!data.success) {
@@ -77,9 +75,7 @@ export const addProductPageLoad = async (req, res) => {
   return res.render("Admin/addProducts", { category: data.data, error: "", activePage: "products" });
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GET /admin/product-edit/:id
-// ─────────────────────────────────────────────────────────────────────────────
+
 export const editProductPageLoad = async (req, res) => {
   const productId = req.params.id;
 
@@ -109,7 +105,7 @@ export const adminProductsAdd = async (req, res) => {
     const isActive = true;
     const variants = {};
 
-    // ── Parse body ──
+    
     for (let key in req.body) {
       const match = key.match(/^variants\[(\d+)\]\.(.+)$/);
       if (match) {
@@ -120,7 +116,7 @@ export const adminProductsAdd = async (req, res) => {
       }
     }
 
-    // ── Parse files ──
+    
     if (req.files && req.files.length > 0) {
       req.files.forEach((file) => {
         const match = file.fieldname.match(/^variants\[(\d+)\]\.images$/);

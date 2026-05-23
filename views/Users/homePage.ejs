@@ -87,7 +87,8 @@
             </nav>
         </div>
 
-<form method="GET" action="/homepage" class="search-wrap relative flex items-center">
+<form method="GET" action="/homepage" class="search-wrap relative flex items-center"
+  onsubmit="const i=this.querySelector('[name=search]'); i.value=i.value.trim();">
   <span class="material-symbols-outlined ic-search">search</span>
   <input
     name="search"
@@ -99,7 +100,6 @@
     <span class="material-symbols-outlined" style="font-size:16px; color:#fff;">arrow_forward</span>
   </button>
 </form>
-
         
             <div class="flex items-center gap-4">
                 <button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
@@ -268,6 +268,9 @@
 </div>
 
 <script>
+
+
+
     let _toastTimer;
 
     function showToast(msg, icon = 'check_circle', iconCls = 'text-green-400') {

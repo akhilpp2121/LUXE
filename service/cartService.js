@@ -116,45 +116,32 @@ export const cartDelete=async(id)=>{
 
 export const cartEdit = async (_id, variantId, quantity) => {
     try {
-        
         const cartItem = await cartModel.findOne({ _id, variantId });
+        if (!cartItem) return { success: false, message: "Cart item not found" };
 
-        if (!cartItem) {
-            return { success: false, message: "Cart item not found" };
-        }
-
-       
         const variant = await variantModel.findById(variantId);
-
-        if (!variant||variant.isActive===false) {
+        if (!variant || variant.isActive === false)
             return { success: false, message: "Product not found" };
-        }
-        if (quantity < 1) {
-            return { success: false, message: "Quantity must be at least 1" };
-        }
-        if (quantity > variant.stock) {
+
+        if (quantity < 1)  return { success: false, message: "Quantity must be at least 1" };
+        if (quantity > 10) return { success: false, message: "Cannot add more than 10" };
+        if (quantity > variant.stock)
             return { success: false, message: `Only ${variant.stock} items available` };
-        }
-        if(quantity>10){
- return {  success:false,message:"Quantity cannot add more than 10"} 
-}
 
         cartItem.quantity = quantity;
         await cartItem.save();
 
-        return {
-    success: true,
-    message: "Cart updated successfully",
-    unitPrice: variant.price           
-};
+        const unitPrice = (variant.discount && variant.discount < variant.price)
+            ? variant.discount
+            : variant.price;
 
+        return { success: true, message: "Cart updated successfully", unitPrice };
 
     } catch (e) {
         console.error("Cart edit error:", e);
         return { success: false, message: "Server error" };
     }
 };
-
 
 export const getCartCount = async (userId) => {
   try {

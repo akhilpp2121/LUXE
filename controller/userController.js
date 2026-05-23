@@ -8,6 +8,7 @@ import {
   handleOtpVerifyService,
   canLoadResetPassword,
   resendOtpService,
+  findUserBlocked
 } from "../service/userService.js";
 import { variantDataLoad } from "../service/productsService.js";
 import { getHomePageData,getProductDetailData } from "../service/userProductService.js";
@@ -40,27 +41,38 @@ export const otpPageLoad = (req, res) => {
   return res.render("Users/otpPage", { email });
 };
 
+
+
 export const homeLoad = async (req, res) => {
   try {
-    if (!req.session.user) return res.redirect("/login");
+    const user = req.session.user;
+    if (!user) return res.redirect("/login");
 
-    const searchQuery = req.query.search || '';
+    const userId = user._id || user.id;
 
+    const isBlockedUser = await findUserBlocked(userId);
+    if (isBlockedUser) {
+      req.session.user = null;
+      req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
+      return res.redirect("/login");
+    }
+
+    const searchQuery = (req.query.search ?? "").trim();
     const { products } = await getHomePageData(searchQuery);
 
     const flashMessage = req.session.flashMessage || null;
     req.session.flashMessage = null;
 
     return res.render("Users/homePage", {
-      user: req.session.user,
+      user,
       flashMessage,
       product: products,
-      searchQuery, 
+      searchQuery,
     });
 
   } catch (error) {
     console.error("Home page load error:", error);
-    return res.status(500).render("error", { message: "Something went wrong" });
+    return res.redirect("/login"); 
   }
 };
 
@@ -277,9 +289,7 @@ export const productListingLoad = async (req, res) => {
 
 
 
-// ============================================================
-//  controllers/productDetailController.js
-// ============================================================
+
 
 
 export const productDetailLoad = async (req, res) => {
@@ -302,8 +312,8 @@ export const productDetailLoad = async (req, res) => {
 
     return res.render("Users/productDetailsPage", {
       product:         data.product,
-      variants:        data.variants,       // unique per color
-      allVariants:     data.allVariants,    // all variants
+      variants:        data.variants,       
+      allVariants:     data.allVariants,   
       defaultVariant:  data.defaultVariant,
       sizes:           data.sizes,
       colors:          data.colors,
@@ -322,3 +332,4 @@ export const productDetailLoad = async (req, res) => {
     });
   }
 };
+

@@ -632,7 +632,7 @@
   function getStockCount() { return activeVariant?.stock ?? 0; }
 
 
-  async function addToCart() {
+async function addToCart() {
   if (!selectedSize) {
     document.getElementById('size-error').classList.remove('hidden');
     document.getElementById('size-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -644,7 +644,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        variantId: activeVariant._id,   
+        variantId: activeVariant._id,
         qty: qty
       })
     });
@@ -656,12 +656,11 @@
       return;
     }
 
-    // Update badge
-    cartCount += qty;
-    const badge = document.getElementById('cart-badge');
-    badge.textContent = cartCount;
-    badge.classList.remove('hidden');
-    badge.classList.add('flex');
+    const badge = document.querySelector('header a[href="/cart"] span.absolute');
+    if (badge) {
+      const current = parseInt(badge.textContent) || 0;
+      badge.textContent = current + qty;
+    }
 
     showToast(
       'Added ' + qty + '× ' + PRODUCT_NAME +
@@ -669,7 +668,6 @@
       'check_circle', 'text-green-400'
     );
 
-    // Optimistically decrement low-stock display
     if (getStockState() === 'low_stock') {
       activeVariant = { ...activeVariant, stock: Math.max(0, activeVariant.stock - qty) };
       if (activeVariant.stock === 0) activeVariant.stockState = 'sold_out';
@@ -689,7 +687,7 @@
     renderSizeGrid();
     renderStockInfo();
     renderCartActions();
-    initDesktopZoom();   /* ← zoom init (Raftaara method) */
+    initDesktopZoom();   
   });
 
  

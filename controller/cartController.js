@@ -1,12 +1,15 @@
 import { CartDataTake ,addToCart,cartDelete,cartEdit} from "../service/cartService.js";
+import { findUserBlocked } from "../service/userService.js";
+
 
 export const cartPageLoad = async (req, res) => {
   try {
     const user = req.session.user;
     if (!user) return res.redirect("/login");
 
-    const id = user._id || user.id;
-    const cartData = await CartDataTake({ userId: id });
+    const userId = user._id || user.id;
+    const cartData = await CartDataTake({ userId: userId});
+    
 
     const cart = { count: cartData.data?.length || 0 };
 
@@ -20,11 +23,13 @@ export const cartPageLoad = async (req, res) => {
       const productInactive  = !product?.isActive;
       const categoryInactive = !category?.isActive;
 
-      if (outOfStock || variantInactive || productInactive || categoryInactive) {
-        return sum;  
-      }
+      if (outOfStock || variantInactive || productInactive || categoryInactive) return sum;
 
-      return sum + (variant.price * item.quantity);
+      const effectivePrice = (variant.discount && variant.discount < variant.price)
+        ? variant.discount
+        : variant.price;
+
+      return sum + (effectivePrice * item.quantity);
     }, 0) || 0;
 
     if (cartData.success) {
@@ -52,21 +57,24 @@ export const cartPageLoad = async (req, res) => {
 };
 
 
-
 export const cartAdd = async (req, res) => {
     try {
         
         
         
         const user = req.session.user;
+        
         if (!user) {
             return res.status(401).json({ success: false, message: "Please login to add to cart" });
         }
+        
 
         const { variantId, qty } = req.body;  
         const userId = user._id || user.id;
-        
-        
+        const userIsBlocked= await findUserBlocked(userId);
+        if(userIsBlocked){
+            return res.status(401).json({success:false,message:"user is blocked you can't add products in you cart"})
+        }
 
 
         
@@ -106,6 +114,8 @@ if (quantity > 10) {
 
 export const removeCartProducts=async(req,res)=>{
     try {
+   
+
         const{id}=req.body;
         if(!id){
             return res.status(401).json({success:false,message:"Error while removing cart"})
@@ -137,6 +147,21 @@ export const removeCartProducts=async(req,res)=>{
 export const quantityUpdate = async (req, res) => {
     try {
         const { cartId, variantId, quantity } = req.body;
+
+
+        const user = req.session.user;
+        
+        if (!user) {
+            return res.status(401).json({ success: false, message: "Please login to add to cart" });
+        }
+        
+
+                const userId = user._id || user.id;
+
+        const userIsBlocked= await findUserBlocked(userId);
+        if(userIsBlocked){
+            return res.status(401).json({success:false,message:"user is blocked you can't add products in you cart"})
+        }
 
         if (!cartId || !variantId || !quantity) {
             return res.status(400).json({

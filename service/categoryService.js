@@ -64,9 +64,6 @@ export const adminCategoryAddLogic = async (categoryName, description, isActive)
 
 
 
-
-
-
 export const adminCategoryEditLogic = async (id, categoryName, description, isActive) => {
     try {
 

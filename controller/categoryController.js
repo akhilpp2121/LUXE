@@ -1,5 +1,6 @@
 
 
+import categoryModel from "../model/categoryModel.js";
 import {
     adminCategoryAddLogic,
     categoryModelLoad,
@@ -19,6 +20,7 @@ export const adminCategoryLoad = async (req, res) => {
     const filter = {};
 
     let sortOption = { createdAt: -1 };
+   
 
     if (searchQuery) {
         filter.categoryName = { $regex: searchQuery, $options: "i" };
@@ -28,6 +30,10 @@ export const adminCategoryLoad = async (req, res) => {
     else if (status === "false") filter.isActive = false;
 
     if (sort === "oldest") sortOption = { createdAt: 1 };
+
+    
+
+    
 
     const data = await categoryModelLoad(filter, sortOption, req.query.page);
 
@@ -55,6 +61,8 @@ export const adminCategoryLoad = async (req, res) => {
     });
    }
 };
+
+
 
 export const addCategoryPageLoad = async (req, res) => {
     try {
@@ -87,16 +95,15 @@ export const adminCategoryAdd = async (req, res) => {
 
 
         const { categoryName, description, status } = req.body;
-
+        
         if (!categoryName || !description) {
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
         const isActive = status === "active";   
+        
         const result = await adminCategoryAddLogic(categoryName, description, isActive);
         
-        
-
         if (!result.success) {
             return res.status(409).json({ success: false, message: result.message });
         }
