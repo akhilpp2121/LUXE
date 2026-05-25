@@ -65,26 +65,20 @@
   .thumb-item:hover:not(.active) { border-color: #334155; }
 
   /* ── Gallery area ── */
-  #gallery-area {
-    position: relative;
-    flex: 1;
-  }
+  #gallery-area { position: relative; flex: 1; }
 
   /* ── Main image wrap ── */
-  /* CHANGED: removed zoom-panel-related overflow:visible and crosshair;
-     now uses overflow:hidden to clip the scaled image (Raftaara method) */
   #main-wrap {
     position: relative;
     width: 100%;
     aspect-ratio: 3/4;
     border-radius: 12px;
-    overflow: hidden;        /* clips the zoomed image inside the box */
+    overflow: hidden;
     background: #1e293b;
-    cursor: crosshair;       /* signals zoom is available */
+    cursor: crosshair;
     user-select: none;
   }
 
-  /* CHANGED: removed transform-origin:center fixed; now set dynamically by JS on mousemove */
   #main-img {
     width: 100%; height: 100%;
     object-fit: cover;
@@ -94,10 +88,6 @@
     transition: opacity 0.2s;
     transform-origin: center center;
   }
-
-  /* ── Lens box — REMOVED (not used in Raftaara method) ── */
-
-  /* ── Zoom panel — REMOVED (not used in Raftaara method) ── */
 
   /* ── Hint badge on main image ── */
   #zoom-hint-badge {
@@ -182,9 +172,49 @@
   .fu { animation: fadeUp 0.5s ease forwards; opacity: 0; }
   .d1{animation-delay:0.05s} .d2{animation-delay:0.15s} .d3{animation-delay:0.25s} .d4{animation-delay:0.4s}
 
-  /* ── Make the gallery column leave enough space for zoom panel on desktop ── */
   @media (min-width: 1024px) {
     .gallery-outer { overflow: visible !important; }
+  }
+
+  /* ── Wishlist button ── */
+  #wishlist-btn {
+    background: none; border: none; outline: none;
+    cursor: pointer; padding: 8px; border-radius: 50%;
+    transition: background 0.2s;
+    flex-shrink: 0; margin-top: 4px;
+  }
+  #wishlist-btn:hover { background: rgba(239, 68, 68, 0.1); }
+
+  #wishlist-icon {
+    display: block;
+    font-size: 26px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+  }
+
+  /* Outline heart — not wishlisted */
+  #wishlist-icon.not-wishlisted {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    color: #94a3b8;
+  }
+  #wishlist-btn:hover #wishlist-icon.not-wishlisted {
+    color: #ef4444;
+  }
+
+  /* Filled heart — wishlisted */
+  #wishlist-icon.wishlisted {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    color: #ef4444;
+  }
+
+  /* Pop bounce animation on toggle */
+  @keyframes heartPop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.45); }
+    70%  { transform: scale(0.88); }
+    100% { transform: scale(1); }
+  }
+  #wishlist-icon.popping {
+    animation: heartPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 </style>
 </head>
@@ -255,14 +285,13 @@
           <span class="material-symbols-outlined msym">search</span>
         </a>
         <a href="/cart" class="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
-  <span class="material-symbols-outlined msym">shopping_cart</span>
-  <% if (locals.cart > 0) { %>
-    <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
-      <%= locals.cart %>
-    </span>
-  <% } %>
-</a>
-        
+          <span class="material-symbols-outlined msym">shopping_cart</span>
+          <% if (locals.cart > 0) { %>
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+              <%= locals.cart %>
+            </span>
+          <% } %>
+        </a>
         <a href="/profile" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
           <span class="material-symbols-outlined msym">person</span>
         </a>
@@ -301,18 +330,15 @@
       <div class="fu d2 gallery-outer" style="overflow:visible;">
         <div class="flex flex-col-reverse md:flex-row gap-4">
 
-          <!-- Thumbnail strip (vertical on desktop, horizontal on mobile) -->
+          <!-- Thumbnail strip -->
           <div id="thumb-strip"
                class="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-1 md:pb-0 flex-shrink-0"
                style="max-height:520px;"></div>
 
-          <!-- #gallery-area: position:relative -->
+          <!-- Gallery area -->
           <div id="gallery-area">
-            <!-- Main image box -->
             <div id="main-wrap">
               <img id="main-img" src="" alt="<%= product.name %>"/>
-
-              <!-- REMOVED: #lens-box (not needed for Raftaara zoom method) -->
 
               <!-- Sold-out overlay -->
               <div id="sold-overlay">
@@ -331,11 +357,7 @@
                 <span class="material-symbols-outlined msym text-sm">zoom_in</span> Tap to zoom
               </button>
             </div>
-
-            <!-- REMOVED: #zoom-panel, #zoom-placeholder, #zoom-inner
-                 (the separate side panel is replaced by the in-place scale zoom) -->
-
-          </div><!-- /#gallery-area -->
+          </div>
 
         </div>
       </div><!-- /gallery column -->
@@ -352,10 +374,22 @@
                 <%= product.name %>
               </h1>
             </div>
-            <button id="wishlist-btn" onclick="toggleWishlist()"
-                    class="p-2 text-slate-400 hover:text-red-500 transition-colors flex-shrink-0 mt-1">
-              <span class="material-symbols-outlined msym text-2xl">favorite</span>
+
+            <!-- ══ WISHLIST BUTTON — fixed filled heart ══ -->
+            <button
+              id="wishlist-btn"
+              onclick="toggleWishlist()"
+              data-wishlisted="<%= locals.isWishlisted ? 'true' : 'false' %>"
+              aria-label="<%= locals.isWishlisted ? 'Remove from wishlist' : 'Add to wishlist' %>"
+              title="<%= locals.isWishlisted ? 'Remove from wishlist' : 'Add to wishlist' %>"
+            >
+              <span
+                id="wishlist-icon"
+                class="material-symbols-outlined <%= locals.isWishlisted ? 'wishlisted' : 'not-wishlisted' %>"
+              >favorite</span>
             </button>
+            <!-- ══ END WISHLIST BUTTON ══ -->
+
           </div>
           <% if (product.description) { %>
             <p class="text-sm text-slate-400 leading-relaxed"><%= product.description %></p>
@@ -401,7 +435,6 @@
               <button
                 class="color-btn <%= isDef ? 'active' : '' %>"
                 data-color="<%= v.color %>"
-                data-variant-id="<%= v._id %>"
                 onclick="selectColor(this)"
               ><%= v.color %></button>
             <% }) %>
@@ -525,16 +558,6 @@
                 <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <span class="text-white font-bold text-xs uppercase tracking-widest bg-black/60 px-3 py-1 rounded-full">Sold Out</span>
                 </div>
-              <% } else { %>
-                <!-- <button class="rel-add absolute bottom-3 right-3 p-2 bg-white/90 text-slate-900 rounded-full shadow-lg"
-                        onclick="event.stopPropagation(); showToast('<%= r.name %> added to cart','check_circle','text-green-400')">
-                  <span class="material-symbols-outlined msym text-sm">add_shopping_cart</span>
-                </button> -->
-                <a href="/cart" 
-   class="rel-add absolute bottom-3 right-3 p-2 bg-white/90 text-slate-900 rounded-full shadow-lg"
-   onclick="event.stopPropagation(); showToast('<%= r.name %> added to cart','check_circle','text-green-400'); return false;">
-  <span class="material-symbols-outlined msym text-sm">add_shopping_cart</span>
-</a>
               <% } %>
               <% if (rSave) { %>
                 <span class="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
@@ -586,9 +609,7 @@
           <li><a href="#" class="hover:text-primary transition-colors">Careers</a></li>
         </ul>
       </div>
-      <div>
-       
-      </div>
+      <div></div>
     </div>
     <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 uppercase tracking-widest">
       <p>© 2025 Luxe Menswear. All Rights Reserved.</p>
@@ -600,7 +621,6 @@
   </footer>
 
 </div><!-- /page shell -->
-
 
 <script>
   const IS_UNAVAILABLE = <%- JSON.stringify(unavailable) %>;
@@ -623,74 +643,136 @@
 
   let selectedSize = activeVariant?.size ?? '';
   let qty          = 1;
-  let wishlisted   = false;
   let currentIdx   = 0;
-  let cartCount    = 0;
 
   function getImages()     { return (activeVariant?.images ?? []).map(i => '/uploads/' + i); }
   function getStockState() { return activeVariant?.stockState ?? 'unavailable'; }
   function getStockCount() { return activeVariant?.stock ?? 0; }
 
-
-async function addToCart() {
-  if (!selectedSize) {
-    document.getElementById('size-error').classList.remove('hidden');
-    document.getElementById('size-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
-
-  try {
-    const res = await fetch('/cart/add-cart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        variantId: activeVariant._id,
-        qty: qty
-      })
-    });
-
-    const data = await res.json();
-
-    if (!data.success) {
-      showToast(data.message || 'Failed to add to cart', 'error', 'text-red-400');
+  /* ════════════════════════════════
+     ADD TO CART
+  ════════════════════════════════ */
+  async function addToCart() {
+    if (!selectedSize) {
+      document.getElementById('size-error').classList.remove('hidden');
+      document.getElementById('size-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    const badge = document.querySelector('header a[href="/cart"] span.absolute');
-    if (badge) {
-      const current = parseInt(badge.textContent) || 0;
-      badge.textContent = current + qty;
+    try {
+      const res = await fetch('/cart/add-cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ variantId: activeVariant._id, qty })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        showToast(data.message || 'Failed to add to cart', 'error', 'text-red-400');
+        return;
+      }
+
+      const badge = document.querySelector('header a[href="/cart"] span.absolute');
+      if (badge) {
+        badge.textContent = (parseInt(badge.textContent) || 0) + qty;
+      }
+
+      showToast(
+        'Added ' + qty + '× ' + PRODUCT_NAME +
+        ' (' + activeVariant.color + ', ' + selectedSize + ') to cart',
+        'check_circle', 'text-green-400'
+      );
+
+      if (getStockState() === 'low_stock') {
+        activeVariant = { ...activeVariant, stock: Math.max(0, activeVariant.stock - qty) };
+        if (activeVariant.stock === 0) activeVariant.stockState = 'sold_out';
+        renderStockInfo();
+        renderCartActions();
+      }
+
+    } catch (err) {
+      console.error('Add to cart error:', err);
+      showToast('Something went wrong. Please try again.', 'error', 'text-red-400');
     }
-
-    showToast(
-      'Added ' + qty + '× ' + PRODUCT_NAME +
-      ' (' + activeVariant.color + ', ' + selectedSize + ') to cart',
-      'check_circle', 'text-green-400'
-    );
-
-    if (getStockState() === 'low_stock') {
-      activeVariant = { ...activeVariant, stock: Math.max(0, activeVariant.stock - qty) };
-      if (activeVariant.stock === 0) activeVariant.stockState = 'sold_out';
-      renderStockInfo();
-      renderCartActions();
-    }
-
-  } catch (err) {
-    console.error('Add to cart error:', err);
-    showToast('Something went wrong. Please try again.', 'error', 'text-red-400');
   }
-}
 
+  /* ════════════════════════════════
+     WISHLIST — filled heart toggle
+  ════════════════════════════════ */
+  async function toggleWishlist() {
+    const btn        = document.getElementById('wishlist-btn');
+    const icon       = document.getElementById('wishlist-icon');
+    const wishlisted = btn.dataset.wishlisted === 'true';
+    const action     = wishlisted ? 'REMOVE' : 'ADD';
+
+    // ── Optimistic UI update ──
+    _applyWishlistState(btn, icon, action === 'ADD');
+
+    // ── Pop animation ──
+    icon.classList.remove('popping');
+    void icon.offsetWidth; // reflow to restart animation
+    icon.classList.add('popping');
+    icon.addEventListener('animationend', () => icon.classList.remove('popping'), { once: true });
+
+    try {
+      const res = await fetch('/wishlist/update', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ variantId: activeVariant._id, action })
+      });
+      const result = await res.json();
+
+      if (!result.success) {
+        // Revert on server failure
+        _applyWishlistState(btn, icon, wishlisted);
+        showToast(result.message || 'Failed to update wishlist', 'error', 'text-red-400');
+        return;
+      }
+
+      showToast(result.message, 'check_circle', 'text-green-400');
+
+    } catch (e) {
+      console.error(e);
+      // Revert on network error
+      _applyWishlistState(btn, icon, wishlisted);
+      showToast('Something went wrong', 'error', 'text-red-400');
+    }
+  }
+
+  /**
+   * Applies filled (wishlisted=true) or outline (wishlisted=false) state
+   * to the wishlist button and heart icon.
+   */
+  function _applyWishlistState(btn, icon, wishlisted) {
+    btn.dataset.wishlisted = wishlisted ? 'true' : 'false';
+    btn.setAttribute('aria-label', wishlisted ? 'Remove from wishlist' : 'Add to wishlist');
+    btn.setAttribute('title',      wishlisted ? 'Remove from wishlist' : 'Add to wishlist');
+
+    if (wishlisted) {
+      icon.classList.remove('not-wishlisted');
+      icon.classList.add('wishlisted');
+    } else {
+      icon.classList.remove('wishlisted');
+      icon.classList.add('not-wishlisted');
+    }
+  }
+
+  /* ════════════════════════════════
+     INIT
+  ════════════════════════════════ */
   document.addEventListener('DOMContentLoaded', () => {
     if (IS_UNAVAILABLE || !activeVariant) { triggerRedirect(); return; }
     renderThumbs();
     renderSizeGrid();
     renderStockInfo();
     renderCartActions();
-    initDesktopZoom();   
+    initDesktopZoom();
   });
 
- 
+  /* ════════════════════════════════
+     GALLERY / THUMBNAILS
+  ════════════════════════════════ */
   function renderThumbs() {
     const strip  = document.getElementById('thumb-strip');
     const images = getImages();
@@ -715,8 +797,6 @@ async function addToCart() {
 
     const mainImg = document.getElementById('main-img');
     mainImg.src = images[idx];
-
-    /* Reset zoom state when image changes */
     mainImg.style.transform       = 'scale(1)';
     mainImg.style.transformOrigin = 'center center';
 
@@ -724,27 +804,23 @@ async function addToCart() {
       t.classList.toggle('active', i === idx));
   }
 
- 
+  /* ════════════════════════════════
+     DESKTOP ZOOM
+  ════════════════════════════════ */
   function initDesktopZoom() {
-  
     if ('ontouchstart' in window) return;
 
     const ZOOM_LEVEL = 2.5;
-
-    const mainWrap  = document.getElementById('main-wrap');
-    const mainImg   = document.getElementById('main-img');
-    const hintBadge = document.getElementById('zoom-hint-badge');
+    const mainWrap   = document.getElementById('main-wrap');
+    const mainImg    = document.getElementById('main-img');
+    const hintBadge  = document.getElementById('zoom-hint-badge');
 
     if (!mainWrap || !mainImg) return;
 
     mainWrap.addEventListener('mousemove', (e) => {
       const rect = mainWrap.getBoundingClientRect();
-
-      /* Cursor position as percentage inside the container */
-      const x = ((e.clientX - rect.left) / rect.width)  * 100;
-      const y = ((e.clientY - rect.top)  / rect.height) * 100;
-
-      /* Zoom origin follows the cursor */
+      const x = ((e.clientX - rect.left)  / rect.width)  * 100;
+      const y = ((e.clientY - rect.top)   / rect.height) * 100;
       mainImg.style.transformOrigin = `${x}% ${y}%`;
       mainImg.style.transform       = `scale(${ZOOM_LEVEL})`;
     });
@@ -754,7 +830,6 @@ async function addToCart() {
     });
 
     mainWrap.addEventListener('mouseleave', () => {
-      /* Reset zoom */
       mainImg.style.transform       = 'scale(1)';
       mainImg.style.transformOrigin = 'center center';
       if (hintBadge) hintBadge.style.opacity = '1';
@@ -777,12 +852,8 @@ async function addToCart() {
     document.getElementById('mob-zoom').classList.remove('active');
     document.body.style.overflow = '';
   }
-  function mobPrev() {
-    openMobZoom((currentIdx - 1 + getImages().length) % getImages().length);
-  }
-  function mobNext() {
-    openMobZoom((currentIdx + 1) % getImages().length);
-  }
+  function mobPrev() { openMobZoom((currentIdx - 1 + getImages().length) % getImages().length); }
+  function mobNext() { openMobZoom((currentIdx + 1) % getImages().length); }
 
   /* ════════════════════════════════
      COLOR SELECTOR
@@ -796,12 +867,10 @@ async function addToCart() {
     const colorVariants = ALL_VARIANTS.filter(v => v.color === color);
     if (!colorVariants.length) return;
 
-    const keepSize = colorVariants.find(v => v.size === selectedSize && v.stock > 0)
-                  || colorVariants.find(v => v.stock > 0)
-                  || colorVariants[0];
-
-    activeVariant = keepSize;
-    selectedSize  = activeVariant.size;
+    activeVariant = colorVariants.find(v => v.size === selectedSize && v.stock > 0)
+                 || colorVariants.find(v => v.stock > 0)
+                 || colorVariants[0];
+    selectedSize = activeVariant.size;
 
     renderThumbs();
     updatePrice();
@@ -817,9 +886,9 @@ async function addToCart() {
     const grid = document.getElementById('size-grid');
     grid.innerHTML = '';
 
-    const activeColor   = activeVariant?.color ?? '';
-    const colorVariants = ALL_VARIANTS.filter(v => v.color === activeColor);
-    const seen = new Set(), sizeRows = [];
+    const colorVariants = ALL_VARIANTS.filter(v => v.color === (activeVariant?.color ?? ''));
+    const seen = new Set();
+    const sizeRows = [];
     for (const v of colorVariants) {
       if (seen.has(v.size)) continue;
       seen.add(v.size);
@@ -830,7 +899,7 @@ async function addToCart() {
       const isSelected    = v.size === selectedSize;
       const isUnavailable = v.stock <= 0 || v.stockState === 'sold_out';
       const btn = document.createElement('button');
-      btn.className = 'size-btn' + (isUnavailable ? ' oos' : isSelected ? ' selected' : '');
+      btn.className   = 'size-btn' + (isUnavailable ? ' oos' : isSelected ? ' selected' : '');
       btn.textContent = v.size;
       btn.disabled    = isUnavailable;
       if (isUnavailable) btn.title = 'Size ' + v.size + ' is out of stock';
@@ -858,6 +927,7 @@ async function addToCart() {
     const ep      = (discount && discount < price) ? discount : price;
     const savePct = (discount && discount < price)
                     ? Math.round((price - discount) / price * 100) : 0;
+
     document.getElementById('display-price').textContent = '₹' + ep.toLocaleString('en-IN');
     const origEl = document.getElementById('display-original');
     const saveEl = document.getElementById('display-save');
@@ -917,53 +987,26 @@ async function addToCart() {
         </button>`;
     } else {
       el.innerHTML = `
-        <div class="flex flex-col sm:flex-row gap-3">
-          <button onclick="addToCart()"
-                  class="flex-1 bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl
-                         shadow-xl shadow-primary/20 transition-all active:scale-95
-                         flex items-center justify-center gap-2 text-sm">
-            <span class="material-symbols-outlined msym">shopping_cart</span> ADD TO CART
-          </button>
-         
-        </div>`;
+        <button onclick="addToCart()"
+                class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl
+                       shadow-xl shadow-primary/20 transition-all active:scale-95
+                       flex items-center justify-center gap-2 text-sm">
+          <span class="material-symbols-outlined msym">shopping_cart</span> ADD TO CART
+        </button>`;
     }
   }
 
   /* ════════════════════════════════
-     INTERACTIONS
+     QTY
   ════════════════════════════════ */
-  
-
-  function buyNow() {
-    if (!selectedSize) {
-      document.getElementById('size-error').classList.remove('hidden');
-      document.getElementById('size-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-    showToast('Redirecting to checkout…', 'bolt', 'text-amber-400');
-    setTimeout(() => {
-      window.location.href = '/checkout?product=' + PRODUCT_ID + '&variant=' + activeVariant._id + '&qty=' + qty;
-    }, 800);
-  }
-
   function changeQty(delta) {
     qty = Math.max(1, Math.min(getStockCount() || 10, qty + delta));
     document.getElementById('qty-display').textContent = qty;
   }
 
-  function toggleWishlist() {
-    wishlisted = !wishlisted;
-    const btn  = document.querySelector('#wishlist-btn span');
-    btn.style.fontVariationSettings = wishlisted ? "'FILL' 1" : "'FILL' 0";
-    btn.parentElement.classList.toggle('text-red-500',   wishlisted);
-    btn.parentElement.classList.toggle('text-slate-400', !wishlisted);
-    showToast(
-      wishlisted ? 'Saved to Wishlist' : 'Removed from Wishlist',
-      wishlisted ? 'favorite' : 'heart_broken',
-      wishlisted ? 'text-red-400' : 'text-slate-400'
-    );
-  }
-
+  /* ════════════════════════════════
+     ACCORDION
+  ════════════════════════════════ */
   function toggleAcc(btn) {
     const body   = btn.nextElementSibling;
     const isOpen = body.classList.contains('open');
@@ -977,7 +1020,9 @@ async function addToCart() {
     }
   }
 
- 
+  /* ════════════════════════════════
+     TOAST
+  ════════════════════════════════ */
   let _toastTimer;
   function showToast(msg, icon, iconCls) {
     document.getElementById('toast-msg').textContent = msg;
@@ -990,7 +1035,9 @@ async function addToCart() {
       document.getElementById('toast').classList.remove('show'), 2800);
   }
 
-  
+  /* ════════════════════════════════
+     REDIRECT
+  ════════════════════════════════ */
   function triggerRedirect() {
     document.getElementById('redirect-overlay').classList.add('active');
     let t = 5;
@@ -1004,6 +1051,9 @@ async function addToCart() {
     }, 1000);
   }
 
+  /* ════════════════════════════════
+     KEYBOARD
+  ════════════════════════════════ */
   document.addEventListener('keydown', e => {
     const mo = document.getElementById('mob-zoom');
     if (!mo.classList.contains('active')) return;

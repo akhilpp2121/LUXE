@@ -29,6 +29,7 @@ export const userSignUpLoad = (req, res) => {
 };
 
 export const userForgotPasswordLoad = (req, res) => {
+  if (req.session.user) return res.redirect("/homePage");
   return res.render("Users/emailVerification");
 };
 
@@ -161,6 +162,14 @@ export const verifyOtpController = async (req, res) => {
 
 export const resetPasswordLoad = async (req, res) => {
   try {
+
+    let user=req.session.user;
+
+    if(user){
+      return res.redirect('/homePage')
+    }
+
+
     const allowed = await canLoadResetPassword(req);
     if (!allowed) return res.redirect("/login");
     return res.render("Users/resetPassword");
@@ -221,11 +230,18 @@ export const logoutUserController = (req, res) => {
 
 import { getCartCount } from "../service/cartService.js";
 import { getFilteredProducts } from "../service/userProductService.js";
+import { wishlistCheck } from "../service/wishlistServie.js";
+
 export const productListingLoad = async (req, res) => {
   try {
     const data = await getFilteredProducts(req.query);
 
     const cartCount = await getCartCount(req.session.user?._id);
+    const userId= req.session.user._id||req.session.user.id;
+    const wishlistResult = await wishlistCheck(userId);
+    const wishlistedIds  = wishlistResult.success ? wishlistResult.data : [];
+
+
 
     const buildPagination = (current, total) => {
       if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -260,6 +276,8 @@ export const productListingLoad = async (req, res) => {
       totalProducts: data.total,
       paginationPages: buildPagination(data.currentPage, data.totalPages),
       productsPerPage: data.LIMIT,
+      wishlistedIds,
+
       error: "",
     });
 
@@ -281,6 +299,7 @@ export const productListingLoad = async (req, res) => {
       totalProducts: 0,
       paginationPages: [1],
       productsPerPage: 9,
+      wishlistedIds:   [],  
       error: "Server error",
     });
   }
