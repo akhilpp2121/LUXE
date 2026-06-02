@@ -290,7 +290,7 @@ tailwind.config = {
           <p class="text-cream-mute text-[9px] uppercase tracking-[0.22em] font-body mb-0.5"><%= color %></p>
           <p class="text-cream-mute text-[9px] uppercase tracking-[0.18em] font-body mb-5">Size &nbsp;<%= size %></p>
 <% if (inStock) { %>
-<form action="/wishlist/move-to-cart" method="POST">
+<form class="add-to-cart-form">
   <input type="hidden" name="variantId" value="<%= variantId %>">
   <input type="hidden" name="wishlistId" value="<%= o._id %>">
   <button type="submit" class="btn-gold relative w-full py-3 overflow-hidden border-0">
@@ -422,12 +422,12 @@ tailwind.config = {
       addBtn.textContent = 'Moving…';
 
       try {
-        const res    = await fetch('/wishlist/move-to-cart', {
+        const res    = await fetch('/cart/add-cart', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({
             variantId,
-            wishlistId: currentWishlistId
+            qty:1
           })
         });
         const result = await res.json();
@@ -562,6 +562,74 @@ tailwind.config = {
     modal.addEventListener('click', e => {
       if (e.target === modal) closeModal();
     });
+
+    // ── Handle form submissions to open modal ──────────────
+    document.addEventListener('submit', e => {
+      const form = e.target;
+      if (!form.classList.contains('add-to-cart-form')) return;
+      
+      e.preventDefault();
+      
+      const variantId = form.querySelector('input[name="variantId"]').value;
+      const wishlistId = form.querySelector('input[name="wishlistId"]').value;
+      
+      if (!variantId) return;
+      
+      // Directly add to cart since variant is already known from wishlist
+      addToCartFromWishlist(variantId, wishlistId);
+    });
+
+    async function addToCartFromWishlist(variantId, wishlistId) {
+      try {
+        const res = await fetch('/cart/add-cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            variantId,
+            qty: 1
+          })
+        });
+        const result = await res.json();
+
+        if (!result.success) {
+          return Swal.fire({
+            toast: true, icon: 'error',
+            title: result.message,
+            position: 'top-right',
+            showConfirmButton: false,
+            timer: 3000
+          });
+        }
+
+        // Update cart badge
+        updateCartBadge();
+
+        Swal.fire({
+          toast: true, icon: 'success',
+          title: result.message,
+          position: 'top-right',
+          showConfirmButton: false,
+          timer: 3000
+        });
+
+        // Remove from wishlist
+        const card = document.querySelector(`[data-id="${wishlistId}"]`);
+        if (card) {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => { card.remove(); updateCounter(); }, 350);
+        }
+      } catch(e) {
+        console.error('addToCartFromWishlist error:', e);
+        Swal.fire({
+          toast: true, icon: 'error',
+          title: 'Something went wrong',
+          position: 'top-right',
+          showConfirmButton: false,
+          timer: 3000
+        });
+      }
+    }
   </script>
 </body>
 </html>

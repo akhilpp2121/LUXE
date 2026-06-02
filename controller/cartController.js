@@ -8,7 +8,7 @@ export const cartPageLoad = async (req, res) => {
     if (!user) return res.redirect("/login");
 
     const userId = user._id || user.id;
-    const cartData = await CartDataTake({ userId: userId});
+    const cartData = await CartDataTake( userId);
     
 
     const cart = { count: cartData.data?.length || 0 };
@@ -112,37 +112,37 @@ if (quantity > 10) {
     }
 };
 
-export const removeCartProducts=async(req,res)=>{
-    try {
-   
+export const removeCartProducts = async (req, res) => {
+  try {
+    
+    
+    const { variantId } = req.body;
+    const userId = req.session.user._id || req.session.user.id;
 
-        const{id}=req.body;
-        if(!id){
-            return res.status(401).json({success:false,message:"Error while removing cart"})
-        }
-
-        let cartRemovingProgress=await cartDelete(id);
-
-         if(!cartRemovingProgress.success){
-
-            return res.status(500).json({
-                success:false,
-                message:cartRemovingProgress.message
-            })
-        }
-        return res.json({
-            success:true,
-            redirect:"/cart"
-        })
-
-
-    } catch (error) {
-
-         console.error('Error loading cart:', error)
-        return res.redirect('/login')
-        
+    if (!variantId) {
+      return res.status(400).json({ success: false, message: "variantId is required" });
     }
-}
+
+    const cartRemovingProgress = await cartDelete(userId, variantId);
+
+    if (!cartRemovingProgress.success) {
+      return res.status(500).json({
+        success: false,
+        message: cartRemovingProgress.message
+      });
+    }
+
+    return res.json({
+      success: true,
+      redirect: "/cart"
+    });
+
+  } catch (error) {
+    console.error("Error removing cart item:", error);
+    return res.status(500).json({ success: false, message: "Something went wrong" });
+  }
+};
+
 
 export const quantityUpdate = async (req, res) => {
     try {
@@ -170,8 +170,8 @@ export const quantityUpdate = async (req, res) => {
             });
         }
 
+        const editProgress = await cartEdit(userId, variantId, Number(quantity));
 
-        const editProgress = await cartEdit(cartId, variantId, Number(quantity));
 
         if (!editProgress.success) {
             return res.status(500).json({

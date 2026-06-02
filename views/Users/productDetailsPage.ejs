@@ -379,13 +379,13 @@
             <button
               id="wishlist-btn"
               onclick="toggleWishlist()"
-              data-wishlisted="<%= locals.isWishlisted ? 'true' : 'false' %>"
+              data-wishlisted="<%= defaultVariant?.isWishlisted ? 'true' : 'false' %>"
               aria-label="<%= locals.isWishlisted ? 'Remove from wishlist' : 'Add to wishlist' %>"
               title="<%= locals.isWishlisted ? 'Remove from wishlist' : 'Add to wishlist' %>"
             >
               <span
                 id="wishlist-icon"
-                class="material-symbols-outlined <%= locals.isWishlisted ? 'wishlisted' : 'not-wishlisted' %>"
+                class="material-symbols-outlined <%= defaultVariant?.isWishlisted ? 'wishlisted' : 'not-wishlisted' %>"
               >favorite</span>
             </button>
             <!-- ══ END WISHLIST BUTTON ══ -->
@@ -622,7 +622,8 @@
 
 </div><!-- /page shell -->
 
-<script>
+<!-- <script>
+
   const IS_UNAVAILABLE = <%- JSON.stringify(unavailable) %>;
   <% if (product) { %>
   const ALL_VARIANTS   = <%- JSON.stringify(allVariants) %>;
@@ -912,6 +913,456 @@
           renderSizeGrid();
           renderStockInfo();
           renderCartActions();
+        };
+      }
+      grid.appendChild(btn);
+    });
+  }
+
+  /* ════════════════════════════════
+     PRICE
+  ════════════════════════════════ */
+  function updatePrice() {
+    if (!activeVariant) return;
+    const { price, discount } = activeVariant;
+    const ep      = (discount && discount < price) ? discount : price;
+    const savePct = (discount && discount < price)
+                    ? Math.round((price - discount) / price * 100) : 0;
+
+    document.getElementById('display-price').textContent = '₹' + ep.toLocaleString('en-IN');
+    const origEl = document.getElementById('display-original');
+    const saveEl = document.getElementById('display-save');
+    if (savePct) {
+      origEl.textContent = '₹' + price.toLocaleString('en-IN');
+      saveEl.textContent = savePct + '% off';
+      origEl.classList.remove('hidden');
+      saveEl.classList.remove('hidden');
+    } else {
+      origEl.classList.add('hidden');
+      saveEl.classList.add('hidden');
+    }
+  }
+
+  /* ════════════════════════════════
+     STOCK INFO
+  ════════════════════════════════ */
+  function renderStockInfo() {
+    const state = getStockState();
+    const count = getStockCount();
+    const el    = document.getElementById('stock-info');
+    const so    = document.getElementById('sold-overlay');
+
+    const map = {
+      in_stock:
+        `<span class="material-symbols-outlined msym text-emerald-400" style="font-variation-settings:'FILL' 1">check_circle</span>
+         <span class="text-sm font-bold text-emerald-400">In Stock</span>
+         <span class="text-xs text-slate-500">· Ships in 1–2 business days</span>`,
+      low_stock:
+        `<span class="material-symbols-outlined msym text-amber-400 pulse" style="font-variation-settings:'FILL' 1">warning</span>
+         <span class="text-sm font-bold text-amber-400">Only ${count} left!</span>
+         <span class="text-xs text-slate-500">· Order soon</span>`,
+      sold_out:
+        `<span class="material-symbols-outlined msym text-red-400" style="font-variation-settings:'FILL' 1">cancel</span>
+         <span class="text-sm font-bold text-red-400">Sold Out</span>`,
+      unavailable:
+        `<span class="material-symbols-outlined msym text-slate-500">block</span>
+         <span class="text-sm font-bold text-slate-500">Currently Unavailable</span>`,
+    };
+    el.innerHTML = map[state] ?? '';
+    so.classList.toggle('show', state === 'sold_out');
+  }
+
+  /* ════════════════════════════════
+     CART ACTIONS
+  ════════════════════════════════ */
+  function renderCartActions() {
+    const el    = document.getElementById('cart-actions');
+    const state = getStockState();
+
+    if (state === 'sold_out' || state === 'unavailable') {
+      el.innerHTML = `
+        <button disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl
+                                flex items-center justify-center gap-2 cursor-not-allowed text-sm">
+          <span class="material-symbols-outlined msym">block</span>
+          ${state === 'sold_out' ? 'SOLD OUT' : 'UNAVAILABLE'}
+        </button>`;
+    } else {
+      el.innerHTML = `
+        <button onclick="addToCart()"
+                class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl
+                       shadow-xl shadow-primary/20 transition-all active:scale-95
+                       flex items-center justify-center gap-2 text-sm">
+          <span class="material-symbols-outlined msym">shopping_cart</span> ADD TO CART
+        </button>`;
+    }
+  }
+
+  /* ════════════════════════════════
+     QTY
+  ════════════════════════════════ */
+  function changeQty(delta) {
+    qty = Math.max(1, Math.min(getStockCount() || 10, qty + delta));
+    document.getElementById('qty-display').textContent = qty;
+  }
+
+  /* ════════════════════════════════
+     ACCORDION
+  ════════════════════════════════ */
+  function toggleAcc(btn) {
+    const body   = btn.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    document.querySelectorAll('.acc-body.open').forEach(b => {
+      b.classList.remove('open');
+      b.previousElementSibling.classList.remove('open');
+    });
+    if (!isOpen) {
+      body.classList.add('open');
+      btn.classList.add('open');
+    }
+  }
+
+  /* ════════════════════════════════
+     TOAST
+  ════════════════════════════════ */
+  let _toastTimer;
+  function showToast(msg, icon, iconCls) {
+    document.getElementById('toast-msg').textContent = msg;
+    const ic = document.getElementById('toast-icon');
+    ic.textContent = icon;
+    ic.className   = 'material-symbols-outlined msym ' + iconCls;
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() =>
+      document.getElementById('toast').classList.remove('show'), 2800);
+  }
+
+  /* ════════════════════════════════
+     REDIRECT
+  ════════════════════════════════ */
+  function triggerRedirect() {
+    document.getElementById('redirect-overlay').classList.add('active');
+    let t = 5;
+    const bar = document.getElementById('redirect-bar');
+    const cnt = document.getElementById('countdown');
+    setTimeout(() => { if (bar) bar.style.width = '100%'; }, 100);
+    const iv = setInterval(() => {
+      t--;
+      if (cnt) cnt.textContent = t;
+      if (t <= 0) { clearInterval(iv); window.location.href = '/product-listing'; }
+    }, 1000);
+  }
+
+  /* ════════════════════════════════
+     KEYBOARD
+  ════════════════════════════════ */
+  document.addEventListener('keydown', e => {
+    const mo = document.getElementById('mob-zoom');
+    if (!mo.classList.contains('active')) return;
+    if (e.key === 'Escape')     closeMobZoom();
+    if (e.key === 'ArrowLeft')  mobPrev();
+    if (e.key === 'ArrowRight') mobNext();
+  });
+</script> -->
+
+
+
+
+<script>
+  const IS_UNAVAILABLE = <%- JSON.stringify(unavailable) %>;
+  <% if (product) { %>
+  const ALL_VARIANTS   = <%- JSON.stringify(allVariants) %>;
+  const COLOR_VARIANTS = <%- JSON.stringify(variants) %>;
+  const PRODUCT_NAME   = <%- JSON.stringify(product.name) %>;
+  const PRODUCT_ID     = <%- JSON.stringify(product._id) %>;
+  <% } else { %>
+  const ALL_VARIANTS   = [];
+  const COLOR_VARIANTS = [];
+  const PRODUCT_NAME   = '';
+  const PRODUCT_ID     = '';
+  <% } %>
+  <% if (defaultVariant) { %>
+  let activeVariant = <%- JSON.stringify(defaultVariant) %>;
+  <% } else { %>
+  let activeVariant = null;
+  <% } %>
+
+  let selectedSize = activeVariant?.size ?? '';
+  let qty          = 1;
+  let currentIdx   = 0;
+
+  function getImages()     { return (activeVariant?.images ?? []).map(i => '/uploads/' + i); }
+  function getStockState() { return activeVariant?.stockState ?? 'unavailable'; }
+  function getStockCount() { return activeVariant?.stock ?? 0; }
+
+  /* ════════════════════════════════
+     ADD TO CART
+  ════════════════════════════════ */
+  async function addToCart() {
+    if (!selectedSize) {
+      document.getElementById('size-error').classList.remove('hidden');
+      document.getElementById('size-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    try {
+      const res = await fetch('/cart/add-cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ variantId: activeVariant._id, qty })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        showToast(data.message || 'Failed to add to cart', 'error', 'text-red-400');
+        return;
+      }
+
+      const badge = document.querySelector('header a[href="/cart"] span.absolute');
+      if (badge) {
+        badge.textContent = (parseInt(badge.textContent) || 0) + qty;
+      }
+
+      showToast(
+        'Added ' + qty + '× ' + PRODUCT_NAME +
+        ' (' + activeVariant.color + ', ' + selectedSize + ') to cart',
+        'check_circle', 'text-green-400'
+      );
+
+      if (getStockState() === 'low_stock') {
+        activeVariant = { ...activeVariant, stock: Math.max(0, activeVariant.stock - qty) };
+        if (activeVariant.stock === 0) activeVariant.stockState = 'sold_out';
+        renderStockInfo();
+        renderCartActions();
+      }
+
+    } catch (err) {
+      console.error('Add to cart error:', err);
+      showToast('Something went wrong. Please try again.', 'error', 'text-red-400');
+    }
+  }
+
+  /* ════════════════════════════════
+     WISHLIST — filled heart toggle
+  ════════════════════════════════ */
+  async function toggleWishlist() {
+    const btn        = document.getElementById('wishlist-btn');
+    const icon       = document.getElementById('wishlist-icon');
+    const wishlisted = btn.dataset.wishlisted === 'true';
+    const action     = wishlisted ? 'REMOVE' : 'ADD';
+
+    // ── Optimistic UI update ──
+    _applyWishlistState(btn, icon, action === 'ADD');
+
+    // ── Pop animation ──
+    icon.classList.remove('popping');
+    void icon.offsetWidth;
+    icon.classList.add('popping');
+    icon.addEventListener('animationend', () => icon.classList.remove('popping'), { once: true });
+
+    try {
+      const res = await fetch('/wishlist/update', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ variantId: activeVariant._id, action })
+      });
+      const result = await res.json();
+
+      if (!result.success) {
+        _applyWishlistState(btn, icon, wishlisted);
+        showToast(result.message || 'Failed to update wishlist', 'error', 'text-red-400');
+        return;
+      }
+
+      //  CHANGE 1: keep in-memory variant in sync so switching away and back is correct
+      activeVariant.isWishlisted = (action === 'ADD');
+
+      showToast(result.message, 'check_circle', 'text-green-400');
+
+    } catch (e) {
+      console.error(e);
+      _applyWishlistState(btn, icon, wishlisted);
+      showToast('Something went wrong', 'error', 'text-red-400');
+    }
+  }
+
+  //  CHANGE 2: new helper — syncs heart icon to activeVariant.isWishlisted
+  function syncWishlistButton() {
+    const btn  = document.getElementById('wishlist-btn');
+    const icon = document.getElementById('wishlist-icon');
+    _applyWishlistState(btn, icon, activeVariant?.isWishlisted ?? false);
+  }
+
+  function _applyWishlistState(btn, icon, wishlisted) {
+    btn.dataset.wishlisted = wishlisted ? 'true' : 'false';
+    btn.setAttribute('aria-label', wishlisted ? 'Remove from wishlist' : 'Add to wishlist');
+    btn.setAttribute('title',      wishlisted ? 'Remove from wishlist' : 'Add to wishlist');
+
+    if (wishlisted) {
+      icon.classList.remove('not-wishlisted');
+      icon.classList.add('wishlisted');
+    } else {
+      icon.classList.remove('wishlisted');
+      icon.classList.add('not-wishlisted');
+    }
+  }
+
+  /* ════════════════════════════════
+     INIT
+  ════════════════════════════════ */
+  document.addEventListener('DOMContentLoaded', () => {
+    if (IS_UNAVAILABLE || !activeVariant) { triggerRedirect(); return; }
+    renderThumbs();
+    renderSizeGrid();
+    renderStockInfo();
+    renderCartActions();
+    initDesktopZoom();
+  });
+
+  /* ════════════════════════════════
+     GALLERY / THUMBNAILS
+  ════════════════════════════════ */
+  function renderThumbs() {
+    const strip  = document.getElementById('thumb-strip');
+    const images = getImages();
+    strip.innerHTML = '';
+    images.forEach((src, i) => {
+      const d   = document.createElement('div');
+      d.className = 'thumb-item' + (i === 0 ? ' active' : '');
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'View ' + (i + 1);
+      d.appendChild(img);
+      d.onclick = () => selectImage(i);
+      strip.appendChild(d);
+    });
+    if (images.length) selectImage(0);
+  }
+
+  function selectImage(idx) {
+    const images = getImages();
+    if (!images.length) return;
+    currentIdx = idx;
+
+    const mainImg = document.getElementById('main-img');
+    mainImg.src = images[idx];
+    mainImg.style.transform       = 'scale(1)';
+    mainImg.style.transformOrigin = 'center center';
+
+    document.querySelectorAll('.thumb-item').forEach((t, i) =>
+      t.classList.toggle('active', i === idx));
+  }
+
+  /* ════════════════════════════════
+     DESKTOP ZOOM
+  ════════════════════════════════ */
+  function initDesktopZoom() {
+    if ('ontouchstart' in window) return;
+
+    const ZOOM_LEVEL = 2.5;
+    const mainWrap   = document.getElementById('main-wrap');
+    const mainImg    = document.getElementById('main-img');
+    const hintBadge  = document.getElementById('zoom-hint-badge');
+
+    if (!mainWrap || !mainImg) return;
+
+    mainWrap.addEventListener('mousemove', (e) => {
+      const rect = mainWrap.getBoundingClientRect();
+      const x = ((e.clientX - rect.left)  / rect.width)  * 100;
+      const y = ((e.clientY - rect.top)   / rect.height) * 100;
+      mainImg.style.transformOrigin = `${x}% ${y}%`;
+      mainImg.style.transform       = `scale(${ZOOM_LEVEL})`;
+    });
+
+    mainWrap.addEventListener('mouseenter', () => {
+      if (hintBadge) hintBadge.style.opacity = '0';
+    });
+
+    mainWrap.addEventListener('mouseleave', () => {
+      mainImg.style.transform       = 'scale(1)';
+      mainImg.style.transformOrigin = 'center center';
+      if (hintBadge) hintBadge.style.opacity = '1';
+    });
+  }
+
+  /* ════════════════════════════════
+     MOBILE ZOOM
+  ════════════════════════════════ */
+  function openMobZoom(idx) {
+    const images = getImages();
+    if (!images.length) return;
+    currentIdx = idx;
+    document.getElementById('mob-zoom-img').src = images[idx];
+    document.getElementById('mob-zoom-counter').textContent = (idx + 1) + ' / ' + images.length;
+    document.getElementById('mob-zoom').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobZoom() {
+    document.getElementById('mob-zoom').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function mobPrev() { openMobZoom((currentIdx - 1 + getImages().length) % getImages().length); }
+  function mobNext() { openMobZoom((currentIdx + 1) % getImages().length); }
+
+  /* ════════════════════════════════
+     COLOR SELECTOR
+  ════════════════════════════════ */
+  function selectColor(btn) {
+    const color = btn.dataset.color;
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('selected-color-label').textContent = color;
+
+    const colorVariants = ALL_VARIANTS.filter(v => v.color === color);
+    if (!colorVariants.length) return;
+
+    activeVariant = colorVariants.find(v => v.size === selectedSize && v.stock > 0)
+                 || colorVariants.find(v => v.stock > 0)
+                 || colorVariants[0];
+    selectedSize = activeVariant.size;
+
+    renderThumbs();
+    updatePrice();
+    renderSizeGrid();
+    renderStockInfo();
+    renderCartActions();
+    syncWishlistButton(); // CHANGE 3: update heart when color changes
+  }
+
+  /* ════════════════════════════════
+     SIZE GRID
+  ════════════════════════════════ */
+  function renderSizeGrid() {
+    const grid = document.getElementById('size-grid');
+    grid.innerHTML = '';
+
+    const colorVariants = ALL_VARIANTS.filter(v => v.color === (activeVariant?.color ?? ''));
+    const seen = new Set();
+    const sizeRows = [];
+    for (const v of colorVariants) {
+      if (seen.has(v.size)) continue;
+      seen.add(v.size);
+      sizeRows.push(v);
+    }
+
+    sizeRows.forEach(v => {
+      const isSelected    = v.size === selectedSize;
+      const isUnavailable = v.stock <= 0 || v.stockState === 'sold_out';
+      const btn = document.createElement('button');
+      btn.className   = 'size-btn' + (isUnavailable ? ' oos' : isSelected ? ' selected' : '');
+      btn.textContent = v.size;
+      btn.disabled    = isUnavailable;
+      if (isUnavailable) btn.title = 'Size ' + v.size + ' is out of stock';
+      if (!isUnavailable) {
+        btn.onclick = () => {
+          activeVariant = v;
+          selectedSize  = v.size;
+          document.getElementById('size-error').classList.add('hidden');
+          updatePrice();
+          renderSizeGrid();
+          renderStockInfo();
+          renderCartActions();
+          syncWishlistButton(); //  CHANGE 4: update heart when size changes
         };
       }
       grid.appendChild(btn);

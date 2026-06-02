@@ -32,6 +32,7 @@ import { isUserAuthenticated } from "../middleware/user.js";
 const router = express.Router();
 import { attachCart } from "../middleware/cartMiddleware.js";
 import { moveToCart, updateWishlist, wishlistPageLoad ,removeWishlistItem} from "../controller/wishlistController.js";
+import { cartAdd } from "../controller/cartController.js";
 
 router.get("/", userLandingLoad);
 router.get("/login", userLoginLoad);
@@ -89,7 +90,6 @@ router.get("/product-details/:productId", isUserAuthenticated, attachCart, produ
 
 router.get('/wishlist',wishlistPageLoad);
 router.post('/wishlist/update',updateWishlist);
-router.post('/wishlist/move-to-cart',moveToCart);
 router.post('/wishlist/remove', removeWishlistItem);
 
 
