@@ -2,7 +2,6 @@ import orderModel from "../model/orderModel.js";
 import variantModel from "../model/variantModel.js";
 import PDFDocument from "pdfkit";
 
-// ─────────────────────────────────────────────────────────────────────────────
 export const getOrderSuccess = async (userId, orderCode) => {
   try {
     if (!userId || !orderCode) {
@@ -19,7 +18,6 @@ export const getOrderSuccess = async (userId, orderCode) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
 export const getOrders = async (filter, page = 1, limit = 0) => {
   try {
     const totalOrders = await orderModel.countDocuments(filter);
@@ -56,7 +54,6 @@ export const getOrders = async (filter, page = 1, limit = 0) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
 export const generateInvoicePDF = (order, stream) => {
   const doc = new PDFDocument({ margin: 50, size: "A4" });
   doc.pipe(stream);
@@ -311,10 +308,9 @@ export const cancelRequestLogic = async (id, reason, remark, orderid) => {
       cancelledBy:      "user",
       remarks:          remark || "",
       requestedAt:      new Date(),
-      cancelledProducts: [item.variantId], // store ObjectId, not string
+      cancelledProducts: [item.variantId], 
     });
 
-    // Build cancelled set after pushing
     const cancelledSet = new Set();
     requestProgress.cancelledAt.forEach((cancel) => {
       cancel.cancelledProducts.forEach((pid) => {
@@ -322,14 +318,12 @@ export const cancelRequestLogic = async (id, reason, remark, orderid) => {
       });
     });
 
-    // Recalculate active subtotal
     const activeSubTotal = requestProgress.orderItems
       .filter((i) => !cancelledSet.has(i.variantId.toString()))
       .reduce((sum, i) => sum + i.price * i.quantity, 0);
 
     requestProgress.subTotal = +activeSubTotal.toFixed(2);
 
-    // Check if all items cancelled
     if (cancelledSet.size === requestProgress.orderItems.length) {
       requestProgress.expectedDeliveryDate = null;
       requestProgress.orderStatus          = "cancelled";
@@ -338,7 +332,6 @@ export const cancelRequestLogic = async (id, reason, remark, orderid) => {
       requestProgress.taxAmount            = 0;
     }
 
-    // Recalculate shipping based on new subtotal
     const newShipping = requestProgress.shippingCharge > 0
       ? (activeSubTotal >= 999 ? 0 : 99)
       : 0;
@@ -356,7 +349,6 @@ export const cancelRequestLogic = async (id, reason, remark, orderid) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
 export const returnRequestLogic = async (orderId, reason, remark, resolution, variantId) => {
   try {
     if (!orderId || !variantId) {
@@ -378,7 +370,6 @@ export const returnRequestLogic = async (orderId, reason, remark, resolution, va
       order.returnedAt = [];
     }
 
-    /* Handle "ALL" case - create separate return entries for each non-cancelled item */
     if (variantId === "ALL" || variantId.toUpperCase() === "ALL") {
       const nonCancelledItems = (order.orderItems || []).filter(item => {
         const isCancelled = (order.cancelledAt || []).some(ca => {

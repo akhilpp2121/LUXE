@@ -33,31 +33,7 @@ export const wishlistPageLoad = async (req, res) => {
     }
 };
 
-// export const wishlistPageLoad = async (req, res) => {
-//   try {
-//     if (!req.session?.user) {
-//       return res.redirect("/login");
-//     }
 
-//     const userId = req.session.user.id || req.session.user._id;
-
-//     const result = await wishlistData({ userId });
-//     const cart = await getCartCount(userId);
-
-//     const wishlist = result.success ? result.data : [];
-//     const unavailable = result.success ? result.unavailable : []; 
-//     return res.render("Users/wishlist", {
-//       wishlist,
-//       unavailable,
-//       cart,
-//       isLogged: req.session.user,
-//       query: req.query,
-//     });
-//   } catch (error) {
-//     console.error("Wishlist page error:", error);
-//     return res.status(500).send("Something went wrong");
-//   }
-// };
 
 export const updateWishlist = async (req, res) => {
   try {

@@ -88,9 +88,9 @@ router.get("/product-details/:productId", isUserAuthenticated, attachCart, produ
 
 
 
-router.get('/wishlist',wishlistPageLoad);
-router.post('/wishlist/update',updateWishlist);
-router.post('/wishlist/remove', removeWishlistItem);
+router.get('/wishlist',isUserAuthenticated,wishlistPageLoad);
+router.post('/wishlist/update',isUserAuthenticated,updateWishlist);
+router.post('/wishlist/remove',isUserAuthenticated, removeWishlistItem);
 
 
 

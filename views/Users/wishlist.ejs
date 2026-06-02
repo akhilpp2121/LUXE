@@ -387,7 +387,7 @@ tailwind.config = {
     </div>
   </div>
 
-  <script>
+  <!-- <script>
     const modal      = document.getElementById('modal');
     const sizeSelect = document.getElementById('size-select');
     const addBtn     = document.getElementById('add-btn');
@@ -630,6 +630,225 @@ tailwind.config = {
         });
       }
     }
-  </script>
+  </script> -->
+
+
+
+<script>
+
+
+
+const modal      = document.getElementById('modal');
+const sizeSelect = document.getElementById('size-select');
+const addBtn     = document.getElementById('add-btn');
+
+let currentWishlistId = null;
+
+function handleSizeChange() {
+  const opt = sizeSelect.options[sizeSelect.selectedIndex];
+  addBtn.disabled = !sizeSelect.value;
+  if (sizeSelect.value && opt.dataset.price) {
+    document.getElementById('modal-price').textContent =
+      '₹' + parseInt(opt.dataset.price).toLocaleString('en-IN');
+  }
+}
+
+function closeModal() {
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  currentWishlistId = null;
+}
+
+// ── Shared helper: remove from wishlist DB ────────────
+async function removeFromWishlistDB(wishlistId) {
+  await fetch('/wishlist/remove', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: wishlistId })
+  });
+}
+
+// ── Modal flow (moveToCart) ───────────────────────────
+async function moveToCart(variantId) {
+  if (!variantId || !currentWishlistId) return;
+
+  addBtn.disabled    = true;
+  addBtn.textContent = 'Moving…';
+
+  try {
+    const res    = await fetch('/cart/add-cart', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ variantId, qty: 1 })
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      addBtn.disabled    = false;
+      addBtn.textContent = 'Move to Bag';
+      return Swal.fire({ toast: true, icon: 'error', title: result.message,
+        position: 'top-right', showConfirmButton: false, timer: 3000 });
+    }
+
+    // ✅ Remove from wishlist DB
+    await removeFromWishlistDB(currentWishlistId);
+
+    updateCartBadge();
+    Swal.fire({ toast: true, icon: 'success', title: result.message,
+      position: 'top-right', showConfirmButton: false, timer: 3000 });
+
+    const card = document.querySelector(`[data-id="${currentWishlistId}"]`);
+    if (card) {
+      card.style.opacity   = '0';
+      card.style.transform = 'translateY(20px)';
+      setTimeout(() => { card.remove(); updateCounter(); }, 350);
+    }
+
+    closeModal();
+
+  } catch(e) {
+    console.error('moveToCart error:', e);
+    addBtn.disabled    = false;
+    addBtn.textContent = 'Move to Bag';
+    Swal.fire({ toast: true, icon: 'error', title: 'Something went wrong',
+      position: 'top-right', showConfirmButton: false, timer: 3000 });
+  }
+}
+
+// ── Direct "Add to Cart" button (wishlist card) ───────
+async function addToCartFromWishlist(variantId, wishlistId) {
+  try {
+    const res    = await fetch('/cart/add-cart', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ variantId, qty: 1 })
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      return Swal.fire({ toast: true, icon: 'error', title: result.message,
+        position: 'top-right', showConfirmButton: false, timer: 3000 });
+    }
+
+    // ✅ Remove from wishlist DB
+    await removeFromWishlistDB(wishlistId);
+
+    updateCartBadge();
+    Swal.fire({ toast: true, icon: 'success', title: result.message,
+      position: 'top-right', showConfirmButton: false, timer: 3000 });
+
+    const card = document.querySelector(`[data-id="${wishlistId}"]`);
+    if (card) {
+      card.style.opacity   = '0';
+      card.style.transform = 'translateY(20px)';
+      setTimeout(() => { card.remove(); updateCounter(); }, 350);
+    }
+
+  } catch(e) {
+    console.error('addToCartFromWishlist error:', e);
+    Swal.fire({ toast: true, icon: 'error', title: 'Something went wrong',
+      position: 'top-right', showConfirmButton: false, timer: 3000 });
+  }
+}
+
+// ── Remove button (X on card) ─────────────────────────
+async function removeFromWishlist(wishlistItemId, btn) {
+  try {
+    const res    = await fetch('/wishlist/remove', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ id: wishlistItemId })
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      return Swal.fire({ toast: true, icon: 'error', title: result.message,
+        position: 'top-right', showConfirmButton: false, timer: 3000 });
+    }
+
+    Swal.fire({ toast: true, icon: 'success', title: result.message,
+      position: 'top-right', showConfirmButton: false, timer: 3000 });
+
+    const card = btn.closest('.product-card');
+    card.style.opacity   = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => { card.remove(); updateCounter(); }, 350);
+
+  } catch(e) {
+    console.error('removeFromWishlist error:', e);
+  }
+}
+
+// ── Counter & empty state ─────────────────────────────
+function updateCounter() {
+  const count   = document.querySelectorAll('.product-card').length;
+  const counter = document.getElementById('item-counter');
+  if (counter) counter.textContent = count.toString().padStart(2, '0') + ' pieces saved';
+
+  if (count === 0) {
+    document.getElementById('wishlist-grid')?.remove();
+    const main = document.querySelector('main');
+    if (main && !document.getElementById('empty-state')) {
+      const empty = document.createElement('div');
+      empty.id        = 'empty-state';
+      empty.className = 'flex flex-col items-center justify-center py-32 text-center';
+      empty.innerHTML = `
+        <div class="w-20 h-20 rounded-full border border-navy-border flex items-center justify-center mb-8">
+          <span class="msym text-[36px] text-gold-dim">favorite_border</span>
+        </div>
+        <p class="font-display text-4xl text-cream font-light italic mb-3">Nothing saved yet</p>
+        <p class="text-cream-mute text-sm font-body mb-10 max-w-xs leading-relaxed">
+          Explore our curated collections and save the pieces that speak to you.
+        </p>
+        <a href="/product-listing" class="text-gold border-b border-gold-dim pb-1 text-[9px] uppercase tracking-[0.28em] font-body hover:text-gold-light transition-colors">
+          Explore Collections
+        </a>`;
+      main.appendChild(empty);
+    }
+  }
+}
+
+// ── Cart badge ────────────────────────────────────────
+function updateCartBadge() {
+  const badge = document.getElementById('cart-badge');
+  if (!badge) return;
+  const current = parseInt(badge.textContent) || 0;
+  badge.textContent = current + 1;
+  badge.classList.remove('hidden');
+  badge.classList.add('flex');
+}
+
+// ── Form submit (card "Add to Cart" button) ───────────
+document.addEventListener('submit', e => {
+  const form = e.target;
+  if (!form.classList.contains('add-to-cart-form')) return;
+  e.preventDefault();
+
+  const variantId  = form.querySelector('input[name="variantId"]').value;
+  const wishlistId = form.querySelector('input[name="wishlistId"]').value;
+  if (!variantId) return;
+
+  addToCartFromWishlist(variantId, wishlistId);
+});
+
+// ── Backdrop click closes modal ───────────────────────
+modal.addEventListener('click', e => {
+  if (e.target === modal) closeModal();
+});
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
 </body>
 </html>

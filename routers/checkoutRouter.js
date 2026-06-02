@@ -7,7 +7,7 @@ const router=express.Router();
 router.get('/',isUserAuthenticated,checkoutPageLoad);
 router.post('/place-order',isUserAuthenticated,placeOrderController);
 
-router.get('/order-success/:orderCode', orderSuccessPage);
+router.get('/order-success/:orderCode',isUserAuthenticated, orderSuccessPage);
 
 
 

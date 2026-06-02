@@ -31,56 +31,45 @@ export const orderSuccessPage = async (req, res) => {
 
 
 import orderModel from "../model/orderModel.js";
-import { getCartCount } from "../service/cartService.js"; // adjust path if needed
+import { getCartCount } from "../service/cartService.js"; 
  
-// ─────────────────────────────────────────────────────────────────────────────
-// STATUS MAP  — schema stores lowercase, template expects uppercase
-// ─────────────────────────────────────────────────────────────────────────────
+
 const STATUS_MAP = {
   placed:    "PENDING",
   cancelled: "CANCELLED",
   completed: "COMPLETED",
 };
- 
-// ─────────────────────────────────────────────────────────────────────────────
-// getOrderById  — fetches & populates a single order
-// ─────────────────────────────────────────────────────────────────────────────
+
 const getOrderById = async (orderId) => {
   const order = await orderModel
     .findById(orderId)
-    .populate("orderItems.variantId")           // gets variant image[], stock, etc.
-    .populate("cancelledAt.cancelledProducts")  // gets cancelled variant docs
+    .populate("orderItems.variantId")           
+    .populate("cancelledAt.cancelledProducts")  
     .lean(); 
-                                   // plain JS object — no .toObject() needed
+    
  
   return order;
 };
  
-// ─────────────────────────────────────────────────────────────────────────────
-// normaliseOrder  — maps schema fields → what the EJS template expects
-// ─────────────────────────────────────────────────────────────────────────────
+
 const normaliseOrder = (o) => ({
-  // ── identity ──────────────────────────────────────────────────────
   _id:                  o._id,
   orderCode:            o.orderCode,
   orderDate:            o.orderDate,
   expectedDeliveryDate: o.expectedDeliveryDate,
   orderMethod:          o.orderMethod,
  
-  // ── status (uppercased for template) ──────────────────────────────
   orderStatus: STATUS_MAP[o.orderStatus] || o.orderStatus.toUpperCase(),
  
-  // ── items (schema field is 'orderItems') ──────────────────────────
   orderItems: (o.orderItems || []).map((item) => ({
     productName: item.productName,
     variantName: item.variantName,
     price:       item.price,
     quantity:    item.quantity,
     totalPrice:  item.totalPrice,
-    variantId:   item.variantId,   // populated Variant doc (has .image[], ._id)
+    variantId:   item.variantId,   
   })),
  
-  // ── address (already embedded in doc, no populate needed) ─────────
   shippingAddress: {
     username:       o.shippingAddress?.username       || "",
     phone_number:   o.shippingAddress?.phone_number   || "",
@@ -92,7 +81,6 @@ const normaliseOrder = (o) => ({
     country:        o.shippingAddress?.country        || "",
   },
  
-  // ── financials ────────────────────────────────────────────────────
   subTotal:      o.subTotal      || 0,
   shippingCharge:o.shippingCharge||0,
   taxAmount:     o.taxAmount     || 0,
@@ -100,17 +88,15 @@ const normaliseOrder = (o) => ({
   totalAmount:   o.totalAmount   || 0,
   deliveryStatus:o.deliveryStatus||'pending',
  
-  // ── cancellations ─────────────────────────────────────────────────
   cancelledAt: (o.cancelledAt || []).map((ca) => ({
 
     reason:              ca.reason,
     remarks:             ca.remarks,
     requestedAt:         ca.requestedAt,
     cancelRequestStatus: ca.cancelRequestStatus,
-    cancelledProducts:   ca.cancelledProducts || [], // populated Variant docs
+    cancelledProducts:   ca.cancelledProducts || [], 
   })),
  
-  // ── returns ───────────────────────────────────────────────────────
   returnedAt: (o.returnedAt || []).map((r) => ({
     reason:              r.reason,
     remark:              r.remark,
@@ -120,47 +106,38 @@ const normaliseOrder = (o) => ({
   })),
 });
  
-// ─────────────────────────────────────────────────────────────────────────────
-// orderDetailsLoad  — GET /checkout/details/:id
-// ─────────────────────────────────────────────────────────────────────────────
+
 export const orderDetailsLoad = async (req, res) => {
   try {
     const { id } = req.params;
  
-    // Guard — must be logged in
     if (!req.session.user) {
       return res.redirect("/login");
     }
  
-    // Guard — id must exist
     if (!id) {
       return res.redirect("/order");
     }
  
     const userId = req.session.user._id || req.session.user.id;
  
-    // Fetch order
     const rawOrder = await getOrderById(id);
  
-    // Guard — order must exist
     if (!rawOrder) {
       return res.redirect("/order");
     }
  
-    // Guard — order must belong to the logged-in user
     if (rawOrder.userId.toString() !== userId.toString()) {
       return res.redirect("/order");
     }
  
-    // Normalise for template
     const order = normaliseOrder(rawOrder);
  
-    // Cart badge count
     const cartData = await getCartCount(userId);
  
     return res.render("Users/orderDetailsUser", {
       isLogged:   req.session.user || "",
-      order:      [order],          // template reads order[0]
+      order:      [order],          
       pageActive: "ORDER",
       cart:       cartData.count || 0,
     });
@@ -175,9 +152,7 @@ export const orderDetailsLoad = async (req, res) => {
 
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// downloadInvoice  —  GET /checkout/invoice/:id
-// ─────────────────────────────────────────────────────────────────────────────
+
 export const downloadInvoice = async (req, res) => {
   try {
     const { id } = req.params;
@@ -188,7 +163,6 @@ export const downloadInvoice = async (req, res) => {
 
     const userId = req.session.user._id || req.session.user.id;
 
-    // Fetch order with populated variant (for SKU)
     const order = await orderModel
       .findById(id)
       .populate("orderItems.variantId")
@@ -199,17 +173,14 @@ export const downloadInvoice = async (req, res) => {
       return res.status(404).send("Order not found");
     }
 
-    // Security — user can only download their own invoice
     if (order.userId.toString() !== userId.toString()) {
       return res.status(403).send("Access denied");
     }
 
-    // Set headers so browser downloads the file
     const filename = `invoice-${order.orderCode}.pdf`;
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 
-    // Generate and pipe PDF directly to response
     generateInvoicePDF(order, res);
 
   } catch (error) {
@@ -227,7 +198,7 @@ export const cancellRequest = async (req, res) => {
         const requestProgress = await cancelRequestLogic(id, reason, remark, orderId)
 
         if (!requestProgress.success) {
-            return res.status(400).json({        // 400 Bad Request, not 401
+            return res.status(400).json({       
                 success: false,
                 message: requestProgress.message
             })
@@ -240,7 +211,7 @@ export const cancellRequest = async (req, res) => {
 
     } catch (e) {
         console.log(e)
-        return res.status(500).json({            // 500 for unexpected server errors
+        return res.status(500).json({          
             success: false,
             message: "Server error"
         })
@@ -297,7 +268,6 @@ export const returnRequest = async (req, res) => {
 
     if (!order.returnedAt) order.returnedAt = [];
 
-    // Build cancelled variant ID set
     const cancelledVIds = new Set(
       (order.cancelledAt || []).flatMap(ca =>
         (ca.cancelledProducts || []).map(cp =>
@@ -306,7 +276,6 @@ export const returnRequest = async (req, res) => {
       )
     );
 
-    // Build already-returned variant ID set
     const alreadyReturnedVIds = new Set(
       (order.returnedAt || []).map(r =>
         r.variant ? r.variant.toString() : ""
@@ -331,7 +300,7 @@ export const returnRequest = async (req, res) => {
           remark:              remark || "",
           resolution,
           variant:             item.variantId,
-          quantity:            item.quantity,        // full qty for ALL
+          quantity:            item.quantity,        
           requestedAt:         new Date(),
           returnRequestStatus: "Pending",
         });
@@ -341,7 +310,6 @@ export const returnRequest = async (req, res) => {
       return res.json({ success: true, message: "Return request submitted for all items" });
     }
 
-    // — Single item —
     if (cancelledVIds.has(variant)) {
       return res.json({ success: false, message: "Cannot return a cancelled item" });
     }
@@ -356,7 +324,6 @@ export const returnRequest = async (req, res) => {
       return res.json({ success: false, message: "Item not found in this order" });
     }
 
-    // Validate quantity
     const requestedQty = parseInt(quantity, 10);
     if (!requestedQty || requestedQty < 1 || requestedQty > orderItem.quantity) {
       return res.json({

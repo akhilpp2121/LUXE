@@ -36,10 +36,10 @@ router.post('/product-add',isAdminAuth,productUpload.any(),adminProductsAdd);
 router.post('/product-edit/:id',isAdminAuth,productUpload.any(),adminProductsEdit)
 router.put( "/product-status/:id",isAdminAuth ,updateProductStatus);
 
-router.get('/order-management',getOrderManagement)
-router.get("/orders/:orderId", getViewOrder);
-router.patch("/orders/:id/status", updateOrderStatus);
-router.patch("/orders/:id/return", updateReturnRequest);
+router.get('/order-management',isAdminAuth,getOrderManagement)
+router.get("/orders/:orderId",isAdminAuth, getViewOrder);
+router.patch("/orders/:id/status",isAdminAuth, updateOrderStatus);
+router.patch("/orders/:id/return",isAdminAuth, updateReturnRequest);
 
 
 
