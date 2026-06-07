@@ -29,6 +29,11 @@ const orderItemSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    deliveryStatus: {
+      type: String,
+      enum: ["pending", "shipped", "out_for_delivery", "delivered", "cancelled", "returned"],
+      default: "pending",
+    },
   },
   { _id: false }
 );
@@ -132,6 +137,7 @@ const returnSchema = new mongoose.Schema(
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
+      adminRemark: { type: String, default: null },
   },
   { _id: false }
 );
@@ -171,6 +177,8 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    gstRate:   { type: Number, default: 5 },
+gstAmount: { type: Number, default: 0 },
 
     shippingCharge: {
   type:    Number,
@@ -195,13 +203,13 @@ const orderSchema = new mongoose.Schema(
 
     orderStatus: {
       type: String,
-      enum: ["placed", "cancelled", "completed"],
+      enum: ["placed", "cancelled", "completed", "returned"],
       default: "placed",
     },
 
     deliveryStatus: {
       type: String,
-      enum: ["pending", "shipped", "out_for_delivery", "delivered", "cancelled"],
+      enum: ["pending", "shipped", "out_for_delivery", "delivered", "cancelled", "partially_delivered", "returned"],
       default: "pending",
     },
 

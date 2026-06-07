@@ -6,7 +6,7 @@ import { addCategoryPageLoad, adminCategoryAdd, adminCategoryLoad, editCategoryP
 import { addProductPageLoad, adminProductPageLoad, adminProductsAdd, editProductPageLoad ,adminProductsEdit,updateProductStatus} from "../controller/productsController.js";
 import { isAdminAuth } from "../middleware/admin.js";
 import { productUpload } from "../config/multer.js";
-import { getOrderManagement ,getViewOrder,updateOrderStatus,updateReturnRequest} from "../controller/adminOrderController.js";
+import { getOrderManagement ,getViewOrder,updateOrderItemStatus,updateReturnRequest, updateAllItemsStatus} from "../controller/adminOrderController.js";
 
 const router = express.Router();
 
@@ -38,7 +38,8 @@ router.put( "/product-status/:id",isAdminAuth ,updateProductStatus);
 
 router.get('/order-management',isAdminAuth,getOrderManagement)
 router.get("/orders/:orderId",isAdminAuth, getViewOrder);
-router.patch("/orders/:id/status",isAdminAuth, updateOrderStatus);
+router.patch("/orders/:id/status",isAdminAuth, updateAllItemsStatus);
+router.patch("/orders/:id/items/:variantId/status",isAdminAuth, updateOrderItemStatus);
 router.patch("/orders/:id/return",isAdminAuth, updateReturnRequest);
 
 

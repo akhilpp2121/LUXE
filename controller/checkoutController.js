@@ -61,10 +61,12 @@ export const placeOrderController = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user?.id;
 
-    if (!userId) {
-      return res.redirect('/homepage');
-    }
-
+   if (!userId) {
+  return res.status(401).json({
+    success: false,
+    message: "Session expired. Please login again."
+  });
+}
     const { addressId, paymentMethod } = req.body;
 
     if (!addressId || !paymentMethod) {

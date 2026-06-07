@@ -5,6 +5,7 @@
 
 
 import passport from "../config/passport.js";
+import { getCartCount } from "../service/cartService.js";
 import {
   getUserProfileService,
   updateProfileService,
@@ -148,7 +149,10 @@ export const deleteAvatar = async (req, res) => {
 export const addressPageLoad = async (req, res) => {
   try {
     if (!req.session.user) return res.redirect("/login");
-    return res.render("Users/address", { user: req.session.user });
+    const userId = req.session.user.id || req.session.user._id;
+
+    const cart=await getCartCount(userId)
+    return res.render("Users/address", { user: req.session.user,cart,data:[],price:0 });
   } catch (err) {
     return res.redirect("/login");
   }

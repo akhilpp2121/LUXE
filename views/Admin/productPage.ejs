@@ -212,17 +212,15 @@
                 <!-- Product Name + Image -->
                 <td class="px-8 py-5">
                   <div class="flex items-center gap-4">
-                    <% if (product.images && product.images.length > 0) { %>
-                      <img
-                        src="<%= product.images[0] %>"
+                   
+                      <div class="w-12 h-12 rounded-lg luxe-gradient flex items-center justify-center text-white font-['Manrope'] font-extrabold text-lg flex-shrink-0">
+                        <img
+                        src = "/uploads/<%=product.variants[0].images[0]%>"
                         alt="<%= product.name %>"
                         class="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                       />
-                    <% } else { %>
-                      <div class="w-12 h-12 rounded-lg luxe-gradient flex items-center justify-center text-white font-['Manrope'] font-extrabold text-lg flex-shrink-0">
-                        <%= product.name.charAt(0).toUpperCase() %>
                       </div>
-                    <% } %>
+                    
                     <div>
                       <p class="text-sm font-bold text-white mb-0.5"><%= product.name %></p>
                     </div>

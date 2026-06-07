@@ -5,6 +5,7 @@ import {
 } from "../service/orderService.js";
 import { generateInvoicePDF } from "../service/orderService.js";
 import { CartDataTake } from "../service/cartService.js";
+import { normaliseOrder } from "../utilites/orderHelperfile.js";
 
 export const orderSuccessPage = async (req, res) => {
   try {
@@ -34,11 +35,6 @@ import orderModel from "../model/orderModel.js";
 import { getCartCount } from "../service/cartService.js"; 
  
 
-const STATUS_MAP = {
-  placed:    "PENDING",
-  cancelled: "CANCELLED",
-  completed: "COMPLETED",
-};
 
 const getOrderById = async (orderId) => {
   const order = await orderModel
@@ -52,59 +48,7 @@ const getOrderById = async (orderId) => {
 };
  
 
-const normaliseOrder = (o) => ({
-  _id:                  o._id,
-  orderCode:            o.orderCode,
-  orderDate:            o.orderDate,
-  expectedDeliveryDate: o.expectedDeliveryDate,
-  orderMethod:          o.orderMethod,
- 
-  orderStatus: STATUS_MAP[o.orderStatus] || o.orderStatus.toUpperCase(),
- 
-  orderItems: (o.orderItems || []).map((item) => ({
-    productName: item.productName,
-    variantName: item.variantName,
-    price:       item.price,
-    quantity:    item.quantity,
-    totalPrice:  item.totalPrice,
-    variantId:   item.variantId,   
-  })),
- 
-  shippingAddress: {
-    username:       o.shippingAddress?.username       || "",
-    phone_number:   o.shippingAddress?.phone_number   || "",
-    street_address: o.shippingAddress?.street_address || "",
-    landmark:       o.shippingAddress?.landmark       || "",
-    city:           o.shippingAddress?.city           || "",
-    state:          o.shippingAddress?.state          || "",
-    postal_code:    o.shippingAddress?.postal_code    || "",
-    country:        o.shippingAddress?.country        || "",
-  },
- 
-  subTotal:      o.subTotal      || 0,
-  shippingCharge:o.shippingCharge||0,
-  taxAmount:     o.taxAmount     || 0,
-  couponApplied: o.couponApplied || 0,
-  totalAmount:   o.totalAmount   || 0,
-  deliveryStatus:o.deliveryStatus||'pending',
- 
-  cancelledAt: (o.cancelledAt || []).map((ca) => ({
 
-    reason:              ca.reason,
-    remarks:             ca.remarks,
-    requestedAt:         ca.requestedAt,
-    cancelRequestStatus: ca.cancelRequestStatus,
-    cancelledProducts:   ca.cancelledProducts || [], 
-  })),
- 
-  returnedAt: (o.returnedAt || []).map((r) => ({
-    reason:              r.reason,
-    remark:              r.remark,
-    resolution:          r.resolution,
-    requestedAt:         r.requestedAt,
-    returnRequestStatus: r.returnRequestStatus,
-  })),
-});
  
 
 export const orderDetailsLoad = async (req, res) => {
@@ -196,7 +140,7 @@ export const cancellRequest = async (req, res) => {
         const { id, reason, remark, orderId } = req.body
 
         const requestProgress = await cancelRequestLogic(id, reason, remark, orderId)
-
+          
         if (!requestProgress.success) {
             return res.status(400).json({       
                 success: false,
@@ -262,9 +206,7 @@ export const returnRequest = async (req, res) => {
 
     const order = await orderModel.findOne({ _id: orderId });
     if (!order) return res.json({ success: false, message: "Order not found" });
-    if (order.deliveryStatus !== "delivered") {
-      return res.json({ success: false, message: "Return only allowed after delivery" });
-    }
+    const orderDelivered = order.deliveryStatus === "delivered";
 
     if (!order.returnedAt) order.returnedAt = [];
 
@@ -287,11 +229,12 @@ export const returnRequest = async (req, res) => {
     if (isAll) {
       const eligible = (order.orderItems || []).filter(item => {
         const vid = item.variantId?.toString() ?? "";
-        return !cancelledVIds.has(vid) && !alreadyReturnedVIds.has(vid);
+        const itemDelivered = orderDelivered || item.deliveryStatus === "delivered";
+        return itemDelivered && !cancelledVIds.has(vid) && !alreadyReturnedVIds.has(vid);
       });
 
       if (eligible.length === 0) {
-        return res.json({ success: false, message: "All items already returned or cancelled" });
+        return res.json({ success: false, message: "No delivered items available for return" });
       }
 
       eligible.forEach(item => {
@@ -322,6 +265,9 @@ export const returnRequest = async (req, res) => {
     );
     if (!orderItem) {
       return res.json({ success: false, message: "Item not found in this order" });
+    }
+    if (!orderDelivered && orderItem.deliveryStatus !== "delivered") {
+      return res.json({ success: false, message: "Return only allowed after delivery" });
     }
 
     const requestedQty = parseInt(quantity, 10);

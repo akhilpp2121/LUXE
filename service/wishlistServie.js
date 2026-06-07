@@ -14,85 +14,37 @@ export const wishlistCheck = async (userId) => {
     return { success: false, data: [] };
   }
 };
+export const wishlistData = async ({ userId, skip, limit }) => {
+    try {
+        const totalDocs = await wishlistModel.countDocuments({ userId });
+        const totalPage = Math.ceil(totalDocs / limit) || 1;
 
-export const wishlistData = async (filter) => {
-  try {
-    const data = await wishlistModel.find(filter)
-    .populate({
-        path: 'variantId',
-        populate: {
-          path: 'productId',
-          populate: { path: 'categoryId' }  
-        }
-      });
-      
-    if (!data || data.length === 0) {
-      return {
-        success: false,
-        message: "No wishlist data found"
-      };
+        const data = await wishlistModel
+            .find({ userId })
+            .populate({
+                path: "variantId",
+                populate: {
+                    path: "productId",
+                    populate: { path: "categoryId" },
+                },
+            })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        return {
+            success: true,
+            data: data ?? [],
+            totalPage,
+        };
+
+    } catch (error) {
+        console.error("wishlistData error:", error);
+        return { success: false, message: "Server error", data: [], totalPage: 1 };
     }
-
-    return {
-      success: true,
-      data: data
-    };
-
-  } catch (error) {
-    console.log(error);
-
-    return {
-      success: false,
-      message: "Server error"
-    };
-  }
 };
 
 
-// export const wishlistData = async (filter) => {
-//   try {
-//     const data = await wishlistModel
-//       .find(filter)
-//       .populate({ path: 'variantId', populate: { path: "productId", populate: { path: "categoryId" } } });
-
-//     if (!data || data.length === 0) {
-//       return { success: false, message: "No wishlist data found" };
-//     }
-
-//     const available = [];
-//     const unavailable = [];
-
-//     for (const item of data) {
-//       const variant  = item.variantId;
-//       const product  = variant?.productId;
-//       const category = product?.categoryId;
-
-//       const isUnavailable =
-//         !variant ||
-//         !variant.isActive ||
-//         (variant.stock ?? 0) < 1 ||
-//         !product ||
-//         !product.isActive ||
-//         !category ||
-//         !category.isActive;
-
-//       if (isUnavailable) {
-//         unavailable.push(item);
-//       } else {
-//         available.push(item);
-//       }
-//     }
-
-//     return {
-//       success: true,
-//       data: available,
-//     };
-
-//   } catch (error) {
-//     console.log(error);
-//     return { success: false, message: "Server error" };
-//   }
-// };
 
 export const wishListUpdateLogic = async (variantId, action, userId) => {
     try {

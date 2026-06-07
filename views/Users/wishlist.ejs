@@ -180,7 +180,7 @@ tailwind.config = {
           <div class="flex items-center gap-4 mt-5">
             <div class="gold-line w-12"></div>
             <span class="text-cream-mute text-[9px] uppercase tracking-[0.28em] font-body" id="item-counter">
-              <%= (wishlist?.length || 0).toString().padStart(2,'0') %> pieces saved
+            
             </span>
           </div>
         </div>
@@ -295,7 +295,7 @@ tailwind.config = {
   <input type="hidden" name="wishlistId" value="<%= o._id %>">
   <button type="submit" class="btn-gold relative w-full py-3 overflow-hidden border-0">
     <span class="shine-sweep"></span>
-    Add to cart
+    move to cart
   </button>
 </form>
 <% } else { %>
@@ -385,6 +385,54 @@ tailwind.config = {
         Move to Bag
       </button>
     </div>
+
+</div> <!-- closes #modal -->
+
+  <!-- ✅ Pagination — outside modal, after </main> close -->
+  <% if (totalPage > 1) { %>
+  <div class="px-8 py-6 flex items-center justify-between max-w-7xl mx-auto">
+
+    <!-- Previous -->
+    <% if (currentPage > 1) { %>
+      <a href="/wishlist?page=<%= currentPage - 1 %>">
+        <button class="px-4 py-2 text-xs font-bold text-cream-mute hover:text-gold transition-colors flex items-center gap-2">
+          <span class="msym text-sm">chevron_left</span>Previous
+        </button>
+      </a>
+    <% } else { %>
+      <button disabled class="px-4 py-2 text-xs font-bold text-cream-mute/30 flex items-center gap-2 cursor-not-allowed">
+        <span class="msym text-sm">chevron_left</span>Previous
+      </button>
+    <% } %>
+
+    <!-- Page Numbers -->
+    <div class="flex items-center gap-2">
+      <% for (let i = 1; i <= totalPage; i++) { %>
+        <a href="/wishlist?page=<%= i %>">
+          <button class="w-8 h-8 rounded-lg text-xs font-bold <%= currentPage == i ? 'btn-gold' : 'text-cream-mute hover:text-gold border border-navy-border' %>">
+            <%= i %>
+          </button>
+        </a>
+      <% } %>
+    </div>
+
+    <!-- Next -->
+    <% if (currentPage < totalPage) { %>
+      <a href="/wishlist?page=<%= currentPage + 1 %>">
+        <button class="px-4 py-2 text-xs font-bold text-cream-mute hover:text-gold transition-colors flex items-center gap-2">
+          Next<span class="msym text-sm">chevron_right</span>
+        </button>
+      </a>
+    <% } else { %>
+      <button disabled class="px-4 py-2 text-xs font-bold text-cream-mute/30 flex items-center gap-2 cursor-not-allowed">
+        Next<span class="msym text-sm">chevron_right</span>
+      </button>
+    <% } %>
+
+  </div>
+  <% } %>
+
+</body>
   </div>
 
   <!-- <script>

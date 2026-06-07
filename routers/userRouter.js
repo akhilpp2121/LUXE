@@ -34,6 +34,10 @@ import { attachCart } from "../middleware/cartMiddleware.js";
 import { moveToCart, updateWishlist, wishlistPageLoad ,removeWishlistItem} from "../controller/wishlistController.js";
 import { cartAdd } from "../controller/cartController.js";
 
+
+
+
+
 router.get("/", userLandingLoad);
 router.get("/login", userLoginLoad);
 router.get("/signUp", userSignUpLoad);

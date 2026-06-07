@@ -1,13 +1,15 @@
 <%
   /* ── SERVER-SIDE CALCULATIONS (runs first, before any HTML output) ── */
 
+  const GST_RATE = 0.05;
+
   let subtotal     = 0;
   let totalSavings = 0;
 
   cart.forEach(p => {
-    const v       = p.variantId;
-    const inStk   = (v?.stock ?? 0) > 0;
-    const isInv   = !v?.productId?.isActive || !v?.isActive || !inStk;
+    const v     = p.variantId;
+    const inStk = (v?.stock ?? 0) > 0;
+    const isInv = !v?.productId?.isActive || !v?.isActive || !inStk;
     if (!isInv) {
       const hasDiscount = v?.discount && v.discount < v?.price;
       const ep  = hasDiscount ? v.discount : (v?.price || 0);
@@ -20,9 +22,10 @@
     }
   });
 
+  const gstAmount  = Math.round(subtotal * GST_RATE);   // 5% on discounted subtotal
   const shipping   = subtotal >= 999 ? 0 : 99;
-  const totalPrice = subtotal + totalSavings;
-  const grandTotal = subtotal + shipping;
+  const totalPrice = subtotal + totalSavings;            // original price before discounts
+  const grandTotal = subtotal + gstAmount + shipping;    // final amount customer pays
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -772,85 +775,115 @@
         <div class="summary-title">Order Summary</div>
 
         <!-- PRODUCT LIST -->
-        <div class="product-list">
-          <% cart.forEach((p) => {
-            const variant     = p.variantId;
-            const product     = variant?.productId;
-            const inStock     = (variant?.stock ?? 0) > 0;
-            const isInvalid   = !product?.isActive || !variant?.isActive || !inStock;
-            const hasDiscount = variant?.discount && variant.discount < variant?.price;
-            const itemPrice   = hasDiscount ? variant.discount : (variant?.price || 0);
-            const origPrice   = variant?.price || 0;
-            const qty         = p.quantity || 1;
-            const lineTotal   = itemPrice * qty;
-            const origTotal   = origPrice * qty;
-            const savedAmt    = hasDiscount ? (origTotal - lineTotal) : 0;
-            const imgSrc      = variant?.images?.[0] ? '/uploads/' + variant.images[0] : null;
-          %>
-            <div class="prod-item <%= isInvalid ? 'invalid' : '' %>" id="cart-item-<%= p._id %>">
+       <div class="product-list">
+  <% cart.forEach((p) => {
+    const variant     = p.variantId;
+    const product     = variant?.productId;
+    const inStock     = (variant?.stock ?? 0) > 0;
+    const isInvalid   = !product?.isActive || !variant?.isActive || !inStock;
+    const hasDiscount = variant?.discount && variant.discount < variant?.price;
+    const itemPrice   = hasDiscount ? variant.discount : (variant?.price || 0);
+    const origPrice   = variant?.price || 0;
+    const qty         = p.quantity || 1;
+    const lineTotal   = itemPrice * qty;
+    const origTotal   = origPrice * qty;
+    const savedAmt    = hasDiscount ? (origTotal - lineTotal) : 0;
+    const imgSrc      = variant?.images?.[0] ? '/uploads/' + variant.images[0] : null;
 
-              <!-- Image -->
-              <% if (imgSrc) { %>
-                <img class="prod-img" src="<%= imgSrc %>" alt="<%= product?.name || 'Product' %>"
-                     onerror="this.style.display='none'">
+    const GST_RATE  = 0.05;
+    const itemGst   = Math.round(lineTotal * GST_RATE);
+    const itemGross = lineTotal + itemGst;
+  %>
+
+    <div class="prod-item <%= isInvalid ? 'invalid' : '' %>" id="cart-item-<%= p._id %>">
+
+      <!-- Image -->
+      <% if (imgSrc) { %>
+        <img class="prod-img"
+             src="<%= imgSrc %>"
+             alt="<%= product?.name || 'Product' %>"
+             onerror="this.style.display='none'">
+      <% } else { %>
+        <div class="prod-img-placeholder">◻</div>
+      <% } %>
+
+      <!-- Info -->
+      <div class="prod-info">
+        <div class="prod-name"><%= product?.name || 'Unknown Product' %></div>
+
+        <div class="prod-meta">
+          <% if (variant?.color) { %><span>Color: <%= variant.color %></span><% } %>
+          <% if (variant?.size)  { %><span>Size: <%= variant.size %></span><% } %>
+        </div>
+
+        <div class="prod-qty">Qty: <%= qty %></div>
+
+        <% if (!isInvalid) { %>
+          <div class="prod-breakdown">
+
+            <!-- Original price -->
+            <div class="bd-row">
+              <span>Item Price</span>
+              <% if (hasDiscount) { %>
+                <span class="strike">₹<%= origTotal.toLocaleString('en-IN') %></span>
               <% } else { %>
-                <div class="prod-img-placeholder">◻</div>
+                <span>₹<%= lineTotal.toLocaleString('en-IN') %></span>
               <% } %>
+            </div>
 
-              <!-- Info -->
-              <div class="prod-info">
-                <div class="prod-name"><%= product?.name || 'Unknown Product' %></div>
-                <div class="prod-meta">
-                  <% if (variant?.color) { %><span>Color: <%= variant.color %></span><% } %>
-                  <% if (variant?.size)  { %><span>Size: <%= variant.size %></span><% } %>
-                </div>
-                <div class="prod-qty">Qty: <%= qty %></div>
-
-                <% if (!isInvalid) { %>
-                  <div class="prod-breakdown">
-                    <div class="bd-row">
-                      <span>Item Total</span>
-                      <% if (hasDiscount) { %>
-                        <span class="strike">₹<%= origTotal.toLocaleString('en-IN') %></span>
-                      <% } else { %>
-                        <span>₹<%= lineTotal.toLocaleString('en-IN') %></span>
-                      <% } %>
-                    </div>
-                    <% if (hasDiscount) { %>
-                      <div class="bd-row green">
-                        <span>Discount</span>
-                        <span>— ₹<%= savedAmt.toLocaleString('en-IN') %></span>
-                      </div>
-                    <% } %>
-                    <div class="bd-row final">
-                      <span>Item Final</span>
-                      <span>₹<%= lineTotal.toLocaleString('en-IN') %></span>
-                    </div>
-                  </div>
-                <% } %>
-
-                <% if (!inStock) { %>
-                  <span class="invalid-badge">Out of stock</span>
-                <% } else if (!product?.isActive || !variant?.isActive) { %>
-                  <span class="invalid-badge">Unavailable</span>
-                <% } %>
-              </div><!-- /prod-info -->
-
-              <!-- Price column -->
-              <div class="prod-prices">
-                <% if (isInvalid) { %>
-                  <div class="prod-price-strike">₹<%= lineTotal.toLocaleString('en-IN') %></div>
-                <% } else { %>
-                  <div class="prod-price-final">₹<%= lineTotal.toLocaleString('en-IN') %></div>
-                  <% if (hasDiscount) { %>
-                    <div class="prod-price-original">₹<%= origTotal.toLocaleString('en-IN') %></div>
-                  <% } %>
-                <% } %>
+            <!-- Discount -->
+            <% if (hasDiscount) { %>
+              <div class="bd-row green">
+                <span>Discount</span>
+                <span>— ₹<%= savedAmt.toLocaleString('en-IN') %></span>
               </div>
+            <% } %>
 
-            </div><!-- /prod-item -->
-          <% }) %>
-        </div><!-- /product-list -->
+            <!-- Taxable value -->
+            <div class="bd-row muted">
+              <span>Taxable Value</span>
+              <span>₹<%= lineTotal.toLocaleString('en-IN') %></span>
+            </div>
+
+            <!-- GST -->
+            <div class="bd-row" style="color:var(--warning)">
+              <span>GST (5%)</span>
+              <span>+ ₹<%= itemGst.toLocaleString('en-IN') %></span>
+            </div>
+
+            <!-- Final -->
+            <div class="bd-row final">
+              <span>Item Total</span>
+              <span>₹<%= itemGross.toLocaleString('en-IN') %></span>
+            </div>
+
+          </div>
+        <% } %>
+
+        <!-- Badges -->
+        <% if (!inStock) { %>
+          <span class="invalid-badge">Out of stock</span>
+        <% } else if (!product?.isActive || !variant?.isActive) { %>
+          <span class="invalid-badge">Unavailable</span>
+        <% } %>
+
+      </div><!-- /prod-info -->
+
+      <!-- Price column -->
+      <div class="prod-prices">
+        <% if (isInvalid) { %>
+          <div class="prod-price-strike">₹<%= origTotal.toLocaleString('en-IN') %></div>
+        <% } else { %>
+          <div class="prod-price-final">₹<%= itemGross.toLocaleString('en-IN') %></div>
+          <% if (hasDiscount) { %>
+            <div class="prod-price-original">₹<%= origTotal.toLocaleString('en-IN') %></div>
+          <% } %>
+        <% } %>
+      </div>
+
+    </div><!-- /prod-item -->
+  <% }) %>
+</div><!-- /product-list -->
 
         <!-- COUPON -->
         <div class="coupon-wrap">
@@ -872,30 +905,63 @@
         <% } %>
 
         <!-- PRICE BREAKDOWN -->
-        <div class="price-section">
-          <div class="price-row">
-            <span class="pr-label">Total Price</span>
-            <span class="pr-val" id="displaySubtotal">₹<%= totalPrice.toLocaleString('en-IN') %></span>
-          </div>
-          <div class="price-row discount">
-            <span class="pr-label">Discount</span>
-            <span class="pr-val" id="discountVal">— ₹<%= totalSavings.toLocaleString('en-IN') %></span>
-          </div>
-          <div class="price-row free">
-            <span class="pr-label">Shipping Fee</span>
-            <span class="pr-val" id="displayShipping">
-              <% if (subtotal >= 999) { %>
-                Free
-              <% } else { %>
-                <span style="color:var(--text-1)">₹99</span>
-              <% } %>
-            </span>
-          </div>
-          <div class="price-row total">
-            <span class="pr-label">Final Price</span>
-            <span class="pr-val" id="displayTotal">₹<%= grandTotal.toLocaleString('en-IN') %></span>
-          </div>
-        </div><!-- /price-section -->
+       <div class="price-section">
+
+  <!-- Original total before discount -->
+  <div class="price-row">
+    <span class="pr-label">Total Price</span>
+    <span class="pr-val" id="displaySubtotal">₹<%= totalPrice.toLocaleString('en-IN') %></span>
+  </div>
+
+  <!-- Discount -->
+  <% if (totalSavings > 0) { %>
+  <div class="price-row discount">
+    <span class="pr-label">Discount</span>
+    <span class="pr-val" id="discountVal">— ₹<%= totalSavings.toLocaleString('en-IN') %></span>
+  </div>
+  <% } %>
+
+  <!-- Taxable value (after discount, before GST) -->
+  <div class="price-row">
+    <span class="pr-label" style="color:var(--text-3)">Taxable Value</span>
+    <span class="pr-val" style="color:var(--text-2);font-size:12px">
+      ₹<%= subtotal.toLocaleString('en-IN') %>
+    </span>
+  </div>
+
+  <!-- GST -->
+  <div class="price-row">
+    <span class="pr-label" style="color:var(--warning)">GST (5%)</span>
+    <span class="pr-val" style="color:var(--warning);font-size:12px">
+      + ₹<%= gstAmount.toLocaleString('en-IN') %>
+    </span>
+  </div>
+
+  <!-- Shipping -->
+  <div class="price-row free">
+    <span class="pr-label">Shipping Fee</span>
+    <span class="pr-val" id="displayShipping">
+      <% if (subtotal >= 999) { %>
+        Free
+      <% } else { %>
+        <span style="color:var(--text-1)">₹99</span>
+      <% } %>
+    </span>
+  </div>
+
+  <!-- Grand Total -->
+  <div class="price-row total">
+    <span class="pr-label">Grand Total</span>
+    <span class="pr-val" id="displayTotal">₹<%= grandTotal.toLocaleString('en-IN') %></span>
+  </div>
+
+</div><!-- /price-section -->
+
+<!-- GST footnote -->
+<p style="font-size:10px;color:var(--text-4);letter-spacing:.08em;
+          text-align:right;margin-top:-14px;margin-bottom:16px;">
+  Incl. ₹<%= gstAmount.toLocaleString('en-IN') %> GST @ 5% on clothing
+</p>
 
         <!-- PLACE ORDER -->
         <button class="place-btn" id="placeOrderBtn" onclick="placeOrder()">

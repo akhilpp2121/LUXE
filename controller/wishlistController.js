@@ -7,6 +7,8 @@ import {
 import { findUserByEmail } from "../service/userService.js";
 import { getCartCount } from "../service/cartService.js";
 
+
+
 export const wishlistPageLoad = async (req, res) => {
     try {
         if (!req.session?.user) {
@@ -14,17 +16,27 @@ export const wishlistPageLoad = async (req, res) => {
         }
 
         const userId = req.session.user.id || req.session.user._id;
+        const limit = 4;
 
-        const result = await wishlistData({ userId });
-        const cart   = await getCartCount(userId);
+        const result = await wishlistData({ userId, skip: 0, limit });
 
-        const wishlist = result.success ? result.data : [];
+        const totalPage = result.totalPage ?? 1;
+        const page = Math.min(Math.max(parseInt(req.query.page) || 1, 1), totalPage);
+        const skip = (page - 1) * limit;
+
+        const finalResult = page > 1
+            ? await wishlistData({ userId, skip, limit })
+            : result;
+
+        const cart = await getCartCount(userId);
 
         return res.render("Users/wishlist", {
-            wishlist,
+            wishlist:    finalResult.data ?? [],
             cart,
-            isLogged: req.session.user,
-                        query: req.query
+            isLogged:    req.session.user,
+            query:       req.query,
+            totalPage,
+            currentPage: page,
         });
 
     } catch (error) {
@@ -32,8 +44,6 @@ export const wishlistPageLoad = async (req, res) => {
         return res.status(500).send("Something went wrong");
     }
 };
-
-
 
 export const updateWishlist = async (req, res) => {
   try {

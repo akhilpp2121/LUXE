@@ -8,12 +8,21 @@ export const cartPageLoad = async (req, res) => {
     if (!user) return res.redirect("/login");
 
     const userId = user._id || user.id;
-    const cartData = await CartDataTake( userId);
-    
+    const cartData = await CartDataTake(userId);
 
-    const cart = { count: cartData.data?.length || 0 };
+    //  Empty cart — early return with all required variables
+    if (!cartData.success) {
+      return res.status(200).render("Users/cart", {
+        isLogged: req.session.user || '',
+        email: '',
+        data: [],
+        price: 0,
+        cart: 0,
+      });
+    }
 
-    const price = cartData.data?.reduce((sum, item) => {
+    //  Price calculation only when cart has data
+    const price = cartData.data.reduce((sum, item) => {
       const variant  = item.variantId;
       const product  = variant?.productId;
       const category = product?.categoryId;
@@ -30,24 +39,14 @@ export const cartPageLoad = async (req, res) => {
         : variant.price;
 
       return sum + (effectivePrice * item.quantity);
-    }, 0) || 0;
+    }, 0);
 
-    if (cartData.success) {
-      return res.status(200).render("Users/cart", {
-        isLogged: req.session.user || '',
-        email: '',
-        data: cartData.data,
-        price,
-        cart: cart.count || 0,
-      });
-    }
-
-    return res.status(500).render("Users/cart", {
+    return res.status(200).render("Users/cart", {
       isLogged: req.session.user || '',
       email: '',
-      data: [],
-      price: 0,
-      cart: 0,
+      data: cartData.data,
+      price,
+      cart: cartData.data.length,
     });
 
   } catch (error) {
@@ -55,7 +54,6 @@ export const cartPageLoad = async (req, res) => {
     res.redirect("/error");
   }
 };
-
 
 export const cartAdd = async (req, res) => {
     try {
@@ -92,14 +90,9 @@ if (quantity > 10) {
     return res.status(400).json({ success: false, message: "You cannot add more than 10 pieces" });
 }
 
-
-
-
         const cartAddProgress = await addToCart(variantId, userId, quantity);
         req.session.message = cartAddProgress.message;
-
-        
-        
+    
         if (!cartAddProgress.success) {
             return res.status(500).json({ success: false, message: cartAddProgress.message });
         }

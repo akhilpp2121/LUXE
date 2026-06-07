@@ -32,6 +32,7 @@ export const adminProductPageLoad = async (req, res) => {
   const categories = categoryResult.success ? categoryResult.data : [];
 
   const products = await productModelLoad(filter, sortOption, req.query.page);
+  
 
  
 

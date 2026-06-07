@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,6 +20,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    
     phoneNumber: {
       type: String,
       unique: true,

@@ -198,31 +198,74 @@ export const generateInvoicePDF = (order, stream) => {
     y += rowHeight;
   });
 
-  // Totals
-  y += 16;
-  const totalsX = 360;
-  const totalsW = COL_R - totalsX;
+  
+  
+// Totals
+y += 16;
+const totalsX = 360;
+const totalsW = COL_R - totalsX;
 
-  const addTotalRow = (label, value, bold = false, color = C.text) => {
-    doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(bold ? 9 : 8)
-       .fillColor(C.muted).text(label, totalsX, y);
-    doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(bold ? 9 : 8)
-       .fillColor(color).text(value, totalsX, y, { align: "right", width: totalsW });
-    y += bold ? 16 : 13;
-  };
+const addTotalRow = (label, value, bold = false, color = C.text) => {
+  doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(bold ? 9 : 8)
+     .fillColor(C.muted).text(label, totalsX, y);
+  doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(bold ? 9 : 8)
+     .fillColor(color).text(value, totalsX, y, { align: "right", width: totalsW });
+  y += bold ? 16 : 13;
+};
 
-  addTotalRow("Subtotal", fmt(order.subTotal));
-  const shipping = order.shippingCharge || 0;
-  addTotalRow("Shipping", shipping === 0 ? "FREE" : fmt(shipping), false, C.green);
-  if (order.couponApplied && order.couponApplied > 0) {
-    addTotalRow("Coupon Discount", "- " + fmt(order.couponApplied), false, C.green);
-  }
-  if (order.taxAmount && order.taxAmount > 0) {
-    addTotalRow("Tax", fmt(order.taxAmount));
-  }
-  hr(y);
-  y += 8;
-  addTotalRow("GRAND TOTAL", fmt(order.totalAmount), true, C.primary);
+const SHIPPING_THRESHOLD = 999;
+const SHIPPING_FEE       = 99;
+const GST_RATE           = 0.05;
+
+// Recalculate from active (non-cancelled) items only
+const cancelledVIdsForTotal = new Set(
+  (order.cancelledAt || []).flatMap((ca) =>
+    (ca.cancelledProducts || []).map((cp) =>
+      cp && cp._id ? cp._id.toString() : cp.toString()
+    )
+  )
+);
+
+const activeSubTotal = (order.orderItems || []).reduce((sum, item) => {
+  const variantId = item.variantId && typeof item.variantId === "object"
+    ? item.variantId._id.toString()
+    : String(item.variantId || "");
+  return cancelledVIdsForTotal.has(variantId) ? sum : sum + (item.totalPrice || 0);
+}, 0);
+
+const gstAmount      = Math.round(activeSubTotal * GST_RATE);
+const shippingCharge = activeSubTotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+const couponDiscount = order.couponApplied || 0;
+const grandTotal     = activeSubTotal + gstAmount + shippingCharge - couponDiscount;
+
+// Subtotal
+addTotalRow("Subtotal (Taxable Value)", fmt(activeSubTotal));
+
+// GST
+addTotalRow("GST @ 5% (Clothing)", fmt(gstAmount), false, "#d97706");
+
+// Shipping — label explains free or why charge was applied
+const shippingLabel = shippingCharge === 0
+  ? "Shipping (Free above Rs. 999)"
+  : "Shipping (Active total below Rs. 999)";
+
+addTotalRow(
+  shippingLabel,
+  shippingCharge === 0 ? "FREE" : fmt(shippingCharge),
+  false,
+  shippingCharge === 0 ? C.green : C.red
+);
+
+// Coupon
+if (couponDiscount > 0) {
+  addTotalRow("Coupon Discount", "- " + fmt(couponDiscount), false, C.green);
+}
+
+hr(y);
+y += 8;
+addTotalRow("GRAND TOTAL (Incl. GST)", fmt(grandTotal), true, C.primary);
+
+
 
   // Notes
   y += 24;

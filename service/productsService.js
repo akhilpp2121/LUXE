@@ -12,6 +12,7 @@ export const productModelLoad = async (filter, sort, pageNo) => {
 
     const total = await Product.countDocuments(filter);
     const totalPages = Math.ceil(total / limit);
+    
 
     const products = await Product.find(filter)
       .populate("categoryId")

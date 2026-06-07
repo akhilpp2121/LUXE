@@ -21,6 +21,7 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod) => {
       return { success: false, message: "Cart is empty" };
     }
 
+    // Step 3: Build orderItems
     let subTotal = 0;
     let orderItems = [];
 
@@ -32,9 +33,9 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod) => {
       if (isInvalid) continue;
 
       const hasDiscount = variant.discount && variant.discount < variant.price;
-      const finalPrice = hasDiscount ? variant.discount : variant.price;
-      const finalQty = items.quantity || 1;
-      const totalPrice = finalPrice * finalQty;
+      const finalPrice  = hasDiscount ? variant.discount : variant.price;
+      const finalQty    = items.quantity || 1;
+      const totalPrice  = finalPrice * finalQty;
 
       subTotal += totalPrice;
 
@@ -44,7 +45,8 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod) => {
         variantName: variant.name || `${variant.color || ''} ${variant.size || ''}`.trim(),
         price:       finalPrice,
         quantity:    finalQty,
-        totalPrice:  totalPrice
+        totalPrice:  totalPrice,
+        stock:       variant.stock  
       });
     }
 
@@ -52,8 +54,19 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod) => {
       return { success: false, message: "No valid items in cart" };
     }
 
-    const shipping = subTotal >= 999 ? 0 : 99;
-    const grandTotal = subTotal + shipping;
+    for (const item of orderItems) {
+      if (item.quantity > (item.stock ?? 0)) {
+        return {
+          success: false,
+          message: `Only ${item.stock} units available for ${item.productName}`
+        };
+      }
+    }
+
+    const GST_RATE  = 0.05;
+    const gstAmount = Math.round(subTotal * GST_RATE);
+    const shipping  = subTotal >= 999 ? 0 : 99;
+    const grandTotal = subTotal + gstAmount + shipping;
 
     const order = await orderModel.create({
       userId,
@@ -70,16 +83,13 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod) => {
       },
       orderItems,
       subTotal,
-      shippingCharge:shipping,
-      totalAmount: grandTotal,
-      orderMethod: paymentMethod?.toLowerCase().trim()
+      gstRate:       GST_RATE * 100,
+      gstAmount:     gstAmount,
+      shippingCharge: shipping,
+      totalAmount:   grandTotal,
+      orderMethod:   paymentMethod?.toLowerCase().trim()
     });
 
-
-
-    
-
-    // Deduct stock
     for (const item of orderItems) {
       await variantModel.findByIdAndUpdate(
         item.variantId,
@@ -87,15 +97,17 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod) => {
       );
     }
 
-    // Clear cart
     await cartModel.findOneAndUpdate({ userId }, { $set: { items: [] } });
 
-    return { success: true, orderId: order._id, message: "Order placed successfully",orderCode: order.orderCode };
+    return {
+      success:   true,
+      orderId:   order._id,
+      orderCode: order.orderCode,
+      message:   "Order placed successfully"
+    };
 
   } catch (error) {
     console.error("placeOrderLogic error:", error);
     return { success: false, message: error.message || "Something went wrong" };
   }
 };
-
-

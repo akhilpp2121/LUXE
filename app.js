@@ -9,6 +9,7 @@ import cartRouter from './routers/cartRouter.js'
 import checkoutRouter from "./routers/checkoutRouter.js"
 import orderRouter from "./routers/orderRouter.js"
 import connectDB from "./config/db_config.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -54,6 +55,9 @@ app.use('/admin',adminRouter)
 app.use('/cart',cartRouter)
 app.use("/checkout",checkoutRouter)
 app.use("/order",orderRouter)
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
