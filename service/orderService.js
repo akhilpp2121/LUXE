@@ -1,6 +1,7 @@
 import orderModel from "../model/orderModel.js";
 import variantModel from "../model/variantModel.js";
 import PDFDocument from "pdfkit";
+import { creditWallet } from "./walletService.js";
 
 export const getOrderSuccess = async (userId, orderCode) => {
   try {
@@ -292,174 +293,407 @@ addTotalRow("GRAND TOTAL (Incl. GST)", fmt(grandTotal), true, C.primary);
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-export const cancelRequestLogic = async (id, reason, remark, orderid) => {
+// export const cancelRequestLogic = async (id, reason, remark, orderid,userId) => {
+//   try {
+//     if (!id || !orderid) {
+//       return { success: false, message: "Invalid cancellation request" };
+//     }
+
+//     const requestProgress = await orderModel.findOne({ _id: orderid });
+//     if (!requestProgress) {
+//       return { success: false, message: "Order not found" };
+//     }
+
+//     if ((requestProgress.deliveryStatus || "").toLowerCase() !== "pending") {
+//       return { success: false, message: "Order can only be cancelled before it is shipped" };
+//     }
+
+//     if (!requestProgress.cancelledAt) {
+//       requestProgress.cancelledAt = [];
+//     }
+
+//     // ── Cancel ALL ──────────────────────────────────────────────────
+//     if (id === "ALL") {
+//       requestProgress.expectedDeliveryDate = null;
+//       const products = [];
+//       for (const i of requestProgress.orderItems) {
+//         products.push(i.variantId);
+//         await variantModel.updateOne({ _id: i.variantId }, { $inc: { stock: i.quantity } });
+//       }
+//       requestProgress.subTotal       = 0;
+//       requestProgress.shippingCharge = 0;
+//       requestProgress.taxAmount      = 0;
+//       requestProgress.totalAmount    = 0;
+//       requestProgress.orderStatus    = "cancelled";
+//       requestProgress.deliveryStatus = "cancelled";
+//       requestProgress.cancelledAt.push({
+//         reason:           reason || "",
+//         cancelledBy:      "user",
+//         remarks:          remark || "",
+//         requestedAt:      new Date(),
+//         cancelledProducts: products,
+//       });
+//       await requestProgress.save();
+//       return { success: true, message: "Order got cancelled" };
+//     }
+
+//     // ── Cancel single item ──────────────────────────────────────────
+//     const item = requestProgress.orderItems.find(
+//       (v) => v.variantId.toString() === id.toString()
+//     );
+//     if (!item) {
+//       return { success: false, message: "Item not found in order" };
+//     }
+
+//     const quantity = item.quantity;
+
+//     requestProgress.cancelledAt.push({
+//       reason:           reason || "",
+//       cancelledBy:      "user",
+//       remarks:          remark || "",
+//       requestedAt:      new Date(),
+//       cancelledProducts: [item.variantId], 
+//     });
+
+//     const cancelledSet = new Set();
+//     requestProgress.cancelledAt.forEach((cancel) => {
+//       cancel.cancelledProducts.forEach((pid) => {
+//         cancelledSet.add(pid.toString());
+//       });
+//     });
+
+//     const activeSubTotal = requestProgress.orderItems
+//       .filter((i) => !cancelledSet.has(i.variantId.toString()))
+//       .reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+//     requestProgress.subTotal = +activeSubTotal.toFixed(2);
+
+//     if (cancelledSet.size === requestProgress.orderItems.length) {
+//       requestProgress.expectedDeliveryDate = null;
+//       requestProgress.orderStatus          = "cancelled";
+//       requestProgress.deliveryStatus       = "cancelled";
+//       requestProgress.shippingCharge       = 0;
+//       requestProgress.taxAmount            = 0;
+//     }
+
+//     const newShipping = requestProgress.shippingCharge > 0
+//       ? (activeSubTotal >= 999 ? 0 : 99)
+//       : 0;
+//     requestProgress.shippingCharge = newShipping;
+//     requestProgress.totalAmount    = +(activeSubTotal + newShipping).toFixed(2);
+
+//     await variantModel.updateOne({ _id: item.variantId }, { $inc: { stock: quantity } });
+//     await requestProgress.save();
+
+//     return { success: true, message: "Item got cancelled" };
+
+//   } catch (e) {
+//     console.error("cancelRequestLogic error:", e.message, e.stack);
+//     return { success: false, message: e.message || "Something went wrong" };
+//   }
+// };
+
+
+
+export const cancelRequestLogic = async (id, reason, remark, orderId, userId) => {
   try {
-    if (!id || !orderid) {
-      return { success: false, message: "Invalid cancellation request" };
+    
+    if (!id || !orderId) {
+      return { success: false, message: "Invalid request" };
     }
 
-    const requestProgress = await orderModel.findOne({ _id: orderid });
-    if (!requestProgress) {
-      return { success: false, message: "Order not found" };
-    }
-
-    if ((requestProgress.deliveryStatus || "").toLowerCase() !== "pending") {
-      return { success: false, message: "Order can only be cancelled before it is shipped" };
-    }
-
-    if (!requestProgress.cancelledAt) {
-      requestProgress.cancelledAt = [];
-    }
-
-    // ── Cancel ALL ──────────────────────────────────────────────────
-    if (id === "ALL") {
-      requestProgress.expectedDeliveryDate = null;
-      const products = [];
-      for (const i of requestProgress.orderItems) {
-        products.push(i.variantId);
-        await variantModel.updateOne({ _id: i.variantId }, { $inc: { stock: i.quantity } });
-      }
-      requestProgress.subTotal       = 0;
-      requestProgress.shippingCharge = 0;
-      requestProgress.taxAmount      = 0;
-      requestProgress.totalAmount    = 0;
-      requestProgress.orderStatus    = "cancelled";
-      requestProgress.deliveryStatus = "cancelled";
-      requestProgress.cancelledAt.push({
-        reason:           reason || "",
-        cancelledBy:      "user",
-        remarks:          remark || "",
-        requestedAt:      new Date(),
-        cancelledProducts: products,
-      });
-      await requestProgress.save();
-      return { success: true, message: "Order got cancelled" };
-    }
-
-    // ── Cancel single item ──────────────────────────────────────────
-    const item = requestProgress.orderItems.find(
-      (v) => v.variantId.toString() === id.toString()
-    );
-    if (!item) {
-      return { success: false, message: "Item not found in order" };
-    }
-
-    const quantity = item.quantity;
-
-    requestProgress.cancelledAt.push({
-      reason:           reason || "",
-      cancelledBy:      "user",
-      remarks:          remark || "",
-      requestedAt:      new Date(),
-      cancelledProducts: [item.variantId], 
-    });
-
-    const cancelledSet = new Set();
-    requestProgress.cancelledAt.forEach((cancel) => {
-      cancel.cancelledProducts.forEach((pid) => {
-        cancelledSet.add(pid.toString());
-      });
-    });
-
-    const activeSubTotal = requestProgress.orderItems
-      .filter((i) => !cancelledSet.has(i.variantId.toString()))
-      .reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-    requestProgress.subTotal = +activeSubTotal.toFixed(2);
-
-    if (cancelledSet.size === requestProgress.orderItems.length) {
-      requestProgress.expectedDeliveryDate = null;
-      requestProgress.orderStatus          = "cancelled";
-      requestProgress.deliveryStatus       = "cancelled";
-      requestProgress.shippingCharge       = 0;
-      requestProgress.taxAmount            = 0;
-    }
-
-    const newShipping = requestProgress.shippingCharge > 0
-      ? (activeSubTotal >= 999 ? 0 : 99)
-      : 0;
-    requestProgress.shippingCharge = newShipping;
-    requestProgress.totalAmount    = +(activeSubTotal + newShipping).toFixed(2);
-
-    await variantModel.updateOne({ _id: item.variantId }, { $inc: { stock: quantity } });
-    await requestProgress.save();
-
-    return { success: true, message: "Item got cancelled" };
-
-  } catch (e) {
-    console.error("cancelRequestLogic error:", e.message, e.stack);
-    return { success: false, message: e.message || "Something went wrong" };
-  }
-};
-
-export const returnRequestLogic = async (orderId, reason, remark, resolution, variantId) => {
-  try {
-    if (!orderId || !variantId) {
-      return { success: false, message: "Order ID and item are required" };
-    }
-    if (!reason || reason.trim() === "") {
-      return { success: false, message: "Reason is required for return" };
-    }
-
-    const order = await orderModel.findOne({ _id: orderId });
+    
+    const order = await orderModel.findById(orderId);
     if (!order) {
       return { success: false, message: "Order not found" };
     }
-    if (order.deliveryStatus !== "delivered") {
-      return { success: false, message: "Return is only allowed after delivery" };
+
+    
+    if (order.deliveryStatus !== "pending") {
+      return { success: false, message: "Cannot cancel after shipping" };
     }
 
-    if (!order.returnedAt) {
-      order.returnedAt = [];
-    }
+    // ensure array exists
+    if (!order.cancelledAt) order.cancelledAt = [];
 
-    if (variantId === "ALL" || variantId.toUpperCase() === "ALL") {
-      const nonCancelledItems = (order.orderItems || []).filter(item => {
-        const isCancelled = (order.cancelledAt || []).some(ca => {
-          return (ca.cancelledProducts || []).some(cp => 
-            (cp && cp._id ? cp._id.toString() : String(cp)) === (item.variantId ? item.variantId.toString() : String(item.variantId))
-          );
-        });
-        return !isCancelled;
+  //  full order cancell
+    if (id === "ALL") {
+
+      // take refund BEFORE modifying
+      const refundAmount = order.totalAmount;
+
+      //  restore stock
+      for (const item of order.orderItems) {
+        await variantModel.updateOne(
+          { _id: item.variantId },
+          { $inc: { stock: item.quantity } }
+        );
+        item.deliveryStatus = "cancelled";
+      }
+
+      //  update order
+      order.subTotal = 0;
+      order.shippingCharge = 0;
+      order.taxAmount = 0;
+      order.totalAmount = 0;
+      order.orderStatus = "cancelled";
+      order.deliveryStatus = "cancelled";
+      order.expectedDeliveryDate = null;
+
+      
+      order.cancelledAt.push({
+        reason: reason || "",
+        remarks: remark || "",
+        cancelledBy: "user",
+        requestedAt: new Date(),
+        cancelledProducts: order.orderItems.map(i => i.variantId),
       });
 
-      if (nonCancelledItems.length === 0) {
+      await order.save();
+
+      if (["razorpay", "wallet"].includes(order.orderMethod)) {
+        const refundResult = await creditWallet(
+          userId,
+          refundAmount,
+          `Refund for order #${order.orderCode || orderId}`,
+          orderId
+        );
+
+        if (!refundResult.success) {
+          console.error("Refund failed for full order:", orderId);
+        }
+      }
+
+      return { success: true, message: "Full order cancelled" };
+    }
+
+    // single item cancell
+   
+
+
+    const item = order.orderItems.find(
+      i => i.variantId.toString() === id.toString()
+    );
+
+    if (!item) {
+      return { success: false, message: "Item not found" };
+    }
+
+    //  restore stock
+    await variantModel.updateOne(
+      { _id: item.variantId },
+      { $inc: { stock: item.quantity } }
+    );
+    item.deliveryStatus = "cancelled";
+
+    order.cancelledAt.push({
+      reason: reason || "",
+      remarks: remark || "",
+      cancelledBy: "user",
+      requestedAt: new Date(),
+      cancelledProducts: [item.variantId],
+    });
+
+    //  get all cancelled product IDs
+    const cancelledIds = new Set(
+      order.cancelledAt.flatMap(c =>
+        c.cancelledProducts.map(id => id.toString())
+      )
+    );
+
+    //  remaining items
+    const activeItems = order.orderItems.filter(
+      i => !cancelledIds.has(i.variantId.toString())
+    );
+
+    //  recalculate subtotal
+    const subTotal = activeItems.reduce(
+      (sum, i) => sum + i.price * i.quantity,
+      0
+    );
+
+    order.subTotal = subTotal;
+
+    // shipping logic
+    order.shippingCharge = subTotal === 0 ? 0 : (subTotal >= 999 ? 0 : 99);
+    order.totalAmount = subTotal + order.shippingCharge;
+
+    // if all items cancelled → mark order cancelled
+    if (activeItems.length === 0) {
+      order.orderStatus = "cancelled";
+      order.deliveryStatus = "cancelled";
+      order.expectedDeliveryDate = null;
+    }
+
+    await order.save();
+
+    //  refund single item
+    if (["razorpay", "wallet"].includes(order.orderMethod)) {
+      const refundAmount = item.price * item.quantity;
+
+      const refundResult = await creditWallet(
+        userId,
+        refundAmount,
+        `Refund for item in order #${order.orderCode || orderId}`,
+        orderId
+      );
+
+      if (!refundResult.success) {
+        console.error("Refund failed for item:", item.variantId);
+      }
+    }
+
+    return { success: true, message: "Item cancelled" };
+
+  } catch (error) {
+    console.error("cancelRequestLogic error:", error);
+    return { success: false, message: "Something went wrong" };
+  }
+};
+
+
+
+
+export const returnRequestLogic = async (
+  orderId,
+  reason,
+  remark,
+  resolution,
+  variantId,
+  quantity
+) => {
+  try {
+    //  Validation
+    if (!orderId || !variantId) {
+      return { success: false, message: "Order ID and item required" };
+    }
+
+    if (!reason?.trim()) {
+      return { success: false, message: "Reason is required" };
+    }
+
+    //  Get order
+    const order = await orderModel.findById(orderId);
+    if (!order) {
+      return { success: false, message: "Order not found" };
+    }
+
+    if (order.deliveryStatus !== "delivered") {
+      return { success: false, message: "Return allowed only after delivery" };
+    }
+
+    order.returnedAt = order.returnedAt || [];
+
+    //  Get cancelled IDs
+    const cancelledIds = new Set(
+      (order.cancelledAt || []).flatMap(c =>
+        c.cancelledProducts.map(id => id.toString())
+      )
+    );
+
+    // return all
+    if (variantId === "ALL") {
+      const eligibleItems = order.orderItems.filter(item => {
+        const vid = item.variantId.toString();
+        if (cancelledIds.has(vid)) return false;
+
+        const activeReturnedQty = order.returnedAt
+          .filter(r => r.variant.toString() === vid && r.returnRequestStatus !== "Rejected")
+          .reduce((sum, r) => sum + (r.quantity || 1), 0);
+
+        return item.quantity > activeReturnedQty;
+      });
+
+      if (eligibleItems.length === 0) {
         return { success: false, message: "No items available to return" };
       }
 
-      nonCancelledItems.forEach(item => {
+      eligibleItems.forEach(item => {
+        const vid = item.variantId.toString();
+        const activeReturnedQty = order.returnedAt
+          .filter(r => r.variant.toString() === vid && r.returnRequestStatus !== "Rejected")
+          .reduce((sum, r) => sum + (r.quantity || 1), 0);
+        
+        const remainingQty = item.quantity - activeReturnedQty;
+
         order.returnedAt.push({
-          reason:      reason.trim(),
-          remark:      remark || "",
-          resolution:  resolution || "",
-          variant:     item.variantId,
+          reason: reason.trim(),
+          remark: remark || "",
+          resolution: resolution || "",
+          variant: item.variantId,
+          quantity: remainingQty,
           requestedAt: new Date(),
           returnRequestStatus: "Pending",
         });
       });
-    } else {
-      /* Single item return */
-      order.returnedAt.push({
-        reason:      reason.trim(),
-        remark:      remark || "",
-        resolution:  resolution || "",
-        variant:     variantId,
-        requestedAt: new Date(),
-        returnRequestStatus: "Pending",
-      });
+
+      await order.save();
+      return { success: true, message: "Return requested for all items" };
     }
 
-    await order.save();
-    const itemCount = variantId === "ALL" || variantId.toUpperCase() === "ALL" 
-      ? "All eligible items return request submitted" 
-      : "Return request submitted successfully";
-    return { success: true, message: itemCount };
+    //  single item
+    if (cancelledIds.has(variantId.toString())) {
+      return { success: false, message: "Item already cancelled" };
+    }
 
-  } catch (e) {
-    console.error("returnRequestLogic error:", e);
+    const item = order.orderItems.find(
+      i => i.variantId.toString() === variantId
+    );
+
+    if (!item) {
+      return { success: false, message: "Item not found" };
+    }
+
+    // Calculate how much of this item has already been successfully/pending returned
+    const activeReturnedQty = order.returnedAt
+      .filter(r => r.variant.toString() === variantId.toString() && r.returnRequestStatus !== "Rejected")
+      .reduce((sum, r) => sum + (r.quantity || 1), 0);
+
+    const maxReturnableQty = item.quantity - activeReturnedQty;
+
+    if (maxReturnableQty <= 0) {
+      return { success: false, message: "Already returned" };
+    }
+
+    const qty = parseInt(quantity) || 1;
+    if (qty < 1 || qty > maxReturnableQty) {
+      return {
+        success: false,
+        message: `Quantity must be between 1 and ${maxReturnableQty}`,
+      };
+    }
+
+    order.returnedAt.push({
+      reason: reason.trim(),
+      remark: remark || "",
+      resolution: resolution || "",
+      variant: variantId,
+      quantity: qty,
+      requestedAt: new Date(),
+      returnRequestStatus: "Pending",
+    });
+
+    await order.save();
+
+    return { success: true, message: "Return request submitted" };
+
+  } catch (error) {
+    console.error("returnRequestLogic error:", error);
     return { success: false, message: "Server error" };
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 export const getUserOrders = async (userId, page = 1, limit = 6) => {

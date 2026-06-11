@@ -33,6 +33,7 @@ const router = express.Router();
 import { attachCart } from "../middleware/cartMiddleware.js";
 import { moveToCart, updateWishlist, wishlistPageLoad ,removeWishlistItem} from "../controller/wishlistController.js";
 import { cartAdd } from "../controller/cartController.js";
+import { walletPageLoad } from "../controller/walletController.js";
 
 
 
@@ -99,7 +100,7 @@ router.post('/wishlist/remove',isUserAuthenticated, removeWishlistItem);
 
 
 
-
+router.get('/wallet',isUserAuthenticated,walletPageLoad)
 
 
 
