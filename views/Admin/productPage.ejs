@@ -5,6 +5,8 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>LUXE Products Management</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -30,18 +32,6 @@
   .luxe-gradient { background: linear-gradient(135deg, #316bf3 0%, #90abff 100%); }
   .search-btn { transition: all 0.15s ease; }
   .search-btn:active { transform: scale(0.93); }
-  .logout-btn {
-    display: flex; align-items: center; gap: 10px; padding: 10px 18px;
-    border-radius: 8px; border: none;
-    background: linear-gradient(135deg, #ff4d4d, #cc0000);
-    color: #fff; font-weight: 600; font-size: 14px; cursor: pointer;
-    transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255,0,0,0.2);
-  }
-  .logout-btn:hover {
-    background: linear-gradient(135deg, #ff1a1a, #990000);
-    transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,0,0,0.3);
-  }
-  .logout-btn:active { transform: scale(0.96); }
 </style>
 </head>
 <body class="bg-background text-on-background font-body antialiased min-h-screen">
@@ -103,13 +93,9 @@
     <div class="flex items-center gap-6">
       <h2 class="font-['Manrope'] font-semibold text-lg text-[#90abff]">Products</h2>
 
-      <!-- Search Form — submits to BE, zero JS involved -->
       <form action="/admin/products" method="GET" class="flex items-center gap-0">
-
-        <!-- Preserve sort across searches -->
         <input type="hidden" name="sort" value="<%= sort || 'latest' %>" />
         <input type="hidden" name="page" value="1" />
-
         <div class="relative flex items-center">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm pointer-events-none">search</span>
           <input
@@ -120,7 +106,6 @@
             value="<%= searchQuery || '' %>"
           />
         </div>
-
         <button
           type="submit"
           class="search-btn flex items-center justify-center gap-1.5 h-[38px] px-4 bg-primary/15 border-b-2 border-transparent hover:bg-primary/25 hover:border-primary text-primary font-['Inter'] font-bold text-xs transition-colors rounded-r-sm"
@@ -129,10 +114,8 @@
           <span class="material-symbols-outlined text-sm">travel_explore</span>
           Search
         </button>
-
       </form>
 
-      <!-- Reset — simple link, clears search, keeps sort -->
       <% if (searchQuery) { %>
         <a href="/admin/products?sort=<%= sort || 'latest' %>&page=1"
           class="search-btn flex items-center justify-center gap-1.5 h-[38px] px-3 bg-error/10 border border-error/20 hover:bg-error/20 hover:border-error/40 text-error font-['Inter'] font-bold text-xs rounded-sm">
@@ -140,7 +123,6 @@
           Reset
         </a>
       <% } %>
-
     </div>
 
     <div class="flex items-center gap-4">
@@ -165,12 +147,9 @@
 
     <!-- Filter Controls -->
     <div class="flex items-center justify-between mb-8">
-
-      <!-- Sort Form — preserves search across sort changes -->
       <form action="/admin/products" method="GET" class="flex gap-3">
         <input type="hidden" name="search" value="<%= searchQuery || '' %>" />
         <input type="hidden" name="page" value="1" />
-
         <div class="bg-surface-container-high rounded-lg px-4 py-2 flex items-center gap-3 border border-outline-variant/5">
           <span class="material-symbols-outlined text-on-surface-variant text-sm">sort</span>
           <select
@@ -195,10 +174,11 @@
       <table class="w-full border-collapse">
         <thead>
           <tr class="bg-surface-container-low/50">
-            <th class="px-8 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Product</th>
-            <th class="px-8 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Category</th>
-            <th class="px-8 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Status</th>
-            <th class="px-8 py-5 text-right text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Actions</th>
+            <th class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Product</th>
+            <th class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Category</th>
+            <th class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Offer</th>
+            <th class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Status</th>
+            <th class="px-6 py-5 text-right text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-outline-variant/10">
@@ -207,72 +187,91 @@
             <% data.forEach(function(product) { %>
 
               <tr class="group hover:bg-surface-bright/50 transition-colors">
-                
 
                 <!-- Product Name + Image -->
-                <td class="px-8 py-5">
+                <td class="px-6 py-4">
                   <div class="flex items-center gap-4">
-                   
-                      <div class="w-12 h-12 rounded-lg luxe-gradient flex items-center justify-center text-white font-['Manrope'] font-extrabold text-lg flex-shrink-0">
-                        <img
-                        src = "/uploads/<%=product.variants[0].images[0]%>"
+                    <div class="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 luxe-gradient">
+                      <img
+                        src="/uploads/<%= product.variants[0].images[0] %>"
                         alt="<%= product.name %>"
-                        class="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                        class="w-11 h-11 object-cover"
                       />
-                      </div>
-                    
-                    <div>
-                      <p class="text-sm font-bold text-white mb-0.5"><%= product.name %></p>
                     </div>
+                    <p class="text-sm font-bold text-white leading-snug"><%= product.name %></p>
                   </div>
                 </td>
 
                 <!-- Category -->
-                <td class="px-8 py-5">
+                <td class="px-6 py-4">
                   <span class="text-[10px] font-bold text-primary uppercase tracking-widest px-2.5 py-1 bg-primary/10 rounded">
                     <%= product.categoryId ? product.categoryId.categoryName : 'No Category' %>
                   </span>
                 </td>
 
-         <!-- Status -->
+                <!-- Offer Dropdown -->
+                <td class="px-6 py-4">
+                  <% if (offers && offers.length > 0) { %>
+                    <select
+                      onchange="updateProductOffer('<%= product._id %>', this)"
+                      class="bg-surface-container-low border border-white/10 text-on-surface text-xs py-1.5 px-2.5 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer w-48"
+                    >
+                      <option value="">No Offer</option>
+                      <% offers.forEach(function(offer) { %>
+                        <%
+                          const isSelected = product.offer && product.offer._id.toString() === offer._id.toString();
+                          const dispVal = offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% OFF` : `₹${offer.discountValue} FLAT`;
+                        %>
+                        <option
+                          value="<%= offer._id %>"
+                          <%= isSelected ? 'selected' : '' %>
+                          data-discount-type="<%= offer.discountType %>"
+                          data-discount-value="<%= offer.discountValue %>"
+                          data-max-discount="<%= offer.maxDiscount %>"
+                        >
+                          <%= offer.name %> (<%= dispVal %>)
+                        </option>
+                      <% }) %>
+                    </select>
+                  <% } else { %>
+                    <span class="text-xs text-on-surface-variant italic">No offers available</span>
+                  <% } %>
+                </td>
 
+                <!-- Status -->
+                <td class="px-6 py-4">
+                  <%
+                    const hasVariants = product.variants && product.variants.length > 0;
+                    const isEffectivelyActive = hasVariants &&
+                      product.variants.some(function(v) { return v.isActive === true; });
+                  %>
+                  <% if (isEffectivelyActive) { %>
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                      Active
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-error/10 text-error">
+                      <span class="w-1.5 h-1.5 rounded-full bg-error inline-block"></span>
+                      Inactive
+                    </span>
+                  <% } %>
+                </td>
 
-         <td class="px-8 py-5">
-  <%
-    const hasVariants = product.variants && product.variants.length > 0;
-
-    const isEffectivelyActive = hasVariants &&
-      product.variants.some(function(v) { return v.isActive === true; });
-  %>
-
-  <% if (isEffectivelyActive) { %>
-    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400">
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
-      Active
-    </span>
-  <% } else { %>
-    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-error/10 text-error">
-      <span class="w-1.5 h-1.5 rounded-full bg-error inline-block"></span>
-      Inactive
-    </span>
-  <% } %>
-</td>
                 <!-- Actions -->
-                <td class="px-8 py-5 text-right">
-                  <div class="flex items-center justify-end gap-3">
-                    <a href="/admin/editProducts/<%= product._id %>">
-                      <button class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-colors" title="Edit">
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                      </button>
-                    </a>
-                  </div>
+                <td class="px-6 py-4 text-right">
+                  <a href="/admin/editProducts/<%= product._id %>">
+                    <button class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-colors" title="Edit">
+                      <span class="material-symbols-outlined text-lg">edit</span>
+                    </button>
+                  </a>
                 </td>
 
               </tr>
             <% }) %>
           <% } else { %>
             <tr>
-              <td colspan="4" class="px-8 py-16 text-center">
+              <td colspan="5" class="px-8 py-16 text-center">
                 <div class="flex flex-col items-center gap-3">
                   <span class="material-symbols-outlined text-4xl text-on-surface-variant">inventory_2</span>
                   <p class="text-sm font-bold text-on-surface-variant">No products found</p>
@@ -291,11 +290,10 @@
         </tbody>
       </table>
 
-      <!-- Pagination — pure BE links, no JS -->
+      <!-- Pagination -->
       <% if (totalPage > 1) { %>
         <div class="px-8 py-6 bg-surface-container-low/30 flex items-center justify-between">
 
-          <!-- Previous -->
           <% if (currentPage > 1) { %>
             <a href="/admin/products?page=<%= currentPage - 1 %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
               <button class="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
@@ -308,7 +306,6 @@
             </button>
           <% } %>
 
-          <!-- Page Numbers -->
           <div class="flex items-center gap-2">
             <% for (let i = 1; i <= totalPage; i++) { %>
               <a href="/admin/products?page=<%= i %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
@@ -319,7 +316,6 @@
             <% } %>
           </div>
 
-          <!-- Next -->
           <% if (currentPage < totalPage) { %>
             <a href="/admin/products?page=<%= currentPage + 1 %>&search=<%= searchQuery || '' %>&sort=<%= sort || 'latest' %>">
               <button class="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
@@ -340,7 +336,44 @@
 
 </main>
 
-<!-- NO <script> block — everything is server-driven -->
+<script>
+  async function updateProductOffer(productId, selectEl) {
+  const offerId = selectEl.value;
 
+  try {
+    const res = await fetch("/admin/product-offer-add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, offerId })
+    });
+
+    const result = await res.json();
+    if (!result.success) {
+      Swal.fire({
+        toast: true, icon: 'error',
+        title: result.message || 'Failed to update offer',
+        position: 'top-right', showConfirmButton: false, timer: 3000
+      });
+      return;
+    }
+
+    Swal.fire({
+      toast: true, icon: 'success',
+      title: offerId ? 'Offer applied successfully' : 'Offer removed successfully',  
+      position: 'top-right', showConfirmButton: false, timer: 2000
+    });
+
+  } catch (error) {
+    console.error(error);
+    Swal.fire({
+      toast: true, icon: 'error',
+      title: 'Server connection error',
+      position: 'top-right', showConfirmButton: false, timer: 3000
+    });
+  }
+}
+
+  
+</script>
 </body>
 </html>

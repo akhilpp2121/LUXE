@@ -162,51 +162,89 @@
                 View all <span class="material-symbols-outlined text-sm">arrow_forward</span>
             </a>
         </div>
+<!-- product card -->
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <% product.forEach(p => { %>
-            <div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm group">
+    <% if (product && product.length > 0) { %>
+        <% product.forEach(p => { %>
+        <div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm group">
 
-                <!-- Image -->
-                <div class="h-48 md:h-56 overflow-hidden relative">
-                    <a href="/product-details/<%= p.productId._id %>?size=<%= p.size %>&color=<%= p.color %>">
-                        <img
-                            src="/uploads/<%= p.images[0] %>"
-                            alt="<%= p.productId.name %>"
-                            loading="lazy"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                    </a>
-                </div>
-
-                <!-- Info -->
-                <div class="p-3">
-                    <h3 class="font-semibold text-sm mb-1 truncate"><%= p.productId.name %></h3>
-                    <p class="text-xs text-slate-500 mb-1 truncate"><%= p.size %> | <%= p.color %></p>
-
-                    <div class="flex items-center gap-2 mb-1">
-                        <% if (p.save > 0) { %>
-                            <p class="text-sm font-bold">₹<%= p.discount %></p>
-                            <p class="text-xs text-slate-400 line-through">₹<%= p.price %></p>
-                        <% } else { %>
-                            <p class="text-sm font-bold">₹<%= p.price %></p>
-                        <% } %>
-                    </div>
-
-                    <% if (p.save > 0) { %>
-                        <p class="text-green-600 text-xs mb-2">Save ₹<%= p.save %></p>
-                    <% } %>
-
-                    <button
-                        onclick="addToCart('<%= p._id %>')"
-                        class="w-full py-2 px-3 rounded-lg font-medium text-xs bg-black text-white hover:bg-gray-800 flex items-center justify-center gap-1">
-                        <span class="material-symbols-outlined" style="font-size:14px">shopping_bag</span>
-                        Add to Cart
-                    </button>
-                </div>
-
+            <!-- Image -->
+            <div class="h-48 md:h-56 overflow-hidden relative">
+                <a href="/product-details/<%= p.productId._id %>?size=<%= p.size %>&color=<%= p.color %>">
+                    <img
+                        src="/uploads/<%= p.images[0] %>"
+                        alt="<%= p.productId.name %>"
+                        loading="lazy"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                </a>
             </div>
-            <% }) %>
+
+            <!-- Info -->
+
+            <!-- Info -->
+<div class="p-3 flex flex-col gap-1">
+
+    <!-- Product Name -->
+    <h3 class="font-semibold text-sm truncate"><%= p.productId.name %></h3>
+
+    <!-- Size & Color -->
+    <p class="text-xs text-slate-500 truncate">
+        <span class="font-medium"><%= p.size %></span>
+        <span class="mx-1 text-slate-400">|</span>
+        <span class="font-medium"><%= p.color %></span>
+    </p>
+
+    <!-- Price Row -->
+    <div class="flex items-center gap-2 mt-1">
+        <% if (p.discount) { %>
+            <!-- Offer applied -->
+            <span class="text-sm font-bold">₹<%= p.discount.toLocaleString('en-IN') %></span>
+            <span class="text-xs text-slate-400 line-through">₹<%= p.price.toLocaleString('en-IN') %></span>
+        <% } else { %>
+            <!-- No offer -->
+            <span class="text-sm font-bold">₹<%= p.price.toLocaleString('en-IN') %></span>
+        <% } %>
+    </div>
+
+    <!-- Savings Badge -->
+    <% if (p.save > 0) { %>
+        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-green-600 bg-green-50 dark:bg-green-500/10 dark:text-green-400 px-2 py-0.5 rounded-full w-fit">
+            <span class="material-symbols-outlined" style="font-size:12px">local_offer</span>
+            Save ₹<%= p.save.toLocaleString('en-IN') %>
+        </span>
+    <% } %>
+
+    <!-- Add to Cart -->
+    <button
+        onclick="addToCart('<%= p._id %>')"
+        class="mt-2 w-full py-2 px-3 rounded-lg font-medium text-xs bg-black text-white hover:bg-gray-800 flex items-center justify-center gap-1 transition-colors">
+        <span class="material-symbols-outlined" style="font-size:14px">shopping_bag</span>
+        Add to Cart
+    </button>
+
+</div>
+           
         </div>
+        <% }) %>
+    <% } else { %>
+        <div class="col-span-4 py-16 text-center">
+            <span class="material-symbols-outlined text-4xl text-slate-400 mb-3 block">search_off</span>
+            <p class="text-slate-500 font-semibold">
+                <% if (searchQuery) { %>
+                    No products found for "<%= searchQuery %>"
+                <% } else { %>
+                    No products available right now
+                <% } %>
+            </p>
+            <% if (searchQuery) { %>
+                <a href="/homepage" class="text-primary text-sm font-bold hover:underline mt-2 inline-block">Clear search</a>
+            <% } %>
+        </div>
+    <% } %>
+</div>
+
+       
     </section>
 
 </main>

@@ -88,7 +88,7 @@
     <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] pointer-events-none z-0"></div>
     <div class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-tertiary/10 blur-[120px] pointer-events-none z-0"></div>
 
-    <!-- ── Sidebar ───────────────────────────────────────────────────── -->
+    <!-- Sidebar -->
     <aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#091328]/90 backdrop-blur-xl border-r border-white/5 sidebar-scroll flex flex-col gap-2 py-8 z-50">
         <div class="px-8 mb-10">
             <h1 class="font-['Outfit'] text-3xl font-black text-white tracking-tight drop-shadow-md">Luxe Admin</h1>
@@ -119,17 +119,16 @@
         </nav>
     </aside>
 
-    <!-- ── Main Content ──────────────────────────────────────────────── -->
+    <!-- Main Content -->
     <main class="ml-64 min-h-screen pb-20 relative z-10">
 
-        <!-- ── Top Header with Form ──────────────────────────────────── -->
+        <!-- Top Header with Form -->
         <header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 glass-panel px-10 py-4">
             <form method="GET" action="/admin/category" class="flex items-center justify-between gap-3 w-full">
 
                 <div class="flex items-center gap-3 flex-1 min-w-0">
                     <h2 class="font-['Outfit'] text-2xl font-bold text-white tracking-wide flex-shrink-0">Categories</h2>
 
-                    <!-- Search -->
                     <div class="relative flex-1 max-w-sm group">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl transition-colors group-focus-within:text-primary">search</span>
                         <input
@@ -144,7 +143,6 @@
 
                 <div class="flex items-center gap-3 flex-shrink-0">
 
-                    <!-- Status Filter -->
                     <select name="status"
                         class="bg-surface-container-low border border-white/10 text-on-surface-variant text-sm py-2.5 px-3 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer">
                         <option value="" <%- status === "" ? "selected" : "" %>>All Status</option>
@@ -152,31 +150,26 @@
                         <option value="false" <%- status === "false" ? "selected" : "" %>>Inactive</option>
                     </select>
 
-                    <!-- Sort Filter -->
                     <select name="sort"
                         class="bg-surface-container-low border border-white/10 text-on-surface-variant text-sm py-2.5 px-3 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer">
                         <option value="latest" <%- sort === "latest" ? "selected" : "" %>>Latest</option>
                         <option value="oldest" <%- sort === "oldest" ? "selected" : "" %>>Oldest</option>
                     </select>
 
-                    <!-- Reset page to 1 on new filter -->
                     <input type="hidden" name="page" value="1" />
 
-                    <!-- Apply / Submit -->
                     <button type="submit"
                         class="bg-surface-container-high border border-white/10 hover:bg-surface-bright text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
                         Apply
                     </button>
 
-                    <!-- Clear Filters -->
                     <a href="/admin/category"
                         class="bg-error/10 hover:bg-error/20 border border-error/30 text-error px-4 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 transition-all">
                         <span class="material-symbols-outlined text-[16px]">restart_alt</span>
                         <span class="text-sm">Clear</span>
                     </a>
 
-                    <!-- Add Category -->
                     <a href="/admin/addCategory"
                         class="primary-gradient text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary-dim/30 whitespace-nowrap">
                         <span class="material-symbols-outlined text-[18px]">add_circle</span>
@@ -187,7 +180,7 @@
             </form>
         </header>
 
-        <!-- ── Content Body ──────────────────────────────────────────── -->
+        <!-- Content Body -->
         <section class="mt-28 px-10">
 
             <% if (error) { %>
@@ -203,6 +196,7 @@
                             <tr class="bg-surface-container-low/50 border-b border-white/5">
                                 <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">Category Name</th>
                                 <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">Description</th>
+                                <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">Offer</th>
                                 <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em] text-center">Status</th>
                                 <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em] text-right">Actions</th>
                             </tr>
@@ -211,7 +205,7 @@
 
                             <% if (data.length === 0) { %>
                             <tr>
-                                <td colspan="4" class="px-8 py-16 text-center">
+                                <td colspan="5" class="px-8 py-16 text-center">
                                     <div class="flex flex-col items-center gap-3">
                                         <span class="material-symbols-outlined text-5xl text-on-surface-variant/30">category</span>
                                         <p class="text-on-surface-variant font-semibold">No categories found</p>
@@ -226,7 +220,7 @@
                             <% data.forEach(cat => { %>
                             <tr class="hover:bg-surface-bright/40 transition-colors group" id="row-<%= cat._id %>">
 
-                                <!-- Name -->
+                                <!-- Category Name -->
                                 <td class="px-8 py-5">
                                     <div class="flex items-center gap-4">
                                         <div class="w-9 h-9 rounded-lg bg-primary-dim/20 border border-primary/20 flex items-center justify-center text-primary font-bold font-['Outfit'] text-sm flex-shrink-0">
@@ -241,6 +235,32 @@
                                 <!-- Description -->
                                 <td class="px-8 py-5 text-on-surface-variant text-sm max-w-xs">
                                     <p class="truncate"><%= cat.description %></p>
+                                </td>
+
+                                <!-- Offer Dropdown -->
+                                <td class="px-8 py-5">
+                                    <% if (offers && offers.length > 0) { %>
+                                        <select
+                                            onchange="updateCategoryOffer('<%= cat._id %>', this)"
+                                            class="bg-surface-container-low border border-white/10 text-on-surface text-xs py-1.5 px-2.5 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer w-48"
+                                        >
+                                            <option value="">No Offer</option>
+                                            <% offers.forEach(function(offer) { %>
+                                                <%
+                                                    const isSelected = cat.offer && cat.offer._id.toString() === offer._id.toString();
+                                                    const dispVal = offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% OFF` : `₹${offer.discountValue} FLAT`;
+                                                %>
+                                                <option
+                                                    value="<%= offer._id %>"
+                                                    <%= isSelected ? 'selected' : '' %>
+                                                >
+                                                    <%= offer.name %> (<%= dispVal %>)
+                                                </option>
+                                            <% }) %>
+                                        </select>
+                                    <% } else { %>
+                                        <span class="text-xs text-on-surface-variant italic">No offers available</span>
+                                    <% } %>
                                 </td>
 
                                 <!-- Status Badge -->
@@ -261,18 +281,12 @@
                                 <!-- Actions -->
                                 <td class="px-8 py-5">
                                     <div class="flex items-center justify-end gap-2">
-
-                                        <!-- Edit -->
                                         <a href="/admin/editCategory/<%= cat._id %>" class="tooltip-wrap">
                                             <button class="p-2.5 rounded-xl bg-surface-container-low border border-white/5 hover:bg-primary-dim/20 hover:border-primary/30 text-on-surface-variant hover:text-primary transition-all">
                                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                                             </button>
                                             <span class="tooltip-text">Edit</span>
                                         </a>
-
-                                       
-                                        
-
                                     </div>
                                 </td>
 
@@ -283,7 +297,7 @@
                     </table>
                 </div>
 
-                <!-- ── Pagination ─────────────────────────────────────── -->
+                <!-- Pagination -->
                 <div class="px-8 py-5 bg-surface-container-low/30 border-t border-white/5 flex items-center justify-between">
                     <p class="text-on-surface-variant text-xs font-semibold tracking-wide">
                         Showing
@@ -297,7 +311,6 @@
 
                     <div class="flex items-center gap-1.5">
 
-                        <!-- Prev -->
                         <% if (currentPage > 1) { %>
                         <a href="?page=<%= currentPage - 1 %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
                             <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container hover:bg-surface-bright text-on-surface-variant hover:text-white transition-all">
@@ -310,7 +323,6 @@
                         </button>
                         <% } %>
 
-                        <!-- Page numbers -->
                         <div class="flex items-center gap-1">
                             <% for (let i = 1; i <= totalPage; i++) { %>
                             <a href="?page=<%= i %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
@@ -324,7 +336,6 @@
                             <% } %>
                         </div>
 
-                        <!-- Next -->
                         <% if (currentPage < totalPage) { %>
                         <a href="?page=<%= currentPage + 1 %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
                             <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container hover:bg-surface-bright text-on-surface-variant hover:text-white transition-all">
@@ -343,5 +354,42 @@
         </section>
     </main>
 
+<script>
+async function updateCategoryOffer(categoryId, selectEl) {
+  const offerId = selectEl.value;
+
+  try {
+    const res = await fetch("/admin/category-offer-add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ categoryId, offerId })
+    });
+
+    const result = await res.json();
+    if (!result.success) {
+      Swal.fire({
+        toast: true, icon: 'error',
+        title: result.message || 'Failed to update category offer',
+        position: 'top-right', showConfirmButton: false, timer: 3000
+      });
+      return;
+    }
+
+    Swal.fire({
+      toast: true, icon: 'success',
+      title: offerId ? 'Offer applied successfully' : 'Offer removed successfully',  // ✅
+      position: 'top-right', showConfirmButton: false, timer: 2000
+    });
+
+  } catch (error) {
+    console.error(error);
+    Swal.fire({
+      toast: true, icon: 'error',
+      title: 'Server connection error',
+      position: 'top-right', showConfirmButton: false, timer: 3000
+    });
+  }
+}
+</script>
 </body>
 </html>

@@ -25,7 +25,8 @@ export const userLoginLoad = (req, res) => {
 
 export const userSignUpLoad = (req, res) => {
   if (req.session.user) return res.redirect("/homePage");
-  return res.render("Users/signUp", { message: null });
+  const referralToken = req.session.referralToken || "";
+  return res.render("Users/signUp", { message: null, referralToken });
 };
 
 export const userForgotPasswordLoad = (req, res) => {
@@ -41,6 +42,7 @@ export const otpPageLoad = (req, res) => {
   if (!email) return res.redirect("/login");
   return res.render("Users/otpPage", { email });
 };
+
 
 
 
@@ -73,25 +75,23 @@ export const homeLoad = async (req, res) => {
 
   } catch (error) {
     console.error("Home page load error:", error);
-    return res.redirect("/login"); 
+    return res.redirect("/login");
   }
 };
 
 export const registerController = async (req, res) => {
-  
-  
   try {
-    const { fullName, email, phoneNumber, password } = req.body;
-    const result = await registerPreCheckService(req, fullName, email, password, phoneNumber);
+    const { fullName, email, phoneNumber, password, referralCode } = req.body;
+    const result = await registerPreCheckService(req, fullName, email, password, phoneNumber, referralCode);
 
     if (!result.success) {
-      return res.render("Users/signUp", { message: result.message });
+      return res.render("Users/signUp", { message: result.message, referralToken: referralCode || "" });
     }
 
     return res.redirect(result.redirect);
   } catch (err) {
     console.error("registerController error:", err);
-    return res.render("Users/signUp", { message: "Server error. Please try again." });
+    return res.render("Users/signUp", { message: "Server error. Please try again.", referralToken: req.body.referralCode || "" });
   }
 };
 

@@ -4,7 +4,7 @@
 
 
 
-import express from "express";
+import express, { Router } from "express";
 import { avatarUpload } from "../config/multer.js";
 
 
@@ -33,6 +33,8 @@ const router = express.Router();
 import { attachCart } from "../middleware/cartMiddleware.js";
 import { moveToCart, updateWishlist, wishlistPageLoad ,removeWishlistItem} from "../controller/wishlistController.js";
 import { cartAdd } from "../controller/cartController.js";
+import { walletPageLoad } from "../controller/walletController.js";
+import { referalPageLoad,referalLinkGenerator } from "../controller/userReferalController.js";
 
 
 
@@ -41,7 +43,9 @@ import { cartAdd } from "../controller/cartController.js";
 router.get("/", userLandingLoad);
 router.get("/login", userLoginLoad);
 router.get("/signUp", userSignUpLoad);
+router.get("/signup", userSignUpLoad);
 router.post("/signUp", registerController);
+router.post("/signup", registerController);
 router.post("/login", loginController);
 
 
@@ -99,7 +103,9 @@ router.post('/wishlist/remove',isUserAuthenticated, removeWishlistItem);
 
 
 
-
+router.get('/wallet',isUserAuthenticated,walletPageLoad);
+router.get('/referal',isUserAuthenticated,referalPageLoad);
+router.post('/profile/referal-link',isUserAuthenticated,referalLinkGenerator);
 
 
 

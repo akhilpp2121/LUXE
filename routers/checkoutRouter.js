@@ -1,21 +1,17 @@
 import express from "express";
-import { checkoutPageLoad ,placeOrderController} from "../controller/checkoutController.js";
+import { applyCouponController, checkoutPageLoad, placeOrderController, cancellPageLoad } from "../controller/checkoutController.js";
 import { isUserAuthenticated } from "../middleware/user.js";
 import { orderSuccessPage } from "../controller/orderController.js";
-const router=express.Router();
+import { createOrder, captureOrder } from "../utilites/paypal.js";
 
-router.get('/',isUserAuthenticated,checkoutPageLoad);
-router.post('/place-order',isUserAuthenticated,placeOrderController);
+const router = express.Router();
 
-router.get('/order-success/:orderCode',isUserAuthenticated, orderSuccessPage);
+router.get('/', isUserAuthenticated, checkoutPageLoad);
+router.post('/place-order', isUserAuthenticated, placeOrderController);
+router.post('/paypal/create-order', isUserAuthenticated, createOrder);   
+router.post('/paypal/capture-order', isUserAuthenticated, captureOrder); 
+router.get('/order-success/:orderCode', isUserAuthenticated, orderSuccessPage);
+router.get('/cancel',isUserAuthenticated,cancellPageLoad)
+router.post('/apply-coupon', isUserAuthenticated, applyCouponController);
 
-
-
-
-
-
-
-
-
-
-export default router
+export default router;

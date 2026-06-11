@@ -35,6 +35,7 @@ let variantSchema = new schema({
     type: Boolean,
     required: true
   },
+    manualDiscount: { type: Number },
   discount: {
     type: Number,
     required: true,

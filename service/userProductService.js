@@ -3,6 +3,96 @@ import Category from "../model/categoryModel.js"
 import Product from "../model/productsModel.js"
 
 
+// export const getHomePageData = async (searchQuery = '') => {
+//   try {
+//     let variantFilter = { isActive: true, stock: { $gt: 0 } };
+
+//     if (searchQuery) {
+//       const matchingProducts = await Product.find({
+//         isActive: true,
+//         name: { $regex: searchQuery, $options: 'i' }
+//       }).select('_id');
+
+//       const matchingProductIds = matchingProducts.map(p => p._id);
+//       if (matchingProductIds.length === 0) return { success: true, products: [] };
+
+//       variantFilter.productId = { $in: matchingProductIds };
+//     }
+
+//     const all = await Variant.find(variantFilter)
+//       .populate({
+//         path: "productId",
+//         populate: [
+//           { path: "categoryId", populate: { path: "offer" } }, // category offer
+//           { path: "offer" }                                     // product offer
+//         ]
+//       })
+//       .lean();
+
+//     const seenProducts = new Set();
+//     const unique = [];
+
+//     for (const v of all) {
+//       if (unique.length >= 8) break;
+//       if (!v.productId) continue;
+//       if (!v.productId.isActive) continue;
+//       if (!v.productId.categoryId) continue;
+//       if (!v.productId.categoryId.isActive) continue;
+
+//       const pid = v.productId._id.toString();
+//       if (seenProducts.has(pid)) continue;
+//       seenProducts.add(pid);
+
+//       const originalPrice = v.price;
+
+//       // Resolve best offer live
+//       const productOffer  = v.productId.offer || null;
+//       const categoryOffer = v.productId.categoryId?.offer || null;
+
+//       const getDiscount = (price, offer) => {
+//         if (!offer || !offer.isActive) return 0;
+//         if (new Date(offer.endDate) < new Date()) return 0;
+
+//         let savings = 0;
+//         if (offer.discountType === "PERCENTAGE") {
+//           savings = price * (offer.discountValue / 100);
+//           if (offer.maxDiscount && savings > offer.maxDiscount) {
+//             savings = offer.maxDiscount;
+//           }
+//         } else if (offer.discountType === "FLAT") {
+//           savings = offer.discountValue;
+//         }
+//         return Math.min(savings, price);
+//       };
+
+//       const productSavings  = getDiscount(originalPrice, productOffer);
+//       const categorySavings = getDiscount(originalPrice, categoryOffer);
+//       const bestSavings     = Math.max(productSavings, categorySavings);
+
+//       const discountedPrice = bestSavings > 0
+//         ? Math.round(originalPrice - bestSavings)
+//         : null;
+
+//       unique.push({
+//         _id:       v._id,
+//         productId: v.productId,
+//         size:      v.size,
+//         color:     v.color,
+//         images:    v.images,
+//         price:     originalPrice,
+//         discount:  discountedPrice,
+//         save:      bestSavings > 0 ? Math.round(bestSavings) : 0,
+//       });
+//     }
+
+//     return { success: true, products: unique };
+
+//   } catch (error) {
+//     console.error("getHomePageData error:", error);
+//     return { success: false, products: [] };
+//   }
+// };
+
 export const getHomePageData = async (searchQuery = '') => {
   try {
     let variantFilter = { isActive: true, stock: { $gt: 0 } };
@@ -14,18 +104,20 @@ export const getHomePageData = async (searchQuery = '') => {
       }).select('_id');
 
       const matchingProductIds = matchingProducts.map(p => p._id);
-
-      if (matchingProductIds.length === 0) {
-        return { success: true, products: [] };
-      }
+      if (matchingProductIds.length === 0) return { success: true, products: [] };
 
       variantFilter.productId = { $in: matchingProductIds };
     }
 
-    const all = await Variant.find(variantFilter).populate({
-      path: "productId",
-      populate: { path: "categoryId" }
-    }).lean();
+    const all = await Variant.find(variantFilter)
+      .populate({
+        path: "productId",
+        populate: [
+          { path: "categoryId", populate: { path: "offer" } },
+          { path: "offer" }
+        ]
+      })
+      .lean();
 
     const seenProducts = new Set();
     const unique = [];
@@ -38,13 +130,57 @@ export const getHomePageData = async (searchQuery = '') => {
       if (!v.productId.categoryId.isActive) continue;
 
       const pid = v.productId._id.toString();
-      if (!seenProducts.has(pid)) {
-        seenProducts.add(pid);
-        unique.push({
-          ...v,
-          save: v.price - v.discount > 0 ? v.price - v.discount : 0
-        });
+      if (seenProducts.has(pid)) continue;
+      seenProducts.add(pid);
+
+      const originalPrice = v.price;
+      const productOffer  = v.productId.offer || null;
+      const categoryOffer = v.productId.categoryId?.offer || null;
+
+      const getDiscount = (price, offer) => {
+        if (!offer || !offer.isActive) return 0;
+        if (new Date(offer.endDate) < new Date()) return 0;
+
+        let savings = 0;
+        if (offer.discountType === "PERCENTAGE") {
+          savings = price * (offer.discountValue / 100);
+          if (offer.maxDiscount && savings > offer.maxDiscount) {
+            savings = offer.maxDiscount;
+          }
+        } else if (offer.discountType === "FLAT") {
+          savings = offer.discountValue;
+        }
+        return Math.min(savings, price);
+      };
+
+      const productSavings  = getDiscount(originalPrice, productOffer);
+      const categorySavings = getDiscount(originalPrice, categoryOffer);
+      const bestSavings     = Math.max(productSavings, categorySavings);
+
+      let discountedPrice = null;
+      let savings = 0;
+
+      if (bestSavings > 0) {
+        // ✅ Offer applied — use offer price
+        discountedPrice = Math.round(originalPrice - bestSavings);
+        savings = Math.round(bestSavings);
+      } else if (v.manualDiscount && v.manualDiscount < originalPrice) {
+        // ✅ No offer — show manual discount from creation time
+        discountedPrice = v.manualDiscount;
+        savings = Math.round(originalPrice - v.manualDiscount);
       }
+      // else — no discount at all, show original price only
+
+      unique.push({
+        _id:       v._id,
+        productId: v.productId,
+        size:      v.size,
+        color:     v.color,
+        images:    v.images,
+        price:     originalPrice,
+        discount:  discountedPrice,
+        save:      savings,
+      });
     }
 
     return { success: true, products: unique };
@@ -54,6 +190,7 @@ export const getHomePageData = async (searchQuery = '') => {
     return { success: false, products: [] };
   }
 };
+
 
 export const getFilteredProducts = async (query) => {
   const search   = (query.search || "").trim();

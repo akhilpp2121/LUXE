@@ -42,52 +42,6 @@ export const getViewOrder = async (req, res) => {
   }
 };
 
-// export const updateOrderStatus = async (req, res) => {
-//   try {
-    
-//     const result = await updateOrderStatusService(req.params.id, req.body.deliveryStatus);
-//     console.log(result);
-    
-//     res.status(result.success ? 200 : 400).json(result);
-//   } catch (error) {
-//     console.error("updateOrderStatus error:", error);
-//     res.status(500).json({ success: false, message: "Server Error" });
-//   }
-// };
-
-// export const updateOrderItemStatus = async (req, res) => {
-//   try {
-//     const { id, variantId } = req.params;
-//     const result = await updateOrderItemStatusService(id, variantId, req.body.deliveryStatus);
-//     return res.status(result.success ? 200 : 400).json(result);
-//   } catch (error) {
-//     console.error("updateOrderItemStatus error:", error);
-//     return res.status(500).json({ success: false, message: "Server Error" });
-//   }
-// };
-
-
-
-// export const updateReturnRequest = async (req, res) => {
-//   try {
-//     const { id } = req.params;       // orderId
-//     const { action, variantId ,adminRemark} = req.body; 
-        
-        
-
-//     const result = await updateReturnRequestLogic(id, action, variantId,adminRemark);
-
-//     if (!result.success) {
-//       return res.status(400).json({ success: false, message: result.message });
-//     }
-
-//     return res.status(200).json({ success: true, message: result.message });
-
-//   } catch (e) {
-//     console.error("updateReturnRequest error:", e);
-//     return res.status(500).json({ success: false, message: "Server error" });
-//   }
-// };
 
 
 
@@ -103,7 +57,6 @@ export const updateAllItemsStatus = async (req, res) => {
   }
 };
 
-// PATCH /api/orders/:id/items/:variantId/status
 export const updateOrderItemStatus = async (req, res) => {
   try {
     const { id, variantId } = req.params;
@@ -115,15 +68,47 @@ export const updateOrderItemStatus = async (req, res) => {
   }
 };
 
-// PATCH /api/orders/:id/return
 export const updateReturnRequest = async (req, res) => {
   try {
     const { id } = req.params;
     const { action, variantId, adminRemark } = req.body;
-    const result = await updateReturnRequestService(id, action, variantId, adminRemark);
+
+    //  Basic validation
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    if (!action) {
+      return res.status(400).json({
+        success: false,
+        message: "Action is required",
+      });
+    }
+
+    //  Normalize values
+    const normalizedVariant =
+      !variantId || variantId === "ALL" ? "ALL" : variantId;
+
+    const remark = adminRemark?.trim() || "";
+
+    // Call service
+    const result = await updateReturnRequestService(
+      id,
+      action,
+      normalizedVariant,
+      remark
+    );
+
     return res.status(result.success ? 200 : 400).json(result);
+
   } catch (error) {
     console.error("updateReturnRequest error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };

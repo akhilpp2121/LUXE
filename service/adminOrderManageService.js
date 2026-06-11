@@ -2,6 +2,7 @@ import { returnRequest } from "../controller/orderController.js";
 import orderModel from "../model/orderModel.js";
 import { userModel } from "../model/usermodel.js";
 import variantModel from "../model/variantModel.js";
+import { creditWallet } from "../service/walletService.js";
 import mongoose from "mongoose";
 
 
@@ -98,378 +99,6 @@ export const getOrderDetailsService = async (orderId) => {
   return order ? { success: true, order } : { success: false, message: "Order not found" };
 };
 
-// const VALID_STATUSES = ["pending", "shipped", "out_for_delivery", "delivered"];
-// const VALID_ITEM_STATUSES = ["pending", "shipped", "out_for_delivery", "delivered"];
-
-// const ORDER_STATUS_MAP = {
-//   pending:          "placed",
-//   shipped:          "placed",
-//   out_for_delivery: "placed",
-//   delivered:        "completed",
- 
-// };
-
-// export const updateOrderStatusService = async (orderId, deliveryStatus) => {
-//   if (!mongoose.Types.ObjectId.isValid(orderId))
-//     return { success: false, message: "Invalid order ID" };
-
-  
-//   if (!VALID_STATUSES.includes(deliveryStatus))
-//     return { success: false, message: "Invalid status" };
-
-//   const order = await orderModel.findById(orderId);
-
-//   if (!order) return { success: false, message: "Order not found" };
-
-//   order.deliveryStatus = deliveryStatus;
-//   order.orderStatus = ORDER_STATUS_MAP[deliveryStatus];
-//   order.orderItems.forEach((item) => {
-//     if (item.deliveryStatus !== "returned") {
-//       item.deliveryStatus = deliveryStatus;
-//     }
-//   });
-
-//   await order.save();
-
-//   return {
-//     success: true,
-//     deliveryStatus: order.deliveryStatus,
-//     orderStatus: order.orderStatus,
-//     message: "Status updated successfully",
-//   };
-// };
-
-// export const updateOrderItemStatusService = async (orderId, variantId, deliveryStatus) => {
-//   if (!mongoose.Types.ObjectId.isValid(orderId)) {
-//     return { success: false, message: "Invalid order ID" };
-//   }
-
-//   if (!mongoose.Types.ObjectId.isValid(variantId)) {
-//     return { success: false, message: "Invalid product ID" };
-//   }
-
-//   if (!VALID_ITEM_STATUSES.includes(deliveryStatus)) {
-//     return { success: false, message: "Invalid status" };
-//   }
-
-//   const order = await orderModel.findById(orderId);
-//   if (!order) return { success: false, message: "Order not found" };
-
-//   const item = order.orderItems.find((orderItem) => (
-//     orderItem.variantId.toString() === variantId.toString()
-//   ));
-
-//   if (!item) return { success: false, message: "Product not found in order" };
-
-//   item.deliveryStatus = deliveryStatus;
-
-//   const itemStatuses = order.orderItems.map((orderItem) => (
-//     orderItem.deliveryStatus || order.deliveryStatus || "pending"
-//   ));
-//   const activeStatuses = itemStatuses.filter((status) => status !== "cancelled" && status !== "returned");
-
-//   if (activeStatuses.length === 0) {
-//     order.deliveryStatus = itemStatuses.includes("returned") ? "delivered" : "cancelled";
-//     order.orderStatus = itemStatuses.includes("returned") ? "completed" : "cancelled";
-//   } else if (activeStatuses.every((status) => status === "delivered")) {
-//     order.deliveryStatus = "delivered";
-//     order.orderStatus = "completed";
-//   } else if (activeStatuses.includes("out_for_delivery")) {
-//     order.deliveryStatus = "out_for_delivery";
-//     order.orderStatus = "placed";
-//   } else if (activeStatuses.includes("shipped")) {
-//     order.deliveryStatus = "shipped";
-//     order.orderStatus = "placed";
-//   } else {
-//     order.deliveryStatus = "pending";
-//     order.orderStatus = "placed";
-//   }
-
-//   await order.save();
-
-//   return {
-//     success: true,
-//     deliveryStatus: order.deliveryStatus,
-//     orderStatus: order.orderStatus,
-//     itemStatus: item.deliveryStatus,
-//     message: "Product status updated successfully",
-//   };
-// };
-
-// export const updateReturnRequestLogic = async (orderId, action, variantId, adminRemark) => {
-//   try {
-//     if (!orderId || !action) {
-//       return { success: false, message: "Invalid request" };
-//     }
-   
-//     const validActions = ["Approved", "Rejected"];
-//     if (!validActions.includes(action)) {
-//       return { success: false, message: "Invalid action" };
-//     }
-
-//     if (!mongoose.Types.ObjectId.isValid(orderId)) {
-//       return { success: false, message: "Invalid order ID" };
-//     }
-
-//     const foundOrder = await orderModel.findById(orderId);
-//     if (!foundOrder) {
-//       return { success: false, message: "Order not found" };
-//     }
-
-//     if (!foundOrder.returnedAt || foundOrder.returnedAt.length === 0) {
-//       return { success: false, message: "No return request found" };
-//     }
-
-//     let returnRequest = null;
-//     if (variantId) {
-//       returnRequest = foundOrder.returnedAt.find(
-//         (r) => r.variant && r.variant.toString() === variantId.toString() && r.returnRequestStatus === "Pending"
-//       );
-//     }
-
-//     if (!returnRequest) {
-//       returnRequest = foundOrder.returnedAt.find((r) => r.returnRequestStatus === "Pending");
-//     }
-
-//     if (!returnRequest) {
-//       returnRequest = foundOrder.returnedAt[foundOrder.returnedAt.length - 1];
-//     }
-
-//     if (returnRequest.returnRequestStatus !== "Pending") {
-//       return { success: false, message: `Return already ${returnRequest.returnRequestStatus.toLowerCase()}` };
-//     }
-
-//     returnRequest.returnRequestStatus = action;
-//     returnRequest.adminRemark = adminRemark?.trim() || null; 
-
-//     if (action === "Approved") {
-//       const vId = returnRequest.variant;
-
-//       if (vId) {
-//         const item = foundOrder.orderItems.find(
-//           (i) => i.variantId.toString() === vId.toString()
-//         );
-//         if (item) {
-//           const returnQty = Math.min(
-//             Number(returnRequest.quantity) || item.quantity,
-//             item.quantity
-//           );
-//           await variantModel.updateOne(
-//             { _id: vId },
-//             { $inc: { stock: returnQty } }
-//           );
-//           item.deliveryStatus = "returned";
-//         }
-//       }
-//     }
-
-//     await foundOrder.save();
-//     return { success: true, message: `Return request ${action.toLowerCase()} successfully` };
-
-//   } catch (e) {
-//     console.error("updateReturnRequestLogic error:", e);
-//     return { success: false, message: "Something went wrong" };
-//   }
-// };
-
-
-
-
-
-// import mongoose from "mongoose";
-// import orderModel from "../models/orderModel.js";
-// import variantModel from "../models/variantModel.js";
-
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-// const VALID_ADMIN_STATUSES = ["pending", "shipped", "out_for_delivery", "delivered"];
-
-// // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-// const deriveOrderStatus = (orderItems) => {
-//   const statuses = orderItems.map((item) => item.deliveryStatus || "pending");
-//   const activeStatuses = statuses.filter(
-//     (s) => s !== "cancelled" && s !== "returned"
-//   );
-
-//   if (activeStatuses.length === 0) {
-//     if (statuses.includes("returned")) {
-//       return { deliveryStatus: "returned", orderStatus: "returned" };
-//     }
-//     return { deliveryStatus: "cancelled", orderStatus: "cancelled" };
-//   }
-
-//   if (activeStatuses.every((s) => s === "delivered")) {
-//     return { deliveryStatus: "delivered", orderStatus: "completed" };
-//   }
-//   if (activeStatuses.includes("out_for_delivery")) {
-//     return { deliveryStatus: "out_for_delivery", orderStatus: "placed" };
-//   }
-//   if (activeStatuses.includes("shipped")) {
-//     return { deliveryStatus: "shipped", orderStatus: "placed" };
-//   }
-
-//   return { deliveryStatus: "pending", orderStatus: "placed" };
-// };
-
-// // ─── Admin Services ───────────────────────────────────────────────────────────
-
-// export const getOrderDetailsService = async (orderId) => {
-//   if (!mongoose.Types.ObjectId.isValid(orderId))
-//     return { success: false, message: "Invalid order ID" };
-
-//   const order = await orderModel.findById(orderId);
-//   return order
-//     ? { success: true, order }
-//     : { success: false, message: "Order not found" };
-// };
-
-// // Bulk — update all items at once (e.g. entire order ships together)
-// export const updateAllItemsStatusService = async (orderId, deliveryStatus) => {
-//   if (!mongoose.Types.ObjectId.isValid(orderId))
-//     return { success: false, message: "Invalid order ID" };
-
-//   if (!VALID_ADMIN_STATUSES.includes(deliveryStatus))
-//     return { success: false, message: "Invalid status" };
-
-//   const order = await orderModel.findById(orderId);
-//   if (!order) return { success: false, message: "Order not found" };
-
-//   order.orderItems.forEach((item) => {
-//     // Never overwrite user-initiated statuses
-//     if (item.deliveryStatus !== "cancelled" && item.deliveryStatus !== "returned") {
-//       item.deliveryStatus = deliveryStatus;
-//     }
-//   });
-
-//   const derived = deriveOrderStatus(order.orderItems);
-//   order.deliveryStatus = derived.deliveryStatus;
-//   order.orderStatus = derived.orderStatus;
-
-//   await order.save();
-
-//   return {
-//     success: true,
-//     deliveryStatus: order.deliveryStatus,
-//     orderStatus: order.orderStatus,
-//     message: "All items updated successfully",
-//   };
-// };
-
-// // Single item — update one item and recalculate order status
-// export const updateOrderItemStatusService = async (orderId, variantId, deliveryStatus) => {
-//   if (!mongoose.Types.ObjectId.isValid(orderId))
-//     return { success: false, message: "Invalid order ID" };
-
-//   if (!mongoose.Types.ObjectId.isValid(variantId))
-//     return { success: false, message: "Invalid variant ID" };
-
-//   if (!VALID_ADMIN_STATUSES.includes(deliveryStatus))
-//     return { success: false, message: "Invalid status" };
-
-//   const order = await orderModel.findById(orderId);
-//   if (!order) return { success: false, message: "Order not found" };
-
-//   const item = order.orderItems.find(
-//     (i) => i.variantId.toString() === variantId.toString()
-//   );
-//   if (!item) return { success: false, message: "Item not found in order" };
-
-//   // Never overwrite user-initiated statuses
-//   if (item.deliveryStatus === "cancelled")
-//     return { success: false, message: "Cannot update a cancelled item" };
-
-//   if (item.deliveryStatus === "returned")
-//     return { success: false, message: "Cannot update a returned item" };
-
-//   item.deliveryStatus = deliveryStatus;
-
-//   const derived = deriveOrderStatus(order.orderItems);
-//   order.deliveryStatus = derived.deliveryStatus;
-//   order.orderStatus = derived.orderStatus;
-
-//   await order.save();
-
-//   return {
-//     success: true,
-//     itemStatus: item.deliveryStatus,
-//     deliveryStatus: order.deliveryStatus,
-//     orderStatus: order.orderStatus,
-//     message: "Item status updated successfully",
-//   };
-// };
-
-// // Return request — approve or reject
-// export const updateReturnRequestService = async (orderId, action, variantId, adminRemark) => {
-//   if (!orderId || !action)
-//     return { success: false, message: "orderId and action are required" };
-
-//   if (!["Approved", "Rejected"].includes(action))
-//     return { success: false, message: "Action must be Approved or Rejected" };
-
-//   if (!mongoose.Types.ObjectId.isValid(orderId))
-//     return { success: false, message: "Invalid order ID" };
-
-//   const order = await orderModel.findById(orderId);
-//   if (!order) return { success: false, message: "Order not found" };
-
-//   if (!order.returnedAt || order.returnedAt.length === 0)
-//     return { success: false, message: "No return request found" };
-
-//   // Find the pending return request — prefer matching variantId if provided
-//   const returnRequest =
-//     (variantId &&
-//       order.returnedAt.find(
-//         (r) =>
-//           r.variant?.toString() === variantId.toString() &&
-//           r.returnRequestStatus === "Pending"
-//       )) ||
-//     order.returnedAt.find((r) => r.returnRequestStatus === "Pending");
-
-//   if (!returnRequest)
-//     return { success: false, message: "No pending return request found" };
-
-//   returnRequest.returnRequestStatus = action;
-//   returnRequest.adminRemark = adminRemark?.trim() || null;
-
-//   if (action === "Approved") {
-//     const vId = returnRequest.variant;
-
-//     if (vId) {
-//       const item = order.orderItems.find(
-//         (i) => i.variantId.toString() === vId.toString()
-//       );
-
-//       if (item) {
-//         const returnQty = Math.min(
-//           Number(returnRequest.quantity) || item.quantity,
-//           item.quantity
-//         );
-//         await variantModel.updateOne({ _id: vId }, { $inc: { stock: returnQty } });
-//         item.deliveryStatus = "returned";
-//       }
-//     }
-
-//     // Recalculate order status after return approved
-//     const derived = deriveOrderStatus(order.orderItems);
-//     order.deliveryStatus = derived.deliveryStatus;
-//     order.orderStatus = derived.orderStatus;
-//   }
-
-//   await order.save();
-//   return { success: true, message: `Return request ${action.toLowerCase()} successfully` };
-// };
-
-
-
-
-
-
-
-
-
-
-// ─── service.js ───────────────────────────────────────────────────────────────
 
 const STATUS_RANK = {
   pending:          0,
@@ -511,25 +140,7 @@ const deriveOrderStatus = (orderItems) => {
   return { deliveryStatus: "pending", orderStatus: "placed" };
 };
 
-const processRefund = async (order, returnRequest, item) => {
-  const returnQty    = Math.min(Number(returnRequest.quantity) || item.quantity, item.quantity);
-  const unitPrice    = item.price || (item.totalPrice / item.quantity);
-  const refundAmount = +(unitPrice * returnQty).toFixed(2);
-
-  if (refundAmount <= 0) return;
-
-  await userModel.findByIdAndUpdate(order.userId, {
-    $inc:  { walletBalance: refundAmount },
-    $push: {
-      walletHistory: {
-        type:        "credit",
-        amount:      refundAmount,
-        description: `Refund for return — Order ${order.orderCode}`,
-        date:        new Date(),
-      },
-    },
-  });
-};
+  
 
 export const updateAllItemsStatusService = async (orderId, deliveryStatus) => {
   if (!mongoose.Types.ObjectId.isValid(orderId))
@@ -606,74 +217,101 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
   };
 };
 
-export const updateReturnRequestService = async (orderId, action, variantId, adminRemark) => {
-  if (!orderId || !action)
-    return { success: false, message: "orderId and action are required" };
 
-  if (!["Approved", "Rejected"].includes(action))
-    return { success: false, message: "Action must be Approved or Rejected" };
 
-  if (!mongoose.Types.ObjectId.isValid(orderId))
-    return { success: false, message: "Invalid order ID" };
 
-  if (!variantId || !mongoose.Types.ObjectId.isValid(variantId))
-    return { success: false, message: "Valid variantId is required" };
 
-  const order = await orderModel.findById(orderId);
-  if (!order) return { success: false, message: "Order not found" };
+export const updateReturnRequestService = async (
+  orderId,
+  action,
+  variantId,
+  adminRemark
+) => {
+  try {
+    // Basic validation
+    if (!orderId || !action)
+      return { success: false, message: "orderId & action required" };
 
-  if (!order.returnedAt?.length)
-    return { success: false, message: "No return request found" };
+    if (!["Approved", "Rejected"].includes(action))
+      return { success: false, message: "Invalid action" };
 
-  const returnRequest = order.returnedAt.find(
-    (r) =>
-      r.variant?.toString() === variantId.toString() &&
-      r.returnRequestStatus  === "Pending"
-  );
+    const order = await orderModel.findById(orderId);
+    if (!order) return { success: false, message: "Order not found" };
 
-  if (!returnRequest)
-    return { success: false, message: "No pending return request found for this item" };
+    const isPaid = ["paypal", "wallet", "cod"].includes(order.orderMethod);
 
-  if (!adminRemark || !adminRemark.trim()) {
-    return { success: false, message: "Reason (remark) is required to approve or reject a return request." };
-  }
-
-  returnRequest.returnRequestStatus = action;
-  returnRequest.adminRemark         = adminRemark.trim();
-
-  if (action === "Approved") {
-    const item = order.orderItems.find(
-      (i) => i.variantId.toString() === variantId.toString()
-    );
-
-    if (item) {
-      const returnQty = Math.min(
-        Number(returnRequest.quantity) || item.quantity,
-        item.quantity
-      );
-
-      // Stock restore
-      await variantModel.updateOne(
-        { _id: variantId },
-        { $inc: { stock: returnQty } }
-      );
-
-      // Item status update
-      item.deliveryStatus = "returned";
-
-      // Refund process
-      await processRefund(order, returnRequest, item);
+    if (!Array.isArray(order.returnedAt)) {
+      order.returnedAt = [];
     }
 
-    // Order level recalculate
-    const derived        = deriveOrderStatus(order.orderItems);
-    order.deliveryStatus = derived.deliveryStatus;
-    order.orderStatus    = derived.orderStatus;
-  }
+    let totalRefund = 0;
 
-  await order.save();
-  return {
-    success: true,
-    message: `Return request ${action.toLowerCase()} successfully`,
-  };
+    const isAll = !variantId || variantId === "ALL";
+
+    const pendingReturns = order.returnedAt.filter(
+      (r) =>
+        r.returnRequestStatus.toLowerCase() === "pending" &&
+        (isAll || r.variant.toString() === variantId.toString())
+    );
+
+    if (!pendingReturns.length)
+      return { success: true, message: "No pending return found" };
+
+    for (const r of pendingReturns) {
+      r.returnRequestStatus = action;
+      r.adminRemark = adminRemark || "";
+
+      if (action === "Approved") {
+        const item = order.orderItems.find(
+          (i) => i.variantId.toString() === r.variant.toString()
+        );
+
+        if (item) {
+          const qty = r.quantity || item.quantity;
+
+          // Stock restore
+          await variantModel.updateOne(
+            { _id: r.variant },
+            { $inc: { stock: qty } }
+          );
+
+          // Mark item as returned
+          item.deliveryStatus = "returned";
+
+          // Refund calculate
+          totalRefund += item.price * qty;
+        }
+      }
+
+      if (!isAll) break;
+    }
+
+    if (action === "Approved") {
+      const derived = deriveOrderStatus(order.orderItems);
+      order.deliveryStatus = derived.deliveryStatus;
+      order.orderStatus = derived.orderStatus;
+    }
+
+    await order.save();
+
+    if (action === "Approved" && isPaid && totalRefund > 0 && (!order.couponApplied || order.couponApplied === 0)) {
+      await creditWallet(
+        order.userId,
+        totalRefund,
+        `Refund for return in order #${order.orderCode}`,
+        orderId
+      );
+    }
+
+    return {
+      success: true,
+      message:
+        action === "Approved"
+          ? `Return approved. ₹${totalRefund} refunded to wallet.`
+          : "Return request rejected",
+    };
+  } catch (error) {
+    console.error("updateReturnRequestService error:", error);
+    return { success: false, message: "Server error" };
+  }
 };

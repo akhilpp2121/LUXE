@@ -4,6 +4,7 @@
 import bcrypt from "bcrypt";
 import { userModel } from "../model/usermodel.js";
 import { sendOtpEmail } from "../utilites/otp.js";
+import { applyReferralReward } from "./referalService.js";
 
 
 
@@ -21,8 +22,6 @@ export const findUserBlocked = (userId) => {
 
 
 export const registerService = async (fullName, email, password, phoneNumber) => {
-  
-  
   try {
     if (!fullName || !email || !password || !phoneNumber) {
       return { success: false, message: "All fields are required" };
@@ -36,7 +35,7 @@ export const registerService = async (fullName, email, password, phoneNumber) =>
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await userModel.create({
+    const newUser = await userModel.create({
       fullName,
       email: email.toLowerCase(),
       password: hashedPassword,
@@ -44,13 +43,12 @@ export const registerService = async (fullName, email, password, phoneNumber) =>
       status: "active",
     });
 
-    return { success: true, message: "Register success" };
+    return { success: true, message: "Register success", user: newUser }; 
   } catch (err) {
     console.error("registerService error:", err);
     return { success: false, message: "Server error" };
   }
 };
-
 // ─── LOGIN ──────────────────────────────────────────────────────────
 export const userLoginLogic = async (req, email, password) => {
   try {
@@ -80,11 +78,11 @@ export const userLoginLogic = async (req, email, password) => {
 
 // ─── OTP ────────────────────────────────────────────────────────────
 export const generateAndSendOtp = async (req, email) => {
-  
-  
+
+
   try {
     const otp = Math.floor(1000 + Math.random() * 9000);
-    req.session.otp        = String(otp);
+    req.session.otp = String(otp);
     req.session.otpExpires = Date.now() + 60 * 1000;
     console.log("Generated OTP:", otp);
     await sendOtpEmail(email, otp);
@@ -95,14 +93,14 @@ export const generateAndSendOtp = async (req, email) => {
 };
 
 export const verifyOtpService = (req) => {
-  
-  
-  
-  
-  const otp        = req.body.otp ? String(req.body.otp).trim() : null;
+
+
+
+
+  const otp = req.body.otp ? String(req.body.otp).trim() : null;
   const sessionOtp = req.session.otp ? String(req.session.otp).trim() : null;
 
-  if (!otp)        return { valid: false, message: "OTP is required" };
+  if (!otp) return { valid: false, message: "OTP is required" };
   if (!sessionOtp) return { valid: false, message: "OTP expired. Request a new one" };
 
   if (!req.session.otpExpires || Date.now() > req.session.otpExpires) {
@@ -130,9 +128,9 @@ export const resetPasswordService = async (email, password) => {
 };
 
 export const verifyEmailService = async (req, email) => {
- 
-  
-  
+
+
+
   try {
     if (!email || !email.includes("@")) {
       return { success: false, message: "Invalid email" };
@@ -141,7 +139,7 @@ export const verifyEmailService = async (req, email) => {
     const user = await userModel.findOne({ email: email.toLowerCase() });
     if (!user) return { success: false, message: "No account found with this email" };
 
-    req.session.email      = email;
+    req.session.email = email;
     req.session.otpContext = "RESET_PASSWORD";
 
     await generateAndSendOtp(req, email);
@@ -153,9 +151,10 @@ export const verifyEmailService = async (req, email) => {
   }
 };
 
-export const registerPreCheckService = async (req, fullName, email, password, phoneNumber) => {
+
+
+export const registerPreCheckService = async (req, fullName, email, password, phoneNumber, referralCode) => {
   try {
-  
     if (!fullName || !email || !password || !phoneNumber) {
       return { success: false, message: "All fields are required" };
     }
@@ -166,8 +165,8 @@ export const registerPreCheckService = async (req, fullName, email, password, ph
     const phoneExists = await userModel.findOne({ phoneNumber });
     if (phoneExists) return { success: false, message: "Phone number already exists" };
 
-    req.session.tempUser   = { fullName, email, password, phoneNumber };
-    req.session.tempEmail  = email;
+    req.session.tempUser = { fullName, email, password, phoneNumber, referralCode: referralCode || null };
+    req.session.tempEmail = email;
     req.session.otpContext = "REGISTER";
 
     await generateAndSendOtp(req, email);
@@ -179,25 +178,20 @@ export const registerPreCheckService = async (req, fullName, email, password, ph
   }
 };
 
-// ─── OTP VERIFY — flow handle ───────────────────────────────────────
 export const handleOtpVerifyService = async (req) => {
-  
-   
-    
-    
-    
+
   try {
-   
-    
+
+
     const otpResult = verifyOtpService(req);
     console.log(otpResult);
-    
+
     if (!otpResult.valid) return { success: false, message: otpResult.message };
 
     const flow = req.session.otpContext;
- 
- 
- 
+
+
+
     // REGISTER
     if (flow === "REGISTER") {
       const userData = req.session.tempUser;
@@ -212,55 +206,64 @@ export const handleOtpVerifyService = async (req) => {
 
       if (!result.success) return { success: false, message: result.message };
 
+      if (userData.referralCode) {
+        await applyReferralReward(result.user, userData.referralCode);
+      }
+
+
       // Session clear
-      req.session.otp        = null;
+      req.session.otp = null;
       req.session.otpExpires = null;
       req.session.otpContext = null;
-      req.session.tempUser   = null;
-      req.session.tempEmail  = null;
+      req.session.tempUser = null;
+      req.session.tempEmail = null;
+
+
+      
+
 
       return { success: true, message: "Account created!", redirect: "/login" };
     }
 
-     // EMAIL EDIT
-if (flow === "CHANGE_EMAIL") {
-  
-  const userId   = req.session.user?.id;
-  const newEmail = req.session.tempEmail;
-  
+    // EMAIL EDIT
+    if (flow === "CHANGE_EMAIL") {
 
-  if (!userId || !newEmail) {
-    return { success: false, message: "Session expired" };
-  }
-
-  await userModel.findByIdAndUpdate(userId, {
-    email: newEmail.toLowerCase()
-  });
-
-  //  update session user
-  req.session.user.email = newEmail.toLowerCase();
- //clear session
-  req.session.otp           = null;
-  req.session.otpExpires    = null;
-  req.session.otpContext    = null;
-  req.session.tempEmail  = null;
-
-  req.session.flashMessage = { type: "success", text: "Email updated successfully!" };
-  
+      const userId = req.session.user?.id;
+      const newEmail = req.session.tempEmail;
 
 
-  return {
-    success: true,
-    message: "Email updated success fully!",
-    redirect: "/profile"
-  };
-}
+      if (!userId || !newEmail) {
+        return { success: false, message: "Session expired" };
+      }
+
+      await userModel.findByIdAndUpdate(userId, {
+        email: newEmail.toLowerCase()
+      });
+
+      //  update session user
+      req.session.user.email = newEmail.toLowerCase();
+      //clear session
+      req.session.otp = null;
+      req.session.otpExpires = null;
+      req.session.otpContext = null;
+      req.session.tempEmail = null;
+
+      req.session.flashMessage = { type: "success", text: "Email updated successfully!" };
+
+
+
+      return {
+        success: true,
+        message: "Email updated success fully!",
+        redirect: "/profile"
+      };
+    }
 
 
 
     // RESET PASSWORD
     if (flow === "RESET_PASSWORD") {
-      
+
       await userModel.findOneAndUpdate(
         { email: req.session.email },
         { isVerified: true }
@@ -273,7 +276,7 @@ if (flow === "CHANGE_EMAIL") {
     console.error("handleOtpVerifyService error:", err);
     return { success: false, message: "Server error" };
   }
- 
+
 };
 
 export const canLoadResetPassword = async (req) => {

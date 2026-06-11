@@ -229,7 +229,29 @@
     var itemStatus = item.deliveryStatus || 'pending';
 
     var cancelled = cancelledVIds[variantId] || !!item.isCancelled || itemStatus === 'cancelled';
-    var returned  = returnedVIds[variantId]  || itemStatus === 'returned';
+
+    // Calculate total quantity of this variant already returned/pending (exclude Rejected)
+    var activeReturnedQty = 0;
+    var returnStatus = null;
+    var adminRemark = null;
+    var lastRet = null;
+    
+    returnedAt.forEach(function(r) {
+      if (r.variant && r.variant.toString() === variantId) {
+        if (r.returnRequestStatus !== 'Rejected') {
+          activeReturnedQty += (r.quantity || 1);
+        }
+        lastRet = r;
+      }
+    });
+
+    if (lastRet) {
+      returnStatus = lastRet.returnRequestStatus || 'Pending';
+      adminRemark  = lastRet.adminRemark || null;
+    }
+
+    var returned = activeReturnedQty >= item.quantity || itemStatus === 'returned';
+    var remainingReturnableQty = item.quantity - activeReturnedQty;
 
     // cancel status label
     var cancelStatus = 'Cancelled';
@@ -248,26 +270,11 @@
       if (foundCa) cancelStatus = foundCa.cancelRequestStatus || 'Cancelled';
     }
 
-    // return status
-    var returnStatus = null;
-    var adminRemark = null;
-    if (returned) {
-      var lastRet = null;
-      for (var ri = 0; ri < returnedAt.length; ri++) {
-        var r = returnedAt[ri];
-        if (r.variant && r.variant.toString() === variantId) lastRet = r;
-      }
-      if (lastRet) {
-        returnStatus = lastRet.returnRequestStatus || 'Pending';
-        adminRemark = lastRet.adminRemark || null;
-      }
-    }
-
     // cancel only if item is still pending
     var canCancelItem = !cancelled && !returned && itemStatus === 'pending';
 
-    // return only if item is delivered
-    var canReturnItem = !cancelled && !returned && itemStatus === 'delivered';
+    // return only if item is delivered and has remaining quantity
+    var canReturnItem = !cancelled && remainingReturnableQty > 0 && itemStatus === 'delivered';
 
     return {
       variantId: variantId,
@@ -280,7 +287,8 @@
       adminRemark: adminRemark,
       itemStatus: itemStatus,
       canCancelItem: canCancelItem,
-      canReturnItem: canReturnItem
+      canReturnItem: canReturnItem,
+      remainingReturnableQty: remainingReturnableQty
     };
   }
 
@@ -303,6 +311,7 @@
   }
   var shippingCharge = ord.shippingCharge || 0;
   var couponDiscount = ord.couponApplied  || 0;
+  
   var gstAmount      = Math.round(activeSubTotal * 0.05);
   var activeTotal    = +(activeSubTotal + gstAmount + shippingCharge - couponDiscount).toFixed(2);
 
@@ -585,7 +594,7 @@
             <!-- Per-item actions -->
             <div class="flex flex-col gap-2 flex-shrink-0" id="cancel-btn-wrap-<%= r.variantId %>">
 
-              <% if (r.canCancelItem && orderItems.length > 1) { %>
+              <% if (r.canCancelItem ) { %>
                 <button onclick="openCancelModal('<%= r.variantId %>','<%= ord._id %>')"
                   class="btn-atelier btn-danger-da text-[10px] py-2 px-3">
                   <span class="material-symbols-outlined text-sm">close</span>
@@ -595,7 +604,7 @@
 
               <% if (r.canReturnItem) { %>
                 <button data-return-btn
-                  onclick="openReturnModal('<%= ord._id %>', '<%= r.variantId %>', '<%= item.productName %>', <%= item.quantity %>)"
+                  onclick="openReturnModal('<%= ord._id %>', '<%= r.variantId %>', '<%= item.productName %>', <%= r.remainingReturnableQty %>)"
                   class="btn-atelier btn-ghost-da text-[10px] py-2 px-3">
                   <span class="material-symbols-outlined text-sm">undo</span>
                   Return

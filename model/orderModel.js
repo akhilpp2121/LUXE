@@ -197,7 +197,7 @@ gstAmount: { type: Number, default: 0 },
 
     orderMethod: {
       type: String,        
-      enum: ["cod", "razorpay", "wallet", "upi"],
+      enum: ["cod", "paypal", "wallet", "upi"],
       required: true,
     },
 

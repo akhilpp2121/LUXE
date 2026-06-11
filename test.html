@@ -122,7 +122,7 @@
         <span id="bannerMsg"></span>
       </div>
 
-      <form id="registerForm" class="space-y-4" novalidate method="post" action="/signup">
+      <form id="registerForm" class="space-y-4" novalidate method="post" action="/signUp">
 
         <!-- Full Name -->
         <div class="space-y-1">
@@ -172,7 +172,7 @@
       placeholder="Enter referral code (optional)" 
       type="text"
       autocomplete="off"
-      value="<%= typeof referralToken !== 'undefined' ? referralToken : '' %>"
+      value="USER123"
     />
   </div>
   <div class="err-msg" id="referralCode-err"></div>
@@ -241,7 +241,7 @@
 
 <script>
 
-  const backendMessage = "<%= message || '' %>";
+  const backendMessage = "";
 
   if (backendMessage) {
     showBanner('error', backendMessage);

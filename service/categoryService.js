@@ -3,6 +3,8 @@
 
 import categoryModel from "../model/categoryModel.js";
 
+
+
 export const categoryModelLoad = async (filter, sort, pageNo) => {
     const page  = parseInt(pageNo) || 1;
     const limit = 4;
@@ -13,7 +15,7 @@ export const categoryModelLoad = async (filter, sort, pageNo) => {
     
     
 
-    const data = await categoryModel.find(filter).sort(sort).skip(skip).limit(limit);
+    const data = await categoryModel.find(filter).populate("offer").sort(sort).skip(skip).limit(limit);
 
     return { success: true, data, currentPage: page, totalPages, totalCount: total };
 };

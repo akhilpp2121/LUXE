@@ -11,10 +11,20 @@ import {
   updatedProducts,
   upsertVariant, 
   updateVariantStatuses    ,
-  generateUniqueSKU   
+  generateUniqueSKU,
+  applyOffersToProduct
 } from "../service/productsService.js";
 import { categoryDataLoad } from "../service/categoryService.js";
-import Variant from "../model/variantModel.js";
+import Product from "../model/productsModel.js";
+import Offer from "../model/offerModel.js";
+import { resolveBestOffer } from "../service/adminOfferService.js";
+import variantModel from "../model/variantModel.js";
+
+
+
+
+
+
 
 
 
@@ -33,8 +43,10 @@ export const adminProductPageLoad = async (req, res) => {
 
   const products = await productModelLoad(filter, sortOption, req.query.page);
   
+  // Load active product offers for dropdown with full attributes
+  const offers = await Offer.find({ isActive: true, type: "PRODUCT", endDate: { $gte: new Date() } }).select('_id name discountType discountValue maxDiscount');
 
- 
+
 
   const commonData = {
     categories,
@@ -51,6 +63,7 @@ export const adminProductPageLoad = async (req, res) => {
       currentPage: 1,
       totalUser: 0,
       totalPage: 1,
+      offers,
     });
   }
 
@@ -61,10 +74,81 @@ export const adminProductPageLoad = async (req, res) => {
     currentPage: products.currentPage,
     totalUser: products.totalUser,
     totalPage: products.totalPages,
+    offers,
   });
 };
 
+// export const adminProductOfferAdd = async (req, res) => {
+//   try {
+//     const { productId, offerId } = req.body;
+    
+    
+//     if (!productId) {
+//       return res.status(400).json({ success: false, message: "productId is required" });
+//     }
+    
+//     // Save the chosen product-level offer
+//     await Product.findByIdAndUpdate(productId, { offer: offerId || null });
 
+//     // Re-fetch with variants + category to compare offers
+//     const product = await Product.findById(productId)
+//       .populate("variants")
+//       .populate("offer")
+//       .lean();
+
+//     const bestOffer = await resolveBestOffer(product);
+
+//     // Store which offer actually won
+//     await Product.findByIdAndUpdate(productId, {
+//       appliedOffer: bestOffer?._id || null,
+//     });
+
+//     const result = await applyOffersToProduct(productId, bestOffer);
+//     if (!result.success) {
+//       return res.status(500).json({ success: false, message: result.message });
+//     }
+
+//     const updatedProduct = await Product.findById(productId)
+//       .populate("variants")
+//       .populate("offer");
+
+//     return res.json({
+//       success: true,
+//       message: "Best offer applied successfully",
+//       product: updatedProduct,
+//     });
+//   } catch (error) {
+//     console.error("adminProductOfferAdd error:", error);
+//     return res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
+export const adminProductOfferAdd = async (req, res) => {
+  try {
+    const { productId, offerId } = req.body;
+    if (!productId) {
+      return res.status(400).json({ success: false, message: "productId is required" });
+    }
+
+    // Save product offer first
+    await Product.findByIdAndUpdate(productId, { offer: offerId || null });
+
+    // applyOffersToProduct fetches fresh data itself — no need to pass bestOffer
+    const result = await applyOffersToProduct(productId);
+    if (!result.success) {
+      return res.status(500).json({ success: false, message: result.message });
+    }
+
+    return res.json({
+      success: true,
+      message: offerId ? "Offer applied successfully" : "Offer removed successfully",
+    });
+
+  } catch (error) {
+    console.error("adminProductOfferAdd error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 
 
@@ -168,13 +252,16 @@ export const adminProductsAdd = async (req, res) => {
           v.size,
           i + 1
         );
+        const price=Number(v.price);
+        const manuvalDiscount=v.discount?Number(v.discount):price;
         return {
           color:    v.color.trim(),
           size:     v.size.trim(),
           sku,
           stock:    Number(v.stock),
-          price:    Number(v.price),
-          discount: v.discount ? Number(v.discount) : 0,
+          price,
+          manuvalDiscount,
+          discount:manuvalDiscount,
           images:   v.images,
           isActive: true,
         };
@@ -197,6 +284,8 @@ export const adminProductsAdd = async (req, res) => {
 
 export const adminProductsEdit = async (req, res) => {
   try {
+    
+    
     const productId = req.params.id;
     const { productName, category, description } = req.body;
 
@@ -213,6 +302,8 @@ export const adminProductsEdit = async (req, res) => {
       categoryId: category,
       description: description.trim(),
     });
+    console.log("edit data is ",editData);
+    
     if (!editData.success)
       return res.status(400).json({ success: false, message: editData.message });
 
@@ -279,12 +370,21 @@ const rawSku = Array.isArray(v.sku) ? v.sku[0] : v.sku;
 const sku = rawSku && String(rawSku).trim()
   ? String(rawSku).trim()
   : await generateUniqueSKU(productName.trim(), v.color, v.size, i + 1);
+
+  const price          = Number(v.price);
+const manualDiscount = v.discount ? Number(v.discount) : price;
+
+
+
 const variantData = {
   color:    v.color.trim(),
   size:     v.size,
   stock:    Number(v.stock),
-  price:    Number(v.price),
-  discount: v.discount ? Number(v.discount) : 0,
+
+  price,
+  manualDiscount, 
+  discount:       manualDiscount,
+  
   SKU:      sku,
   images:   mergedImages,
 };
@@ -296,11 +396,13 @@ const variantData = {
       });
       if (!result.success)
         return res.status(400).json({ success: false, message: result.message });
+      console.log("result is ",result);
+      
 
       keepVariantIds.push(result.data._id.toString());
     }
 
-    await Variant.deleteMany({ productId, _id: { $nin: keepVariantIds } });
+    await variantModel.deleteMany({ productId, _id: { $nin: keepVariantIds } });
 
     return res.status(200).json({
       success: true,
@@ -309,8 +411,11 @@ const variantData = {
     });
 
   } catch (error) {
+
+    console.error("adminProductsEdit error:", error.message); // ← exact message
+    console.error("Stack:", error.stack);                     
     console.error("adminProductsEdit error:", error);
-    return res.status(500).json({ success: false, message: "Server error. Please try again." });
+    return res.status(500).json({ success: false, message: "Server error Please try again." });
   }
 };
 

@@ -17,6 +17,12 @@ const categorySchema=new schema({
         required:true,
         default:true
     },
+    offer: {
+            
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Offer",
+        default: null
+    },
     
 },{timestamps:true})
 
