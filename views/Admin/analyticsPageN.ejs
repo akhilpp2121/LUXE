@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <%
+    const pageSummary = summary || {};
+    const pageOrders = Array.isArray(orders) ? orders : [];
+    const activePeriod = period || "This Week";
+    const activeFilter = filter || "weekly";
+    const customFrom = from || "";
+    const customTo = to || "";
+    const filters = [
+      { key: "daily", label: "Daily" },
+      { key: "weekly", label: "Weekly" },
+      { key: "monthly", label: "Monthly" },
+      { key: "yearly", label: "Yearly" }
+    ];
+    const exportParams = new URLSearchParams({ filter: activeFilter });
+    if (activeFilter === "custom") {
+      if (customFrom) exportParams.set("from", customFrom);
+      if (customTo) exportParams.set("to", customTo);
+    }
+    const exportQuery = exportParams.toString();
+
+    const formatCurrency = (value) => {
+      const amount = Number(value || 0);
+      return amount.toLocaleString("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    };
+
+    const statusClasses = {
+      Delivered: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+      Processing: "bg-blue-50 text-blue-700 ring-blue-600/20",
+      Cancelled: "bg-red-50 text-red-700 ring-red-600/20"
+    };
+  %>
+
+  <!-- SideNavBar -->
+  <aside class="fixed left-0 top-0 h-full w-[280px] flex flex-col p-6 bg-[#0c1424] z-50">
+    <div class="mb-8 px-4">
+      <h1 class="text-2xl font-bold text-white">AdminPro</h1>
+      <p class="text-[11px] font-medium text-[#a3aac4]">Enterprise Suite</p>
+    </div>
+
+    <nav class="flex-1 space-y-1">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/dashboard">
+        <span class="material-symbols-outlined text-lg">dashboard</span>Dashboard
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/order-management">
+        <span class="material-symbols-outlined text-lg">shopping_cart</span>Orders
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/products">
+        <span class="material-symbols-outlined text-lg">inventory_2</span>Products
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/users">
+        <span class="material-symbols-outlined text-lg">group</span>Users
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white border-l-4 border-[#90abff] bg-[#1f2b49] font-bold text-sm"
+        href="/admin/analystic">
+        <span class="material-symbols-outlined text-lg">monitoring</span>Analytics
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="#">
+        <span class="material-symbols-outlined text-lg">confirmation_number</span>Coupons
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/category">
+        <span class="material-symbols-outlined text-lg">category</span>Categories
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="#">
+        <span class="material-symbols-outlined text-lg">local_offer</span>Offers
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="#">
+        <span class="material-symbols-outlined text-lg">ad_units</span>Banners
+      </a>
+    </nav>
+
+    <div class="mt-auto px-4 py-6 border-t border-[#1f2b49] flex items-center gap-2">
+      <div class="overflow-hidden">
+        <p class="text-xs font-semibold text-white truncate">Organization Logo</p>
+        <p class="text-[11px] text-[#a3aac4] truncate">Premium Admin</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="ml-[280px] mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <header class="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-sm font-medium uppercase tracking-wide text-slate-500">Admin Dashboard</p>
+        <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-950">Sales Analytics</h1>
+      </div>
+      <div class="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Period</p>
+        <p class="mt-1 text-sm font-semibold text-slate-900"><%= activePeriod %></p>
+      </div>
+    </header>
+
+    <section class="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Range</label>
+          <div class="flex flex-wrap gap-2">
+            <% filters.forEach((item) => { %>
+              <a href="/admin/analystic?filter=<%= item.key %>" class="rounded-md border border-slate-200 px-4 py-2 text-sm font-medium shadow-sm <%= activeFilter === item.key ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-50' %>"><%= item.label %></a>
+            <% }) %>
+            <span class="rounded-md border border-slate-200 px-4 py-2 text-sm font-medium shadow-sm <%= activeFilter === 'custom' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700' %>">Custom</span>
+          </div>
+        </div>
+
+        <form action="/admin/analystic" method="GET" class="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <input type="hidden" name="filter" value="custom">
+          <div>
+            <label for="date-from" class="text-xs font-semibold uppercase tracking-wide text-slate-500">From</label>
+            <input id="date-from" name="from" type="date" value="<%= customFrom %>" class="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none">
+          </div>
+          <div>
+            <label for="date-to" class="text-xs font-semibold uppercase tracking-wide text-slate-500">To</label>
+            <input id="date-to" name="to" type="date" value="<%= customTo %>" class="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none">
+          </div>
+          <button type="submit" class="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">Apply</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-sm font-medium text-slate-500">Total Orders</p>
+        <p class="mt-3 text-3xl font-bold text-slate-950"><%= Number(pageSummary.totalOrders || 0).toLocaleString("en-IN") %></p>
+      </article>
+      <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-sm font-medium text-slate-500">Order Amount</p>
+        <p class="mt-3 text-3xl font-bold text-slate-950"><%= formatCurrency(pageSummary.orderAmount) %></p>
+      </article>
+      <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-sm font-medium text-slate-500">Total Discount</p>
+        <p class="mt-3 text-3xl font-bold text-red-700"><%= formatCurrency(pageSummary.totalDiscount) %></p>
+      </article>
+      <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-sm font-medium text-slate-500">Net Revenue</p>
+        <p class="mt-3 text-3xl font-bold text-emerald-700"><%= formatCurrency(pageSummary.netRevenue) %></p>
+      </article>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-950">Orders</h2>
+          <p class="mt-1 text-sm text-slate-500">Showing complete sales report for <%= activePeriod %></p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="/admin/analystic/pdf?<%= exportQuery %>" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Download PDF</a>
+          <a href="/admin/analystic/excel?<%= exportQuery %>" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Export Excel</a>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-left">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Order ID</th>
+              <th class="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
+              <th class="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Customer</th>
+              <th class="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Order Amount</th>
+              <th class="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Coupon Code</th>
+              <th class="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Discount</th>
+              <th class="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Net Amount</th>
+              <th class="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 bg-white">
+            <% if (pageOrders.length) { %>
+              <% pageOrders.forEach((order) => { %>
+                <tr class="hover:bg-slate-50">
+                  <td class="whitespace-nowrap px-5 py-4 text-sm font-semibold text-blue-700">#<%= order.id %></td>
+                  <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-600"><%= order.date %></td>
+                  <td class="whitespace-nowrap px-5 py-4 text-sm font-medium text-slate-900"><%= order.customer %></td>
+                  <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-700"><%= formatCurrency(order.orderAmount) %></td>
+                  <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-700">
+                    <% if (order.coupon) { %>
+                      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"><%= order.coupon %></span>
+                    <% } else { %>
+                      <span class="text-slate-400">-</span>
+                    <% } %>
+                  </td>
+                  <td class="whitespace-nowrap px-5 py-4 text-sm font-medium text-red-700"><%= formatCurrency(order.totalDiscount) %></td>
+                  <td class="whitespace-nowrap px-5 py-4 text-sm font-semibold text-slate-950"><%= formatCurrency(order.netAmount) %></td>
+                  <td class="whitespace-nowrap px-5 py-4 text-sm">
+                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset <%= statusClasses[order.status] || 'bg-slate-100 text-slate-700 ring-slate-600/20' %>">
+                      <%= order.status %>
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="8" class="px-5 py-12 text-center text-sm text-slate-500">No orders found for this period.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

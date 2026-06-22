@@ -1,749 +1,526 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LUXE Admin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f5f6fa;
-  --sidebar:#0f1623;
-  --sidebar-hover:#1a2236;
-  --sidebar-active:#1e2a40;
-  --accent:#4f6ef7;
-  --accent-light:#eef1ff;
-  --text:#1a1d2e;
-  --text-2:#6b7280;
-  --text-3:#9ca3af;
-  --white:#ffffff;
-  --border:#e5e7eb;
-  --success:#10b981;
-  --success-bg:#ecfdf5;
-  --warning:#f59e0b;
-  --warning-bg:#fffbeb;
-  --danger:#ef4444;
-  --danger-bg:#fef2f2;
-  --info:#3b82f6;
-  --info-bg:#eff6ff;
-  --gold:#f59e0b;
-  --sidebar-w:220px;
-  --nav-h:60px;
-  --radius:10px;
-  --shadow:0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
-}
-html{font-size:14px}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
-a{text-decoration:none;color:inherit}
-button{font-family:inherit;cursor:pointer}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px}
-
-/* ── SIDEBAR ── */
-.sidebar{
-  width:var(--sidebar-w);min-width:var(--sidebar-w);
-  background:var(--sidebar);
-  display:flex;flex-direction:column;
-  height:100vh;position:fixed;left:0;top:0;z-index:50;
-  overflow-y:auto;
-}
-.sidebar-brand{
-  padding:20px 18px 16px;
-  border-bottom:1px solid rgba(255,255,255,0.07);
-  display:flex;align-items:center;gap:10px;
-}
-.brand-icon{
-  width:34px;height:34px;border-radius:9px;
-  background:var(--accent);
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;font-weight:800;color:#fff;letter-spacing:-1px;
-}
-.brand-name{font-size:1.05rem;font-weight:800;color:#fff;letter-spacing:-0.3px}
-.brand-sub{font-size:0.62rem;color:rgba(255,255,255,0.3);letter-spacing:0.08em;text-transform:uppercase;margin-top:1px}
-
-.nav-group{padding:16px 0 8px}
-.nav-label{
-  font-size:0.6rem;color:rgba(255,255,255,0.25);
-  text-transform:uppercase;letter-spacing:0.12em;
-  padding:0 18px 6px;
-}
-.nav-item{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 18px;
-  color:rgba(255,255,255,0.5);
-  font-size:0.82rem;font-weight:500;
-  border-left:2px solid transparent;
-  transition:all 150ms ease;
-  cursor:pointer;
-  position:relative;
-}
-.nav-item:hover{background:var(--sidebar-hover);color:rgba(255,255,255,0.85)}
-.nav-item.active{
-  background:var(--sidebar-active);
-  color:#fff;
-  border-left-color:var(--accent);
-}
-.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:0.7}
-.nav-item.active svg,.nav-item:hover svg{opacity:1}
-.nav-badge{
-  margin-left:auto;
-  background:var(--accent);color:#fff;
-  font-size:0.6rem;font-weight:700;
-  padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;
-}
-.nav-badge.red{background:#ef4444}
-.nav-badge.amber{background:#f59e0b;color:#1a1d2e}
-
-.sidebar-footer{
-  margin-top:auto;
-  border-top:1px solid rgba(255,255,255,0.07);
-  padding:12px 0;
-}
-.logout-btn{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 18px;
-  color:rgba(255,255,255,0.4);
-  font-size:0.82rem;font-weight:500;
-  cursor:pointer;transition:all 150ms ease;
-  background:none;border:none;width:100%;
-}
-.logout-btn:hover{color:#ef4444;background:rgba(239,68,68,0.08)}
-.logout-btn svg{width:16px;height:16px}
-.user-info{
-  display:flex;align-items:center;gap:10px;
-  padding:12px 18px 6px;
-}
-.user-av{
-  width:30px;height:30px;border-radius:50%;
-  background:var(--accent);
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.65rem;font-weight:700;color:#fff;flex-shrink:0;
-}
-.user-name{font-size:0.8rem;font-weight:600;color:#fff;line-height:1.2}
-.user-role{font-size:0.65rem;color:rgba(255,255,255,0.3)}
-
-/* ── MAIN ── */
-.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
-
-/* ── TOPBAR ── */
-.topbar{
-  height:var(--nav-h);background:var(--white);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;
-  position:sticky;top:0;z-index:40;
-  box-shadow:var(--shadow);
-}
-.topbar-left{display:flex;flex-direction:column}
-.page-title{font-size:1rem;font-weight:700;color:var(--text);letter-spacing:-0.2px}
-.page-path{font-size:0.72rem;color:var(--text-3)}
-.topbar-right{display:flex;align-items:center;gap:10px}
-
-.search-box{
-  display:flex;align-items:center;gap:8px;
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:8px;padding:7px 12px;
-  transition:border-color 150ms;
-}
-.search-box:focus-within{border-color:var(--accent)}
-.search-box input{
-  background:none;border:none;outline:none;
-  font-family:inherit;font-size:0.8rem;color:var(--text);width:160px;
-}
-.search-box input::placeholder{color:var(--text-3)}
-
-.icon-btn{
-  width:34px;height:34px;border-radius:8px;
-  background:var(--bg);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:all 150ms;color:var(--text-2);
-  position:relative;
-}
-.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
-.icon-btn svg{width:16px;height:16px}
-.notif-dot{
-  position:absolute;top:6px;right:6px;
-  width:5px;height:5px;border-radius:50%;
-  background:var(--danger);border:1px solid #fff;
-}
-
-.topbar-av{
-  width:34px;height:34px;border-radius:50%;
-  background:var(--accent);
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.65rem;font-weight:700;color:#fff;cursor:pointer;
-  border:2px solid var(--accent-light);
-}
-
-/* ── CONTENT ── */
-.content{padding:24px 28px;flex:1}
-
-/* ── STAT CARDS ── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-.stat-card{
-  background:var(--white);border-radius:var(--radius);
-  padding:20px;border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  transition:box-shadow 150ms;
-  display:flex;flex-direction:column;gap:12px;
-}
-.stat-card:hover{box-shadow:var(--shadow-md)}
-.stat-top{display:flex;align-items:flex-start;justify-content:space-between}
-.stat-label{font-size:0.72rem;color:var(--text-2);font-weight:500;text-transform:uppercase;letter-spacing:0.06em}
-.stat-icon{
-  width:36px;height:36px;border-radius:9px;
-  display:flex;align-items:center;justify-content:center;
-}
-.stat-icon svg{width:18px;height:18px}
-.stat-icon.blue{background:var(--accent-light);color:var(--accent)}
-.stat-icon.green{background:var(--success-bg);color:var(--success)}
-.stat-icon.amber{background:var(--warning-bg);color:var(--warning)}
-.stat-icon.red{background:var(--danger-bg);color:var(--danger)}
-.stat-val{font-size:1.65rem;font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1}
-.stat-footer{display:flex;align-items:center;gap:6px}
-.stat-delta{font-size:0.72rem;font-weight:600;display:flex;align-items:center;gap:2px}
-.stat-delta.up{color:var(--success)}
-.stat-delta.down{color:var(--danger)}
-.stat-period{font-size:0.7rem;color:var(--text-3)}
-
-/* ── CHARTS ROW ── */
-.charts-row{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-bottom:24px}
-
-.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
-.card-head{
-  padding:16px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.card-title{font-size:0.88rem;font-weight:700;color:var(--text)}
-.card-sub{font-size:0.7rem;color:var(--text-3);margin-top:2px}
-.card-body{padding:20px}
-
-.period-tabs{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:3px}
-.ptab{
-  font-size:0.7rem;font-weight:600;padding:4px 10px;
-  border-radius:5px;border:none;background:none;
-  color:var(--text-2);cursor:pointer;transition:all 150ms;
-}
-.ptab.active{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
-
-/* chart wrappers */
-.chart-area{position:relative;height:200px;margin-top:8px}
-.donut-area{display:flex;flex-direction:column;align-items:center;gap:16px}
-.donut-canvas-wrap{position:relative;width:140px;height:140px}
-.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.donut-center-val{font-size:1.2rem;font-weight:800;color:var(--text)}
-.donut-center-lbl{font-size:0.6rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em}
-.legend{width:100%;display:flex;flex-direction:column;gap:8px}
-.leg-item{display:flex;align-items:center;gap:8px}
-.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.leg-lbl{font-size:0.75rem;color:var(--text-2);flex:1}
-.leg-val{font-size:0.75rem;font-weight:600;color:var(--text)}
-.leg-pct{font-size:0.68rem;color:var(--text-3);margin-left:2px}
-
-/* ── TABLE ── */
-.table-tools{display:flex;align-items:center;gap:8px}
-.btn{
-  font-family:inherit;font-size:0.75rem;font-weight:600;
-  padding:7px 14px;border-radius:7px;border:none;cursor:pointer;
-  display:flex;align-items:center;gap:5px;transition:all 150ms;
-}
-.btn svg{width:13px;height:13px}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:#3d5ce8}
-.btn-outline{background:#fff;border:1px solid var(--border);color:var(--text-2)}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse}
-thead tr{border-bottom:1px solid var(--border)}
-th{
-  padding:10px 16px;font-size:0.68rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:0.08em;
-  color:var(--text-3);text-align:left;white-space:nowrap;background:var(--bg);
-}
-th:last-child{text-align:right}
-tbody tr{border-bottom:1px solid #f3f4f6;transition:background 120ms}
-tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:#fafbff}
-td{padding:12px 16px;font-size:0.8rem;vertical-align:middle}
-td:last-child{text-align:right}
-
-.order-id{font-family:'JetBrains Mono',monospace;font-size:0.73rem;color:var(--accent);font-weight:500}
-.cust-cell{display:flex;align-items:center;gap:10px}
-.cust-av{
-  width:28px;height:28px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.6rem;font-weight:700;color:#fff;flex-shrink:0;
-}
-.cust-name{font-weight:600;color:var(--text)}
-.cust-email{font-size:0.68rem;color:var(--text-3)}
-.amount{font-weight:700;color:var(--text)}
-.date-cell{color:var(--text-2)}
-
-.badge{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:3px 8px;border-radius:5px;
-  font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
-}
-.badge::before{content:'';width:4px;height:4px;border-radius:50%}
-.badge.delivered{background:var(--success-bg);color:var(--success)}
-.badge.delivered::before{background:var(--success)}
-.badge.processing{background:var(--info-bg);color:var(--info)}
-.badge.processing::before{background:var(--info)}
-.badge.cancelled{background:var(--danger-bg);color:var(--danger)}
-.badge.cancelled::before{background:var(--danger)}
-.badge.shipped{background:var(--warning-bg);color:var(--warning)}
-.badge.shipped::before{background:var(--warning)}
-
-.tbl-footer{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 20px;border-top:1px solid var(--border);
-}
-.tbl-info{font-size:0.72rem;color:var(--text-3)}
-.pagination{display:flex;gap:3px}
-.pg-btn{
-  width:27px;height:27px;border-radius:6px;border:1px solid var(--border);
-  background:#fff;font-size:0.72rem;font-weight:600;color:var(--text-2);
-  cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;
-  transition:all 120ms;
-}
-.pg-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.pg-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
-
-/* ── BOTTOM ROW ── */
-.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
-
-/* top products */
-.prod-item{
-  display:flex;align-items:center;gap:12px;
-  padding:10px 0;border-bottom:1px solid #f3f4f6;
-}
-.prod-item:last-child{border-bottom:none}
-.prod-rank{width:20px;font-size:0.65rem;font-weight:700;color:var(--text-3);text-align:center;flex-shrink:0}
-.prod-rank.top{color:var(--gold)}
-.prod-name{font-size:0.8rem;font-weight:600;color:var(--text);flex:1}
-.prod-cat{font-size:0.65rem;color:var(--text-3)}
-.prod-sold{font-size:0.72rem;color:var(--text-2);white-space:nowrap}
-.prod-rev{font-size:0.78rem;font-weight:700;color:var(--text);white-space:nowrap}
-.prod-bar-wrap{height:3px;background:#f3f4f6;border-radius:2px;margin-top:3px}
-.prod-bar{height:100%;border-radius:2px}
-
-/* quick stats */
-.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.quick-card{
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:8px;padding:14px;
-}
-.quick-val{font-size:1.25rem;font-weight:800;color:var(--text);letter-spacing:-0.3px}
-.quick-lbl{font-size:0.68rem;color:var(--text-3);margin-top:3px}
-.quick-delta{font-size:0.68rem;font-weight:600;margin-top:6px}
-.quick-delta.up{color:var(--success)}
-.quick-delta.down{color:var(--danger)}
-
-/* ── RECENT ACTIVITY ── */
-.activity-list{display:flex;flex-direction:column;gap:0}
-.act-item{
-  display:flex;align-items:flex-start;gap:12px;
-  padding:12px 0;border-bottom:1px solid #f3f4f6;
-}
-.act-item:last-child{border-bottom:none}
-.act-icon{
-  width:30px;height:30px;border-radius:8px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-}
-.act-icon svg{width:14px;height:14px}
-.act-icon.blue{background:var(--accent-light);color:var(--accent)}
-.act-icon.green{background:var(--success-bg);color:var(--success)}
-.act-icon.amber{background:var(--warning-bg);color:var(--warning)}
-.act-icon.red{background:var(--danger-bg);color:var(--danger)}
-.act-text{font-size:0.78rem;color:var(--text-2);line-height:1.5;flex:1}
-.act-text strong{color:var(--text);font-weight:600}
-.act-time{font-size:0.67rem;color:var(--text-3);margin-top:2px}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;display:inline-block}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-
-/* ── ANIMATIONS ── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.stat-card{animation:fadeUp 350ms ease both}
-.stat-card:nth-child(1){animation-delay:0ms}
-.stat-card:nth-child(2){animation-delay:50ms}
-.stat-card:nth-child(3){animation-delay:100ms}
-.stat-card:nth-child(4){animation-delay:150ms}
-</style>
-</head>
-<body>
-
-<!-- ── SIDEBAR ── -->
-<aside class="sidebar">
-  <div class="sidebar-brand">
-    <div class="brand-icon">L</div>
-    <div>
-      <div class="brand-name">LUXE</div>
-      <div class="brand-sub">Admin Panel</div>
-    </div>
-  </div>
-
-  <div class="nav-group">
-    <div class="nav-label">Overview</div>
-    <a class="nav-item active" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Analytics
-    </a>
-  </div>
-
-  <div class="nav-group">
-    <div class="nav-label">Management</div>
-    <a class="nav-item" href="/admin/users">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      User Management
-     
-    </a>
-    <a class="nav-item" href="/admin/order-management">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M9 8h2"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-      Orders
-    </a>
-    <a class="nav-item" href="/admin/products">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 00-1 1v10a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1z"/><path d="M16 3H8l-1 4h10l-1-4z"/></svg>
-      Product Management
-    </a>
-    <a class="nav-item" href="/admin/category">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 00-1 1v10a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1z"/><path d="M16 3H8l-1 4h10l-1-4z"/></svg>
-      category Management
-    </a>
-  </div>
-
-  <div class="nav-group">
-    <div class="nav-label">Marketing</div>
-    <a class="nav-item" href="/admin/offer">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>
-      Offer Management
-    </a>
-    <a class="nav-item" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>
-      Banner Management
-    </a>
-    <a class="nav-item" href="/admin/coupons">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4M15 10l4 4-4 4"/></svg>
-      Coupon Management
-      <span class="nav-badge amber">6</span>
-    </a>
-  </div>
-
-  <div class="nav-group">
-    <div class="nav-label">Finance</div>
-    <a class="nav-item" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/><circle cx="9" cy="12" r="3" fill="currentColor" stroke="none" opacity="0.3"/></svg>
-      Refund Management
-      <span class="nav-badge red">2</span>
-    </a>
-  </div>
-
-  <div class="sidebar-footer">
-    <div class="user-info">
-    
-    <form action="/admin/logout" method="POST" style="margin:0;">
-  <button type="submit" class="logout-btn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
-    </svg>
-    Log out
-  </button>
-</form>
-
-  </div>
-</aside>
-
-<!-- ── MAIN ── -->
-<div class="main">
-
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="page-title">Analytics Dashboard</div>
-      <div class="page-path">Home / Analytics · October 2024</div>
-    </div>
-    <div class="topbar-right">
-      <div class="search-box">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" placeholder="Search…"/>
-      </div>
-      <div class="icon-btn" title="Notifications">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <div class="notif-dot"></div>
-      </div>
-      <div class="icon-btn" title="Settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      </div>
-      <div class="topbar-av">EH</div>
-    </div>
-  </div>
-
-  <!-- Content -->
-  <div class="content">
-
-    <!-- Stat Cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-label">Total Revenue</div>
-          <div class="stat-icon blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-          </div>
-        </div>
-        <div class="stat-val">1.28M</div>
-        <div class="stat-footer">
-          <span class="stat-delta up">▲ 12.5%</span>
-          <span class="stat-period">vs last month</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-label">Total Orders</div>
-          <div class="stat-icon amber">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M9 8h2"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          </div>
-        </div>
-        <div class="stat-val">4,921</div>
-        <div class="stat-footer">
-          <span class="stat-delta up">▲ 8.2%</span>
-          <span class="stat-period">vs last month</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-label">Active Users</div>
-          <div class="stat-icon green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          </div>
-        </div>
-        <div class="stat-val">12,840</div>
-        <div class="stat-footer">
-          <span class="stat-delta up">▲ 0.4%</span>
-          <span class="stat-period">vs last month</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-label">Pending Refunds</div>
-          <div class="stat-icon red">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-          </div>
-        </div>
-        <div class="stat-val">14,200</div>
-        <div class="stat-footer">
-          <span class="stat-delta down">▼ 2 requests</span>
-          <span class="stat-period">pending review</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="charts-row">
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <div class="card-title">Monthly Revenue</div>
-            <div class="card-sub">Jan – Oct 2024</div>
-          </div>
-          <div class="period-tabs">
-            <button class="ptab">Weekly</button>
-            <button class="ptab active">Monthly</button>
-            <button class="ptab">Yearly</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="chart-area">
-            <canvas id="revenueChart" role="img" aria-label="Monthly revenue bar chart Jan to Oct 2024">Revenue peaks in May and August.</canvas>
-          </div>
-        </div>
-      </div>
-
-    
-    </div>
-
-    <!-- Orders Table -->
-    <div class="card" style="margin-bottom:24px">
-      <div class="card-head">
-        <div>
-          <div class="card-title">Recent Orders</div>
-          <div class="card-sub">Last 24 hours · <span style="color:var(--danger);font-weight:600">4 pending</span></div>
-        </div>
-        <div class="table-tools">
-          <button class="btn btn-outline">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-            Filter
-          </button>
-          <button class="btn btn-outline">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            Export
-          </button>
-          <button class="btn btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            New Order
-          </button>
-        </div>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Date</th>
-              <th>Items</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="order-id">#LX-92841</span></td>
-              <td><div class="cust-cell"><div class="cust-av" style="background:#4f6ef7">JW</div><div><div class="cust-name">Julianne Waters</div><div class="cust-email">j.waters@mail.com</div></div></div></td>
-              <td><span class="date-cell">Oct 24, 2024</span></td>
-              <td style="color:var(--text-2)">3 items</td>
-              <td><span class="amount">1,240.00</span></td>
-              <td><span class="badge delivered">Delivered</span></td>
-            </tr>
-            <tr>
-              <td><span class="order-id">#LX-92842</span></td>
-              <td><div class="cust-cell"><div class="cust-av" style="background:#f59e0b">AS</div><div><div class="cust-name">Alexander Sterling</div><div class="cust-email">a.sterling@mail.com</div></div></div></td>
-              <td><span class="date-cell">Oct 24, 2024</span></td>
-              <td style="color:var(--text-2)">2 items</td>
-              <td><span class="amount">890.00</span></td>
-              <td><span class="badge processing">Processing</span></td>
-            </tr>
-            <tr>
-              <td><span class="order-id">#LX-92843</span></td>
-              <td><div class="cust-cell"><div class="cust-av" style="background:#ef4444">MK</div><div><div class="cust-name">Marcus Knight</div><div class="cust-email">m.knight@mail.com</div></div></div></td>
-              <td><span class="date-cell">Oct 23, 2024</span></td>
-              <td style="color:var(--text-2)">5 items</td>
-              <td><span class="amount">2,150.00</span></td>
-              <td><span class="badge cancelled">Cancelled</span></td>
-            </tr>
-            <tr>
-              <td><span class="order-id">#LX-92844</span></td>
-              <td><div class="cust-cell"><div class="cust-av" style="background:#10b981">SC</div><div><div class="cust-name">Sophia Chen</div><div class="cust-email">s.chen@mail.com</div></div></div></td>
-              <td><span class="date-cell">Oct 23, 2024</span></td>
-              <td style="color:var(--text-2)">1 item</td>
-              <td><span class="amount">495.00</span></td>
-              <td><span class="badge shipped">Shipped</span></td>
-            </tr>
-            <tr>
-              <td><span class="order-id">#LX-92845</span></td>
-              <td><div class="cust-cell"><div class="cust-av" style="background:#8b5cf6">RL</div><div><div class="cust-name">Rafael Lowe</div><div class="cust-email">r.lowe@mail.com</div></div></div></td>
-              <td><span class="date-cell">Oct 22, 2024</span></td>
-              <td style="color:var(--text-2)">4 items</td>
-              <td><span class="amount">3,310.00</span></td>
-              <td><span class="badge delivered">Delivered</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="tbl-footer">
-        <span class="tbl-info">Showing 5 of 4,921 orders</span>
-        <div class="pagination">
-          <button class="pg-btn">‹</button>
-          <button class="pg-btn active">1</button>
-          <button class="pg-btn">2</button>
-          <button class="pg-btn">3</button>
-          <button class="pg-btn">›</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Row -->
-    <div class="bottom-row">
-      <!-- Top Products -->
-      
-
-      <!-- Quick Stats + Activity -->
-      <div style="display:flex;flex-direction:column;gap:16px">
-
-        <!-- Quick Stats -->
-        
-        <!-- Activity -->
-       
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<script>
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-      window.location.reload();
-    }
-  });
-
-
-
-const accent='#4f6ef7', gold='#f59e0b', green='#10b981', red='#ef4444';
-const gridColor='rgba(0,0,0,0.05)', textMuted='#9ca3af';
-
-const rCtx=document.getElementById('revenueChart');
-if(rCtx){
-  new Chart(rCtx,{
-    type:'bar',
-    data:{
-      labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'],
-      datasets:[
-        {label:'Revenue',data:[98,87,120,110,155,132,145,168,140,128],
-         backgroundColor:accent+'cc',borderRadius:5,borderSkipped:false,hoverBackgroundColor:accent},
-        {label:'Last Year',data:[80,74,98,92,120,110,118,140,115,105],
-         backgroundColor:'rgba(0,0,0,0.06)',borderRadius:5,borderSkipped:false,hoverBackgroundColor:'rgba(0,0,0,0.1)'}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:c=>+c.raw+'k'}}
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>AdminPro - Sales Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary": "#565e74",
+            "outline-variant": "#c3c6d7",
+            "surface-container-low": "#f2f4f6",
+            "surface-variant": "#e0e3e5",
+            "primary": "#004ac6",
+            "on-surface-variant": "#434655",
+            "background": "#f7f9fb",
+            "error": "#ba1a1a",
+            "on-surface": "#191c1e",
+            "surface-container": "#eceef0",
+            "outline": "#737686"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "xl": "32px",
+            "md": "16px",
+            "base": "4px",
+            "gutter": "24px",
+            "xs": "4px",
+            "lg": "24px",
+            "sidebar-width": "280px",
+            "sm": "8px"
+          },
+          "fontFamily": { "body-lg": ["Inter"] },
+          "fontSize": {
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+            "headline-xl": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }]
+          }
+        },
       },
-      scales:{
-        x:{grid:{color:gridColor},ticks:{color:textMuted,font:{size:11,family:'Plus Jakarta Sans'}}},
-        y:{grid:{color:gridColor},ticks:{color:textMuted,font:{size:11},callback:v=>+v+'k'},beginAtZero:true}
-      },animation:{duration:900}
     }
-  });
-}
-
-const dCtx=document.getElementById('donutChart');
-if(dCtx){
-  new Chart(dCtx,{
-    type:'doughnut',
-    data:{
-      labels:['Tops','Bottoms','Footwear','Accessories'],
-      datasets:[{data:[35,25,22,18],backgroundColor:[accent,gold,green,red],borderWidth:0,hoverOffset:5}]
-    },
-    options:{
-      cutout:'72%',responsive:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}%`}}},
-      animation:{animateScale:true,duration:900}
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
     }
-  });
-}
 
-document.querySelectorAll('.ptab').forEach(btn=>{
-  btn.addEventListener('click',function(){
-    this.closest('.period-tabs').querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
-    this.classList.add('active');
-  });
-});
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
 
-document.querySelectorAll('.nav-item').forEach(item=>{
-  item.addEventListener('click',function(e){
-    
-    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-    this.classList.add('active');
-  });
-});
-</script>
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+
+    /* Pagination button styles */
+    .page-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #e0e3e5;
+      background: #fff;
+      color: #737686;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      background: #f2f4f6;
+      color: #191c1e;
+    }
+
+    .page-btn.active {
+      background: #004ac6;
+      color: #fff;
+      border-color: #004ac6;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface">
+
+  <!-- SideNavBar -->
+  <aside class="fixed left-0 top-0 h-full w-sidebar-width flex flex-col p-lg bg-[#0c1424] z-50">
+    <div class="mb-xl px-4">
+      <h1 class="text-headline-lg font-bold text-white">AdminPro</h1>
+      <p class="text-label-sm text-[#a3aac4]">Enterprise Suite</p>
+    </div>
+
+    <nav class="flex-1 space-y-1">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white border-l-4 border-[#90abff] bg-[#1f2b49] font-bold text-sm"
+        href="/admin/dashboard">
+        <span class="material-symbols-outlined text-lg">dashboard</span>Dashboard
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/order-management">
+        <span class="material-symbols-outlined text-lg">shopping_cart</span>Orders
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/products">
+        <span class="material-symbols-outlined text-lg">inventory_2</span>Products
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/users">
+        <span class="material-symbols-outlined text-lg">group</span>Users
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/analystic">
+        <span class="material-symbols-outlined text-lg">monitoring</span>Analytics
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/coupons">
+        <span class="material-symbols-outlined text-lg">confirmation_number</span>Coupons
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/category">
+        <span class="material-symbols-outlined text-lg">category</span>Categories
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/offer">
+        <span class="material-symbols-outlined text-lg">local_offer</span>Offers
+      </a>
+     
+    </nav>
+
+    <div class="mt-auto px-4 py-lg border-t border-[#1f2b49] flex items-center gap-sm">
+      <div class="overflow-hidden">
+        <p class="text-label-md font-semibold text-white truncate">Organization Logo</p>
+        <p class="text-label-sm text-[#a3aac4] truncate">Premium Admin</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- TopAppBar -->
+  <!-- <header
+    class="flex justify-between items-center h-16 px-lg ml-sidebar-width w-[calc(100%-280px)] bg-white sticky top-0 z-40 border-b border-surface-variant">
+    <div class="flex items-center gap-md flex-1">
+      <div class="relative w-full max-w-md">
+        <span
+          class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+        <input
+          class="w-full bg-surface-container-low border-none rounded-xl pl-10 py-2 font-body-sm focus:ring-2 focus:ring-primary/20"
+          placeholder="Search analytics, products, transactions..." type="text" />
+      </div>
+    </div>
+    <div class="flex items-center gap-lg">
+      <button class="font-label-md text-label-md text-on-surface-variant hover:text-primary">Settings</button>
+      <button
+        class="bg-primary text-white px-md py-sm rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">Profile</button>
+    </div>
+  </header> -->
+
+  <!-- Main Content -->
+  <main class="ml-sidebar-width p-lg min-h-[calc(100vh-64px)] overflow-y-auto">
+
+    <section class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-lg">
+      <div>
+        <h2 class="font-headline-xl text-headline-xl text-on-surface">Sales Dashboard</h2>
+        <p class="font-body-md text-body-md text-outline">Real-time performance metrics and revenue tracking.</p>
+      </div>
+    </section>
+
+    <% const revenueSeries=(chartData && chartData.data) ? chartData.data : { labels: [], values: [] }; const
+      fullRevenue=chartData && typeof chartData.fullRevenue==="number" ? chartData.fullRevenue : 0; const
+      totalOrders=chartData && typeof chartData.totalOrders==="number" ? chartData.totalOrders : 0; const tabs=[ {
+      key: "weekly" , label: "Weekly" }, { key: "monthly" , label: "Monthly" }, { key: "yearly" , label: "Yearly" } ];
+      %>
+
+      <!-- Revenue Performance -->
+      <div class="bg-white rounded-xl shadow-sm border border-surface-variant overflow-hidden mb-lg">
+        <div
+          class="p-lg border-b border-surface-container-low flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+          <div>
+            <h3 class="font-headline-md text-headline-md text-on-surface">Revenue Performance</h3>
+            <div class="flex items-center gap-sm mt-1">
+              <span class="font-headline-lg text-headline-lg text-primary">
+                ₹<%= fullRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+              </span>
+              <span
+                class="text-secondary bg-surface-container-low px-2 py-0.5 rounded-full font-label-sm text-label-sm">
+                <%= totalOrders %> units sold
+              </span>
+            </div>
+          </div>
+          <div class="flex p-1 bg-surface-container-low rounded-xl">
+            <% tabs.forEach(tab=> { %>
+              <a href="/admin/dashboard?filter=<%= tab.key %>"
+                class="px-md py-1.5 rounded-lg text-label-md font-label-md transition-colors <%= filter === tab.key ? 'bg-white shadow-sm text-primary' : 'text-outline hover:text-on-surface' %>">
+                <%= tab.label %>
+              </a>
+              <% }) %>
+          </div>
+        </div>
+
+        <div class="p-lg h-[320px] relative">
+          <% if (!revenueSeries.labels || revenueSeries.labels.length===0) { %>
+            <div class="absolute inset-0 flex items-center justify-center text-outline font-body-sm">
+              No revenue data available for this period.
+            </div>
+            <% } else { %>
+              <canvas id="revenueChart"></canvas>
+              <% } %>
+        </div>
+      </div>
+
+      <!-- Insights Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-lg mb-lg">
+
+        <!-- Top Products -->
+        <div class="bg-white rounded-xl shadow-sm border border-surface-variant p-lg">
+          <div class="flex justify-between items-center mb-xl">
+            <h3 class="font-headline-md text-headline-md text-on-surface">Top 10 Products</h3>
+          </div>
+          <% if (!topProducts || topProducts.length===0) { %>
+            <p class="text-body-sm text-outline">No product sales recorded yet.</p>
+            <% } else { %>
+              <div class="space-y-md">
+                <% const maxUnitsSold=topProducts[0].unitsSold || 1; %>
+                  <% topProducts.forEach(product=> { %>
+                    <div class="space-y-xs">
+                      <div class="flex justify-between text-body-sm font-medium">
+                        <span>
+                          <%= product.name %>
+                        </span>
+                        <span class="text-primary">₹<%= (product.revenue || 0).toLocaleString('en-IN', {
+                            minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                      </div>
+                      <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+                        <div class="h-full bg-primary rounded-full"
+                          style="width: <%= Math.min((product.unitsSold / maxUnitsSold) * 100, 100) %>%"></div>
+                      </div>
+                    </div>
+                    <% }) %>
+              </div>
+              <% } %>
+        </div>
+
+        <!-- Category Performance -->
+        <div class="bg-white rounded-xl shadow-sm border border-surface-variant p-lg">
+          <div class="flex justify-between items-center mb-xl">
+            <h3 class="font-headline-md text-headline-md text-on-surface">Top 10 Categories</h3>
+          </div>
+          <% if (!topCategories || topCategories.length===0) { %>
+            <p class="text-body-sm text-outline">No category sales recorded yet.</p>
+            <% } else { %>
+              <div class="space-y-md">
+                <% const maxCategoryUnitsSold=topCategories[0].unitsSold || 1; %>
+                  <% topCategories.forEach(cat=> { %>
+                    <div class="space-y-xs">
+                      <div class="flex justify-between text-body-sm font-medium">
+                        <span>
+                          <%= cat.name %>
+                        </span>
+                        <span class="text-primary">₹<%= (cat.revenue || 0).toLocaleString('en-IN', {
+                            minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                      </div>
+                      <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+                        <div class="h-full bg-primary rounded-full"
+                          style="width: <%= Math.min((cat.unitsSold / maxCategoryUnitsSold) * 100, 100) %>%"></div>
+                      </div>
+                    </div>
+                    <% }) %>
+              </div>
+              <% } %>
+        </div>
+      </div>
+
+  <%
+    // ─── Net Balance Fix ───────────────────────────────────────────────────────
+    // Previously: netBalance = ledger[last].runningBalance
+    // Bug: if runningBalance isn't computed server-side, it comes through as 0.
+    // Fix: recompute runningBalance client-side from credit/debit on each row,
+    //       and derive the header totals + net from the full array, not the last row.
+    //
+    // Also ensure ledger rows always have a valid runningBalance by computing it
+    // here if the server didn't supply one.
+    let runningTotal = 0;
+    const ledgerWithBalance = (ledger || []).map(entry => {
+      runningTotal += (entry.credit || 0) - (entry.debit || 0);
+      return { ...entry, runningBalance: entry.runningBalance || runningTotal };
+    });
+
+    const ledgerTotals = ledgerWithBalance.reduce((acc, entry) => {
+      acc.credit += entry.credit || 0;
+      acc.debit  += entry.debit  || 0;
+      return acc;
+    }, { credit: 0, debit: 0 });
+
+    // Net balance = last row's running balance (or sum of credits minus debits)
+    const netBalance = ledgerWithBalance.length > 0
+      ? ledgerWithBalance[ledgerWithBalance.length - 1].runningBalance
+      : 0;
+  %>
+
+        <!-- Ledger Book -->
+        <section class="bg-white rounded-xl shadow-sm border border-surface-variant overflow-hidden">
+          <div
+            class="p-lg border-b border-surface-container-low flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+            <div>
+              <h3 class="font-headline-md text-headline-md text-on-surface">Ledger Book</h3>
+              <p class="text-body-sm text-outline mt-1">Last 30 days — completed sales (credit) vs returns (debit)</p>
+            </div>
+            <div class="flex items-center gap-lg">
+              <div class="text-right">
+                <p class="text-label-sm text-outline uppercase tracking-wider">Total Credit</p>
+                <p class="font-headline-md text-emerald-600">+₹<%= ledgerTotals.credit.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-label-sm text-outline uppercase tracking-wider">Total Debit</p>
+                <p class="font-headline-md text-error">-₹<%= ledgerTotals.debit.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                </p>
+              </div>
+              <div class="text-right border-l border-surface-variant pl-lg">
+                <p class="text-label-sm text-outline uppercase tracking-wider">Net Balance</p>
+                <p class="font-headline-md text-on-surface">₹<%= netBalance.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <% if (!ledgerWithBalance || ledgerWithBalance.length===0) { %>
+            <div class="p-lg text-body-sm text-outline">No transactions in the last 30 days.</div>
+            <% } else { %>
+              <!-- Table (rows injected by JS pagination) -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead class="bg-surface-bright border-b border-surface-variant sticky top-0">
+                    <tr>
+                      <th class="px-lg py-md font-label-md text-label-md text-outline uppercase tracking-wider">Date
+                      </th>
+                      <th
+                        class="px-lg py-md font-label-md text-label-md text-outline uppercase tracking-wider text-right">
+                        Credit</th>
+                      <th
+                        class="px-lg py-md font-label-md text-label-md text-outline uppercase tracking-wider text-right">
+                        Debit</th>
+                      <th
+                        class="px-lg py-md font-label-md text-label-md text-outline uppercase tracking-wider text-right">
+                        Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ledger-tbody" class="divide-y divide-surface-container-low font-body-sm text-body-sm">
+                    <%# rows rendered by renderLedgerPage() JS below %>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination controls -->
+              <div class="flex items-center justify-between px-lg py-md border-t border-surface-container-low">
+                <span id="ledger-range-label" class="text-body-sm text-outline"></span>
+                <div id="ledger-pagination" class="flex items-center gap-1"></div>
+              </div>
+              <% } %>
+        </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // ── Revenue chart ──────────────────────────────────────────────────────────
+    const revenueSeries = JSON.parse('<%- JSON.stringify(revenueSeries).replace(/'/g, "\\'") %>');
+
+    const canvas = document.getElementById('revenueChart');
+    if (canvas && revenueSeries.labels && revenueSeries.labels.length > 0) {
+      new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: revenueSeries.labels,
+          datasets: [{
+            label: 'Revenue',
+            data: revenueSeries.values,
+            borderColor: '#004ac6',
+            backgroundColor: 'rgba(0, 74, 198, 0.1)',
+            fill: true,
+            tension: 0.4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (value) => '₹' + value.toLocaleString('en-IN')
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ── Ledger pagination ──────────────────────────────────────────────────────
+    const LEDGER_DATA = JSON.parse('<%- JSON.stringify(ledgerWithBalance).replace(/'/g, "\\'") %>');
+    const ROWS_PER_PAGE = 10;
+    let currentPage = 1;
+
+    function fmtINR(amount) {
+      return '₹' + Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function totalPages() {
+      return Math.max(1, Math.ceil(LEDGER_DATA.length / ROWS_PER_PAGE));
+    }
+
+    function renderLedgerPage(page) {
+      const tbody = document.getElementById('ledger-tbody');
+      if (!tbody) return;
+
+      const start = (page - 1) * ROWS_PER_PAGE;
+      const end = Math.min(start + ROWS_PER_PAGE, LEDGER_DATA.length);
+      const slice = LEDGER_DATA.slice(start, end);
+
+      tbody.innerHTML = slice.map(entry => `
+      <tr class="hover:bg-surface-container-low transition-colors">
+        <td class="px-lg py-md font-medium">${entry.date}</td>
+        <td class="px-lg py-md text-right font-medium text-emerald-600">
+          ${entry.credit > 0 ? '+' + fmtINR(entry.credit) : '—'}
+        </td>
+        <td class="px-lg py-md text-right font-medium" style="color:#ba1a1a">
+          ${entry.debit > 0 ? '-' + fmtINR(entry.debit) : '—'}
+        </td>
+        <td class="px-lg py-md text-right font-semibold text-on-surface">
+          ${fmtINR(entry.runningBalance)}
+        </td>
+      </tr>
+    `).join('');
+
+      // Range label
+      const label = document.getElementById('ledger-range-label');
+      if (label) {
+        label.textContent = `Showing ${start + 1}–${end} of ${LEDGER_DATA.length} entries`;
+      }
+
+      renderPagination(page);
+    }
+
+    function renderPagination(page) {
+      const container = document.getElementById('ledger-pagination');
+      if (!container) return;
+      const tp = totalPages();
+
+      // Build page numbers to show: always first, last, current ±1, with ellipsis
+      const pages = new Set([1, tp, page, page - 1, page + 1].filter(p => p >= 1 && p <= tp));
+      const sorted = [...pages].sort((a, b) => a - b);
+
+      let html = `
+      <button class="page-btn" id="pg-prev" ${page === 1 ? 'disabled' : ''} onclick="goToPage(${page - 1})">
+        <span class="material-symbols-outlined" style="font-size:16px;line-height:1">chevron_left</span>
+      </button>`;
+
+      let prev = null;
+      for (const p of sorted) {
+        if (prev !== null && p - prev > 1) {
+          html += `<span class="page-btn" style="cursor:default;border:none;color:#737686">…</span>`;
+        }
+        html += `<button class="page-btn ${p === page ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+        prev = p;
+      }
+
+      html += `
+      <button class="page-btn" id="pg-next" ${page === tp ? 'disabled' : ''} onclick="goToPage(${page + 1})">
+        <span class="material-symbols-outlined" style="font-size:16px;line-height:1">chevron_right</span>
+      </button>`;
+
+      container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      const tp = totalPages();
+      if (page < 1 || page > tp) return;
+      currentPage = page;
+      renderLedgerPage(page);
+    }
+
+    // Initial render
+    if (LEDGER_DATA.length > 0) {
+      renderLedgerPage(1);
+    }
+  </script>
 </body>
+
 </html>

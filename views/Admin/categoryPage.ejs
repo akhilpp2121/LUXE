@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html class="dark" lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -10,8 +11,11 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
 
     <script id="tailwind-config">
         tailwind.config = {
@@ -59,61 +63,106 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
         }
-        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: #1f2b49; border-radius: 10px; }
-        .primary-gradient { background: linear-gradient(135deg, #316bf3 0%, #90abff 100%); }
+
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: #1f2b49;
+            border-radius: 10px;
+        }
+
+        .primary-gradient {
+            background: linear-gradient(135deg, #316bf3 0%, #90abff 100%);
+        }
+
         .glass-panel {
             background: rgba(6, 14, 32, 0.6);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .tooltip-wrap { position: relative; }
+
+        .tooltip-wrap {
+            position: relative;
+        }
+
         .tooltip-wrap .tooltip-text {
-            visibility: hidden; opacity: 0;
-            background: #141f38; color: #dee5ff;
-            text-align: center; border-radius: 6px;
-            padding: 4px 10px; font-size: 11px; font-weight: 600; white-space: nowrap;
-            position: absolute; z-index: 10; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-            border: 1px solid rgba(255,255,255,0.08);
+            visibility: hidden;
+            opacity: 0;
+            background: #141f38;
+            color: #dee5ff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            position: absolute;
+            z-index: 10;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             transition: opacity 0.15s;
         }
-        .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+        .tooltip-wrap:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
+
 <body class="bg-background text-on-surface relative">
 
     <!-- Background glows -->
-    <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] pointer-events-none z-0"></div>
-    <div class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-tertiary/10 blur-[120px] pointer-events-none z-0"></div>
+    <div
+        class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] pointer-events-none z-0">
+    </div>
+    <div
+        class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-tertiary/10 blur-[120px] pointer-events-none z-0">
+    </div>
 
     <!-- Sidebar -->
-    <aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#091328]/90 backdrop-blur-xl border-r border-white/5 sidebar-scroll flex flex-col gap-2 py-8 z-50">
+    <aside
+        class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#091328]/90 backdrop-blur-xl border-r border-white/5 sidebar-scroll flex flex-col gap-2 py-8 z-50">
         <div class="px-8 mb-10">
             <h1 class="font-['Outfit'] text-3xl font-black text-white tracking-tight drop-shadow-md">Luxe Admin</h1>
             <p class="text-primary-dim text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Executive Portal</p>
         </div>
         <nav class="flex flex-col gap-2 px-4">
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="/admin/dashboard">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50"
+                href="/admin/dashboard">
                 <span class="material-symbols-outlined text-lg opacity-70">dashboard</span><span>Dashboard</span>
             </a>
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="#">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50"
+                href="#">
                 <span class="material-symbols-outlined text-lg opacity-70">shopping_cart</span><span>Orders</span>
             </a>
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="/admin/products">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50"
+                href="/admin/products">
                 <span class="material-symbols-outlined text-lg opacity-70">inventory_2</span><span>Products</span>
             </a>
-            <a class="text-white bg-primary-dim/10 border border-primary-dim/20 shadow-[0_0_15px_rgba(49,107,243,0.1)] px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-bold flex items-center gap-4" href="/admin/category">
+            <a class="text-white bg-primary-dim/10 border border-primary-dim/20 shadow-[0_0_15px_rgba(49,107,243,0.1)] px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-bold flex items-center gap-4"
+                href="/admin/category">
                 <span class="material-symbols-outlined text-lg text-primary">category</span><span>Categories</span>
             </a>
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="/admin/users">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50"
+                href="/admin/users">
                 <span class="material-symbols-outlined text-lg opacity-70">group</span><span>Users</span>
             </a>
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="#">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50"
+                href="#">
                 <span class="material-symbols-outlined text-lg opacity-70">analytics</span><span>Analytics</span>
             </a>
-            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50" href="#">
+            <a class="text-[#a3aac4] hover:text-white px-4 py-3 rounded-xl transition-all font-['Plus_Jakarta_Sans'] text-sm font-semibold flex items-center gap-4 hover:bg-surface-bright/50"
+                href="#">
                 <span class="material-symbols-outlined text-lg opacity-70">image</span><span>Banners</span>
             </a>
         </nav>
@@ -127,17 +176,14 @@
             <form method="GET" action="/admin/category" class="flex items-center justify-between gap-3 w-full">
 
                 <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <h2 class="font-['Outfit'] text-2xl font-bold text-white tracking-wide flex-shrink-0">Categories</h2>
+                    <h2 class="font-['Outfit'] text-2xl font-bold text-white tracking-wide flex-shrink-0">Categories
+                    </h2>
 
                     <div class="relative flex-1 max-w-sm group">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl transition-colors group-focus-within:text-primary">search</span>
-                        <input
-                            name="search"
-                            type="text"
-                            value="<%= search %>"
-                            placeholder="Search categories..."
-                            class="w-full bg-surface-container-low/50 border border-white/5 focus:bg-surface-container focus:border-primary/50 focus:ring-4 focus:ring-primary/10 text-sm py-2.5 pl-10 pr-4 text-white placeholder-on-surface-variant rounded-xl transition-all outline-none"
-                        />
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl transition-colors group-focus-within:text-primary">search</span>
+                        <input name="search" type="text" value="<%= search %>" placeholder="Search categories..."
+                            class="w-full bg-surface-container-low/50 border border-white/5 focus:bg-surface-container focus:border-primary/50 focus:ring-4 focus:ring-primary/10 text-sm py-2.5 pl-10 pr-4 text-white placeholder-on-surface-variant rounded-xl transition-all outline-none" />
                     </div>
                 </div>
 
@@ -145,15 +191,15 @@
 
                     <select name="status"
                         class="bg-surface-container-low border border-white/10 text-on-surface-variant text-sm py-2.5 px-3 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer">
-                        <option value="" <%- status === "" ? "selected" : "" %>>All Status</option>
-                        <option value="true" <%- status === "true" ? "selected" : "" %>>Active</option>
-                        <option value="false" <%- status === "false" ? "selected" : "" %>>Inactive</option>
+                        <option value="" <%- status==="" ? "selected" : "" %>>All Status</option>
+                        <option value="true" <%- status==="true" ? "selected" : "" %>>Active</option>
+                        <option value="false" <%- status==="false" ? "selected" : "" %>>Inactive</option>
                     </select>
 
                     <select name="sort"
                         class="bg-surface-container-low border border-white/10 text-on-surface-variant text-sm py-2.5 px-3 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer">
-                        <option value="latest" <%- sort === "latest" ? "selected" : "" %>>Latest</option>
-                        <option value="oldest" <%- sort === "oldest" ? "selected" : "" %>>Oldest</option>
+                        <option value="latest" <%- sort==="latest" ? "selected" : "" %>>Latest</option>
+                        <option value="oldest" <%- sort==="oldest" ? "selected" : "" %>>Oldest</option>
                     </select>
 
                     <input type="hidden" name="page" value="1" />
@@ -184,212 +230,257 @@
         <section class="mt-28 px-10">
 
             <% if (error) { %>
-            <script>
-                Swal.fire({ toast: true, icon: 'error', title: '<%= error %>', position: 'top-right', showConfirmButton: false, timer: 3000 });
-            </script>
-            <% } %>
+                <script>
+                    Swal.fire({ toast: true, icon: 'error', title: '<%= error %>', position: 'top-right', showConfirmButton: false, timer: 3000 });
+                </script>
+                <% } %>
 
-            <div class="bg-surface-container-high/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-surface-container-low/50 border-b border-white/5">
-                                <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">Category Name</th>
-                                <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">Description</th>
-                                <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">Offer</th>
-                                <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em] text-center">Status</th>
-                                <th class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em] text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
+                    <div
+                        class="bg-surface-container-high/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-surface-container-low/50 border-b border-white/5">
+                                        <th
+                                            class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">
+                                            Category Name</th>
+                                        <th
+                                            class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">
+                                            Description</th>
+                                        <th
+                                            class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em]">
+                                            Offer</th>
+                                        <th
+                                            class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em] text-center">
+                                            Status</th>
+                                        <th
+                                            class="px-8 py-5 text-on-surface-variant font-semibold text-[11px] uppercase tracking-[0.15em] text-right">
+                                            Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
 
-                            <% if (data.length === 0) { %>
-                            <tr>
-                                <td colspan="5" class="px-8 py-16 text-center">
-                                    <div class="flex flex-col items-center gap-3">
-                                        <span class="material-symbols-outlined text-5xl text-on-surface-variant/30">category</span>
-                                        <p class="text-on-surface-variant font-semibold">No categories found</p>
-                                        <% if (search || status) { %>
-                                        <a href="/admin/category" class="text-primary text-sm hover:underline">Clear filters</a>
+                                    <% if (data.length===0) { %>
+                                        <tr>
+                                            <td colspan="5" class="px-8 py-16 text-center">
+                                                <div class="flex flex-col items-center gap-3">
+                                                    <span
+                                                        class="material-symbols-outlined text-5xl text-on-surface-variant/30">category</span>
+                                                    <p class="text-on-surface-variant font-semibold">No categories found
+                                                    </p>
+                                                    <% if (search || status) { %>
+                                                        <a href="/admin/category"
+                                                            class="text-primary text-sm hover:underline">Clear
+                                                            filters</a>
+                                                        <% } %>
+                                                </div>
+                                            </td>
+                                        </tr>
                                         <% } %>
-                                    </div>
-                                </td>
-                            </tr>
-                            <% } %>
 
-                            <% data.forEach(cat => { %>
-                            <tr class="hover:bg-surface-bright/40 transition-colors group" id="row-<%= cat._id %>">
+                                            <% data.forEach(cat=> { %>
+                                                <tr class="hover:bg-surface-bright/40 transition-colors group"
+                                                    id="row-<%= cat._id %>">
 
-                                <!-- Category Name -->
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-9 h-9 rounded-lg bg-primary-dim/20 border border-primary/20 flex items-center justify-center text-primary font-bold font-['Outfit'] text-sm flex-shrink-0">
-                                            <%= cat.categoryName.charAt(0).toUpperCase() %>
-                                        </div>
-                                        <span class="font-bold text-white font-['Outfit'] text-base tracking-wide <%= !cat.isActive ? 'opacity-40' : '' %>">
-                                            <%= cat.categoryName %>
-                                        </span>
-                                    </div>
-                                </td>
+                                                    <!-- Category Name -->
+                                                    <td class="px-8 py-5">
+                                                        <div class="flex items-center gap-4">
+                                                            <div
+                                                                class="w-9 h-9 rounded-lg bg-primary-dim/20 border border-primary/20 flex items-center justify-center text-primary font-bold font-['Outfit'] text-sm flex-shrink-0">
+                                                                <%= cat.categoryName.charAt(0).toUpperCase() %>
+                                                            </div>
+                                                            <span
+                                                                class="font-bold text-white font-['Outfit'] text-base tracking-wide <%= !cat.isActive ? 'opacity-40' : '' %>">
+                                                                <%= cat.categoryName %>
+                                                            </span>
+                                                        </div>
+                                                    </td>
 
-                                <!-- Description -->
-                                <td class="px-8 py-5 text-on-surface-variant text-sm max-w-xs">
-                                    <p class="truncate"><%= cat.description %></p>
-                                </td>
+                                                    <!-- Description -->
+                                                    <td class="px-8 py-5 text-on-surface-variant text-sm max-w-xs">
+                                                        <p class="truncate">
+                                                            <%= cat.description %>
+                                                        </p>
+                                                    </td>
 
-                                <!-- Offer Dropdown -->
-                                <td class="px-8 py-5">
-                                    <% if (offers && offers.length > 0) { %>
-                                        <select
-                                            onchange="updateCategoryOffer('<%= cat._id %>', this)"
-                                            class="bg-surface-container-low border border-white/10 text-on-surface text-xs py-1.5 px-2.5 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer w-48"
-                                        >
-                                            <option value="">No Offer</option>
-                                            <% offers.forEach(function(offer) { %>
-                                                <%
-                                                    const isSelected = cat.offer && cat.offer._id.toString() === offer._id.toString();
-                                                    const dispVal = offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% OFF` : `₹${offer.discountValue} FLAT`;
-                                                %>
-                                                <option
-                                                    value="<%= offer._id %>"
-                                                    <%= isSelected ? 'selected' : '' %>
-                                                >
-                                                    <%= offer.name %> (<%= dispVal %>)
-                                                </option>
-                                            <% }) %>
-                                        </select>
+                                                    <!-- Offer Dropdown -->
+                                                    <td class="px-8 py-5">
+                                                        <% if (offers && offers.length> 0) { %>
+                                                            <select
+                                                                onchange="updateCategoryOffer('<%= cat._id %>', this)"
+                                                                class="bg-surface-container-low border border-white/10 text-on-surface text-xs py-1.5 px-2.5 rounded-xl outline-none focus:border-primary/50 transition-all cursor-pointer w-48">
+                                                                <option value="">No Offer</option>
+                                                                <% offers.forEach(function(offer) { %>
+                                                                    <% const isSelected=cat.offer &&
+                                                                        cat.offer._id.toString()===offer._id.toString();
+                                                                        const dispVal=offer.discountType==='PERCENTAGE'
+                                                                        ? `${offer.discountValue}% OFF` :
+                                                                        `₹${offer.discountValue} FLAT`; %>
+                                                                        <option value="<%= offer._id %>" <%=isSelected
+                                                                            ? 'selected' : '' %>
+                                                                            >
+                                                                            <%= offer.name %> (<%= dispVal %>)
+                                                                        </option>
+                                                                        <% }) %>
+                                                            </select>
+                                                            <% } else { %>
+                                                                <span class="text-xs text-on-surface-variant italic">No
+                                                                    offers available</span>
+                                                                <% } %>
+                                                    </td>
+
+                                                    <!-- Status Badge -->
+                                                    <td class="px-8 py-5 text-center">
+                                                        <% if (cat.isActive) { %>
+                                                            <span
+                                                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
+                                                                <span
+                                                                    class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+                                                                Active
+                                                            </span>
+                                                            <% } else { %>
+                                                                <span
+                                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-outline-variant/20 text-on-surface-variant border border-outline-variant/30">
+                                                                    <span
+                                                                        class="w-1.5 h-1.5 rounded-full bg-on-surface-variant inline-block"></span>
+                                                                    Inactive
+                                                                </span>
+                                                                <% } %>
+                                                    </td>
+
+                                                    <!-- Actions -->
+                                                    <td class="px-8 py-5">
+                                                        <div class="flex items-center justify-end gap-2">
+                                                            <a href="/admin/editCategory/<%= cat._id %>"
+                                                                class="tooltip-wrap">
+                                                                <button
+                                                                    class="p-2.5 rounded-xl bg-surface-container-low border border-white/5 hover:bg-primary-dim/20 hover:border-primary/30 text-on-surface-variant hover:text-primary transition-all">
+                                                                    <span
+                                                                        class="material-symbols-outlined text-[18px]">edit</span>
+                                                                </button>
+                                                                <span class="tooltip-text">Edit</span>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+
+                                                </tr>
+                                                <% }) %>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div
+                            class="px-8 py-5 bg-surface-container-low/30 border-t border-white/5 flex items-center justify-between">
+                            <p class="text-on-surface-variant text-xs font-semibold tracking-wide">
+                                Showing
+                                <span class="text-white font-bold">
+                                    <%= totalCount===0 ? 0 : (currentPage - 1) * 4 + 1 %>
+                                </span>
+                                –
+                                <span class="text-white font-bold">
+                                    <%= Math.min(currentPage * 4, totalCount) %>
+                                </span>
+                                of
+                                <span class="text-white font-bold">
+                                    <%= totalCount %>
+                                </span>
+                                categories
+                            </p>
+
+                            <div class="flex items-center gap-1.5">
+
+                                <% if (currentPage> 1) { %>
+                                    <a
+                                        href="?page=<%= currentPage - 1 %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
+                                        <button
+                                            class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container hover:bg-surface-bright text-on-surface-variant hover:text-white transition-all">
+                                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                                        </button>
+                                    </a>
                                     <% } else { %>
-                                        <span class="text-xs text-on-surface-variant italic">No offers available</span>
-                                    <% } %>
-                                </td>
+                                        <button disabled
+                                            class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container text-on-surface-variant opacity-30 cursor-not-allowed">
+                                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                                        </button>
+                                        <% } %>
 
-                                <!-- Status Badge -->
-                                <td class="px-8 py-5 text-center">
-                                    <% if (cat.isActive) { %>
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
-                                            Active
-                                        </span>
-                                    <% } else { %>
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-outline-variant/20 text-on-surface-variant border border-outline-variant/30">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant inline-block"></span>
-                                            Inactive
-                                        </span>
-                                    <% } %>
-                                </td>
-
-                                <!-- Actions -->
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="/admin/editCategory/<%= cat._id %>" class="tooltip-wrap">
-                                            <button class="p-2.5 rounded-xl bg-surface-container-low border border-white/5 hover:bg-primary-dim/20 hover:border-primary/30 text-on-surface-variant hover:text-primary transition-all">
-                                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                            </button>
-                                            <span class="tooltip-text">Edit</span>
-                                        </a>
-                                    </div>
-                                </td>
-
-                            </tr>
-                            <% }) %>
-
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="px-8 py-5 bg-surface-container-low/30 border-t border-white/5 flex items-center justify-between">
-                    <p class="text-on-surface-variant text-xs font-semibold tracking-wide">
-                        Showing
-                        <span class="text-white font-bold"><%= totalCount === 0 ? 0 : (currentPage - 1) * 4 + 1 %></span>
-                        –
-                        <span class="text-white font-bold"><%= Math.min(currentPage * 4, totalCount) %></span>
-                        of
-                        <span class="text-white font-bold"><%= totalCount %></span>
-                        categories
-                    </p>
-
-                    <div class="flex items-center gap-1.5">
-
-                        <% if (currentPage > 1) { %>
-                        <a href="?page=<%= currentPage - 1 %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
-                            <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container hover:bg-surface-bright text-on-surface-variant hover:text-white transition-all">
-                                <span class="material-symbols-outlined text-sm">chevron_left</span>
-                            </button>
-                        </a>
-                        <% } else { %>
-                        <button disabled class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container text-on-surface-variant opacity-30 cursor-not-allowed">
-                            <span class="material-symbols-outlined text-sm">chevron_left</span>
-                        </button>
-                        <% } %>
-
-                        <div class="flex items-center gap-1">
-                            <% for (let i = 1; i <= totalPage; i++) { %>
-                            <a href="?page=<%= i %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
-                                <button class="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-xs transition-all
+                                            <div class="flex items-center gap-1">
+                                                <% for (let i=1; i <=totalPage; i++) { %>
+                                                    <a
+                                                        href="?page=<%= i %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
+                                                        <button
+                                                            class="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-xs transition-all
                                     <%= i === currentPage
                                         ? 'bg-primary-dim text-white shadow-lg shadow-primary-dim/20'
                                         : 'border border-transparent hover:border-white/10 hover:bg-surface-container text-on-surface-variant hover:text-white' %>">
-                                    <%= i %>
-                                </button>
-                            </a>
-                            <% } %>
+                                                            <%= i %>
+                                                        </button>
+                                                    </a>
+                                                    <% } %>
+                                            </div>
+
+                                            <% if (currentPage < totalPage) { %>
+                                                <a
+                                                    href="?page=<%= currentPage + 1 %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
+                                                    <button
+                                                        class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container hover:bg-surface-bright text-on-surface-variant hover:text-white transition-all">
+                                                        <span
+                                                            class="material-symbols-outlined text-sm">chevron_right</span>
+                                                    </button>
+                                                </a>
+                                                <% } else { %>
+                                                    <button disabled
+                                                        class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container text-on-surface-variant opacity-30 cursor-not-allowed">
+                                                        <span
+                                                            class="material-symbols-outlined text-sm">chevron_right</span>
+                                                    </button>
+                                                    <% } %>
+
+                            </div>
                         </div>
-
-                        <% if (currentPage < totalPage) { %>
-                        <a href="?page=<%= currentPage + 1 %>&status=<%= status %>&search=<%= search %>&sort=<%= sort %>">
-                            <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container hover:bg-surface-bright text-on-surface-variant hover:text-white transition-all">
-                                <span class="material-symbols-outlined text-sm">chevron_right</span>
-                            </button>
-                        </a>
-                        <% } else { %>
-                        <button disabled class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/5 bg-surface-container text-on-surface-variant opacity-30 cursor-not-allowed">
-                            <span class="material-symbols-outlined text-sm">chevron_right</span>
-                        </button>
-                        <% } %>
-
                     </div>
-                </div>
-            </div>
         </section>
     </main>
 
-<script>
-async function updateCategoryOffer(categoryId, selectEl) {
-  const offerId = selectEl.value;
+    <script>
+        async function updateCategoryOffer(categoryId, selectEl) {
+            const offerId = selectEl.value;
 
-  try {
-    const res = await fetch("/admin/category-offer-add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ categoryId, offerId })
-    });
+            try {
+                const res = await fetch("/admin/category-offer-add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ categoryId, offerId })
+                });
 
-    const result = await res.json();
-    if (!result.success) {
-      Swal.fire({
-        toast: true, icon: 'error',
-        title: result.message || 'Failed to update category offer',
-        position: 'top-right', showConfirmButton: false, timer: 3000
-      });
-      return;
-    }
+                const result = await res.json();
+                if (!result.success) {
+                    Swal.fire({
+                        toast: true, icon: 'error',
+                        title: result.message || 'Failed to update category offer',
+                        position: 'top-right', showConfirmButton: false, timer: 3000
+                    });
+                    return;
+                }
 
-    Swal.fire({
-      toast: true, icon: 'success',
-      title: offerId ? 'Offer applied successfully' : 'Offer removed successfully',  // ✅
-      position: 'top-right', showConfirmButton: false, timer: 2000
-    });
+                Swal.fire({
+                    toast: true, icon: 'success',
+                    title: offerId ? 'Offer applied successfully' : 'Offer removed successfully',  // ✅
+                    position: 'top-right', showConfirmButton: false, timer: 2000
+                });
 
-  } catch (error) {
-    console.error(error);
-    Swal.fire({
-      toast: true, icon: 'error',
-      title: 'Server connection error',
-      position: 'top-right', showConfirmButton: false, timer: 3000
-    });
-  }
-}
-</script>
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    toast: true, icon: 'error',
+                    title: 'Server connection error',
+                    position: 'top-right', showConfirmButton: false, timer: 3000
+                });
+            }
+        }
+    </script>
 </body>
+
 </html>

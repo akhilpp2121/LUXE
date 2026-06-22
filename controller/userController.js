@@ -82,6 +82,8 @@ export const homeLoad = async (req, res) => {
 export const registerController = async (req, res) => {
   try {
     const { fullName, email, phoneNumber, password, referralCode } = req.body;
+    console.log(email,password);
+    
     const result = await registerPreCheckService(req, fullName, email, password, phoneNumber, referralCode);
 
     if (!result.success) {

@@ -1,196 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>User Management — Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --bg:       #0f0f13;
-      --surface:  #17171f;
-      --card:     #1e1e28;
-      --border:   #2a2a38;
-      --accent:   #6c63ff;
-      --accent2:  #a78bfa;
-      --danger:   #f87171;
-      --success:  #34d399;
-      --warning:  #fbbf24;
-      --text:     #e8e8f0;
-      --muted:    #7c7c96;
-      --subtle:   #3a3a50;
-      --font:     'DM Sans', sans-serif;
-      --mono:     'DM Mono', monospace;
+      --bg: #0f0f13;
+      --surface: #17171f;
+      --card: #1e1e28;
+      --border: #2a2a38;
+      --accent: #6c63ff;
+      --accent2: #a78bfa;
+      --danger: #f87171;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --text: #e8e8f0;
+      --muted: #7c7c96;
+      --subtle: #3a3a50;
+      --font: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
     }
 
     body {
       font-family: var(--font);
       background: var(--bg);
       color: var(--text);
-      display: flex;
       min-height: 100vh;
     }
 
-    /* ── Sidebar ── */
-    .sidebar {
-      width: 240px;
-      flex-shrink: 0;
-      background: #13131a;
-      border-right: 1px solid #1e1e2e;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      position: sticky;
-      top: 0;
-      overflow-y: auto;
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
-
-    /* Brand */
-    .sidebar-brand {
-      padding: 22px 20px 18px;
-      border-bottom: 1px solid #1e1e2e;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .brand-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
-      background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0;
-      letter-spacing: -0.5px;
-    }
-    .brand-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: #e8e8f0;
-      letter-spacing: -0.2px;
-    }
-    .brand-sub {
-      font-size: 10px;
-      color: #3a3a55;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-top: 1px;
-    }
-
-    /* Nav sections */
-    .nav-section {
-      padding: 18px 0 4px;
-    }
-    .nav-section-label {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1.4px;
-      text-transform: uppercase;
-      color: #35354f;
-      padding: 0 20px 6px;
-    }
-
-    /* Nav items */
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 20px;
-      font-size: 13px;
-      font-weight: 400;
-      color: #55556f;
-      text-decoration: none;
-      border-left: 2px solid transparent;
-      transition: all 0.15s ease;
-      position: relative;
-    }
-    .nav-item svg {
-      width: 15px;
-      height: 15px;
-      flex-shrink: 0;
-      opacity: 0.5;
-      transition: opacity 0.15s;
-    }
-    .nav-item:hover {
-      color: #b0b0d0;
-      background: rgba(108, 99, 255, 0.05);
-    }
-    .nav-item:hover svg { opacity: 0.9; }
-    .nav-item.active {
-      color: #a78bfa;
-      background: rgba(108, 99, 255, 0.08);
-      border-left-color: #6c63ff;
-      font-weight: 500;
-    }
-    .nav-item.active svg {
-      opacity: 1;
-      color: #6c63ff;
-    }
-
-    /* Badges */
-    .nav-badge {
-      margin-left: auto;
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 20px;
-      background: rgba(108, 99, 255, 0.12);
-      color: #a78bfa;
-      letter-spacing: 0.2px;
-    }
-    .nav-badge.red   { background: rgba(248,113,113,0.1); color: #f87171; }
-    .nav-badge.amber { background: rgba(251,191,36,0.1);  color: #fbbf24; }
-
-    /* Divider */
-    .nav-divider {
-      height: 1px;
-      background: #1e1e2e;
-      margin: 8px 0;
-    }
-
-    /* Footer / logout */
-    .sidebar-footer {
-      margin-top: auto;
-      padding: 14px 16px;
-      border-top: 1px solid #1e1e2e;
-    }
-
-    .logout-btn {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      width: 100%;
-      padding: 9px 13px;
-      background: transparent;
-      border: 1px solid rgba(248, 113, 113, 0.12);
-      border-radius: 8px;
-      color: #45455f;
-      font-size: 13px;
-      font-weight: 500;
-      font-family: var(--font);
-      cursor: pointer;
-      transition: all 0.18s ease;
-      text-align: left;
-    }
-    .logout-btn svg {
-      width: 14px;
-      height: 14px;
-      flex-shrink: 0;
-      transition: transform 0.18s ease;
-    }
-    .logout-btn:hover {
-      background: rgba(248, 113, 113, 0.07);
-      border-color: rgba(248, 113, 113, 0.35);
-      color: #f87171;
-    }
-    .logout-btn:hover svg { transform: translateX(3px); }
-    .logout-btn:active { background: rgba(248, 113, 113, 0.12); }
 
     /* ── Main ── */
     .main {
@@ -199,6 +54,7 @@
       flex-direction: column;
       overflow-x: hidden;
     }
+
     .topbar {
       height: 60px;
       background: var(--surface);
@@ -211,18 +67,22 @@
       top: 0;
       z-index: 10;
     }
+
     .topbar-title {
       font-size: 15px;
       font-weight: 500;
       color: var(--text);
     }
+
     .topbar-right {
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
     .avatar {
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       display: flex;
@@ -234,7 +94,10 @@
     }
 
     /* ── Page content ── */
-    .content { padding: 32px; flex: 1; }
+    .content {
+      padding: 32px;
+      flex: 1;
+    }
 
     .page-header {
       display: flex;
@@ -242,11 +105,13 @@
       justify-content: space-between;
       margin-bottom: 28px;
     }
+
     .page-header h1 {
       font-size: 22px;
       font-weight: 600;
       letter-spacing: -0.4px;
     }
+
     .page-header p {
       font-size: 13px;
       color: var(--muted);
@@ -260,22 +125,44 @@
       gap: 16px;
       margin-bottom: 28px;
     }
+
     .stat-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 16px 20px;
     }
-    .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0.3px; }
-    .stat-value { font-size: 24px; font-weight: 600; margin-top: 6px; letter-spacing: -0.5px; }
-    .stat-value.accent { color: var(--accent2); }
-    .stat-value.success { color: var(--success); }
-    .stat-value.danger  { color: var(--danger); }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-value.accent {
+      color: var(--accent2);
+    }
+
+    .stat-value.success {
+      color: var(--success);
+    }
+
+    .stat-value.danger {
+      color: var(--danger);
+    }
 
     /* ── Error banner ── */
     .error-banner {
-      background: rgba(248,113,113,0.1);
-      border: 1px solid rgba(248,113,113,0.3);
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
       border-radius: 8px;
       padding: 12px 16px;
       color: var(--danger);
@@ -298,11 +185,13 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
+
     .search-wrap {
       flex: 1;
       min-width: 200px;
       position: relative;
     }
+
     .search-wrap input {
       width: 100%;
       background: var(--bg);
@@ -315,15 +204,25 @@
       outline: none;
       transition: border-color 0.15s;
     }
-    .search-wrap input:focus { border-color: var(--accent); }
-    .search-wrap input::placeholder { color: var(--muted); }
+
+    .search-wrap input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-wrap input::placeholder {
+      color: var(--muted);
+    }
+
     .search-icon {
       position: absolute;
-      left: 11px; top: 50%; transform: translateY(-50%);
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
       color: var(--muted);
       font-size: 14px;
       pointer-events: none;
     }
+
     .filter-select {
       background: var(--bg);
       border: 1px solid var(--border);
@@ -336,7 +235,11 @@
       cursor: pointer;
       transition: border-color 0.15s;
     }
-    .filter-select:focus { border-color: var(--accent); }
+
+    .filter-select:focus {
+      border-color: var(--accent);
+    }
+
     .btn-filter {
       background: var(--accent);
       color: #fff;
@@ -349,7 +252,11 @@
       cursor: pointer;
       transition: opacity 0.15s;
     }
-    .btn-filter:hover { opacity: 0.85; }
+
+    .btn-filter:hover {
+      opacity: 0.85;
+    }
+
     .btn-reset {
       background: transparent;
       color: var(--muted);
@@ -364,7 +271,11 @@
       display: inline-flex;
       align-items: center;
     }
-    .btn-reset:hover { color: var(--text); border-color: var(--subtle); }
+
+    .btn-reset:hover {
+      color: var(--text);
+      border-color: var(--subtle);
+    }
 
     /* ── Table ── */
     .table-wrap {
@@ -373,11 +284,13 @@
       border-radius: 10px;
       overflow: hidden;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
     }
+
     thead th {
       background: var(--surface);
       padding: 13px 20px;
@@ -390,21 +303,35 @@
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
+
     tbody tr {
       border-bottom: 1px solid var(--border);
       transition: background 0.1s;
     }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
     td {
       padding: 14px 20px;
       vertical-align: middle;
       color: var(--text);
     }
 
-    .user-cell { display: flex; align-items: center; gap: 12px; }
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .user-avatar {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       flex-shrink: 0;
       background: var(--subtle);
@@ -417,16 +344,33 @@
       overflow: hidden;
       border: 1px solid var(--border);
     }
+
     .user-avatar img {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       border-radius: 50%;
       display: block;
     }
-    .user-avatar .initials { line-height: 1; }
-    .user-name { font-weight: 500; font-size: 13px; }
-    .user-id   { font-size: 11px; color: var(--muted); font-family: var(--mono); }
-    .email-cell { color: var(--muted); }
+
+    .user-avatar .initials {
+      line-height: 1;
+    }
+
+    .user-name {
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .user-id {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .email-cell {
+      color: var(--muted);
+    }
 
     .badge {
       display: inline-flex;
@@ -438,15 +382,43 @@
       border-radius: 20px;
       letter-spacing: 0.2px;
     }
-    .badge-dot { width: 5px; height: 5px; border-radius: 50%; }
-    .badge.active  { background: rgba(52,211,153,0.12); color: var(--success); }
-    .badge.active .badge-dot  { background: var(--success); }
-    .badge.blocked { background: rgba(248,113,113,0.12); color: var(--danger); }
-    .badge.blocked .badge-dot { background: var(--danger); }
 
-    .date-cell { color: var(--muted); font-size: 12px; font-family: var(--mono); }
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
 
-    .action-form { display: flex; align-items: center; gap: 8px; }
+    .badge.active {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--success);
+    }
+
+    .badge.active .badge-dot {
+      background: var(--success);
+    }
+
+    .badge.blocked {
+      background: rgba(248, 113, 113, 0.12);
+      color: var(--danger);
+    }
+
+    .badge.blocked .badge-dot {
+      background: var(--danger);
+    }
+
+    .date-cell {
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    .action-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .action-select {
       background: var(--bg);
       border: 1px solid var(--border);
@@ -458,6 +430,7 @@
       outline: none;
       cursor: pointer;
     }
+
     .btn-action {
       background: var(--subtle);
       color: var(--text);
@@ -470,15 +443,27 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .btn-action:hover { background: var(--accent); color: #fff; }
+
+    .btn-action:hover {
+      background: var(--accent);
+      color: #fff;
+    }
 
     .empty-state {
       padding: 60px 20px;
       text-align: center;
       color: var(--muted);
     }
-    .empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
-    .empty-state p { font-size: 14px; }
+
+    .empty-state .icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
 
     .pagination {
       display: flex;
@@ -488,8 +473,18 @@
       flex-wrap: wrap;
       gap: 12px;
     }
-    .page-info { font-size: 13px; color: var(--muted); }
-    .page-buttons { display: flex; gap: 6px; align-items: center; }
+
+    .page-info {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .page-buttons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
     .page-btn {
       background: var(--card);
       border: 1px solid var(--border);
@@ -504,182 +499,128 @@
       display: inline-flex;
       align-items: center;
     }
-    .page-btn:hover { color: var(--text); border-color: var(--subtle); }
-    .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .page-btn.disabled { opacity: 0.35; pointer-events: none; }
 
+    .page-btn:hover {
+      color: var(--text);
+      border-color: var(--subtle);
+    }
+
+    .page-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .page-btn.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
 
     .toast {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: var(--font);
-    z-index: 9999;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    animation: slideUp 0.25s ease;
-  }
-  .toast.success {
-  background: #1a2e26;
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  color: #34d399;
-}
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font);
+      z-index: 9999;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      animation: slideUp 0.25s ease;
+    }
 
-.toast.warning {
-  background: #2a2010;
-  border: 1px solid rgba(251, 191, 36, 0.35);
-  color: #fbbf24;
-}
+    .toast.success {
+      background: #1a2e26;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: #34d399;
+    }
 
-.toast.error {
-  background: #2e1a1a;
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  color: #f87171;
-}
+    .toast.warning {
+      background: #2a2010;
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      color: #fbbf24;
+    }
 
-.toast-icon {
-  font-size: 15px;
-  font-weight: 700;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: rgba(255,255,255,0.06);
-}
+    .toast.error {
+      background: #2e1a1a;
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: #f87171;
+    }
 
+    .toast-icon {
+      font-size: 15px;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.06);
+    }
   </style>
 </head>
+
 <body>
 
   <!-- ── SIDEBAR ── -->
-  <aside class="sidebar">
-
-    <!-- Brand -->
-    <div class="sidebar-brand">
-      <div class="brand-icon">AP</div>
-      <div>
-        <div class="brand-name">AdminPanel</div>
-        <div class="brand-sub">Control Center</div>
-      </div>
+  <aside class="fixed left-0 top-0 h-full w-[280px] flex flex-col p-6 bg-[#0c1424] z-50">
+    <div class="mb-8 px-4">
+      <h1 class="text-2xl font-bold text-white">AdminPro</h1>
+      <p class="text-[11px] font-medium text-[#a3aac4]">Enterprise Suite</p>
     </div>
 
-    <!-- Overview -->
-    <div class="nav-section">
-      <div class="nav-section-label">Overview</div>
-      <a href="/admin/dashboard" class="nav-item <%= activePage==='dashboard'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-        Analytics
+    <nav class="flex-1 space-y-1">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/dashboard">
+        <span class="material-symbols-outlined text-lg">dashboard</span>Dashboard
       </a>
-    </div>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/order-management">
+        <span class="material-symbols-outlined text-lg">shopping_cart</span>Orders
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/products">
+        <span class="material-symbols-outlined text-lg">inventory_2</span>Products
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white border-l-4 border-[#90abff] bg-[#1f2b49] font-bold text-sm"
+        href="/admin/users">
+        <span class="material-symbols-outlined text-lg">group</span>Users
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/analystic">
+        <span class="material-symbols-outlined text-lg">monitoring</span>Analytics
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="#">
+        <span class="material-symbols-outlined text-lg">confirmation_number</span>Coupons
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/category">
+        <span class="material-symbols-outlined text-lg">category</span>Categories
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/offer">
+        <span class="material-symbols-outlined text-lg">local_offer</span>Offers
+      </a>
+    </nav>
 
-    <div class="nav-divider"></div>
-
-    <!-- Management -->
-    <div class="nav-section">
-      <div class="nav-section-label">Management</div>
-      <a href="/admin/users" class="nav-item <%= activePage==='users'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-        </svg>
-        Users
-        
-      </a>
-      <a href="/admin/orders" class="nav-item <%= activePage==='orders'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 12h6M9 16h6M9 8h2"/>
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-        </svg>
-        Orders
-        <span class="nav-badge red">4</span>
-      </a>
-      <a href="/admin/products" class="nav-item <%= activePage==='products'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 7H4a1 1 0 00-1 1v10a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1z"/>
-          <path d="M16 3H8l-1 4h10l-1-4z"/>
-        </svg>
-        Products
-      </a>
-      <a href="/admin/category" class="nav-item <%= activePage==='categories'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 6h18M3 12h18M3 18h18"/>
-        </svg>
-        Categories
-      </a>
-    </div>
-
-    <div class="nav-divider"></div>
-
-    <!-- Marketing -->
-    <div class="nav-section">
-      <div class="nav-section-label">Marketing</div>
-      <a href="/admin/offers" class="nav-item <%= activePage==='offers'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/>
-        </svg>
-        Offers
-      </a>
-      <a href="/admin/banners" class="nav-item <%= activePage==='banners'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="6" width="20" height="12" rx="2"/>
-          <path d="M2 10h20"/>
-        </svg>
-        Banners
-      </a>
-      <a href="/admin/coupons" class="nav-item <%= activePage==='coupons'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 14l-4-4 4-4M15 10l4 4-4 4"/>
-        </svg>
-        Coupons
-        <span class="nav-badge amber">6</span>
-      </a>
-    </div>
-
-    <div class="nav-divider"></div>
-
-    <!-- Finance -->
-    <div class="nav-section">
-      <div class="nav-section-label">Finance</div>
-      <a href="/admin/refunds" class="nav-item <%= activePage==='refunds'?'active':'' %>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 12h18M3 6h18M3 18h18"/>
-        </svg>
-        Refunds
-        <span class="nav-badge red">2</span>
-      </a>
-    </div>
-
-    <!-- Logout -->
-    <div class="sidebar-footer">
-      <form action="/admin/logout" method="POST" style="margin:0;">
-        <button type="submit" class="logout-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
-          </svg>
-          Log out
+    <div class="mt-auto px-4 py-6 border-t border-[#1f2b49]">
+      <form action="/admin/logout" method="POST" class="m-0">
+        <button type="submit" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm">
+          <span class="material-symbols-outlined text-lg">logout</span>Log out
         </button>
       </form>
     </div>
-
   </aside>
 
   <!-- ── MAIN ── -->
-  <div class="main">
+  <div class="main ml-[280px]">
     <header class="topbar">
       <span class="topbar-title">User Management</span>
       <div class="topbar-right">
@@ -699,233 +640,245 @@
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">Total Users</div>
-          <div class="stat-value accent"><%= totalUser %></div>
+          <div class="stat-value accent">
+            <%= totalUser %>
+          </div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Current Page</div>
-          <div class="stat-value"><%= currentPage %> / <%= totalPage %></div>
+          <div class="stat-value">
+            <%= currentPage %> / <%= totalPage %>
+          </div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Filter</div>
           <div class="stat-value" style="font-size:16px;margin-top:8px;text-transform:capitalize;">
-            <%= status === 'true' ? 'Active' : status === 'false' ? 'Blocked' : 'All' %>
+            <%= status==='true' ? 'Active' : status==='false' ? 'Blocked' : 'All' %>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Sorted</div>
           <div class="stat-value" style="font-size:16px;margin-top:8px;text-transform:capitalize;">
-            <%= sort === 'oldest' ? 'Oldest First' : 'Newest First' %>
+            <%= sort==='oldest' ? 'Oldest First' : 'Newest First' %>
           </div>
         </div>
       </div>
 
       <% if (error) { %>
-        <div class="error-banner">⚠ <%= error %></div>
-      <% } %>
-
-      <form method="GET" action="/admin/users">
-        <div class="filters">
-          <div class="search-wrap">
-            <span class="search-icon">⌕</span>
-            <input type="text" name="search" placeholder="Search by name or email…" value="<%= search %>"/>
-          </div>
-          <select name="status" class="filter-select">
-            <option value=""      <%= status==='undefined'||status===''?'selected':'' %>>All Status</option>
-            <option value="true"  <%= status==='true'  ?'selected':'' %>>Active</option>
-            <option value="false" <%= status==='false' ?'selected':'' %>>Blocked</option>
-          </select>
-          <select name="sort" class="filter-select">
-            <option value="latest" <%= sort==='latest'?'selected':'' %>>Newest First</option>
-            <option value="oldest" <%= sort==='oldest'?'selected':'' %>>Oldest First</option>
-          </select>
-          <button type="submit" class="btn-filter">Apply</button>
-          <a href="/admin/users" class="btn-reset">clear</a>
+        <div class="error-banner">⚠ <%= error %>
         </div>
-      </form>
+        <% } %>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>User</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Joined</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if (data && data.length > 0) { %>
-              <% data.forEach((user, i) => { %>
-              <tr>
-                <td style="color:var(--muted);font-family:var(--mono);font-size:12px;">
-                  <%= ((currentPage - 1) * 5) + i + 1 %>
-                </td>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar">
-                      <% if (user.avatar && user.avatar.trim() !== '') { %>
-                        <img src="<%= user.avatar %>" alt="<%= user.fullName %>"
-                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-                        <span class="initials" style="display:none;">
-                          <%= user.fullName ? user.fullName.charAt(0).toUpperCase() : '?' %>
+          <form method="GET" action="/admin/users">
+            <div class="filters">
+              <div class="search-wrap">
+                <span class="search-icon">⌕</span>
+                <input type="text" name="search" placeholder="Search by name or email…" value="<%= search %>" />
+              </div>
+              <select name="status" class="filter-select">
+                <option value="" <%=(!status || status==='undefined') ?'selected':'' %>>All Status</option>
+                <option value="true" <%=status==='true' ?'selected':'' %>>Active</option>
+                <option value="false" <%=status==='false' ?'selected':'' %>>Blocked</option>
+              </select>
+              <select name="sort" class="filter-select">
+                <option value="latest" <%=sort==='latest' ?'selected':'' %>>Newest First</option>
+                <option value="oldest" <%=sort==='oldest' ?'selected':'' %>>Oldest First</option>
+              </select>
+              <button type="submit" class="btn-filter">Apply</button>
+              <a href="/admin/users" class="btn-reset">clear</a>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (data && data.length > 0) { %>
+                  <% data.forEach((user, i) => { %>
+                    <tr>
+                      <td style="color:var(--muted);font-family:var(--mono);font-size:12px;">
+                        <%= ((currentPage - 1) * 5) + i + 1 %>
+                      </td>
+                      <td>
+                        <div class="user-cell">
+                          <div class="user-avatar">
+                            <% if (user.avatar && user.avatar.trim() !== '') { %>
+                              <img src="<%= user.avatar %>" alt="<%= user.fullName %>"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                              <span class="initials" style="display:none;">
+                                <%= user.fullName ? user.fullName.charAt(0).toUpperCase() : '?' %>
+                              </span>
+                            <% } else { %>
+                              <span class="initials">
+                                <%= user.fullName ? user.fullName.charAt(0).toUpperCase() : '?' %>
+                              </span>
+                            <% } %>
+                          </div>
+                          <div>
+                            <div class="user-name">
+                              <%= user.fullName || '—' %>
+                            </div>
+                            <div class="user-id">
+                              <%= user._id %>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="email-cell">
+                        <%= user.email %>
+                      </td>
+                      <td style="color:var(--muted);font-size:13px;">
+                        <%= user.phoneNumber || '—' %>
+                      </td>
+                      <td>
+                        <span class="badge <%= user.isActive ? 'active' : 'blocked' %>">
+                          <span class="badge-dot"></span>
+                          <%= user.isActive ? 'Active' : 'Blocked' %>
                         </span>
-                      <% } else { %>
-                        <span class="initials">
-                          <%= user.fullName ? user.fullName.charAt(0).toUpperCase() : '?' %>
-                        </span>
-                      <% } %>
-                    </div>
-                    <div>
-                      <div class="user-name"><%= user.fullName || '—' %></div>
-                      <div class="user-id"><%= user._id %></div>
-                    </div>
-                  </div>
-                </td>
-                <td class="email-cell"><%= user.email %></td>
-                <td style="color:var(--muted);font-size:13px;"><%= user.phoneNumber || '—' %></td>
-                <td>
-                  <span class="badge <%= user.isActive ? 'active' : 'blocked' %>">
-                    <span class="badge-dot"></span>
-                    <%= user.isActive ? 'Active' : 'Blocked' %>
-                  </span>
-                </td>
-                <td class="date-cell">
-                  <%= user.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})
-                    : '—' %>
-                </td>
-                <td>
-                 
+                      </td>
+                      <td class="date-cell">
+                        <%= user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—' %>
+                      </td>
+                      <td>
+                        <form action="/admin/users/edit" method="POST" class="action-form">
+                          <input type="hidden" name="id" value="<%= user._id %>" />
+                          <select name="isActive" class="action-select"
+                            data-current="<%= user.isActive ? 'true' : 'false' %>" onchange="openModal(this)">
+                            <option value="true" <%=user.isActive ? 'selected' : '' %>>Active</option>
+                            <option value="false" <%=!user.isActive ? 'selected' : '' %>>Block</option>
+                          </select>
+                        </form>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="7">
+                      <div class="empty-state">
+                        <div class="icon">◎</div>
+                        <p>No users found matching your filters.</p>
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
 
-<form action="/admin/users/edit" method="POST" class="action-form">
-    <input type="hidden" name="id" value="<%= user._id %>" />
-    <select name="isActive" class="action-select"
-      data-current="<%= user.isActive ? 'true' : 'false' %>"
-      onchange="openModal(this)">
-      <option value="true"  <%= user.isActive  ? 'selected' : '' %>>Active</option>
-      <option value="false" <%= !user.isActive ? 'selected' : '' %>>Block</option>
-    </select>
-  </form>
+          <% if (totalPage > 1) { %>
+            <div class="pagination">
+              <span class="page-info">
+                Showing page <%= currentPage %> of <%= totalPage %> &nbsp;·&nbsp; <%= totalUser %> total users
+              </span>
+              <div class="page-buttons">
+                <a href="/admin/users?page=<%= currentPage-1 %>&search=<%= encodeURIComponent(search || '') %>&status=<%= encodeURIComponent(status || '') %>&sort=<%= encodeURIComponent(sort || '') %>"
+                  class="page-btn <%= currentPage <= 1 ? 'disabled' : '' %>">← Prev</a>
 
-                </td>
-              </tr>
-              <% }) %>
-            <% } else { %>
-              <tr>
-                <td colspan="7">
-                  <div class="empty-state">
-                    <div class="icon">◎</div>
-                    <p>No users found matching your filters.</p>
-                  </div>
-                </td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
-      </div>
+                <% for (let p = 1; p <= totalPage; p++) { %>
+                  <% if (p === 1 || p === totalPage || (p >= currentPage - 1 && p <= currentPage + 1)) { %>
+                    <a href="/admin/users?page=<%= p %>&search=<%= encodeURIComponent(search || '') %>&status=<%= encodeURIComponent(status || '') %>&sort=<%= encodeURIComponent(sort || '') %>"
+                      class="page-btn <%= p === currentPage ? 'active' : '' %>">
+                      <%= p %>
+                    </a>
+                  <% } else if (p === currentPage - 2 || p === currentPage + 2) { %>
+                    <span class="page-btn" style="pointer-events:none;">…</span>
+                  <% } %>
+                <% } %>
 
-      <% if (totalPage > 1) { %>
-      <div class="pagination">
-        <span class="page-info">
-          Showing page <%= currentPage %> of <%= totalPage %> &nbsp;·&nbsp; <%= totalUser %> total users
-        </span>
-        <div class="page-buttons">
-          <a href="/admin/users?page=<%= currentPage-1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>"
-             class="page-btn <%= currentPage <= 1 ? 'disabled' : '' %>">← Prev</a>
-
-          <% for (let p = 1; p <= totalPage; p++) { %>
-            <% if (p === 1 || p === totalPage || (p >= currentPage-1 && p <= currentPage+1)) { %>
-              <a href="/admin/users?page=<%= p %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>"
-                 class="page-btn <%= p === currentPage ? 'active' : '' %>"><%= p %></a>
-            <% } else if (p === currentPage-2 || p === currentPage+2) { %>
-              <span class="page-btn" style="pointer-events:none;">…</span>
-            <% } %>
+                <a href="/admin/users?page=<%= currentPage+1 %>&search=<%= encodeURIComponent(search || '') %>&status=<%= encodeURIComponent(status || '') %>&sort=<%= encodeURIComponent(sort || '') %>"
+                  class="page-btn <%= currentPage >= totalPage ? 'disabled' : '' %>">Next →</a>
+              </div>
+            </div>
           <% } %>
 
-          <a href="/admin/users?page=<%= currentPage+1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>"
-             class="page-btn <%= currentPage >= totalPage ? 'disabled' : '' %>">Next →</a>
-        </div>
-      </div>
-      <% } %>
-
-      <% if (toast) { %>
-<div id="toast" class="toast <%= toast.type %>">
-  <span class="toast-icon">
-    <% if (toast.type === 'success') { %>✓
-    <% } else if (toast.type === 'warning') { %>⊘
-    <% } else { %>✕
-    <% } %>
-  </span>
-  <span><%= toast.msg %></span>
-</div>
-<% } %>
+          <% if (toast) { %>
+            <div id="toast" class="toast <%= toast.type %>">
+              <span class="toast-icon">
+                <% if (toast.type === 'success') { %>✓
+                <% } else if (toast.type === 'warning') { %>⊘
+                <% } else { %>✕
+                <% } %>
+              </span>
+              <span>
+                <%= toast.msg %>
+              </span>
+            </div>
+          <% } %>
 
     </div>
   </div>
 
   <!-- Confirmation Modal -->
-<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);
+  <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);
   z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#1e1e28;border:1px solid #2a2a38;border-radius:10px;
+    <div style="background:#1e1e28;border:1px solid #2a2a38;border-radius:10px;
     padding:20px 22px;width:250px;font-family:'DM Sans',sans-serif;text-align:center;">
-    <p id="modal-msg" style="font-size:13px;color:#e8e8f0;margin:0 0 14px;line-height:1.5;"></p>
-    <div style="display:flex;gap:8px;">
-      <button onclick="closeModal()" style="flex:1;padding:7px;background:transparent;
+      <p id="modal-msg" style="font-size:13px;color:#e8e8f0;margin:0 0 14px;line-height:1.5;"></p>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeModal()" style="flex:1;padding:7px;background:transparent;
         border:1px solid #2a2a38;border-radius:7px;color:#7c7c96;font-size:12px;
         font-family:'DM Sans',sans-serif;cursor:pointer;">Cancel</button>
-      <button id="modal-btn" style="flex:1;padding:7px;border-radius:7px;font-size:12px;
+        <button id="modal-btn" style="flex:1;padding:7px;border-radius:7px;font-size:12px;
         font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid;"></button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  let _sel = null;
+  <script>
+    let _sel = null;
 
-  function openModal(el) {
-    _sel = el;
-    const isBlock = el.value === 'false';
-    document.getElementById('modal-msg').textContent =
-      isBlock ? 'Block this user?' : 'Activate this user?';
-    const btn = document.getElementById('modal-btn');
-    btn.textContent      = isBlock ? 'Block' : 'Activate';
-    btn.style.background = isBlock ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.12)';
-    btn.style.borderColor= isBlock ? 'rgba(248,113,113,0.4)'  : 'rgba(52,211,153,0.4)';
-    btn.style.color      = isBlock ? '#f87171' : '#34d399';
-    btn.onclick = () => el.closest('form').submit();
-    document.getElementById('modal').style.display = 'flex';
-  }
-
-  function closeModal() {
-    document.getElementById('modal').style.display = 'none';
-    if (_sel) _sel.value = _sel.dataset.current; // revert dropdown
-  }
-
-  document.getElementById('modal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-  });
-
-  // Toast auto-dismiss
-  document.addEventListener('DOMContentLoaded', function () {
-    const toast = document.getElementById('toast');
-    if (toast) {
-      const timer = setTimeout(() => {
-        toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(12px)';
-        setTimeout(() => toast.remove(), 400);
-      }, 5000);
-      toast.addEventListener('click', () => { clearTimeout(timer); toast.remove(); });
+    function openModal(el) {
+      _sel = el;
+      const isBlock = el.value === 'false';
+      document.getElementById('modal-msg').textContent =
+        isBlock ? 'Block this user?' : 'Activate this user?';
+      const btn = document.getElementById('modal-btn');
+      btn.textContent = isBlock ? 'Block' : 'Activate';
+      btn.style.background = isBlock ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.12)';
+      btn.style.borderColor = isBlock ? 'rgba(248,113,113,0.4)' : 'rgba(52,211,153,0.4)';
+      btn.style.color = isBlock ? '#f87171' : '#34d399';
+      btn.onclick = () => el.closest('form').submit();
+      document.getElementById('modal').style.display = 'flex';
     }
-  });
 
-  window.addEventListener('pageshow', function (e) {
-    if (e.persisted) window.location.reload();
-  });
-</script>
- 
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+      if (_sel) _sel.value = _sel.dataset.current; // revert dropdown
+    }
+
+    document.getElementById('modal').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+
+    // Toast auto-dismiss
+    document.addEventListener('DOMContentLoaded', function () {
+      const toast = document.getElementById('toast');
+      if (toast) {
+        const timer = setTimeout(() => {
+          toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(12px)';
+          setTimeout(() => toast.remove(), 400);
+        }, 5000);
+        toast.addEventListener('click', () => { clearTimeout(timer); toast.remove(); });
+      }
+    });
+
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted) window.location.reload();
+    });
+  </script>
+
 </body>
+
 </html>

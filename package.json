@@ -1,68 +1,71 @@
 {
-  
-  "name": "my-project",
-  
-  "version": "1.0.0",
-  
-  "type": "module",
-  
-  "scripts": {
-  
-    
-  "start": "node app.js",
-  
-    
-  "dev": "nodemon app.js"
-  
-  },
-  
-  "dependencies": {
-  
-    
-  "@paypal/checkout-server-sdk": "^1.0.3",
-  
-    
-  "bcrypt": "^6.0.0",
-  
-    
-  "dotenv": "^17.4.1",
-  
-    
-  "ejs": "^5.0.1",
-  
-    
-  "express": "^5.2.1",
-  
-    
-  "express-session": "^1.19.0",
-  
-    
-  "init": "^0.1.2",
-  
-    
-  "mongoose": "^9.4.1",
-  
-    
-  "multer": "^2.1.1",
-  
-    
-  "nodemailer": "^8.0.5",
-  
-    
-  "passport": "^0.7.0",
-  
-    
-  "passport-google-oauth20": "^2.0.0",
-  
-    
-  "pdfkit": "^0.18.0"
-  
-  },
-  
-  "devDependencies": {
-  
-    
-  "nodemon": "^3.1.14"
-  
-  }
+  
+ "name": "my-project",
+  
+ "version": "1.0.0",
+  
+ "type": "module",
+  
+ "scripts": {
+  
+   
+ "start": "node app.js",
+  
+   
+ "dev": "nodemon app.js"
+  
+ },
+  
+ "dependencies": {
+  
+   
+ "@paypal/checkout-server-sdk": "^1.0.3",
+  
+   
+ "bcrypt": "^6.0.0",
+  
+   
+ "dayjs": "^1.11.21",
+  
+   
+ "dotenv": "^17.4.1",
+  
+   
+ "ejs": "^5.0.1",
+  
+   
+ "express": "^5.2.1",
+  
+   
+ "express-session": "^1.19.0",
+  
+   
+ "init": "^0.1.2",
+  
+   
+ "mongoose": "^9.4.1",
+  
+   
+ "multer": "^2.2.0",
+  
+   
+ "nodemailer": "^8.0.5",
+  
+   
+ "passport": "^0.7.0",
+  
+   
+ "passport-google-oauth20": "^2.0.0",
+  
+   
+ "pdfkit": "^0.18.0"
+  
+ },
+  
+ "devDependencies": {
+  
+   
+ "nodemon": "^3.1.14"
+  
+ }
 }

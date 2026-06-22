@@ -1,30 +1,41 @@
-import { verifyAdminLogin ,adminUsersLogic,adminUserEditLogic} from "../service/adminService.js";
-
+import { verifyAdminLogin, adminUsersLogic, adminUserEditLogic } from "../service/adminService.js";
+import { getDashboardData } from "../service/salesReportService.js";
 export const adminLoginLoad = async (req, res) => {
-    try {
-        if (req.session.admin) {
-            return res.redirect("/admin/dashboard");
-        }
-
-        return res.render("Admin/adminLogin"); 
-    } catch (error) {
-        console.error("Error loading admin login:", error);
-        return res.status(500).send("Server Error");
+  try {
+    if (req.session.admin) {
+      return res.redirect("/admin/dashboard");
     }
+
+    return res.render("Admin/adminLogin");
+  } catch (error) {
+    console.error("Error loading admin login:", error);
+    return res.status(500).send("Server Error");
+  }
 };
 
 
-export const dashboardLoad = async (req, res) => {
-    try {
-        if (!req.session.admin) {
-            return res.redirect("/admin/login"); 
-        }
 
-        return res.render("Admin/dashboard");
-    } catch (error) {
-        console.error("Dashboard load error:", error);
-        res.status(500).send("Server Error");
+
+export const dashboardLoad = async (req, res) => {
+  try {
+    if (!req.session.admin) {
+      return res.redirect("/admin/login");
     }
+
+    const filter = req.query.filter || "yearly"; // yearly, monthly, weekly
+    const dashboardData = await getDashboardData(filter);
+
+    return res.render("Admin/dashboard", {
+      chartData: dashboardData.chartData,
+      topProducts: dashboardData.topProducts,
+      topCategories: dashboardData.topCategories,
+      ledger: dashboardData.ledger,
+      filter: dashboardData.filter
+    });
+  } catch (error) {
+    console.error("Dashboard load error:", error);
+    res.status(500).send("Server Error");
+  }
 };
 
 
@@ -65,16 +76,16 @@ export const userManagementPageLoad = async (req, res) => {
 
     // Build filter
     let filter = {}
-    if (req.query.status === "true")  filter.isActive = true
+    if (req.query.status === "true") filter.isActive = true
     if (req.query.status === "false") filter.isActive = false
-    
+
 
     if (req.query.search && req.query.search.trim() !== "") {
-  filter.$or = [
-    { fullName: { $regex: req.query.search, $options: "i" } },
-    { email:    { $regex: req.query.search, $options: "i" } }
-  ];
-}
+      filter.$or = [
+        { fullName: { $regex: req.query.search, $options: "i" } },
+        { email: { $regex: req.query.search, $options: "i" } }
+      ];
+    }
 
 
     // Build sort
@@ -99,15 +110,15 @@ export const userManagementPageLoad = async (req, res) => {
     }
 
     return res.render('Admin/userManagement', {
-      data:        result.data,
-      status:      String(filter.isActive),
+      data: result.data,
+      status: String(filter.isActive),
       currentPage: result.currentPage,
-      totalUser:   result.totalUser,
-      totalPage:   result.totalPages,
-      search:      req.query.search || "",
-      sort:        req.query.sort || "latest",
-      error:       '',
-      activePage:  'users',
+      totalUser: result.totalUser,
+      totalPage: result.totalPages,
+      search: req.query.search || "",
+      sort: req.query.sort || "latest",
+      error: '',
+      activePage: 'users',
       toast
     })
 
@@ -129,9 +140,9 @@ export const updateUserStatusController = async (req, res) => {
 
     req.session.toast = result.success
       ? {
-          type: isActive === 'true' ? 'success' : 'warning',
-          msg: `${userName} has been ${isActive === 'true' ? 'activated' : 'blocked'}`
-        }
+        type: isActive === 'true' ? 'success' : 'warning',
+        msg: `${userName} has been ${isActive === 'true' ? 'activated' : 'blocked'}`
+      }
       : { type: 'error', msg: 'Failed to update user' };
 
   } catch (err) {
