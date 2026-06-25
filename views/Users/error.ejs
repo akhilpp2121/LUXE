@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Luxe - <%= error.statusCode || 500 %> Error</title>
+    
+    <!-- Tailwind CSS with forms and container queries plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1152d4",
+                        "primary-hover": "#0e44b0",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Manrope', sans-serif; }
+        .glow-effect {
+            box-shadow: 0 0 40px -10px rgba(17, 82, 212, 0.2);
+        }
+        .glow-effect-red {
+            box-shadow: 0 0 40px -10px rgba(239, 68, 68, 0.25);
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glassmorphism {
+            background: rgba(30, 41, 59, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-300">
+    
+    <!-- Premium Header -->
+    <header class="w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-background-dark/70 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-3xl animate-pulse">diamond</span>
+                <a href="/homePage" class="text-2xl font-extrabold tracking-tighter text-slate-900 dark:text-white uppercase hover:text-primary transition-colors duration-300">
+                    Luxe
+                </a>
+            </div>
+            <div>
+                <button onclick="document.documentElement.classList.toggle('dark')" class="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all duration-300">
+                    <span class="material-symbols-outlined block dark:hidden">dark_mode</span>
+                    <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center px-6 py-20 relative overflow-hidden">
+        <!-- Abstract gradient background blobs -->
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-red-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-2xl w-full text-center space-y-8 relative z-10">
+            <!-- Alert Badge & Icon -->
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <div class="w-20 h-20 rounded-full bg-red-500/10 dark:bg-red-500/20 text-red-500 flex items-center justify-center glow-effect-red animate-bounce">
+                    <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1">error</span>
+                </div>
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold tracking-widest uppercase border border-red-500/20">
+                    HTTP <%= error.statusCode || 500 %>
+                </div>
+            </div>
+
+            <!-- Error Details -->
+            <div class="space-y-4">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+                    <%= error.title || 'Error Occurred' %>
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed max-w-lg mx-auto">
+                    <%= error.message || 'An unexpected error has occurred on our servers. Please try again later.' %>
+                </p>
+            </div>
+
+            <!-- Stack Trace for Dev Environment -->
+            <% if (locals.error && error.stack) { %>
+                <div class="text-left bg-slate-100/80 dark:bg-slate-900/85 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 max-h-72 overflow-y-auto font-mono text-[11px] text-red-500 dark:text-red-400 whitespace-pre-wrap shadow-inner custom-scrollbar relative">
+                    <div class="sticky top-0 right-0 flex justify-end">
+                        <span class="px-2 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-bold uppercase text-[9px]">Developer Stack Trace</span>
+                    </div>
+                    <%= error.stack %>
+                </div>
+            <% } %>
+
+            <!-- Navigation Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto pt-4">
+                <a href="/homePage" class="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-primary/25">
+                    <span class="material-symbols-outlined text-lg">home</span>
+                    Back to Home
+                </a>
+                <button onclick="window.history.length > 1 ? window.history.back() : window.location.href = '/homePage'" class="w-full sm:w-auto glassmorphism border border-slate-200 dark:border-slate-800 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300 px-8 py-4 rounded-xl font-bold transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">arrow_back</span>
+                    Go Back
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-background-dark border-t border-slate-200/60 dark:border-slate-800/60 py-8 mt-auto transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 dark:text-slate-500">
+            <p>© 2026 Luxe Apparel Co. All rights reserved.</p>
+            <div class="flex items-center gap-6">
+                <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

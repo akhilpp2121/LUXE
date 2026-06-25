@@ -68,7 +68,14 @@ export const wishListUpdateLogic = async (variantId, action, userId) => {
             }
 
             
-            await wishlistModel.create({ userId, variantId });
+            try {
+                await wishlistModel.create({ userId, variantId });
+            } catch (err) {
+                if (err.code === 11000) {
+                    return { success: false, message: "Already in your wishlist" };
+                }
+                throw err;
+            }
             return { success: true, message: "Added to wishlist" };
         }
 

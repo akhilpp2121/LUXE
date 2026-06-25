@@ -6,18 +6,14 @@ import productsModel from "../model/productsModel.js";
 import categoryModel from "../model/categoryModel.js";
 import mongoose from "mongoose";
 
-/**
- * Generate dummy chart data based on filter.
- * In a real implementation you would aggregate sales per month/week/year.
- */
+
 const generateChartData = (filter) => {
-  // Simple static mock data
+  
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const data = months.map((m) => ({ label: m, value: Math.floor(Math.random() * 10000) + 5000 }));
   return data;
 };
 
-// Get top N products by total quantity sold
 const getTopProducts = async (limit = 10) => {
   // Aggregate order items to sum quantity per productName
   const pipeline = [
@@ -81,7 +77,6 @@ const getTopCategories = async (limit = 10) => {
 };
 
 export const getDashboardData = async (filter = "yearly") => {
-  // For now ignore filter; could be used to adjust date range.
   const chartData = generateChartData(filter);
   const topProducts = await getTopProducts(10);
   const topCategories = await getTopCategories(10);

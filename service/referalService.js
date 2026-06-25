@@ -20,6 +20,13 @@ export const referalLinkFetch = async (userId) => {
     }
 };
 
+
+const generateCode = (length) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const bytes = crypto.randomBytes(length);
+    return Array.from(bytes, byte => chars[byte % chars.length]).join('');
+};
+
 export const generateReferalLink = async (userId) => {
     try {
         const existing = await referalModel.findOne({ referrer: userId });
@@ -30,13 +37,23 @@ export const generateReferalLink = async (userId) => {
             };
         }
 
-        const token = crypto.randomBytes(16).toString("hex");
+        const CODE_LENGTH = 6; // Change to any value between 5–7
+        const MAX_RETRIES = 5;
 
-        const tokenExists = await referalModel.findOne({ token });
-        if (tokenExists) {
+        let token;
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+            const candidate = generateCode(CODE_LENGTH);
+            const tokenExists = await referalModel.findOne({ token: candidate });
+            if (!tokenExists) {
+                token = candidate;
+                break;
+            }
+        }
+
+        if (!token) {
             return {
                 success: false,
-                message: "Token collision, please try again"
+                message: "Could not generate a unique code, please try again"
             };
         }
 
@@ -60,55 +77,6 @@ export const generateReferalLink = async (userId) => {
 };
 
 
-
-// export const applyReferralReward = async (newUser, refToken) => {
-//   try {
-//     if (!refToken) {
-//       return;
-//     }
-
-//     let referrer = null;
-
-//     // First try to find by referral token
-//     const referalEntry = await referalModel.findOne({ token: refToken });
-//     if (referalEntry) {
-//       referrer = await userModel.findById(referalEntry.referrer);
-//     } else {
-//       // If not found, try to find by referral code directly
-//       referrer = await userModel.findOne({ referalCode: refToken });
-//     }
-
-//     if (!referrer) {
-//       console.log("Invalid referral token or code:", refToken);
-//       return;
-//     }
-
-//     // Avoid self-referral
-//     if (referrer._id.toString() === newUser._id.toString()) {
-//       console.log("Self referral attempt blocked");
-//       return;
-//     }
-
-//     const REFERRER_REWARD = 100;
-//     const REFEREE_REWARD  = 50;
-
-//     // Credit referrer wallet and create transaction history
-//     await creditWallet(referrer._id, REFERRER_REWARD, `Referral bonus for inviting ${newUser.fullName}`);
-
-//     // Credit new user (referee) wallet and create transaction history
-//     await creditWallet(newUser._id, REFEREE_REWARD, `Referral sign-up bonus from ${referrer.fullName}`);
-
-//     // Link new user to referrer in the user record
-//     await userModel.findByIdAndUpdate(newUser._id, {
-//       $set: { referredBy: referrer._id }
-//     });
-
-//     console.log(`Referral reward applied and wallet transactions created: referrer ${referrer.email} +${REFERRER_REWARD}, new user +${REFEREE_REWARD}`);
-
-//   } catch (error) {
-//     console.log("applyReferralReward error:", error);
-//   }
-// };
 
 
 

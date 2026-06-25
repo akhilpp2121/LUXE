@@ -245,62 +245,74 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-lg mb-lg">
 
         <!-- Top Products -->
-        <div class="bg-white rounded-xl shadow-sm border border-surface-variant p-lg">
-          <div class="flex justify-between items-center mb-xl">
-            <h3 class="font-headline-md text-headline-md text-on-surface">Top 10 Products</h3>
-          </div>
-          <% if (!topProducts || topProducts.length===0) { %>
-            <p class="text-body-sm text-outline">No product sales recorded yet.</p>
-            <% } else { %>
-              <div class="space-y-md">
-                <% const maxUnitsSold=topProducts[0].unitsSold || 1; %>
-                  <% topProducts.forEach(product=> { %>
-                    <div class="space-y-xs">
-                      <div class="flex justify-between text-body-sm font-medium">
-                        <span>
-                          <%= product.name %>
-                        </span>
-                        <span class="text-primary">₹<%= (product.revenue || 0).toLocaleString('en-IN', {
-                            minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                      </div>
-                      <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full"
-                          style="width: <%= Math.min((product.unitsSold / maxUnitsSold) * 100, 100) %>%"></div>
-                      </div>
-                    </div>
-                    <% }) %>
+        <!-- Top Products -->
+<div class="bg-white rounded-xl shadow-sm border border-surface-variant p-lg">
+  <div class="flex justify-between items-center mb-xl">
+    <h3 class="font-headline-md text-headline-md text-on-surface">Top 10 Products</h3>
+  </div>
+  <% if (!topProducts || topProducts.length===0) { %>
+    <p class="text-body-sm text-outline">No product sales recorded yet.</p>
+    <% } else { %>
+      <div class="space-y-md">
+        <% const maxUnitsSold=topProducts[0].unitsSold || 1; %>
+          <% topProducts.forEach(product=> { %>
+            <div class="space-y-xs">
+              <div class="flex justify-between text-body-sm font-medium">
+                <span>
+                  <%= product.name %>
+                </span>
+                <span class="text-primary"><%= product.unitsSold || 0 %> units sold</span>
               </div>
-              <% } %>
-        </div>
+              <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full"
+                  style="width: <%= Math.min((product.unitsSold / maxUnitsSold) * 100, 100) %>%"></div>
+              </div>
+            </div>
+            <% }) %>
+      </div>
+      <% } %>
+</div>
 
         <!-- Category Performance -->
-        <div class="bg-white rounded-xl shadow-sm border border-surface-variant p-lg">
-          <div class="flex justify-between items-center mb-xl">
-            <h3 class="font-headline-md text-headline-md text-on-surface">Top 10 Categories</h3>
-          </div>
-          <% if (!topCategories || topCategories.length===0) { %>
-            <p class="text-body-sm text-outline">No category sales recorded yet.</p>
-            <% } else { %>
-              <div class="space-y-md">
-                <% const maxCategoryUnitsSold=topCategories[0].unitsSold || 1; %>
-                  <% topCategories.forEach(cat=> { %>
-                    <div class="space-y-xs">
-                      <div class="flex justify-between text-body-sm font-medium">
-                        <span>
-                          <%= cat.name %>
-                        </span>
-                        <span class="text-primary">₹<%= (cat.revenue || 0).toLocaleString('en-IN', {
-                            minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                      </div>
-                      <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full"
-                          style="width: <%= Math.min((cat.unitsSold / maxCategoryUnitsSold) * 100, 100) %>%"></div>
-                      </div>
-                    </div>
-                    <% }) %>
+
+
+
+
+
+
+
+        <!-- Category Performance -->
+<div class="bg-white rounded-xl shadow-sm border border-surface-variant p-lg">
+  <div class="flex justify-between items-center mb-xl">
+    <h3 class="font-headline-md text-headline-md text-on-surface">Top 10 Categories</h3>
+  </div>
+  <% if (!topCategories || topCategories.length===0) { %>
+    <p class="text-body-sm text-outline">No category sales recorded yet.</p>
+    <% } else { %>
+      <div class="space-y-md">
+        <% const maxCategoryUnitsSold=topCategories[0].unitsSold || 1; %>
+          <% topCategories.forEach(cat=> { %>
+            <div class="space-y-xs">
+              <div class="flex justify-between text-body-sm font-medium">
+                <span>
+                  <%= cat.name %>
+                </span>
+                <span class="text-primary"><%= cat.unitsSold || 0 %> units sold</span>
               </div>
-              <% } %>
-        </div>
+              <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full"
+                  style="width: <%= Math.min((cat.unitsSold / maxCategoryUnitsSold) * 100, 100) %>%"></div>
+              </div>
+            </div>
+            <% }) %>
+      </div>
+      <% } %>
+</div>
+
+
+
+        
+        
       </div>
 
   <%

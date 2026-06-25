@@ -221,6 +221,101 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
 
 
 
+// export const updateReturnRequestService = async (
+//   orderId,
+//   action,
+//   variantId,
+//   adminRemark
+// ) => {
+//   try {
+//     // Basic validation
+//     if (!orderId || !action)
+//       return { success: false, message: "orderId & action required" };
+
+//     if (!["Approved", "Rejected"].includes(action))
+//       return { success: false, message: "Invalid action" };
+
+//     const order = await orderModel.findById(orderId);
+//     if (!order) return { success: false, message: "Order not found" };
+
+//     const isPaid = ["paypal", "wallet", "cod"].includes(order.orderMethod);
+
+//     if (!Array.isArray(order.returnedAt)) {
+//       order.returnedAt = [];
+//     }
+
+//     let totalRefund = 0;
+
+//     const isAll = !variantId || variantId === "ALL";
+
+//     const pendingReturns = order.returnedAt.filter(
+//       (r) =>
+//         r.returnRequestStatus.toLowerCase() === "pending" &&
+//         (isAll || r.variant.toString() === variantId.toString())
+//     );
+
+//     if (!pendingReturns.length)
+//       return { success: true, message: "No pending return found" };
+
+//     for (const r of pendingReturns) {
+//       r.returnRequestStatus = action;
+//       r.adminRemark = adminRemark || "";
+
+//       if (action === "Approved") {
+//         const item = order.orderItems.find(
+//           (i) => i.variantId.toString() === r.variant.toString()
+//         );
+
+//         if (item) {
+//           const qty = r.quantity || item.quantity;
+
+//           // Stock restore
+//           await variantModel.updateOne(
+//             { _id: r.variant },
+//             { $inc: { stock: qty } }
+//           );
+
+//           // Mark item as returned
+//           item.deliveryStatus = "returned";
+
+//           // Refund calculate
+//           totalRefund += item.price * qty;
+//         }
+//       }
+
+//       if (!isAll) break;
+//     }
+
+//     if (action === "Approved") {
+//       const derived = deriveOrderStatus(order.orderItems);
+//       order.deliveryStatus = derived.deliveryStatus;
+//       order.orderStatus = derived.orderStatus;
+//     }
+
+//     await order.save();
+
+//     if (action === "Approved" && isPaid && totalRefund > 0 && (!order.couponApplied || order.couponApplied === 0)) {
+//       await creditWallet(
+//         order.userId,
+//         totalRefund,
+//         `Refund for return in order #${order.orderCode}`,
+//         orderId
+//       );
+//     }
+
+//     return {
+//       success: true,
+//       message:
+//         action === "Approved"
+//           ? `Return approved. ₹${totalRefund} refunded to wallet.`
+//           : "Return request rejected",
+//     };
+//   } catch (error) {
+//     console.error("updateReturnRequestService error:", error);
+//     return { success: false, message: "Server error" };
+//   }
+// };
+
 export const updateReturnRequestService = async (
   orderId,
   action,
@@ -228,7 +323,6 @@ export const updateReturnRequestService = async (
   adminRemark
 ) => {
   try {
-    // Basic validation
     if (!orderId || !action)
       return { success: false, message: "orderId & action required" };
 
@@ -239,6 +333,7 @@ export const updateReturnRequestService = async (
     if (!order) return { success: false, message: "Order not found" };
 
     const isPaid = ["paypal", "wallet", "cod"].includes(order.orderMethod);
+    const GST_RATE = 0.05;
 
     if (!Array.isArray(order.returnedAt)) {
       order.returnedAt = [];
@@ -257,6 +352,11 @@ export const updateReturnRequestService = async (
     if (!pendingReturns.length)
       return { success: true, message: "No pending return found" };
 
+    const originalSubTotal = (order.orderItems || []).reduce(
+      (sum, i) => sum + (i.totalPrice || 0),
+      0
+    );
+
     for (const r of pendingReturns) {
       r.returnRequestStatus = action;
       r.adminRemark = adminRemark || "";
@@ -269,17 +369,30 @@ export const updateReturnRequestService = async (
         if (item) {
           const qty = r.quantity || item.quantity;
 
-          // Stock restore
           await variantModel.updateOne(
             { _id: r.variant },
             { $inc: { stock: qty } }
           );
 
-          // Mark item as returned
           item.deliveryStatus = "returned";
 
-          // Refund calculate
-          totalRefund += item.price * qty;
+         
+          const itemLineValue = item.price * qty;
+          
+
+          
+          let itemCouponShare = 0;
+          if (order.couponApplied > 0 && originalSubTotal > 0) {
+            const itemFullLineTotal = item.price * item.quantity;
+            itemCouponShare =
+              order.couponApplied * (itemFullLineTotal / originalSubTotal) *
+              (qty / item.quantity);
+          }
+
+          const taxableValue = Math.round(Math.max(itemLineValue - itemCouponShare, 0));
+          const itemGst = Math.round(taxableValue * GST_RATE);
+
+          totalRefund += taxableValue + itemGst;
         }
       }
 
@@ -294,7 +407,7 @@ export const updateReturnRequestService = async (
 
     await order.save();
 
-    if (action === "Approved" && isPaid && totalRefund > 0 && (!order.couponApplied || order.couponApplied === 0)) {
+    if (action === "Approved" && isPaid && totalRefund > 0) {
       await creditWallet(
         order.userId,
         totalRefund,
@@ -307,7 +420,7 @@ export const updateReturnRequestService = async (
       success: true,
       message:
         action === "Approved"
-          ? `Return approved. ₹${totalRefund} refunded to wallet.`
+          ? `Return approved. ₹${totalRefund.toFixed(2)} refunded to wallet.`
           : "Return request rejected",
     };
   } catch (error) {

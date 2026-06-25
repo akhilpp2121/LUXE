@@ -275,6 +275,10 @@ export const topSellingProduct = async () => {
   }
 };
 
+
+ 
+
+
 export const ledgerBook = async () => {
   try {
     const now = new Date();
@@ -297,17 +301,48 @@ export const ledgerBook = async () => {
         }
       ]),
 
+      
       Order.aggregate([
         {
           $match: {
-            createdAt: { $gte: start, $lte: now },
-            ...IS_RETURNED
+            "returnedAt.0": { $exists: true } 
+          }
+        },
+        { $unwind: "$returnedAt" },
+        {
+          $match: {
+            "returnedAt.returnRequestStatus": "Approved",
+            "returnedAt.requestedAt": { $gte: start, $lte: now }
+          }
+        },
+        {
+          // pull the matching order item to get its price
+          $addFields: {
+            matchedItem: {
+              $first: {
+                $filter: {
+                  input: "$orderItems",
+                  as: "item",
+                  cond: { $eq: ["$$item.variantId", "$returnedAt.variant"] }
+                }
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            returnAmount: {
+              $multiply: [
+                { $ifNull: ["$matchedItem.price", 0] },
+                { $ifNull: ["$returnedAt.quantity", 0] }
+              ]
+            }
           }
         },
         {
           $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-            total: { $sum: "$totalAmount" }
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$returnedAt.requestedAt" } },
+            total: { $sum: "$returnAmount" }
           }
         }
       ])

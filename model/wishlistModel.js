@@ -14,4 +14,6 @@ let wishlistSchema = new schema({
     }
 },{timestamps:true})
 
+wishlistSchema.index({ userId: 1, variantId: 1 }, { unique: true });
+
 export default mongoose.model("Wishlist",wishlistSchema)

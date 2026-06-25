@@ -235,7 +235,7 @@
     var returnStatus = null;
     var adminRemark = null;
     var lastRet = null;
-    
+
     returnedAt.forEach(function(r) {
       if (r.variant && r.variant.toString() === variantId) {
         if (r.returnRequestStatus !== 'Rejected') {
@@ -309,11 +309,30 @@
     var ri = resolveItem(orderItems[i]);
     if (!ri.cancelled) activeSubTotal += (orderItems[i].totalPrice || 0);
   }
-  var shippingCharge = ord.shippingCharge || 0;
-  var couponDiscount = ord.couponApplied  || 0;
-  
+
+  // ---- BUGFIX: empty cart / fully-cancelled cart must not carry shipping
+  // or coupon discount into the total — otherwise the total can go negative.
+  // hasActiveItems is true only when there is at least one item AND that
+  // item contributes a positive amount to the subtotal.
+  var hasActiveItems = orderItems.length > 0 && activeSubTotal > 0;
+
+  // ---- BUGFIX: shipping must be recomputed from the live active subtotal
+  // against the free-shipping threshold (₹999), not pulled straight from
+  // the stored ord.shippingCharge. Below ₹999 → ₹99 charged; ₹999 or above
+  // → free. Never charged at all when there are no active items.
+  var SHIPPING_THRESHOLD = 999;
+  var SHIPPING_FEE       = 99;
+  var shippingCharge = hasActiveItems
+    ? (activeSubTotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE)
+    : 0;
+
+  // Coupon discount is also skipped entirely when there are no active items.
+  var couponDiscount = hasActiveItems ? (ord.couponApplied || 0) : 0;
+
   var gstAmount      = Math.round(activeSubTotal * 0.05);
-  var activeTotal    = +(activeSubTotal + gstAmount + shippingCharge - couponDiscount).toFixed(2);
+  var activeTotalRaw = activeSubTotal + gstAmount + shippingCharge - couponDiscount;
+  // Final safety net: total should never display as negative.
+  var activeTotal    = +(Math.max(0, activeTotalRaw)).toFixed(2);
 
   // Items eligible to return
   var returnableItems = [];
@@ -335,11 +354,15 @@
 
   <!-- Back -->
   <div class="mb-10 fade-up d1">
-    <a href="/order/my-orders" class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[.18em] font-bold text-on-surface-variant hover:text-primary transition-colors group">
-      <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
-      Order Archive
-    </a>
-  </div>
+  <a href="/order/my-orders" class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[.18em] font-bold text-on-surface-variant hover:text-primary transition-colors group">
+    <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+    Order Archive
+  </a>
+  <a href="/" class="ml-6 inline-flex items-center gap-2 text-[11px] uppercase tracking-[.18em] font-bold text-on-surface-variant hover:text-primary transition-colors group">
+    <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+    Back to Home
+  </a>
+</div>
 
   <!-- Page Header -->
   <header class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-8 fade-up d2">
@@ -786,7 +809,7 @@
           </div>
 
           <div class="border-t border-outline-variant/20"></div>
-          <p class="text-[10px] text-on-surface-variant/40 tracking-wide">GST of 5% applied on taxable subtotal (clothing)</p>
+          <p class="text-[10px] text-on-surface-variant/40 tracking-wide">GST of 5% applied on taxable subtotal (clothing) · Free shipping over &#8377;999</p>
 
           <div class="flex justify-between items-end">
             <span class="text-[10px] uppercase tracking-[.15em] font-bold text-white">Grand Total</span>
@@ -993,9 +1016,16 @@
     for (var i = 0; i < rows.length; i++) {
       if (rows[i].dataset.cancelled !== 'true') sub += parseFloat(rows[i].dataset.price || 0);
     }
-    var gst      = Math.round(sub * GST_RATE);
-    var shipping = sub >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-    var total    = +(sub + gst + shipping - COUPON).toFixed(2);
+
+    // BUGFIX: if there's nothing left in the active cart (every item
+    // cancelled, or no items at all), shipping and coupon must not apply,
+    // and the total must never render as negative. Shipping below the
+    // ₹999 threshold is ₹99; at or above it, shipping is free.
+    var hasActive  = sub > 0;
+    var gst        = Math.round(sub * GST_RATE);
+    var shipping   = hasActive ? (sub >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE) : 0;
+    var couponUsed = hasActive ? COUPON : 0;
+    var total      = Math.max(0, +(sub + gst + shipping - couponUsed).toFixed(2));
 
     var subEl      = document.getElementById('displaySubtotal');
     var gstEl      = document.getElementById('displayGst');

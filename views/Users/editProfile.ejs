@@ -192,15 +192,15 @@
 <nav class="topnav">
   <div class="brand">LUXE <span>ATELIER</span></div>
   <ul class="nav-links">
-    <li><a href="#">Showroom</a></li>
-    <li><a href="#">Collections</a></li>
-    <li><a href="#">Atelier</a></li>
-    <li><a href="#">Journal</a></li>
+    <li><a href="/product-listing">Showroom</a></li>
+    <li><a href="/product-listing">Collections</a></li>
+   
   </ul>
   <div class="nav-acts">
-    <button class="nav-btn"><span class="ms material-symbols-outlined">shopping_bag</span></button>
-    <button class="nav-btn on"><span class="ms material-symbols-outlined">person</span></button>
-  </div>
+  <a href="/cart" class="nav-btn"><span class="ms material-symbols-outlined">shopping_bag</span></a>
+  <a href="/profile" class="nav-btn on"><span class="ms material-symbols-outlined">person</span></a>
+</div>
+ 
 </nav>
 
 <!-- SIDEBAR -->
@@ -213,7 +213,7 @@
     <a href="/profile" class="sidebar-link active">
       <span class="material-symbols-outlined">person</span><span>Profile</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="/order/my-orders" class="sidebar-link">
       <span class="material-symbols-outlined">package_2</span><span>My Orders</span>
     </a>
     <a href="/address" class="sidebar-link">
@@ -222,21 +222,19 @@
     <a href="/changePassword" class="sidebar-link">
       <span class="material-symbols-outlined">lock_reset</span><span>Change Password</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="/wishlist" class="sidebar-link">
       <span class="material-symbols-outlined">favorite</span><span>Wishlist</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="/referal" class="sidebar-link">
       <span class="material-symbols-outlined">share_reviews</span><span>Referral Link</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="/wallet" class="sidebar-link">
       <span class="material-symbols-outlined">account_balance_wallet</span><span>Wallet</span>
     </a>
-    <a href="#" class="sidebar-link">
-      <span class="material-symbols-outlined">confirmation_number</span><span>Coupons</span>
-    </a>
+   
   </nav>
   <div class="sidebar-footer">
-    <a href="#"><span class="material-symbols-outlined">logout</span><span>Sign Out</span></a>
+    <a href="/logout"><span class="material-symbols-outlined">logout</span><span>Sign Out</span></a>
   </div>
 </aside>
 
