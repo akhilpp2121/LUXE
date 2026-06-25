@@ -1,0 +1,11 @@
+export const ROUTE_NOT_FOUND = "Route not found";
+export const INTERNAL_SERVER_ERROR = "Internal server error";
+export const INVALID_CREDENTIALS = "Invalid credentials";
+export const FAILED_TO_LOAD_USERS = "Failed to load users";
+export const FAILED_TO_UPDATE_USER = "Failed to update user";
+export const SOMETHING_WENT_WRONG = "Something went wrong";
+export const VALIDATION_ERROR = "Validation validation failed";
+export const BAD_REQUEST = "Bad request";
+export const UNAUTHORIZED = "Unauthorized access";
+export const FORBIDDEN = "Access forbidden";
+export const CONFLICT = "Resource already exists";

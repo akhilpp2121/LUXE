@@ -122,7 +122,7 @@
         <span id="bannerMsg"></span>
       </div>
 
-      <form id="registerForm" class="space-y-4" novalidate method="post" action="/signUp">
+      <form id="registerForm" class="space-y-4" novalidate method="post" action="/signup">
 
         <!-- Full Name -->
         <div class="space-y-1">
@@ -154,6 +154,32 @@
           <div class="err-msg" id="phoneNumber-err"></div>
 
         </div>
+
+       
+             <!-- Referral Code -->
+<div class="space-y-1">
+  <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">
+    Referral Code
+  </label>
+  <div class="relative group">
+    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">
+      card_giftcard
+    </span>
+    <input 
+      id="referralCode" 
+      name="referralCode"
+      class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all"
+      placeholder="Enter referral code (optional)" 
+      type="text"
+      autocomplete="off"
+      value="<%= typeof referralToken !== 'undefined' ? referralToken : '' %>"
+    />
+  </div>
+  <div class="err-msg" id="referralCode-err"></div>
+</div>
+
+
+
 
         <!-- Password -->
         <div class="space-y-1">

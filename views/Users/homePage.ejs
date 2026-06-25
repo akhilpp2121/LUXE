@@ -82,8 +82,7 @@
             </div>
             <nav class="hidden md:flex items-center gap-8">
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="/product-listing">Collections</a>
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">New Arrivals</a>
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">About</a>
+              
             </nav>
         </div>
 
@@ -102,9 +101,12 @@
 </form>
         
             <div class="flex items-center gap-4">
-                <button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <span class="material-symbols-outlined">favorite</span>
-                </button>
+
+                <a href="/wishlist">
+    <button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+        <span class="material-symbols-outlined">favorite</span>
+    </button>
+</a>
 
                <a href="/cart" class="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
   <span class="material-symbols-outlined msym">shopping_cart</span>
@@ -157,13 +159,16 @@
                 View all <span class="material-symbols-outlined text-sm">arrow_forward</span>
             </a>
         </div>
+<!-- product card -->
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <% product.forEach(p => { %>
-            <div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm group">
+    <% if (product && product.length > 0) { %>
+        <% product.forEach(p => { %>
+
+            <div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm group flex flex-col h-full">
 
                 <!-- Image -->
-                <div class="h-48 md:h-56 overflow-hidden relative">
+                <div class="h-48 md:h-56 overflow-hidden relative flex-shrink-0">
                     <a href="/product-details/<%= p.productId._id %>?size=<%= p.size %>&color=<%= p.color %>">
                         <img
                             src="/uploads/<%= p.images[0] %>"
@@ -174,34 +179,68 @@
                 </div>
 
                 <!-- Info -->
-                <div class="p-3">
-                    <h3 class="font-semibold text-sm mb-1 truncate"><%= p.productId.name %></h3>
-                    <p class="text-xs text-slate-500 mb-1 truncate"><%= p.size %> | <%= p.color %></p>
+                <div class="p-3 flex flex-col gap-1 flex-1">
 
-                    <div class="flex items-center gap-2 mb-1">
-                        <% if (p.save > 0) { %>
-                            <p class="text-sm font-bold">₹<%= p.discount %></p>
-                            <p class="text-xs text-slate-400 line-through">₹<%= p.price %></p>
+                    <!-- Product Name -->
+                    <h3 class="font-semibold text-sm truncate"><%= p.productId.name %></h3>
+
+                    <!-- Size & Color -->
+                    <p class="text-xs text-slate-500 truncate">
+                        <span class="font-medium"><%= p.size %></span>
+                        <span class="mx-1 text-slate-400">|</span>
+                        <span class="font-medium"><%= p.color %></span>
+                    </p>
+
+                    <!-- Price Row (reserved height) -->
+                    <div class="flex items-center gap-2 mt-1 min-h-[20px]">
+                        <% if (p.discount) { %>
+                            <span class="text-sm font-bold">₹<%= p.discount.toLocaleString('en-IN') %></span>
+                            <span class="text-xs text-slate-400 line-through">₹<%= p.price.toLocaleString('en-IN') %></span>
                         <% } else { %>
-                            <p class="text-sm font-bold">₹<%= p.price %></p>
+                            <span class="text-sm font-bold">₹<%= p.price.toLocaleString('en-IN') %></span>
                         <% } %>
                     </div>
 
-                    <% if (p.save > 0) { %>
-                        <p class="text-green-600 text-xs mb-2">Save ₹<%= p.save %></p>
-                    <% } %>
+                    <!-- Savings Badge (reserved height so layout doesn't shift) -->
+                    <div class="min-h-[22px] flex items-center">
+                        <% if (p.save > 0) { %>
+                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-green-600 bg-green-50 dark:bg-green-500/10 dark:text-green-400 px-2 py-0.5 rounded-full w-fit">
+                                <span class="material-symbols-outlined" style="font-size:12px">local_offer</span>
+                                Save ₹<%= p.save.toLocaleString('en-IN') %>
+                            </span>
+                        <% } %>
+                    </div>
 
+                    <!-- Add to Cart — pinned to bottom -->
                     <button
                         onclick="addToCart('<%= p._id %>')"
-                        class="w-full py-2 px-3 rounded-lg font-medium text-xs bg-black text-white hover:bg-gray-800 flex items-center justify-center gap-1">
+                        class="mt-auto w-full py-2 px-3 rounded-lg font-medium text-xs bg-black text-white hover:bg-gray-800 flex items-center justify-center gap-1 transition-colors">
                         <span class="material-symbols-outlined" style="font-size:14px">shopping_bag</span>
                         Add to Cart
                     </button>
-                </div>
 
+                </div>
             </div>
-            <% }) %>
+
+        <% }) %>
+    <% } else { %>
+        <div class="col-span-4 py-16 text-center">
+            <span class="material-symbols-outlined text-4xl text-slate-400 mb-3 block">search_off</span>
+            <p class="text-slate-500 font-semibold">
+                <% if (searchQuery) { %>
+                    No products found for "<%= searchQuery %>"
+                <% } else { %>
+                    No products available right now
+                <% } %>
+            </p>
+            <% if (searchQuery) { %>
+                <a href="/homepage" class="text-primary text-sm font-bold hover:underline mt-2 inline-block">Clear search</a>
+            <% } %>
         </div>
+    <% } %>
+</div>
+
+       
     </section>
 
 </main>
@@ -230,11 +269,10 @@
         <div>
             <h4 class="font-bold mb-8 uppercase text-sm tracking-widest">Shop</h4>
             <ul class="space-y-4 text-slate-500">
-                <li><a class="hover:text-primary transition-colors" href="#">New Arrivals</a></li>
-                <li><a class="hover:text-primary transition-colors" href="#">Best Sellers</a></li>
-                <li><a class="hover:text-primary transition-colors" href="#">Menswear</a></li>
-                <li><a class="hover:text-primary transition-colors" href="#">Accessories</a></li>
-                <li><a class="hover:text-primary transition-colors" href="#">Gift Cards</a></li>
+                <li><a class="hover:text-primary transition-colors" href="/product-listing">New Arrivals</a></li>
+                <li><a class="hover:text-primary transition-colors" href="/product-listing">Best Sellers</a></li>
+                <li><a class="hover:text-primary transition-colors" href="/product-listing">Menswear</a></li>
+                
             </ul>
         </div>
         <div>
@@ -251,11 +289,7 @@
     </div>
     <div class="max-w-7xl mx-auto px-6 pt-10 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
         <p>© 2024 Luxe Apparel Co. All rights reserved.</p>
-        <div class="flex items-center gap-8">
-            <a class="hover:text-slate-200 transition-colors" href="#">Privacy Policy</a>
-            <a class="hover:text-slate-200 transition-colors" href="#">Terms of Service</a>
-            <a class="hover:text-slate-200 transition-colors" href="#">Accessibility</a>
-        </div>
+       
     </div>
 </footer>
 
@@ -268,8 +302,6 @@
 </div>
 
 <script>
-
-
 
     let _toastTimer;
 

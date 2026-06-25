@@ -5,6 +5,7 @@
 
 
 import passport from "../config/passport.js";
+import { getCartCount } from "../service/cartService.js";
 import {
   getUserProfileService,
   updateProfileService,
@@ -148,7 +149,10 @@ export const deleteAvatar = async (req, res) => {
 export const addressPageLoad = async (req, res) => {
   try {
     if (!req.session.user) return res.redirect("/login");
-    return res.render("Users/address", { user: req.session.user });
+    const userId = req.session.user.id || req.session.user._id;
+
+    const cart=await getCartCount(userId)
+    return res.render("Users/address", { user: req.session.user,cart,data:[],price:0 });
   } catch (err) {
     return res.redirect("/login");
   }
@@ -294,7 +298,7 @@ export const addressAddController = async (req, res) => {
     const userId = req.session.user?.id;  
     if (!userId) return res.status(401).json({ message: 'Not authenticated' });
     const newAddress = await addAddressService(userId, req.body);
-    return res.status(201).json({ message: 'Address added successfully.', address: newAddress });
+    return res.status(201).json({ success: true, message: 'Address added successfully.', address: newAddress });
   } catch (error) {
     return handleError(res, error);
   }
@@ -326,13 +330,18 @@ export const addressDeleteController = async (req, res) => {
 
 export const addressSetDefaultController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  
-    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const userId = req.session.user?.id || req.session.user?._id; 
+    if (!userId) return res.status(401).json({ success: false, message: 'Not authenticated' });
+
     const { id } = req.params;
     const updated = await setDefaultAddressService(userId, id);
-    return res.status(200).json({ message: 'Default address updated.', address: updated });
+
+    return res.status(200).json({ 
+      success: true,                        
+      message: 'Default address updated.', 
+      address: updated                      
+    });
   } catch (error) {
     return handleError(res, error);
   }
 };
-

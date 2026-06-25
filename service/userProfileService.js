@@ -3,6 +3,12 @@ import path from "path";
 import fs from "fs";
 import { addressModel } from "../model/addressModel.js";
 
+
+export const addressFetcher = (userId=>addressModel.find({userId}))
+
+export const addressIdFetcher = (_id=>addressModel.find({_id}))
+
+
 const deleteOldAvatar = (avatarPath) => {
   if (!avatarPath || avatarPath.includes("default-avatar")) return;
   const filePath = path.join(process.cwd(), "public", avatarPath.replace(/^\//, ""));
@@ -242,7 +248,13 @@ export const setDefaultAddressService = async (userId, addressId) => {
     throw error;
   }
 
-  await addressModel.updateMany({ userId }, { isDefault: false });  // ← fixed
+  if (existing.isDefault) return existing;
+
+  await addressModel.updateMany(
+    { userId, _id: { $ne: addressId } }, 
+    { $set: { isDefault: false } }
+  );
+
   existing.isDefault = true;
   await existing.save();
 

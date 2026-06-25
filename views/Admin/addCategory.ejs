@@ -1,50 +1,62 @@
 <!DOCTYPE html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<html class="dark" lang="en">
 
-<!-- FIX: SweetAlert2 added here -->
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;500;700&amp;family=Lexend:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface": "#e4e1e8", "inverse-primary": "#4c599f", "surface-dim": "#131318", "surface-bright": "#39393e", background: "#131318", "secondary-fixed-dim": "#c1c4e6", "inverse-surface": "#e4e1e8", "on-primary-container": "#7e8bd4", surface: "#131318", "surface-container-low": "#1b1b20", "surface-container-highest": "#343439", "on-error": "#690005", "primary-fixed": "#dee1ff", "on-tertiary-container": "#cc7a59", "secondary-container": "#414561", "primary-container": "#122165", "on-surface-variant": "#c6c5d2", "error-container": "#93000a", "surface-variant": "#343439", "on-secondary-container": "#afb3d4", "tertiary-fixed-dim": "#ffb598", "on-error-container": "#ffdad6", "surface-container-lowest": "#0d0e12", "on-tertiary-fixed": "#370e00", "inverse-on-surface": "#303035", "tertiary-container": "#4c1700", "outline-variant": "#454650", "secondary-fixed": "#dee0ff", error: "#ffb4ab", "primary-fixed-dim": "#bac3ff", "on-secondary-fixed": "#151a33", "on-tertiary": "#571f04", "on-primary-fixed": "#001159", tertiary: "#ffb598", "surface-tint": "#bac3ff", "surface-container-high": "#29292f", "on-secondary-fixed-variant": "#414561", secondary: "#c1c4e6", "on-primary": "#1c2a6d"}, borderRadius: {DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem"}, spacing: {base: "4px", lg: "24px", sm: "12px", xl: "32px", xs: "8px", gutter: "20px", md: "16px", margin: "24px"}, fontFamily: {h1: ["Inter"], "label-sm": ["Inter"], "body-md": ["Lexend"], h3: ["Inter"], "body-sm": ["Inter"], "label-md": ["Inter"], "body-lg": ["Lexend"], h2: ["Inter"], "headline-sm": ["Literata"], "headline-lg": ["Literata"], "headline-md": ["Literata"]}, fontSize: {h1: ["30px", {lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "700"}], "label-sm": ["11px", {lineHeight: "14px", letterSpacing: "0em", fontWeight: "500"}], "body-md": ["14px", {lineHeight: "20px", letterSpacing: "0em", fontWeight: "400"}], h3: ["20px", {lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600"}], "body-sm": ["12px", {lineHeight: "16px", fontWeight: "400"}], "label-md": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "body-lg": ["16px", {lineHeight: "24px", letterSpacing: "0em", fontWeight: "400"}], h2: ["24px", {lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-sm": ["20px", {lineHeight: "28px", letterSpacing: "0em", fontWeight: "500"}], "headline-lg": ["30px", {lineHeight: "38px", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-md": ["24px", {lineHeight: "32px", letterSpacing: "0em", fontWeight: "600"}]}}}};</script>
-<style>
-        body { font-family: 'Inter', sans-serif; }
+    <!-- FIX: SweetAlert2 added here -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Literata:wght@400;500;700&amp;family=Lexend:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script
+        id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-surface": "#e4e1e8", "inverse-primary": "#4c599f", "surface-dim": "#131318", "surface-bright": "#39393e", background: "#131318", "secondary-fixed-dim": "#c1c4e6", "inverse-surface": "#e4e1e8", "on-primary-container": "#7e8bd4", surface: "#131318", "surface-container-low": "#1b1b20", "surface-container-highest": "#343439", "on-error": "#690005", "primary-fixed": "#dee1ff", "on-tertiary-container": "#cc7a59", "secondary-container": "#414561", "primary-container": "#122165", "on-surface-variant": "#c6c5d2", "error-container": "#93000a", "surface-variant": "#343439", "on-secondary-container": "#afb3d4", "tertiary-fixed-dim": "#ffb598", "on-error-container": "#ffdad6", "surface-container-lowest": "#0d0e12", "on-tertiary-fixed": "#370e00", "inverse-on-surface": "#303035", "tertiary-container": "#4c1700", "outline-variant": "#454650", "secondary-fixed": "#dee0ff", error: "#ffb4ab", "primary-fixed-dim": "#bac3ff", "on-secondary-fixed": "#151a33", "on-tertiary": "#571f04", "on-primary-fixed": "#001159", tertiary: "#ffb598", "surface-tint": "#bac3ff", "surface-container-high": "#29292f", "on-secondary-fixed-variant": "#414561", secondary: "#c1c4e6", "on-primary": "#1c2a6d" }, borderRadius: { DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem" }, spacing: { base: "4px", lg: "24px", sm: "12px", xl: "32px", xs: "8px", gutter: "20px", md: "16px", margin: "24px" }, fontFamily: { h1: ["Inter"], "label-sm": ["Inter"], "body-md": ["Lexend"], h3: ["Inter"], "body-sm": ["Inter"], "label-md": ["Inter"], "body-lg": ["Lexend"], h2: ["Inter"], "headline-sm": ["Literata"], "headline-lg": ["Literata"], "headline-md": ["Literata"] }, fontSize: { h1: ["30px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "700" }], "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0em", fontWeight: "500" }], "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }], h3: ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }], "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }], "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }], "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" }], h2: ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }], "headline-sm": ["20px", { lineHeight: "28px", letterSpacing: "0em", fontWeight: "500" }], "headline-lg": ["30px", { lineHeight: "38px", letterSpacing: "-0.01em", fontWeight: "600" }], "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "0em", fontWeight: "600" }] } } } };</script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
     </style>
 </head>
+
 <body class="bg-gray-950 text-white">
 
-<!-- Sidebar Component -->
- <aside class="fixed flex flex-col h-full py-4 bg-gray-950 h-screen w-64 left-0 border-r border-gray-800 z-50">
+    <!-- Sidebar Component -->
+    <aside class="fixed flex flex-col h-full py-4 bg-gray-950 h-screen w-64 left-0 border-r border-gray-800 z-50">
 
-<div class="px-6 mb-8 flex items-center gap-3">
-    
-    <div class="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center text-white font-black text-sm shadow-md">
-        L
-    </div>
+        <div class="px-6 mb-8 flex items-center gap-3">
 
-    <div>
-        <h2 class="text-lg font-black text-on-surface leading-tight">System Admin</h2>
-        <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">LUXE</p>
-    </div>
+            <div
+                class="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center text-white font-black text-sm shadow-md">
+                L
+            </div>
 
-</div>
+            <div>
+                <h2 class="text-lg font-black text-on-surface leading-tight">System Admin</h2>
+                <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">LUXE</p>
+            </div>
 
- <nav class="flex flex-col gap-2 px-4">
-    <a class="text-white bg-gray-900 border border-purple-500/30 
+        </div>
+
+        <nav class="flex flex-col gap-2 px-4">
+            <a class="text-white bg-gray-900 border border-purple-500/30 
 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl 
 flex items-center gap-4 font-bold" href="/admin/dashboard">
                 <span class="material-symbols-outlined text-lg opacity-70">dashboard</span>
                 <span>Dashboard</span>
             </a>
-            <a class="text-white bg-gray-900 border border-purple-500/30 
+            <a href="/admin/order-management" class="text-white bg-gray-900 border border-purple-500/30 
 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl 
 flex items-center gap-4 font-bold">
                 <span class="material-symbols-outlined text-lg opacity-70">shopping_cart</span>
@@ -56,9 +68,9 @@ flex items-center gap-4 font-bold" href="/admin/products">
                 <span class="material-symbols-outlined text-lg opacity-70">inventory_2</span>
                 <span>Products</span>
             </a>
-            
+
             <!-- Active State: Categories -->
-             <a class="text-white bg-gray-900 border border-purple-500/30 
+            <a class="text-white bg-gray-900 border border-purple-500/30 
 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl 
 flex items-center gap-4 font-bold" href="/admin/category">
                 <span class="material-symbols-outlined text-lg text-primary">category</span>
@@ -70,293 +82,292 @@ flex items-center gap-4 font-bold" href="/admin/users">
                 <span class="material-symbols-outlined text-lg opacity-70">group</span>
                 <span>Users</span>
             </a>
-            <a class="text-white bg-gray-900 border border-purple-500/30 
+            <a href="/admin/analystic"  class="text-white bg-gray-900 border border-purple-500/30 
 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl 
 flex items-center gap-4 font-bold">
                 <span class="material-symbols-outlined text-lg opacity-70">analytics</span>
                 <span>Analytics</span>
             </a>
-            <a class="text-white bg-gray-900 border border-purple-500/30 
-shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl 
-flex items-center gap-4 font-bold">
-                <span class="material-symbols-outlined text-lg opacity-70">image</span>
-                <span>Banners</span>
-            </a>
+          
         </nav>
-        
 
-</aside>
-<!-- Main Content Wrapper -->
- <main class="ml-64 min-h-screen bg-gray-950">
 
-<!-- TopNavBar Component -->
-<header class="flex items-center justify-between px-6 h-16 w-full bg-surface-container-low border-b border-outline-variant sticky top-0 z-40 font-['Inter'] antialiased">
-<div class="flex items-center gap-2">
-    
-    <span class="material-symbols-outlined bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text"
-          style="font-variation-settings: 'FILL' 1;">
-        add_circle
-    </span>
+    </aside>
+    <!-- Main Content Wrapper -->
+    <main class="ml-64 min-h-screen bg-gray-950">
 
-    <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-        AdminConsole
-    </h1>
+        <!-- TopNavBar Component -->
+        <header
+            class="flex items-center justify-between px-6 h-16 w-full bg-surface-container-low border-b border-outline-variant sticky top-0 z-40 font-['Inter'] antialiased">
+            <div class="flex items-center gap-2">
 
-</div>
+                <span
+                    class="material-symbols-outlined bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text"
+                    style="font-variation-settings: 'FILL' 1;">
+                    add_circle
+                </span>
 
-<div class="flex items-center gap-6">
-<div class="relative hidden lg:block">
-</div>
-<div class="flex items-center gap-1">
-<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded">
-</button>
-<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded">
-</button>
-<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded">
-</button>
-</div>
-</div>
-</header>
+                <h1
+                    class="text-xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
+                    AdminConsole
+                </h1>
 
-<!-- Page Canvas -->
-<div class="p-lg md:p-xl max-w-5xl mx-auto">
-<!-- Breadcrumbs -->
-<nav class="flex items-center gap-2 text-body-sm text-on-secondary-container mb-md">
-<span class="material-symbols-outlined text-sm">chevron_right</span>
-<a class="hover:text-primary transition-colors" href="/admin/category">Categories</a>
-<span class="material-symbols-outlined text-sm">chevron_right</span>
-<span class="font-semibold text-on-surface">Add New Category</span>
-</nav>
+            </div>
 
-<!-- Form starts here — wraps everything including header buttons -->
-<form action="/admin/category-add" method="POST" id="categoryForm">
+            <div class="flex items-center gap-6">
+                <div class="relative hidden lg:block">
+                </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded">
+                    </button>
+                    <button
+                        class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded">
+                    </button>
+                    <button
+                        class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded">
+                    </button>
+                </div>
+            </div>
+        </header>
 
-<!-- Header Section -->
-<div class="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-md">
-<div>
-<h2 class="font-h1 text-h1 text-on-surface mb-xs">Add New Category</h2>
-<p class="font-body-md text-body-md text-on-surface-variant">Configure a new product classification for your enterprise inventory.</p>
-</div>
-<div class="flex gap-sm">
-<button type="button" onclick="resetForm()"
-    class="px-md h-10 border border-gray-700 bg-gray-900 text-white rounded-lg">
-    Cancel
-</button>
+        <!-- Page Canvas -->
+        <div class="p-lg md:p-xl max-w-5xl mx-auto">
+            <!-- Breadcrumbs -->
+            <nav class="flex items-center gap-2 text-body-sm text-on-secondary-container mb-md">
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                <a class="hover:text-primary transition-colors" href="/admin/category">Categories</a>
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                <span class="font-semibold text-on-surface">Add New Category</span>
+            </nav>
 
-<button type="submit" class="px-6 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all duration-200">
-    <span class="material-symbols-outlined text-[20px]">save</span>
-    <span class="tracking-wide">Save Category</span>
-</button>
-</div>
-</div>
+            <!-- Form starts here — wraps everything including header buttons -->
+            <form action="/admin/category-add" method="POST" id="categoryForm">
 
-<!-- Bento Grid Layout for Form -->
-<div class="grid grid-cols-12 gap-6">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-md">
+                    <div>
+                        <h2 class="font-h1 text-h1 text-on-surface mb-xs">Add New Category</h2>
+                        <p class="font-body-md text-body-md text-on-surface-variant">Configure a new product
+                            classification for your enterprise inventory.</p>
+                    </div>
+                    <div class="flex gap-sm">
+                        <button type="button" onclick="resetForm()"
+                            class="px-md h-10 border border-gray-700 bg-gray-900 text-white rounded-lg">
+                            Cancel
+                        </button>
 
-    <!-- Primary Form Area -->
-    <div class="col-span-12 lg:col-span-8 space-y-6">
+                        <button type="submit"
+                            class="px-6 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all duration-200">
+                            <span class="material-symbols-outlined text-[20px]">save</span>
+                            <span class="tracking-wide">Save Category</span>
+                        </button>
+                    </div>
+                </div>
 
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <!-- Bento Grid Layout for Form -->
+                <div class="grid grid-cols-12 gap-6">
 
-            <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <span class="material-symbols-outlined text-purple-500">info</span>
-                Category Details
-            </h3>
+                    <!-- Primary Form Area -->
+                    <div class="col-span-12 lg:col-span-8 space-y-6">
 
-            <div class="space-y-6">
+                        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
 
-                <!-- Category Name -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        Category Name <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                        id="category_name"
-                        name="categoryName"
-                        type="text"
-                        placeholder="Enter category name"
-                        class="w-full px-4 py-3 rounded-lg 
+                            <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-purple-500">info</span>
+                                Category Details
+                            </h3>
+
+                            <div class="space-y-6">
+
+                                <!-- Category Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                                        Category Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input id="category_name" name="categoryName" type="text"
+                                        placeholder="Enter category name" class="w-full px-4 py-3 rounded-lg 
                         bg-gray-950 border border-gray-700 
                         text-white placeholder-gray-400 
                         focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 
-                        outline-none transition-all"
-                    />
-                    <p id="nameError" class="text-xs text-red-500 mt-1 hidden"></p>
-                    <p class="text-xs text-gray-500 mt-1 italic">
-                        This name will be visible to customers.
-                    </p>
-                </div>
+                        outline-none transition-all" />
+                                    <p id="nameError" class="text-xs text-red-500 mt-1 hidden"></p>
+                                    <p class="text-xs text-gray-500 mt-1 italic">
+                                        This name will be visible to customers.
+                                    </p>
+                                </div>
 
-                <!-- Description -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        Description
-                    </label>
-                    <textarea 
-                        id="description"
-                        name="description"
-                        rows="5"
-                        placeholder="Enter description..."
-                        class="w-full px-4 py-3 rounded-lg 
+                                <!-- Description -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                                        Description
+                                    </label>
+                                    <textarea id="description" name="description" rows="5"
+                                        placeholder="Enter description..." class="w-full px-4 py-3 rounded-lg 
                         bg-gray-950 border border-gray-700 
                         text-white placeholder-gray-400 
                         focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 
                         outline-none transition-all resize-none">
                     </textarea>
-                    <p id="descError" class="text-xs text-red-500 mt-1 hidden"></p>
-                </div>
+                                    <p id="descError" class="text-xs text-red-500 mt-1 hidden"></p>
+                                </div>
 
-            </div>
-        </div>
+                            </div>
+                        </div>
 
-    </div>
+                    </div>
 
-    <!-- Secondary Column -->
-    <div class="col-span-12 lg:col-span-4 space-y-6">
+                    <!-- Secondary Column -->
+                    <div class="col-span-12 lg:col-span-4 space-y-6">
 
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
 
-            <h3 class="text-xs text-gray-400 mb-4 uppercase tracking-wider">
-                Settings
-            </h3>
+                            <h3 class="text-xs text-gray-400 mb-4 uppercase tracking-wider">
+                                Settings
+                            </h3>
 
-            <!-- Status -->
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-3">
-                    Category Status
-                </label>
+                            <!-- Status -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-3">
+                                    Category Status
+                                </label>
 
-                <div class="flex flex-col gap-3">
+                                <div class="flex flex-col gap-3">
 
-                    <!-- Active -->
-                    <label class="flex items-center gap-3 p-3 border border-gray-700 rounded-lg cursor-pointer 
+                                    <!-- Active -->
+                                    <label class="flex items-center gap-3 p-3 border border-gray-700 rounded-lg cursor-pointer 
                     hover:bg-gray-800 transition-all 
                     has-[:checked]:border-purple-500 has-[:checked]:bg-purple-500/10">
-                        <input checked name="status" type="radio" value="active"
-                            class="w-4 h-4 accent-purple-500">
-                        <div>
-                            <span class="font-medium text-white">Active</span>
-                            <p class="text-xs text-gray-400">
-                                Visible and available for products
-                            </p>
-                        </div>
-                    </label>
+                                        <input checked name="status" type="radio" value="active"
+                                            class="w-4 h-4 accent-purple-500">
+                                        <div>
+                                            <span class="font-medium text-white">Active</span>
+                                            <p class="text-xs text-gray-400">
+                                                Visible and available for products
+                                            </p>
+                                        </div>
+                                    </label>
 
-                    <!-- Inactive -->
-                    <label class="flex items-center gap-3 p-3 border border-gray-700 rounded-lg cursor-pointer 
+                                    <!-- Inactive -->
+                                    <label class="flex items-center gap-3 p-3 border border-gray-700 rounded-lg cursor-pointer 
                     hover:bg-gray-800 transition-all 
                     has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-500/10">
-                        <input name="status" type="radio" value="inactive"
-                            class="w-4 h-4 accent-indigo-500">
-                        <div>
-                            <span class="font-medium text-white">Inactive</span>
-                            <p class="text-xs text-gray-400">
-                                Hidden from storefront
-                            </p>
+                                        <input name="status" type="radio" value="inactive"
+                                            class="w-4 h-4 accent-indigo-500">
+                                        <div>
+                                            <span class="font-medium text-white">Inactive</span>
+                                            <p class="text-xs text-gray-400">
+                                                Hidden from storefront
+                                            </p>
+                                        </div>
+                                    </label>
+
+                                </div>
+                            </div>
+
                         </div>
-                    </label>
+
+                    </div>
 
                 </div>
-            </div>
 
-        </div> 
+                <!-- Mobile Footer Actions (Visible on small screens only) -->
+                <div class="mt-xl lg:hidden flex flex-col gap-sm">
+                    <button type="submit"
+                        class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg shadow-purple-500/30">Save
+                        Category</button>
+                    <button type="button" onclick="resetForm()"
+                        class="w-full py-3 border border-gray-700 bg-gray-900 text-white font-label-md text-label-md rounded-lg">Cancel</button>
+                </div>
 
-    </div>
+            </form><!-- Form ends here -->
 
-</div>
+        </div>
+    </main>
 
-<!-- Mobile Footer Actions (Visible on small screens only) -->
-<div class="mt-xl lg:hidden flex flex-col gap-sm">
-    <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg shadow-purple-500/30">Save Category</button>
-    <button type="button" onclick="resetForm()" class="w-full py-3 border border-gray-700 bg-gray-900 text-white font-label-md text-label-md rounded-lg">Cancel</button>
-</div>
-
-</form><!-- Form ends here -->
-
-</div>
-</main>
-
-<script>
-function resetForm() {
-    document.getElementById("categoryForm").reset();
-}
-
-let isSubmitting = false;
-
-document.getElementById("categoryForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    if (isSubmitting) return;
-
-    const nameEl  = document.getElementById("category_name");
-    const descEl  = document.getElementById("description");
-    const nameErr = document.getElementById("nameError");
-    const descErr = document.getElementById("descError");
-
-    nameErr.classList.add("hidden");
-    descErr.classList.add("hidden");
-    nameEl.classList.remove("border-red-500");
-    descEl.classList.remove("border-red-500");
-
-    let valid = true;
-
-    if (nameEl.value.trim().length === 0) {
-        nameErr.textContent = "Category name is required";
-        nameErr.classList.remove("hidden");
-        nameEl.classList.add("border-red-500");
-        valid = false;
-    } else if (nameEl.value.trim().length < 3) {
-        nameErr.textContent = "Minimum 3 characters required";
-        nameErr.classList.remove("hidden");
-        nameEl.classList.add("border-red-500");
-        valid = false;
-    }
-
-    if (descEl.value.trim().length === 0) {
-        descErr.textContent = "Description is required";
-        descErr.classList.remove("hidden");
-        descEl.classList.add("border-red-500");
-        valid = false;
-    }
-
-    if (!valid) return;
-
-    isSubmitting = true;
-
-    const status = document.querySelector('input[name="status"]:checked').value;
-
-    try {
-        const res = await fetch("/admin/category-add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                categoryName: nameEl.value.trim(),
-                description:  descEl.value.trim(),
-                status:       status
-            })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            await Swal.fire({
-                icon: "success",
-                title: "Category Added!",
-                timer: 1500,
-                showConfirmButton: false
-            });
-            window.location.href = data.redirect;
-        } else {
-            isSubmitting = false;
-            Swal.fire({ icon: "error", title: "Error", text: data.message });
+    <script>
+        function resetForm() {
+            document.getElementById("categoryForm").reset();
         }
 
-    } catch (err) {
-        isSubmitting = false;
-        console.error(err);
-        Swal.fire({ icon: "error", title: "Network error", text: "Could not reach the server." });
-    }
-});
-</script>
+        let isSubmitting = false;
 
-</body></html>
+        document.getElementById("categoryForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            if (isSubmitting) return;
+
+            const nameEl = document.getElementById("category_name");
+            const descEl = document.getElementById("description");
+            const nameErr = document.getElementById("nameError");
+            const descErr = document.getElementById("descError");
+
+            nameErr.classList.add("hidden");
+            descErr.classList.add("hidden");
+            nameEl.classList.remove("border-red-500");
+            descEl.classList.remove("border-red-500");
+
+            let valid = true;
+
+            if (nameEl.value.trim().length === 0) {
+                nameErr.textContent = "Category name is required";
+                nameErr.classList.remove("hidden");
+                nameEl.classList.add("border-red-500");
+                valid = false;
+            } else if (nameEl.value.trim().length < 3) {
+                nameErr.textContent = "Minimum 3 characters required";
+                nameErr.classList.remove("hidden");
+                nameEl.classList.add("border-red-500");
+                valid = false;
+            }
+
+            if (descEl.value.trim().length === 0) {
+                descErr.textContent = "Description is required";
+                descErr.classList.remove("hidden");
+                descEl.classList.add("border-red-500");
+                valid = false;
+            }
+
+            if (!valid) return;
+
+            isSubmitting = true;
+
+            const status = document.querySelector('input[name="status"]:checked').value;
+
+            try {
+                const res = await fetch("/admin/category-add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        categoryName: nameEl.value.trim(),
+                        description: descEl.value.trim(),
+                        status: status
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    await Swal.fire({
+                        icon: "success",
+                        title: "Category Added!",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    window.location.href = data.redirect;
+                } else {
+                    isSubmitting = false;
+                    Swal.fire({ icon: "error", title: "Error", text: data.message });
+                }
+
+            } catch (err) {
+                isSubmitting = false;
+                console.error(err);
+                Swal.fire({ icon: "error", title: "Network error", text: "Could not reach the server." });
+            }
+        });
+    </script>
+
+</body>
+
+</html>

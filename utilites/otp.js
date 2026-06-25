@@ -7,7 +7,7 @@ export const sendOtpEmail = async (email, otp) => {
   service: "gmail",
   auth: {
     user: process.env.EMAIL,
-    pass: process.env.PASSWORD, // Gmail App Password
+    pass: process.env.PASSWORD, 
   },
 });
 

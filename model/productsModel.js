@@ -25,7 +25,14 @@ const productSchema = new schema({
     variants: [{                              
     type: mongoose.Schema.Types.ObjectId,
     ref: "Variant"
-  }]
+  }],
+  offer: {
+        
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Offer",
+        default: null
+    }
+
 
 },{timestamps:true})
 

@@ -842,26 +842,34 @@
 </head>
 <body>
 
+
+
 <!-- ── NAV ── -->
 <nav class="topnav">
   <div class="brand">LUXE <span>ATELIER</span></div>
   <ul class="nav-links">
-    <li><a href="#">Showroom</a></li>
-    <li><a href="#">Collections</a></li>
-    <li><a href="#">Atelier</a></li>
-    <li><a href="#">Journal</a></li>
+    <li><a href="/">Showroom</a></li>
+    <li><a href="/product-listing">Collections</a></li>
+    
   </ul>
   <div class="nav-acts">
-    <button class="nav-btn"><span class="material-symbols-outlined">shopping_bag</span></button>
-    <button class="nav-btn on"><span class="material-symbols-outlined">person</span></button>
+    <a href="/cart" class="nav-btn">
+  <span class="material-symbols-outlined">shopping_bag</span>
+</a>
+
+<a href="/profile" class="nav-btn on">
+  <span class="material-symbols-outlined">person</span>
+</a>
+    
   </div>
 </nav>
 
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="sidebar-profile">
-    <div class="sidebar-avatar">EV</div>
-    <h3>Eleanor Voss</h3>
+   
+   
+    
     <div class="sidebar-tier"><div class="tier-dot"></div><span>Gold Member</span></div>
   </div>
   <div class="sidebar-section-label">Account</div>
@@ -869,7 +877,7 @@
     <a href="/profile" class="sidebar-link">
       <span class="material-symbols-outlined">person</span><span>Profile</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="order/my-orders" class="sidebar-link">
       <span class="material-symbols-outlined">package_2</span><span>My Orders</span>
     </a>
     <a href="/address" class="sidebar-link active">
@@ -881,18 +889,16 @@
   </nav>
   <div class="sidebar-section-label">More</div>
   <nav class="sidebar-nav">
-    <a href="#" class="sidebar-link">
+    <a href="/wishlist" class="sidebar-link">
       <span class="material-symbols-outlined">favorite</span><span>Wishlist</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="/referal" class="sidebar-link">
       <span class="material-symbols-outlined">share_reviews</span><span>Referral</span>
     </a>
-    <a href="#" class="sidebar-link">
+    <a href="/wallet" class="sidebar-link">
       <span class="material-symbols-outlined">account_balance_wallet</span><span>Wallet</span>
     </a>
-    <a href="#" class="sidebar-link">
-      <span class="material-symbols-outlined">confirmation_number</span><span>Coupons</span>
-    </a>
+    
   </nav>
   <div class="sidebar-footer">
     <a href="/logout">

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmed — LUXE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0a14;
+      --surface:  #10101e;
+      --card:     #13132a;
+      --border:   #2a2a4a;
+      --gold:     #d4a853;
+      --gold-dim: #9a7030;
+      --violet:   #7c6aff;
+      --rose:     #ff6a9a;
+      --text:     #f0eeff;
+      --muted:    #7a78a0;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── mesh gradient background ── */
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%,  rgba(124,106,255,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%,  rgba(212,168,83,.12)  0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 60% 30%,  rgba(255,106,154,.08) 0%, transparent 50%),
+        #0a0a14;
+    }
+
+    /* ── confetti canvas ── */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── floating orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(60px);
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+    .orb-1 { width:320px; height:320px; background:rgba(124,106,255,.12); top:-80px; left:-80px; animation-delay:0s; }
+    .orb-2 { width:240px; height:240px; background:rgba(212,168,83,.10);  bottom:-60px; right:-60px; animation-delay:-3s; }
+    .orb-3 { width:180px; height:180px; background:rgba(255,106,154,.08); top:40%; right:5%; animation-delay:-5s; }
+
+    @keyframes orbFloat {
+      0%,100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* ── card ── */
+    .card {
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(145deg, rgba(19,19,42,.95), rgba(16,16,30,.98));
+      border: 1px solid rgba(124,106,255,.2);
+      border-radius: 16px;
+      max-width: 560px;
+      width: 100%;
+      padding: 3.5rem 3rem;
+      text-align: center;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.04),
+        0 32px 80px rgba(0,0,0,.5),
+        0 0 120px rgba(124,106,255,.06);
+      animation: cardIn .8s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(32px) scale(.97); }
+      to   { opacity:1; transform: translateY(0)    scale(1); }
+    }
+
+    /* ── floating gift illustration ── */
+    .gift-wrap {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 2rem;
+      position: relative;
+      animation: giftFloat 5s ease-in-out infinite;
+    }
+
+    @keyframes giftFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-12px); }
+    }
+
+    .gift-glow {
+      position: absolute;
+      inset: -20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,168,83,.25) 0%, transparent 70%);
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%,100% { opacity:.6; transform: scale(1); }
+      50%      { opacity:1;  transform: scale(1.1); }
+    }
+
+    /* ── check ring ── */
+    .check-ring {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    .ring-outer {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      position: absolute;
+      top:0; left:0;
+      animation: ringExpand .7s .2s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .ring-mid {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      border: 1px solid rgba(124,106,255,.4);
+      position: absolute;
+      top: 15px; left: 15px;
+      animation: ringExpand .7s .35s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .ring-inner {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(212,168,83,.15), rgba(124,106,255,.1));
+      border: 1px solid rgba(212,168,83,.3);
+      position: absolute;
+      top: 30px; left: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: ringExpand .7s .5s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes ringExpand {
+      from { opacity:0; transform: scale(.3); }
+      to   { opacity:1; transform: scale(1); }
+    }
+
+    .check-path {
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+      animation: drawCheck .6s .9s ease forwards;
+    }
+
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* ── tag ── */
+    .tag {
+      font-size: .62rem;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: .9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      opacity: 0;
+      animation: fadeUp .5s .6s ease forwards;
+    }
+    .tag::before, .tag::after {
+      content: '';
+      display: block;
+      width: 32px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim));
+    }
+    .tag::after { background: linear-gradient(90deg, var(--gold-dim), transparent); }
+
+    /* ── heading ── */
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 2.6rem);
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: .7rem;
+      opacity: 0;
+      animation: fadeUp .5s .7s ease forwards;
+    }
+
+    h1 em {
+      font-style: italic;
+      font-weight: 500;
+      background: linear-gradient(135deg, var(--gold), var(--violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: .88rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp .5s .8s ease forwards;
+    }
+
+    /* ── order chip ── */
+    .order-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      background: rgba(212,168,83,.08);
+      border: 1px solid rgba(212,168,83,.25);
+      border-radius: 100px;
+      padding: .55rem 1.3rem;
+      margin-bottom: 2.5rem;
+      font-size: .8rem;
+      color: var(--gold);
+      letter-spacing: .07em;
+      opacity: 0;
+      animation: fadeUp .5s .9s ease forwards;
+    }
+    .order-chip .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+    @keyframes dotPulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.4; transform:scale(.6); }
+    }
+
+    /* ── bento summary ── */
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .75rem;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp .5s 1s ease forwards;
+    }
+
+    .summary-box {
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 10px;
+      padding: 1rem .75rem;
+      text-align: center;
+      transition: border-color .3s, background .3s;
+    }
+    .summary-box:hover {
+      border-color: rgba(212,168,83,.25);
+      background: rgba(212,168,83,.04);
+    }
+
+    .summary-box .s-label {
+      font-size: .6rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+
+    .summary-box .s-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .summary-box .s-value.gold {
+      background: linear-gradient(135deg, var(--gold), #f0c87a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── delivery strip ── */
+    .delivery-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      background: rgba(124,106,255,.07);
+      border: 1px solid rgba(124,106,255,.18);
+      border-radius: 10px;
+      padding: .85rem 1.2rem;
+      margin-bottom: 2.5rem;
+      font-size: .8rem;
+      color: rgba(200,195,255,.8);
+      opacity: 0;
+      animation: fadeUp .5s 1.05s ease forwards;
+    }
+    .delivery-strip svg { flex-shrink: 0; }
+
+    /* ── buttons ── */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+      opacity: 0;
+      animation: fadeUp .5s 1.1s ease forwards;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: .95rem 1.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .3s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold) 0%, #e8b96a 100%);
+      color: #0a0a14;
+      box-shadow: 0 4px 24px rgba(212,168,83,.25);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(212,168,83,.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .btn-outline:hover {
+      border-color: rgba(124,106,255,.4);
+      color: rgba(200,195,255,.9);
+      background: rgba(124,106,255,.06);
+      transform: translateY(-2px);
+    }
+
+    /* ── footnote ── */
+    .footnote {
+      margin-top: 2rem;
+      font-size: .7rem;
+      color: var(--muted);
+      opacity: 0;
+      animation: fadeUp .5s 1.2s ease forwards;
+    }
+    .footnote a { color: var(--gold); text-decoration: none; }
+    .footnote a:hover { text-decoration: underline; }
+
+    /* ── shared keyframe ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(16px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="card">
+
+  <!-- floating check illustration -->
+  <div class="gift-wrap">
+    <div class="gift-glow"></div>
+    <div class="check-ring">
+      <div class="ring-outer"></div>
+      <div class="ring-mid"></div>
+      <div class="ring-inner">
+        <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
+          <path class="check-path" d="M2 12L12 22L30 2"
+                stroke="#d4a853" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="tag">Order Confirmed</div>
+
+  <h1>Thank you,<br/><em>your order is placed</em></h1>
+
+  <p class="subtitle">
+    We've received your order and are preparing it with care.<br/>
+    A confirmation will be sent to your registered email.
+  </p>
+
+  <!-- order code -->
+  <div class="order-chip">
+    <div class="dot"></div>
+    <%= order.orderCode %>
+  </div>
+
+  <!-- bento summary -->
+  <div class="summary">
+    <div class="summary-box">
+      <div class="s-label">Items</div>
+      <div class="s-value"><%= order.orderItems.length %></div>
+    </div>
+    <div class="summary-box">
+      <div class="s-label">Total</div>
+      <div class="s-value gold">₹<%= order.totalAmount.toLocaleString('en-IN') %></div>
+    </div>
+    <div class="summary-box">
+      <div class="s-label">Payment</div>
+      <div class="s-value"><%= order.orderMethod.toUpperCase() %></div>
+    </div>
+  </div>
+
+  <!-- delivery strip -->
+  <div class="delivery-strip">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="3" width="15" height="13" rx="1"/>
+      <path d="M16 8h4l3 5v4h-7V8z"/>
+      <circle cx="5.5" cy="18.5" r="2.5"/>
+      <circle cx="18.5" cy="18.5" r="2.5"/>
+    </svg>
+    Estimated delivery in <strong style="color:#c0bbff;margin:0 .3em;">5–7 business days</strong> · Express Courier
+  </div>
+
+  <!-- action buttons -->
+  <div class="actions">
+    <a href="/order/details/<%= order._id %>" class="btn btn-primary">
+  View Order Details
+</a>
+    <a href="/product-listing" class="btn btn-outline">
+      Continue Shopping
+    </a>
+  </div>
+
+  <p class="footnote">
+    Need help? <a href="/support">Contact our support</a> &nbsp;·&nbsp; support@luxe.com
+  </p>
+
+</div>
+
+<script>
+// ── confetti ──
+(function(){
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width  = window.innerWidth;
+  const H = canvas.height = window.innerHeight;
+
+  const colors = ['#d4a853','#7c6aff','#ff6a9a','#f0eeff','#c0bbff','#f0c87a'];
+  const pieces = [];
+
+  for(let i = 0; i < 90; i++){
+    pieces.push({
+      x:  Math.random() * W,
+      y:  Math.random() * H - H,
+      w:  Math.random() * 8 + 4,
+      h:  Math.random() * 4 + 2,
+      r:  Math.random() * Math.PI * 2,
+      vx: (Math.random() - .5) * 1.2,
+      vy: Math.random() * 2 + 1,
+      vr: (Math.random() - .5) * .08,
+      c:  colors[Math.floor(Math.random() * colors.length)],
+      op: Math.random() * .6 + .3
+    });
+  }
+
+  let frame = 0;
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    for(const p of pieces){
+      ctx.save();
+      ctx.globalAlpha = p.op;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.r);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.r  += p.vr;
+      // fade out after 180 frames
+      if(frame > 180) p.op -= .003;
+      if(p.y > H + 20){ p.y = -20; p.x = Math.random()*W; }
+    }
+    frame++;
+    if(frame < 320) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,W,H);
+  }
+  draw();
+
+  window.addEventListener('resize', () => {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+})();
+</script>
+
+</body>
+</html>

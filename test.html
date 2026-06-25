@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#1152d4",
+          "background-light": "#f6f6f8",
+          "background-dark": "#101622",
+        },
+        fontFamily: {
+          "display": ["Manrope", "sans-serif"]
+        },
+        borderRadius: {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+      },
+    },
+  }
+</script>
+<title>Luxe | Elevate Your Wardrobe</title>
+<style>
+  .field-error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.1) !important; }
+  .field-ok    { border-color: #22c55e !important; }
+  .err-msg     { display: none; font-size: 12px; color: #ef4444; margin-top: 4px; padding-left: 4px; }
+  .err-msg.show{ display: block; }
+  .banner      { display: none; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: 500; margin-bottom: 1.25rem; }
+  .banner.show { display: flex; }
+  .banner.success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .banner.error   { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+  .dark .banner.success { background: #14532d; color: #bbf7d0; border-color: #16a34a; }
+  .dark .banner.error   { background: #450a0a; color: #fecaca; border-color: #dc2626; }
+
+  .overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: #fff;
+}
+
+.hidden {
+  display: none;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4CAF50;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased h-screen overflow-hidden">
+<div id="overlay" class="overlay hidden">
+  <div class="loader"></div>
+  <p>Processing...</p>
+</div>
+
+
+
+  <div class="flex h-full w-full">
+
+  <!-- Left Side: High-end Fashion Photography -->
+  <div class="hidden lg:flex lg:w-1/2 relative">
+    <div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 via-transparent to-transparent z-10"></div>
+    <div class="absolute top-10 left-10 z-20 flex items-center gap-2">
+      <div class="size-8 text-primary">
+        <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.8261 17.4264C16.7203 18.1174 20.2244 18.5217 24 18.5217C27.7756 18.5217 31.2797 18.1174 34.1739 17.4264C36.9144 16.7722 39.9967 15.2331 41.3563 14.1648L24.8486 40.6391C24.4571 41.267 23.5429 41.267 23.1514 40.6391L6.64374 14.1648C8.00331 15.2331 11.0856 16.7722 13.8261 17.4264Z" fill="currentColor"/>
+          <path clip-rule="evenodd" d="M39.998 12.236C39.9944 12.2537 39.9875 12.2845 39.9748 12.3294C39.9436 12.4399 39.8949 12.5741 39.8346 12.7175C39.8168 12.7597 39.7989 12.8007 39.7813 12.8398C38.5103 13.7113 35.9788 14.9393 33.7095 15.4811C30.9875 16.131 27.6413 16.5217 24 16.5217C20.3587 16.5217 17.0125 16.131 14.2905 15.4811C12.0012 14.9346 9.44505 13.6897 8.18538 12.8168C8.17384 12.7925 8.16216 12.767 8.15052 12.7408C8.09919 12.6249 8.05721 12.5114 8.02977 12.411C8.00356 12.3152 8.00039 12.2667 8.00004 12.2612C8.00004 12.261 8 12.2607 8.00004 12.2612C8.00004 12.2359 8.0104 11.9233 8.68485 11.3686C9.34546 10.8254 10.4222 10.2469 11.9291 9.72276C14.9242 8.68098 19.1919 8 24 8C28.8081 8 33.0758 8.68098 36.0709 9.72276C37.5778 10.2469 38.6545 10.8254 39.3151 11.3686C39.9006 11.8501 39.9857 12.1489 39.998 12.236ZM4.95178 15.2312L21.4543 41.6973C22.6288 43.5809 25.3712 43.5809 26.5457 41.6973L43.0534 15.223C43.0709 15.1948 43.0878 15.1662 43.104 15.1371L41.3563 14.1648C43.104 15.1371 43.1038 15.1374 43.104 15.1371L43.1051 15.135L43.1065 15.1325L43.1101 15.1261L43.1199 15.1082C43.1276 15.094 43.1377 15.0754 43.1497 15.0527C43.1738 15.0075 43.2062 14.9455 43.244 14.8701C43.319 14.7208 43.4196 14.511 43.5217 14.2683C43.6901 13.8679 44 13.0689 44 12.2609C44 10.5573 43.003 9.22254 41.8558 8.2791C40.6947 7.32427 39.1354 6.55361 37.385 5.94477C33.8654 4.72057 29.133 4 24 4C18.867 4 14.1346 4.72057 10.615 5.94478C8.86463 6.55361 7.30529 7.32428 6.14419 8.27911C4.99695 9.22255 3.99999 10.5573 3.99999 12.2609C3.99999 13.1275 4.29264 13.9078 4.49321 14.3607C4.60375 14.6102 4.71348 14.8196 4.79687 14.9689C4.83898 15.0444 4.87547 15.1065 4.9035 15.1529C4.91754 15.1762 4.92954 15.1957 4.93916 15.2111L4.94662 15.223L4.95178 15.2312ZM35.9868 18.996L24 38.22L12.0131 18.996C12.4661 19.1391 12.9179 19.2658 13.3617 19.3718C16.4281 20.1039 20.0901 20.5217 24 20.5217C27.9099 20.5217 31.5719 20.1039 34.6383 19.3718C35.082 19.2658 35.5339 19.1391 35.9868 18.996Z" fill="currentColor" fill-rule="evenodd"/>
+        </svg>
+      </div>
+      <h2 class="text-white text-2xl font-bold tracking-tight">Luxe</h2>
+    </div>
+    <div class="absolute bottom-20 left-10 z-20 max-w-md">
+      <h1 class="text-white text-5xl font-black leading-tight mb-4">Redefining Modern Elegance.</h1>
+      <p class="text-slate-300 text-lg">Join our exclusive community and access curated collections designed for the contemporary man.</p>
+    </div>
+    <div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDBgLcohoNu2MSuU8oEP0YU97YC8FQSvbvQp_yv-XteYHoWAnByHXBrruzE2udyQRDHuUkyeg6DzGPbn-AgTCUHo5Vot_1Bwe0clrWTmpYJnZbHmI2Ptue-tI09alRYKc40kTP-mZBgDNjD9GcXm3DvA1p20kg4kTzbc-4pSt5CQJBcWptn7RPKvwcx2cjrgpb_zse0go8ZfAcluHmOdHUZA8VZnKtIG2anNXmCLVhABD8qzg2unW3YIaYL4MokHcWmlA4vj8BHRpc-')"></div>
+  </div>
+
+  <!-- Right Side: Sign-up Form -->
+  <div class="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 lg:px-24 bg-background-light dark:bg-background-dark overflow-y-auto py-12">
+    <div class="w-full max-w-[440px]">
+
+      <div class="mb-8 text-center lg:text-left">
+        <h2 class="text-3xl font-black text-slate-900 dark:text-slate-100 mb-2">Create Account</h2>
+        <p class="text-slate-500 dark:text-slate-400">Experience the pinnacle of high-end fashion.</p>
+      </div>
+
+      <!-- Response Banner -->
+      <div id="responseBanner" class="banner" role="alert">
+        <span id="bannerIcon"></span>
+        <span id="bannerMsg"></span>
+      </div>
+
+      <form id="registerForm" class="space-y-4" novalidate method="post" action="/signUp">
+
+        <!-- Full Name -->
+        <div class="space-y-1">
+          <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Full Name</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">person</span>
+            <input id="fullName" name="fullName" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your name" type="text" autocomplete="name"/>
+          </div>
+          <div class="err-msg" id="fullName-err"></div>
+        </div>
+
+        <!-- Email -->
+        <div class="space-y-1">
+          <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Email Address</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">mail</span>
+            <input id="email" name="email" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your email" type="email" autocomplete="email"/>
+          </div>
+          <div class="err-msg" id="email-err"></div>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="space-y-1">
+          <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Phone Number</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">phone</span>
+            <input id="phoneNumber" name="phoneNumber" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your number" type="tel" autocomplete="tel"/>
+          </div>
+          <div class="err-msg" id="phoneNumber-err"></div>
+
+        </div>
+
+       
+             <!-- Referral Code -->
+<div class="space-y-1">
+  <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">
+    Referral Code
+  </label>
+  <div class="relative group">
+    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">
+      card_giftcard
+    </span>
+    <input 
+      id="referralCode" 
+      name="referralCode"
+      class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all"
+      placeholder="Enter referral code (optional)" 
+      type="text"
+      autocomplete="off"
+      value="USER123"
+    />
+  </div>
+  <div class="err-msg" id="referralCode-err"></div>
+</div>
+
+
+
+
+        <!-- Password -->
+        <div class="space-y-1">
+          <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Password</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">lock</span>
+            <input id="password" name="password" class="w-full pl-12 pr-12 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="••••••••" type="password" autocomplete="new-password"/>
+            <button id="eyeBtn" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none" type="button" aria-label="Toggle password visibility" tabindex="-1">
+              <span id="eyeIcon" class="material-symbols-outlined text-[20px]">visibility</span>
+            </button>
+          </div>
+          <div class="err-msg" id="password-err"></div>
+        </div>
+
+        <!-- Submit Button -->
+        <button id="submitBtn" class="w-full py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/20 transform active:scale-[0.98] mt-2 disabled:opacity-60 disabled:cursor-not-allowed" type="submit">
+          Create Account
+        </button>
+
+      </form>
+
+      <!-- Divider -->
+      <div class="relative my-7">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-slate-200 dark:border-slate-800"></div>
+        </div>
+        <div class="relative flex justify-center text-xs uppercase">
+          <span class="bg-background-light dark:bg-background-dark px-4 text-slate-500 font-medium tracking-widest">OR</span>
+        </div>
+      </div>
+
+      <!-- Google Sign-up -->
+      <a href="/auth/google"><button class="flex items-center justify-center gap-3 w-full py-3.5 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-200 font-semibold" type="button">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.26.81-.58z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Sign up with Google
+      </button>
+      </a>
+
+      <!-- Footer Link -->
+      <p class="mt-8 text-center text-slate-600 dark:text-slate-400">
+        Already have an account?
+        <a class="text-primary font-bold hover:underline underline-offset-4 ml-1" href="/login">Log In</a>
+      </p>
+
+      <!-- Terms -->
+      <p class="mt-6 text-center text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
+        By clicking Create Account, you agree to Luxe's <br class="hidden sm:block"/>
+        <a class="underline" href="#">Terms of Service</a> and <a class="underline" href="#">Privacy Policy</a>.
+      </p>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+  const backendMessage = "";
+
+  if (backendMessage) {
+    showBanner('error', backendMessage);
+  }
+  // ── Eye Toggle ──────────────────────────────────────────────────────────────
+  const pwInput  = document.getElementById('password');
+  const eyeBtn   = document.getElementById('eyeBtn');
+  const eyeIcon  = document.getElementById('eyeIcon');
+
+  eyeBtn.addEventListener('click', () => {
+    const show = pwInput.type === 'password';
+    pwInput.type  = show ? 'text' : 'password';
+    eyeIcon.textContent = show ? 'visibility_off' : 'visibility';
+  });
+
+  // ── Validation helpers ───────────────────────────────────────────────────────
+  function setErr(id, msg) {
+    const input  = document.getElementById(id);
+    const errDiv = document.getElementById(id + '-err');
+    input.classList.add('field-error');
+    input.classList.remove('field-ok');
+    errDiv.textContent = msg;
+    errDiv.classList.add('show');
+    return false;
+  }
+
+  function setOk(id) {
+    const input  = document.getElementById(id);
+    const errDiv = document.getElementById(id + '-err');
+    input.classList.remove('field-error');
+    input.classList.add('field-ok');
+    errDiv.textContent = '';
+    errDiv.classList.remove('show');
+    return true;
+  }
+
+  function validateField(id) {
+    const val = document.getElementById(id).value.trim();
+
+    if (id === 'fullName') {
+  const value = val.trim();
+
+  if (!value) return setErr(id, 'Full name is required');
+
+  if (value.length < 3)
+    return setErr(id, 'Must be at least 3 characters');
+
+  // Only letters and single spaces between words
+  // No numbers or special characters
+  if (!/^[A-Za-z]+(?:\s[A-Za-z]+)*$/.test(value))
+    return setErr(id, 'Only letters allowed in full name');
+
+  return setOk(id);
+}
+
+if (id === 'email') {
+  const value = val.trim().toLowerCase();
+
+  if (!value) return setErr(id, 'Email address is required');
+
+  if (/\s/.test(value))
+    return setErr(id, 'Email must not contain spaces');
+
+  const emailRegex =
+    /^[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/;
+
+  if (!emailRegex.test(value))
+    return setErr(id, 'Enter a valid email address');
+
+  return setOk(id);
+}
+
+
+if (id === 'phoneNumber') {
+  const value = val.trim();
+
+  if (!value) return setErr(id, 'Phone number is required');
+
+  // remove accidental spaces inside number
+  if (/\s/.test(value))
+    return setErr(id, 'Phone number must not contain spaces');
+
+  // exactly 10 digits
+  if (!/^[6-9]\d{9}$/.test(value))
+    return setErr(id, 'Enter a valid 10-digit mobile number');
+
+  return setOk(id);
+}
+
+
+    if (id === 'password') {
+      if (!val)           return setErr(id, 'Password is required');
+      if (val.length < 6) return setErr(id, 'At least 6 characters required');
+      if (!/[A-Z]/.test(val)) return setErr(id, 'Include at least one uppercase letter (A–Z)');
+      if (!/[a-z]/.test(val)) return setErr(id, 'Include at least one lowercase letter (a–z)');
+      if (!/[0-9]/.test(val)) return setErr(id, 'Include at least one number (0–9)');
+      if (!/[@$!%*?&]/.test(val)) return setErr(id, 'Include a special character: @ $ ! % * ? &');
+      return setOk(id);
+    }
+  }
+
+  // Live re-validate on input (only after first blur/submit)
+  ['fullName', 'email', 'phoneNumber', 'password'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('blur',  () => { if (el.value) validateField(id); });
+    el.addEventListener('input', () => { if (el.classList.contains('field-error')) validateField(id); });
+  });
+
+  // ── Banner ──────────────────────────────────────────────────────────────────
+  function showBanner(type, msg) {
+    const banner = document.getElementById('responseBanner');
+    const iconEl = document.getElementById('bannerIcon');
+    const msgEl  = document.getElementById('bannerMsg');
+
+    const successIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const errorIcon   = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+    banner.className = `banner show ${type}`;
+    iconEl.innerHTML = type === 'success' ? successIcon : errorIcon;
+    msgEl.textContent = msg;
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function showOverlay() {
+  document.getElementById("overlay").classList.remove("hidden");
+}
+
+function hideOverlay() {
+  document.getElementById("overlay").classList.add("hidden");
+}
+
+
+  function hideBanner() {
+    document.getElementById('responseBanner').className = 'banner';
+  
+  }  document.getElementById('registerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const ids = ['fullName', 'email', 'phoneNumber', 'password'];
+  const results = ids.map(id => validateField(id));
+
+  if (results.includes(false)) return;
+
+  
+  e.target.submit();
+  showOverlay();
+});
+
+
+</script>
+</body>
+</html>
