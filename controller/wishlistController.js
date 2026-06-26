@@ -13,9 +13,10 @@ import { findUserBlocked } from "../service/userService.js";
 export const wishlistPageLoad = async (req, res) => {
     try {
 
+      const userId = req.session.user.id || req.session.user._id;
    const isBlockedUser = await findUserBlocked(userId);
 
-    const userId = req.session.user.id || req.session.user._id;
+    
       if (isBlockedUser) {
         req.session.user = null;
         req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
