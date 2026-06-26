@@ -1,9 +1,19 @@
 import { findUserByEmail } from "../service/userService.js"
 import { walletTransaction } from "../service/walletService.js";
-
+import { findUserBlocked } from "../service/userService.js";
 export const walletPageLoad = async (req, res) => {
     try {
+
         const userId = req.session.user._id || req.session.user.id;
+
+
+         const isBlockedUser = await findUserBlocked(userId);
+    if (isBlockedUser) {
+      req.session.user = null;
+      req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
+      return res.redirect("/login");
+    }
+
         const user = await findUserByEmail(req.session.user.email);
         const transaction = await walletTransaction(userId);
         const time= new Date().toDateString()

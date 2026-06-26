@@ -6,6 +6,7 @@ import {
 import { generateInvoicePDF } from "../service/orderService.js";
 import { CartDataTake } from "../service/cartService.js";
 import { normaliseOrder } from "../utilites/orderHelperfile.js";
+import { findUserBlocked } from "../service/userService.js";
 
 export const orderSuccessPage = async (req, res) => {
   try {
@@ -64,6 +65,17 @@ export const orderDetailsLoad = async (req, res) => {
     }
  
     const userId = req.session.user._id || req.session.user.id;
+
+    
+    
+    
+             const isBlockedUser = await findUserBlocked(userId);
+        if (isBlockedUser) {
+          req.session.user = null;
+          req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
+          return res.redirect("/login");
+        }
+    
  
     const rawOrder = await getOrderById(id);
  

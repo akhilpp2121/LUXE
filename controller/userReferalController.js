@@ -9,6 +9,17 @@ export const referalPageLoad = async (req, res) => {
   try {
     const userId = req.session.user._id || req.session.user.id;
 
+
+    
+    
+             const isBlockedUser = await findUserBlocked(userId);
+        if (isBlockedUser) {
+          req.session.user = null;
+          req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
+          return res.redirect("/login");
+        }
+    
+
     let user = await userModel.findById(userId);
 
     if (!user.referalCode) {

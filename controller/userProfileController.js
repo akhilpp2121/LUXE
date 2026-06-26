@@ -23,6 +23,7 @@ import {
   setDefaultAddressService,
 } from '../service/userProfileService.js'; 
 import { generateAndSendOtp } from "../service/userService.js";
+import { findUserBlocked } from "../service/userService.js";
 import bcrypt from "bcrypt";
 
 
@@ -31,6 +32,20 @@ import bcrypt from "bcrypt";
 
 export const profileLoadPage = async (req, res) => {
   try {
+
+
+    const userId = req.session.user._id || req.session.user.id;
+
+
+         const isBlockedUser = await findUserBlocked(userId);
+    if (isBlockedUser) {
+      req.session.user = null;
+      req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
+      return res.redirect("/login");
+    }
+
+
+
     if (!req.session.user) return res.redirect("/login");
     const user = await getUserProfileService(req.session.user.id);
     if (!user) return res.redirect("/login");
@@ -148,6 +163,8 @@ export const deleteAvatar = async (req, res) => {
 
 export const addressPageLoad = async (req, res) => {
   try {
+
+
     if (!req.session.user) return res.redirect("/login");
     const userId = req.session.user.id || req.session.user._id;
 

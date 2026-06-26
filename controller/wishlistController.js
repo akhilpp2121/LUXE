@@ -6,11 +6,24 @@ import {
 } from "../service/wishlistServie.js";
 import { findUserByEmail } from "../service/userService.js";
 import { getCartCount } from "../service/cartService.js";
+import { findUserBlocked } from "../service/userService.js";
 
 
 
 export const wishlistPageLoad = async (req, res) => {
     try {
+
+   const isBlockedUser = await findUserBlocked(userId);
+      if (isBlockedUser) {
+        req.session.user = null;
+        req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
+        return res.redirect("/login");
+      }
+  
+
+
+
+
         if (!req.session?.user) {
             return res.redirect("/login");
         }

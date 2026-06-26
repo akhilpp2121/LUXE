@@ -8,6 +8,9 @@ export const checkoutPageLoad = async (req, res) => {
     if (!req.session.user) return res.redirect("/login");
 
     let userId = req.session.user.id || req.session.user._id;
+
+   
+    
     const walletBalance = await walletBalanceCheck(userId);
     let cartDetails = await CartDataTake(userId);
 
