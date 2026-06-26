@@ -14,6 +14,8 @@ export const wishlistPageLoad = async (req, res) => {
     try {
 
    const isBlockedUser = await findUserBlocked(userId);
+
+    const userId = req.session.user.id || req.session.user._id;
       if (isBlockedUser) {
         req.session.user = null;
         req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
@@ -28,7 +30,7 @@ export const wishlistPageLoad = async (req, res) => {
             return res.redirect("/login");
         }
 
-        const userId = req.session.user.id || req.session.user._id;
+       
         const limit = 4;
 
         const result = await wishlistData({ userId, skip: 0, limit });
