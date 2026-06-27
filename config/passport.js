@@ -31,7 +31,7 @@ passport.use(
       callbackURL: "https://www.akhilpp.co.in/auth/google/callback",
       passReqToCallback: true, // needed to read req.session.ref
     },
-    async (req, accessToken, refreshToken, profile, done) => {q
+    async (req, accessToken, refreshToken, profile, done) => {
       try {
         // 1. Existing user via googleId
         let user = await userModel.findOne({ googleId: profile.id });
