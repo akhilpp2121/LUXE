@@ -58,6 +58,11 @@ export const userLoginLogic = async (req, email, password) => {
 
     if (user.isBlocked) return { success: false, field: "email", message: "Account is blocked" };
 
+    // Account exists but has no password (e.g. created via Google) — can't login with password
+    if (!user.password) {
+      return { success: false, field: "email", message: "This account uses Google sign-in. Please log in with Google instead." };
+    }
+
     const isMatch = await bcrypt.compare(password.trim(), user.password);
     if (!isMatch) return { success: false, field: "password", message: "Password is incorrect" };
 
