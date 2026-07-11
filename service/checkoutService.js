@@ -1,4 +1,3 @@
-
 import { addressModel } from "../model/addressModel.js";
 import cartModel from "../model/cartModel.js";
 import orderModel from "../model/orderModel.js";
@@ -8,9 +7,13 @@ import { userModel } from "../model/usermodel.js";
 import couponModel from "../model/couponModel.js";
 import { debitWallet } from "./walletService.js";
 
-
-
-export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCode = null, discount = 0) => {
+export const placeOrderLogic = async (
+  userId,
+  addressId,
+  paymentMethod,
+  couponCode = null,
+  discount = 0,
+) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -22,7 +25,7 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
     // 2. Cart
     const cartdata = await cartModel.findOne({ userId }).populate({
       path: "items.variantId",
-      populate: { path: "productId" }
+      populate: { path: "productId" },
     });
 
     if (!cartdata || cartdata.items.length === 0)
@@ -48,7 +51,9 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
       const qty = items.quantity || 1;
 
       if (qty > variant.stock)
-        throw new Error(`Only ${variant.stock} units available for ${product.name}`);
+        throw new Error(
+          `Only ${variant.stock} units available for ${product.name}`,
+        );
 
       const totalPrice = finalPrice * qty;
       subTotal += totalPrice;
@@ -62,37 +67,37 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
           "Default Variant",
         price: finalPrice,
         quantity: qty,
-        totalPrice
+        totalPrice,
       });
     }
 
     if (!orderItems.length) throw new Error("No valid items in cart");
 
     // 4. Pricing
-    const GST = 0.05;
-    const gstAmount = Math.round(subTotal * GST);
+    const GST_RATE = 0.05;
     const shipping = subTotal >= 999 ? 0 : 99;
 
-    // ── FIX: validate and apply coupon discount ──
+    // ── Validate and apply coupon discount ──
     let appliedDiscount = 0;
     if (couponCode && discount > 0) {
       // Re-validate the coupon server-side — never trust the client amount blindly
       const couponResult = await applyCoupon(couponCode, subTotal);
       if (couponResult.success) {
         // Use the server-calculated discount, not the client-sent value
-        appliedDiscount = couponResult.discount;
+        appliedDiscount = Math.min(couponResult.discount, subTotal);
 
         // Decrement usageLimit so the coupon can't be reused beyond its limit
         await couponModel.updateOne(
           { code: couponCode.toUpperCase().trim() },
-          { $inc: { usageLimit: -1 } }
+          { $inc: { usageLimit: -1 } },
         );
       }
-      // If coupon is invalid server-side we silently ignore it
-      // (don't throw — just place order at full price)
     }
 
-    const grandTotal = subTotal + gstAmount + shipping - appliedDiscount;
+    const taxableValue = Math.max(subTotal - appliedDiscount, 0);
+    const gstAmount = Math.round(taxableValue * GST_RATE);
+
+    const grandTotal = taxableValue + gstAmount + shipping;
 
     // 5. Wallet pre-check (use final grandTotal after coupon)
     if (paymentMethod === "wallet") {
@@ -102,33 +107,38 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
     }
 
     // 6. Create order — couponApplied now saved correctly
-    const [order] = await orderModel.create([{
-      userId,
-      shippingAddressId: address._id,
-      shippingAddress: {
-        username: address.fullName,
-        phone_number: address.phoneNumber,
-        street_address: `${address.houseNumber}, ${address.streetName}`,
-        city: address.city,
-        state: address.state,
-        postal_code: address.pincode,
-        country: address.country
-      },
-      orderItems,
-      subTotal,
-      gstAmount,
-      shippingCharge: shipping,
-      couponApplied: appliedDiscount,   // ← was missing entirely before
-      totalAmount: grandTotal,
-      orderMethod: paymentMethod
-    }], { session });
+    const [order] = await orderModel.create(
+      [
+        {
+          userId,
+          shippingAddressId: address._id,
+          shippingAddress: {
+            username: address.fullName,
+            phone_number: address.phoneNumber,
+            street_address: `${address.houseNumber}, ${address.streetName}`,
+            city: address.city,
+            state: address.state,
+            postal_code: address.pincode,
+            country: address.country,
+          },
+          orderItems,
+          subTotal,
+          gstAmount,
+          shippingCharge: shipping,
+          couponApplied: appliedDiscount, // ← was missing entirely before
+          totalAmount: grandTotal,
+          orderMethod: paymentMethod,
+        },
+      ],
+      { session },
+    );
 
     // 7. Stock update
     for (const item of orderItems) {
       const updated = await variantModel.updateOne(
         { _id: item.variantId, stock: { $gte: item.quantity } },
         { $inc: { stock: -item.quantity } },
-        { session }
+        { session },
       );
       if (updated.modifiedCount === 0)
         throw new Error("Stock changed, please try again");
@@ -140,17 +150,13 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
         userId,
         grandTotal,
         `Payment for order #${order.orderCode}`,
-        order._id
+        order._id,
       );
       if (!debit.success) throw new Error("Wallet debit failed");
     }
 
     // 9. Clear cart
-    await cartModel.updateOne(
-      { userId },
-      { $set: { items: [] } },
-      { session }
-    );
+    await cartModel.updateOne({ userId }, { $set: { items: [] } }, { session });
 
     await session.commitTransaction();
     session.endSession();
@@ -159,9 +165,8 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
       success: true,
       orderId: order._id,
       orderCode: order.orderCode,
-      message: "Order placed successfully"
+      message: "Order placed successfully",
     };
-
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -169,7 +174,6 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
     return { success: false, message: error.message || "Order failed" };
   }
 };
-
 
 export const getAvailableCoupon = async (orderTotal) => {
   try {
@@ -185,8 +189,6 @@ export const getAvailableCoupon = async (orderTotal) => {
     return [];
   }
 };
-
-
 
 export const applyCoupon = async (code, orderTotal) => {
   const now = new Date();

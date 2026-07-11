@@ -31,11 +31,18 @@ const orderItemSchema = new mongoose.Schema(
     },
     deliveryStatus: {
       type: String,
-      enum: ["pending", "shipped", "out_for_delivery", "delivered", "cancelled", "returned"],
+      enum: [
+        "pending",
+        "shipped",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+        "returned",
+      ],
       default: "pending",
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const shippingAddressSchema = new mongoose.Schema(
@@ -45,11 +52,11 @@ const shippingAddressSchema = new mongoose.Schema(
       required: true,
     },
     phone_number: {
-      type: String,       
+      type: String,
       required: true,
     },
     street_address: {
-      type: String,       
+      type: String,
       required: true,
     },
     landmark: {
@@ -65,7 +72,7 @@ const shippingAddressSchema = new mongoose.Schema(
       required: true,
     },
     postal_code: {
-      type: String,       
+      type: String,
       required: true,
     },
     country: {
@@ -73,7 +80,7 @@ const shippingAddressSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const cancellationSchema = new mongoose.Schema(
@@ -102,7 +109,7 @@ const cancellationSchema = new mongoose.Schema(
       },
     ],
   },
-  { _id: false }
+  { _id: false },
 );
 
 const returnSchema = new mongoose.Schema(
@@ -124,7 +131,7 @@ const returnSchema = new mongoose.Schema(
       default: null,
     },
     variant: {
-      type: mongoose.Schema.Types.ObjectId,   
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Variant",
       default: null,
     },
@@ -137,9 +144,9 @@ const returnSchema = new mongoose.Schema(
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
-      adminRemark: { type: String, default: null },
+    adminRemark: { type: String, default: null },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const orderSchema = new mongoose.Schema(
@@ -152,7 +159,7 @@ const orderSchema = new mongoose.Schema(
 
     orderCode: {
       type: String,
-      default: generateOrderCode,   
+      default: generateOrderCode,
       unique: true,
       index: true,
     },
@@ -177,15 +184,15 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    gstRate:   { type: Number, default: 5 },
-gstAmount: { type: Number, default: 0 },
+    gstRate: { type: Number, default: 5 },
+    gstAmount: { type: Number, default: 0 },
 
     shippingCharge: {
-  type:    Number,
-  default: 0,
-},
+      type: Number,
+      default: 0,
+    },
 
-    couponApplied: {       
+    couponApplied: {
       type: Number,
       default: 0,
     },
@@ -196,7 +203,7 @@ gstAmount: { type: Number, default: 0 },
     },
 
     orderMethod: {
-      type: String,        
+      type: String,
       enum: ["cod", "paypal", "wallet", "upi"],
       required: true,
     },
@@ -209,11 +216,19 @@ gstAmount: { type: Number, default: 0 },
 
     deliveryStatus: {
       type: String,
-      enum: ["pending", "shipped", "out_for_delivery", "delivered", "cancelled", "partially_delivered", "returned"],
+      enum: [
+        "pending",
+        "shipped",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+        "partially_delivered",
+        "returned",
+      ],
       default: "pending",
     },
 
-    orderShipment: {       
+    orderShipment: {
       type: Date,
       default: null,
     },
@@ -234,15 +249,15 @@ gstAmount: { type: Number, default: 0 },
 
     cancelledAt: {
       type: [cancellationSchema],
-      default: [],          
+      default: [],
     },
 
     returnedAt: {
       type: [returnSchema],
-      default: [],          
+      default: [],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Order", orderSchema);

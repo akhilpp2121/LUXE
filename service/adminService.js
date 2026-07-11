@@ -3,17 +3,17 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const verifyAdminLogin = (email, password) => {
-  const adminEmail    = process.env.ADMIN;
+  const adminEmail = process.env.ADMIN;
   const adminPassword = process.env.PASSWORDADMIN;
   return email === adminEmail && password === adminPassword;
 };
 
 export const adminUsersLogic = async (filter, pageNo, sort) => {
   try {
-    const page       = parseInt(pageNo) || 1;
-    const limit      = 3;
-    const skip       = (page - 1) * limit;
-    const total      = await userModel.countDocuments(filter);
+    const page = parseInt(pageNo) || 1;
+    const limit = 3;
+    const skip = (page - 1) * limit;
+    const total = await userModel.countDocuments(filter);
     const totalPages = Math.ceil(total / limit);
 
     const data = await userModel
@@ -21,7 +21,9 @@ export const adminUsersLogic = async (filter, pageNo, sort) => {
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .select("fullName email phoneNumber isActive isBlocked status avatar createdAt");
+      .select(
+        "fullName email phoneNumber isActive isBlocked status avatar createdAt",
+      );
 
     return {
       success: true,
@@ -55,8 +57,7 @@ export const adminUserEditLogic = async (status, id) => {
 
     await user.save();
 
-    return { success: true,user };
-
+    return { success: true, user };
   } catch (error) {
     console.error(error);
     return { success: false, message: "Error updating user" };

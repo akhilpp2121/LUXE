@@ -1,13 +1,9 @@
-
-
 import dayjs from "dayjs";
 import Order from "../model/orderModel.js";
 import { getRangeConfig } from "../config/range_config.js";
 
-
 const NOT_RETURNED = { $expr: { $eq: [{ $size: "$returnedAt" }, 0] } };
 const IS_RETURNED = { $expr: { $gt: [{ $size: "$returnedAt" }, 0] } };
-
 
 const buildEmptyBuckets = (config) => {
   const buckets = new Map();
@@ -33,7 +29,6 @@ const formatBucketLabel = (key, stepUnit) => {
   return key;
 };
 
-
 export const chartData = async (filter = "yearly") => {
   try {
     const config = getRangeConfig(filter);
@@ -44,15 +39,17 @@ export const chartData = async (filter = "yearly") => {
           $match: {
             orderStatus: "completed",
             createdAt: { $gte: config.start },
-            ...NOT_RETURNED
-          }
+            ...NOT_RETURNED,
+          },
         },
         {
           $group: {
-            _id: { $dateToString: { format: config.dateFormat, date: "$createdAt" } },
-            total: { $sum: "$totalAmount" }
-          }
-        }
+            _id: {
+              $dateToString: { format: config.dateFormat, date: "$createdAt" },
+            },
+            total: { $sum: "$totalAmount" },
+          },
+        },
       ]),
 
       Order.aggregate([
@@ -60,18 +57,18 @@ export const chartData = async (filter = "yearly") => {
           $match: {
             orderStatus: "completed",
             createdAt: { $gte: config.start },
-            ...NOT_RETURNED
-          }
+            ...NOT_RETURNED,
+          },
         },
         { $unwind: "$orderItems" },
         {
           $group: {
             _id: null,
             fullRevenue: { $sum: "$orderItems.totalPrice" },
-            totalOrders: { $sum: "$orderItems.quantity" }
-          }
-        }
-      ])
+            totalOrders: { $sum: "$orderItems.quantity" },
+          },
+        },
+      ]),
     ]);
 
     const buckets = buildEmptyBuckets(config);
@@ -91,14 +88,13 @@ export const chartData = async (filter = "yearly") => {
       filter,
       fullRevenue: totals.fullRevenue,
       totalOrders: totals.totalOrders,
-      data: { labels, values }
+      data: { labels, values },
     };
   } catch (e) {
     console.log(e);
     return { success: false, message: "Server error" };
   }
 };
-
 
 // export const topSellingProduct = async () => {
 //   try {
@@ -186,14 +182,11 @@ export const chartData = async (filter = "yearly") => {
 //   }
 // };
 
-
-
-
 export const topSellingProduct = async () => {
   try {
     const match = {
       orderStatus: "completed",
-      ...NOT_RETURNED
+      ...NOT_RETURNED,
     };
 
     const [products, categories] = await Promise.all([
@@ -205,11 +198,11 @@ export const topSellingProduct = async () => {
             _id: "$orderItems.variantId",
             name: { $first: "$orderItems.productName" },
             unitsSold: { $sum: "$orderItems.quantity" },
-            revenue: { $sum: "$orderItems.totalPrice" }
-          }
+            revenue: { $sum: "$orderItems.totalPrice" },
+          },
         },
         { $sort: { unitsSold: -1 } },
-        { $limit: 10 }
+        { $limit: 10 },
       ]),
 
       Order.aggregate([
@@ -220,40 +213,42 @@ export const topSellingProduct = async () => {
             from: "variants",
             localField: "orderItems.variantId",
             foreignField: "_id",
-            as: "variantInfo"
-          }
+            as: "variantInfo",
+          },
         },
-        
+
         { $unwind: { path: "$variantInfo", preserveNullAndEmptyArrays: true } },
         {
           $lookup: {
             from: "products",
             localField: "variantInfo.productId",
             foreignField: "_id",
-            as: "productInfo"
-          }
+            as: "productInfo",
+          },
         },
-        
+
         { $unwind: { path: "$productInfo", preserveNullAndEmptyArrays: true } },
         {
           $group: {
             _id: "$productInfo.categoryId",
             unitsSold: { $sum: "$orderItems.quantity" },
-            revenue: { $sum: "$orderItems.totalPrice" }
-          }
+            revenue: { $sum: "$orderItems.totalPrice" },
+          },
         },
         {
           $lookup: {
             from: "categories",
             localField: "_id",
             foreignField: "_id",
-            as: "categoryInfo"
-          }
+            as: "categoryInfo",
+          },
         },
-        { $unwind: { path: "$categoryInfo", preserveNullAndEmptyArrays: true } },
+        {
+          $unwind: { path: "$categoryInfo", preserveNullAndEmptyArrays: true },
+        },
         { $sort: { unitsSold: -1 } },
-        { $limit: 10 }
-      ])
+        { $limit: 10 },
+      ]),
     ]);
 
     return {
@@ -261,23 +256,24 @@ export const topSellingProduct = async () => {
       product: products.map((p) => ({
         name: p.name,
         unitsSold: p.unitsSold,
-        revenue: p.revenue
+        revenue: p.revenue,
       })),
       category: categories.map((c) => ({
         name: c.categoryInfo?.categoryName || "Uncategorized",
         unitsSold: c.unitsSold,
-        revenue: c.revenue
-      }))
+        revenue: c.revenue,
+      })),
     };
   } catch (e) {
     console.log(e);
-    return { success: false, message: "Server error", product: [], category: [] };
+    return {
+      success: false,
+      message: "Server error",
+      product: [],
+      category: [],
+    };
   }
 };
-
-
- 
-
 
 export const ledgerBook = async () => {
   try {
@@ -290,30 +286,29 @@ export const ledgerBook = async () => {
           $match: {
             createdAt: { $gte: start, $lte: now },
             orderStatus: "completed",
-            ...NOT_RETURNED
-          }
+            ...NOT_RETURNED,
+          },
         },
         {
           $group: {
             _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-            total: { $sum: "$totalAmount" }
-          }
-        }
+            total: { $sum: "$totalAmount" },
+          },
+        },
       ]),
 
-      
       Order.aggregate([
         {
           $match: {
-            "returnedAt.0": { $exists: true } 
-          }
+            "returnedAt.0": { $exists: true },
+          },
         },
         { $unwind: "$returnedAt" },
         {
           $match: {
             "returnedAt.returnRequestStatus": "Approved",
-            "returnedAt.requestedAt": { $gte: start, $lte: now }
-          }
+            "returnedAt.requestedAt": { $gte: start, $lte: now },
+          },
         },
         {
           // pull the matching order item to get its price
@@ -323,29 +318,34 @@ export const ledgerBook = async () => {
                 $filter: {
                   input: "$orderItems",
                   as: "item",
-                  cond: { $eq: ["$$item.variantId", "$returnedAt.variant"] }
-                }
-              }
-            }
-          }
+                  cond: { $eq: ["$$item.variantId", "$returnedAt.variant"] },
+                },
+              },
+            },
+          },
         },
         {
           $addFields: {
             returnAmount: {
               $multiply: [
                 { $ifNull: ["$matchedItem.price", 0] },
-                { $ifNull: ["$returnedAt.quantity", 0] }
-              ]
-            }
-          }
+                { $ifNull: ["$returnedAt.quantity", 0] },
+              ],
+            },
+          },
         },
         {
           $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$returnedAt.requestedAt" } },
-            total: { $sum: "$returnAmount" }
-          }
-        }
-      ])
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$returnedAt.requestedAt",
+              },
+            },
+            total: { $sum: "$returnAmount" },
+          },
+        },
+      ]),
     ]);
 
     const creditMap = new Map(credits.map((c) => [c._id, c.total]));
@@ -367,7 +367,7 @@ export const ledgerBook = async () => {
         date: date.format("DD MMM"),
         credit,
         debit,
-        runningBalance: balance
+        runningBalance: balance,
       });
     }
 
@@ -378,7 +378,6 @@ export const ledgerBook = async () => {
   }
 };
 
-
 export const getDashboardData = async (filter = "yearly") => {
   const validFilters = ["yearly", "monthly", "weekly"];
   const safeFilter = validFilters.includes(filter) ? filter : "yearly";
@@ -386,7 +385,7 @@ export const getDashboardData = async (filter = "yearly") => {
   const [chart, topSelling, ledger] = await Promise.all([
     chartData(safeFilter),
     topSellingProduct(),
-    ledgerBook()
+    ledgerBook(),
   ]);
 
   return {
@@ -394,6 +393,6 @@ export const getDashboardData = async (filter = "yearly") => {
     chartData: chart,
     topProducts: topSelling.success ? topSelling.product : [],
     topCategories: topSelling.success ? topSelling.category : [],
-    ledger: ledger.success ? ledger.ledger : []
+    ledger: ledger.success ? ledger.ledger : [],
   };
 };

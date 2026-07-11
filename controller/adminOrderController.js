@@ -1,7 +1,9 @@
-
 import {
   getOrderDetailsService,
-  orderManagementService,updateAllItemsStatusService,updateOrderItemStatusService,updateReturnRequestService
+  orderManagementService,
+  updateAllItemsStatusService,
+  updateOrderItemStatusService,
+  updateReturnRequestService,
 } from "../service/adminOrderManageService.js";
 
 export const getOrderManagement = async (req, res) => {
@@ -10,12 +12,7 @@ export const getOrderManagement = async (req, res) => {
       page: req.query.page,
       status: req.query.status,
       search: req.query.search,
-      
-     
-     
     });
-    
-    
 
     res.render("Admin/orderManagement", orderData);
   } catch (error) {
@@ -30,7 +27,7 @@ export const getViewOrder = async (req, res) => {
     const orderData = await getOrderDetailsService(orderId);
 
     if (!orderData.success) {
-      return res.redirect("/admin/order-management"); 
+      return res.redirect("/admin/order-management");
     }
 
     return res.render("Admin/orderDetailsPage", {
@@ -42,14 +39,13 @@ export const getViewOrder = async (req, res) => {
   }
 };
 
-
-
-
-
 // PATCH /api/orders/:id/status
 export const updateAllItemsStatus = async (req, res) => {
   try {
-    const result = await updateAllItemsStatusService(req.params.id, req.body.deliveryStatus);
+    const result = await updateAllItemsStatusService(
+      req.params.id,
+      req.body.deliveryStatus,
+    );
     return res.status(result.success ? 200 : 400).json(result);
   } catch (error) {
     console.error("updateAllItemsStatus error:", error);
@@ -60,7 +56,11 @@ export const updateAllItemsStatus = async (req, res) => {
 export const updateOrderItemStatus = async (req, res) => {
   try {
     const { id, variantId } = req.params;
-    const result = await updateOrderItemStatusService(id, variantId, req.body.deliveryStatus);
+    const result = await updateOrderItemStatusService(
+      id,
+      variantId,
+      req.body.deliveryStatus,
+    );
     return res.status(result.success ? 200 : 400).json(result);
   } catch (error) {
     console.error("updateOrderItemStatus error:", error);
@@ -112,7 +112,6 @@ export const updateOrderItemStatus = async (req, res) => {
 //     });
 //   }
 // };
-
 
 export const updateReturnRequest = async (req, res) => {
   try {

@@ -364,11 +364,13 @@ export const getProductVariants = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    const variants = await variantModel.find({
-      productId,
-      isActive: true,
-      stock: { $gt: 0 },
-    }).select("size color price discount stock images");
+    const variants = await variantModel
+      .find({
+        productId,
+        isActive: true,
+        stock: { $gt: 0 },
+      })
+      .select("size color price discount stock images");
 
     if (!variants.length) {
       return res.json({ success: false, message: "No variants available" });

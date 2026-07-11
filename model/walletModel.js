@@ -1,34 +1,36 @@
 import mongoose from "mongoose";
 
-let walletSchema = new mongoose.Schema({
+let walletSchema = new mongoose.Schema(
+  {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true,
     },
     type: {
-        type: String,
-        enum: ["credit", "debit"],
-        required: true
+      type: String,
+      enum: ["credit", "debit"],
+      required: true,
     },
     amount: {
-        type: Number,
-        required: true
+      type: Number,
+      required: true,
     },
     reason: {
-        type: String
+      type: String,
     },
     orderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Order",
-        default: null
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      default: null,
     },
     status: {
-        type: String,
-        enum: ["pending", "completed", "failed"],
-        default: "completed"   
-    }
+      type: String,
+      enum: ["pending", "completed", "failed"],
+      default: "completed",
+    },
+  },
+  { timestamps: true },
+);
 
-}, { timestamps: true })
-
-export default mongoose.model("Wallet", walletSchema)
+export default mongoose.model("Wallet", walletSchema);

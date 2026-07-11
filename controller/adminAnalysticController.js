@@ -3,7 +3,9 @@ import Order from "../model/orderModel.js";
 import PDFDocument from "pdfkit";
 
 const getPeriodConfig = (query) => {
-  const filter = ["daily", "weekly", "monthly", "yearly", "custom"].includes(query.filter)
+  const filter = ["daily", "weekly", "monthly", "yearly", "custom"].includes(
+    query.filter,
+  )
     ? query.filter
     : "weekly";
 
@@ -14,7 +16,7 @@ const getPeriodConfig = (query) => {
       filter,
       start: now.startOf("day").toDate(),
       end: now.endOf("day").toDate(),
-      period: "Today"
+      period: "Today",
     };
   }
 
@@ -23,7 +25,7 @@ const getPeriodConfig = (query) => {
       filter,
       start: now.startOf("month").toDate(),
       end: now.endOf("day").toDate(),
-      period: "This Month"
+      period: "This Month",
     };
   }
 
@@ -32,7 +34,7 @@ const getPeriodConfig = (query) => {
       filter,
       start: now.startOf("year").toDate(),
       end: now.endOf("day").toDate(),
-      period: "This Year"
+      period: "This Year",
     };
   }
 
@@ -47,7 +49,7 @@ const getPeriodConfig = (query) => {
         to: query.to,
         start: from.startOf("day").toDate(),
         end: to.endOf("day").toDate(),
-        period: `${from.format("DD MMM YYYY")} - ${to.format("DD MMM YYYY")}`
+        period: `${from.format("DD MMM YYYY")} - ${to.format("DD MMM YYYY")}`,
       };
     }
   }
@@ -56,13 +58,15 @@ const getPeriodConfig = (query) => {
     filter,
     start: now.subtract(6, "day").startOf("day").toDate(),
     end: now.endOf("day").toDate(),
-    period: "This Week"
+    period: "This Week",
   };
 };
 
 const mapStatus = (order) => {
-  if (order.orderStatus === "cancelled" || order.deliveryStatus === "cancelled") return "Cancelled";
-  if (order.orderStatus === "completed" || order.deliveryStatus === "delivered") return "Delivered";
+  if (order.orderStatus === "cancelled" || order.deliveryStatus === "cancelled")
+    return "Cancelled";
+  if (order.orderStatus === "completed" || order.deliveryStatus === "delivered")
+    return "Delivered";
   return "Processing";
 };
 
@@ -71,7 +75,7 @@ const formatCurrency = (value) =>
     style: "currency",
     currency: "INR",
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   });
 
 const fileSafePeriod = (period) =>
@@ -90,12 +94,10 @@ const escapeHtml = (value) =>
 const getAnalyticsReportData = async (query) => {
   const periodConfig = getPeriodConfig(query);
   const match = {
-    createdAt: { $gte: periodConfig.start, $lte: periodConfig.end }
+    createdAt: { $gte: periodConfig.start, $lte: periodConfig.end },
   };
 
-  const rawOrders = await Order.find(match)
-    .sort({ createdAt: -1 })
-    .lean();
+  const rawOrders = await Order.find(match).sort({ createdAt: -1 }).lean();
 
   const orders = rawOrders.map((order) => {
     const orderAmount = Number(order.subTotal || 0);
@@ -110,7 +112,7 @@ const getAnalyticsReportData = async (query) => {
       coupon: totalDiscount > 0 ? "Applied" : "",
       totalDiscount,
       netAmount,
-      status: mapStatus(order)
+      status: mapStatus(order),
     };
   });
 
@@ -122,7 +124,7 @@ const getAnalyticsReportData = async (query) => {
       totals.netRevenue += order.netAmount;
       return totals;
     },
-    { totalOrders: 0, orderAmount: 0, totalDiscount: 0, netRevenue: 0 }
+    { totalOrders: 0, orderAmount: 0, totalDiscount: 0, netRevenue: 0 },
   );
 
   return { periodConfig, summary, orders };
@@ -130,7 +132,9 @@ const getAnalyticsReportData = async (query) => {
 
 export const getAnalyticsPage = async (req, res) => {
   try {
-    const { periodConfig, summary, orders } = await getAnalyticsReportData(req.query);
+    const { periodConfig, summary, orders } = await getAnalyticsReportData(
+      req.query,
+    );
 
     return res.render("Admin/analyticsPageN", {
       summary,
@@ -138,7 +142,7 @@ export const getAnalyticsPage = async (req, res) => {
       period: periodConfig.period,
       filter: periodConfig.filter,
       from: periodConfig.from || "",
-      to: periodConfig.to || ""
+      to: periodConfig.to || "",
     });
   } catch (err) {
     console.log(err);
@@ -148,8 +152,12 @@ export const getAnalyticsPage = async (req, res) => {
 
 export const downloadAnalyticsExcel = async (req, res) => {
   try {
-    const { periodConfig, summary, orders } = await getAnalyticsReportData(req.query);
-    const rows = orders.map((order) => `
+    const { periodConfig, summary, orders } = await getAnalyticsReportData(
+      req.query,
+    );
+    const rows = orders
+      .map(
+        (order) => `
       <tr>
         <td>${escapeHtml(order.id)}</td>
         <td>${escapeHtml(order.date)}</td>
@@ -160,7 +168,9 @@ export const downloadAnalyticsExcel = async (req, res) => {
         <td>${order.netAmount.toFixed(2)}</td>
         <td>${escapeHtml(order.status)}</td>
       </tr>
-    `).join("");
+    `,
+      )
+      .join("");
 
     const html = `
       <html>
@@ -205,9 +215,15 @@ export const downloadAnalyticsExcel = async (req, res) => {
 
 export const downloadAnalyticsPdf = async (req, res) => {
   try {
-    const { periodConfig, summary, orders } = await getAnalyticsReportData(req.query);
+    const { periodConfig, summary, orders } = await getAnalyticsReportData(
+      req.query,
+    );
     const filename = `sales-report-${fileSafePeriod(periodConfig.period)}.pdf`;
-    const doc = new PDFDocument({ margin: 36, size: "A4", layout: "landscape" });
+    const doc = new PDFDocument({
+      margin: 36,
+      size: "A4",
+      layout: "landscape",
+    });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
@@ -215,12 +231,23 @@ export const downloadAnalyticsPdf = async (req, res) => {
 
     doc.fontSize(18).fillColor("#0f172a").text("Sales Analytics Report");
     doc.moveDown(0.25);
-    doc.fontSize(10).fillColor("#475569").text(`Period: ${periodConfig.period}`);
+    doc
+      .fontSize(10)
+      .fillColor("#475569")
+      .text(`Period: ${periodConfig.period}`);
     doc.text(`Generated: ${dayjs().format("DD MMM YYYY, hh:mm A")}`);
     doc.moveDown();
 
     doc.fontSize(11).fillColor("#111827");
-    doc.text(`Total Orders: ${summary.totalOrders}`, { continued: true }).text(`   Order Amount: ${formatCurrency(summary.orderAmount)}`, { continued: true }).text(`   Total Discount: ${formatCurrency(summary.totalDiscount)}`, { continued: true }).text(`   Net Revenue: ${formatCurrency(summary.netRevenue)}`);
+    doc
+      .text(`Total Orders: ${summary.totalOrders}`, { continued: true })
+      .text(`   Order Amount: ${formatCurrency(summary.orderAmount)}`, {
+        continued: true,
+      })
+      .text(`   Total Discount: ${formatCurrency(summary.totalDiscount)}`, {
+        continued: true,
+      })
+      .text(`   Net Revenue: ${formatCurrency(summary.netRevenue)}`);
     doc.moveDown();
 
     const columns = [
@@ -231,7 +258,7 @@ export const downloadAnalyticsPdf = async (req, res) => {
       { label: "Coupon", width: 70 },
       { label: "Discount", width: 72 },
       { label: "Net Amt", width: 78 },
-      { label: "Status", width: 78 }
+      { label: "Status", width: 78 },
     ];
     const startX = doc.x;
     let y = doc.y;
@@ -246,19 +273,23 @@ export const downloadAnalyticsPdf = async (req, res) => {
 
       columns.forEach((column, index) => {
         doc.rect(x, y, column.width, rowHeight).strokeColor("#cbd5e1").stroke();
-        doc.fontSize(isHeader ? 8 : 7)
+        doc
+          .fontSize(isHeader ? 8 : 7)
           .fillColor(isHeader ? "#0f172a" : "#334155")
           .text(String(cells[index] ?? ""), x + 4, y + 7, {
             width: column.width - 8,
             height: rowHeight - 8,
-            ellipsis: true
+            ellipsis: true,
           });
         x += column.width;
       });
       y += rowHeight;
     };
 
-    drawRow(columns.map((column) => column.label), true);
+    drawRow(
+      columns.map((column) => column.label),
+      true,
+    );
 
     if (orders.length) {
       orders.forEach((order) => {
@@ -270,7 +301,7 @@ export const downloadAnalyticsPdf = async (req, res) => {
           order.coupon || "-",
           formatCurrency(order.totalDiscount),
           formatCurrency(order.netAmount),
-          order.status
+          order.status,
         ]);
       });
     } else {

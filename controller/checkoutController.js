@@ -83,14 +83,12 @@ export const placeOrderController = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user?.id;
     if (!userId)
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "Session expired. Please login again.",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "Session expired. Please login again.",
+      });
 
-    const { addressId, paymentMethod, couponCode, discount } = req.body; 
+    const { addressId, paymentMethod, couponCode, discount } = req.body;
 
     if (!addressId || !paymentMethod)
       return res
@@ -123,11 +121,10 @@ export const placeOrderController = async (req, res) => {
 
 export const cancellPageLoad = async (req, res) => {
   try {
-   
     return res.render("Users/paypalCancel", { user: req.session.user || null });
   } catch (error) {
     console.error("error in cancellPageLoad", error);
-    
+
     return res.redirect("/checkout");
   }
 };

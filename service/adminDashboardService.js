@@ -6,11 +6,25 @@ import productsModel from "../model/productsModel.js";
 import categoryModel from "../model/categoryModel.js";
 import mongoose from "mongoose";
 
-
 const generateChartData = (filter) => {
-  
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const data = months.map((m) => ({ label: m, value: Math.floor(Math.random() * 10000) + 5000 }));
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const data = months.map((m) => ({
+    label: m,
+    value: Math.floor(Math.random() * 10000) + 5000,
+  }));
   return data;
 };
 
@@ -22,7 +36,9 @@ const getTopProducts = async (limit = 10) => {
       $group: {
         _id: "$orderItems.productName",
         totalSold: { $sum: "$orderItems.quantity" },
-        revenue: { $sum: { $multiply: ["$orderItems.price", "$orderItems.quantity"] } },
+        revenue: {
+          $sum: { $multiply: ["$orderItems.price", "$orderItems.quantity"] },
+        },
       },
     },
     { $sort: { totalSold: -1 } },
@@ -65,7 +81,9 @@ const getTopCategories = async (limit = 10) => {
     {
       $group: {
         _id: "$categoryInfo.name",
-        totalSales: { $sum: { $multiply: ["$orderItems.price", "$orderItems.quantity"] } },
+        totalSales: {
+          $sum: { $multiply: ["$orderItems.price", "$orderItems.quantity"] },
+        },
       },
     },
     { $sort: { totalSales: -1 } },

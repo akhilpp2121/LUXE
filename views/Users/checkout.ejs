@@ -888,9 +888,9 @@
           </div>
 
           <div class="price-row">
-            <span class="pr-label" style="color:var(--warning)">GST (5%)</span>
-            <span class="pr-val" style="color:var(--warning);font-size:12px">+ ₹<%= gstAmount.toLocaleString('en-IN') %></span>
-          </div>
+  <span class="pr-label" style="color:var(--warning)">GST (5%)</span>
+  <span class="pr-val" style="color:var(--warning);font-size:12px" id="displayGst">+ ₹<%= gstAmount.toLocaleString('en-IN') %></span>
+</div>
 
           <div class="price-row free">
             <span class="pr-label">Shipping Fee</span>
@@ -948,10 +948,11 @@
   let editingAddressDefault = false;
   let paypalButtonsRendered = false;
 
-  const checkoutAddresses = <%- JSON.stringify(address).replace(/</g, '\\u003c') %>;
-  const baseGrandTotal    = <%= grandTotal %>;
-  const orderTotal        = <%= orderTotal %>;
-  const walletBalance     = <%= walletBalance %>;
+ const checkoutAddresses = <%- JSON.stringify(address).replace(/</g, '\\u003c') %>;
+const baseGrandTotal    = <%= grandTotal %>;
+const baseSubtotal      = <%= subtotal %>;
+const orderTotal        = <%= orderTotal %>;
+const walletBalance     = <%= walletBalance %>;
 
   /* ── LOADER ── */
   const overlay    = document.getElementById('loadingOverlay');
@@ -1153,12 +1154,24 @@
   }
 
   function updateGrandTotal(discount, couponCode) {
-    const newTotal    = baseGrandTotal - discount;
+    const taxable  = Math.max(baseSubtotal - discount, 0);
+    const gst      = Math.round(taxable * 0.05);
+    const shipping = baseSubtotal >= 999 ? 0 : 99;
+    const newTotal = taxable + gst + shipping;
+
     const totalEl     = document.getElementById('displayTotal');
+    const gstEl       = document.getElementById('displayGst');
+    const shippingEl  = document.getElementById('displayShipping');
     const discountRow = document.getElementById('couponDiscountRow');
     const discountEl  = document.getElementById('couponDiscountDisplay');
     const labelEl     = document.getElementById('appliedCouponLabel');
-    totalEl.textContent = '₹' + newTotal.toLocaleString('en-IN');
+
+    totalEl.textContent  = '₹' + newTotal.toLocaleString('en-IN');
+    gstEl.textContent    = '+ ₹' + gst.toLocaleString('en-IN');
+    shippingEl.innerHTML = shipping === 0
+      ? 'Free'
+      : '<span style="color:var(--text-1)">₹' + shipping + '</span>';
+
     if (discount > 0 && couponCode) {
       discountRow.classList.add('visible');
       discountEl.textContent = '— ₹' + discount.toLocaleString('en-IN');
@@ -1167,7 +1180,6 @@
       discountRow.classList.remove('visible');
     }
   }
-
   function showCouponMsg(text, type) {
     const el = document.getElementById('couponMsg');
     el.textContent = text;
@@ -1337,6 +1349,7 @@
   }
 
   /* ── COD / WALLET PLACE ORDER ── */
+
   async function placeOrder() {
     if (!selectedAddressId) {
       document.getElementById('addr-select-error').style.display = 'block';
@@ -1344,7 +1357,11 @@
       return toast('error', 'Please select a shipping address.');
     }
 
-    const currentTotal = baseGrandTotal - appliedDiscount;
+    const taxable_     = Math.max(baseSubtotal - appliedDiscount, 0);
+    const gst_         = Math.round(taxable_ * 0.05);
+    const shipping_    = baseSubtotal >= 999 ? 0 : 99;
+    const currentTotal = taxable_ + gst_ + shipping_;
+ 
     if (selectedPayment === 'wallet' && walletBalance < currentTotal) {
       return toast('error', `Insufficient wallet balance. You need ₹${(currentTotal - walletBalance).toLocaleString('en-IN')} more.`);
     }

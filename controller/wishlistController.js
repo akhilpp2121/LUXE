@@ -8,57 +8,52 @@ import { findUserByEmail } from "../service/userService.js";
 import { getCartCount } from "../service/cartService.js";
 import { findUserBlocked } from "../service/userService.js";
 
-
-
 export const wishlistPageLoad = async (req, res) => {
-    try {
+  try {
+    const userId = req.session.user.id || req.session.user._id;
+    const isBlockedUser = await findUserBlocked(userId);
 
-      const userId = req.session.user.id || req.session.user._id;
-   const isBlockedUser = await findUserBlocked(userId);
-
-    
-      if (isBlockedUser) {
-        req.session.user = null;
-        req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
-        return res.redirect("/login");
-      }
-  
-
-
-
-
-        if (!req.session?.user) {
-            return res.redirect("/login");
-        }
-
-       
-        const limit = 4;
-
-        const result = await wishlistData({ userId, skip: 0, limit });
-
-        const totalPage = result.totalPage ?? 1;
-        const page = Math.min(Math.max(parseInt(req.query.page) || 1, 1), totalPage);
-        const skip = (page - 1) * limit;
-
-        const finalResult = page > 1
-            ? await wishlistData({ userId, skip, limit })
-            : result;
-
-        const cart = await getCartCount(userId);
-
-        return res.render("Users/wishlist", {
-            wishlist:    finalResult.data ?? [],
-            cart,
-            isLogged:    req.session.user,
-            query:       req.query,
-            totalPage,
-            currentPage: page,
-        });
-
-    } catch (error) {
-        console.error("Wishlist page error:", error);
-        return res.status(500).send("Something went wrong");
+    if (isBlockedUser) {
+      req.session.user = null;
+      req.session.flashMessage = {
+        type: "error",
+        message: "Your account has been blocked.",
+      };
+      return res.redirect("/login");
     }
+
+    if (!req.session?.user) {
+      return res.redirect("/login");
+    }
+
+    const limit = 4;
+
+    const result = await wishlistData({ userId, skip: 0, limit });
+
+    const totalPage = result.totalPage ?? 1;
+    const page = Math.min(
+      Math.max(parseInt(req.query.page) || 1, 1),
+      totalPage,
+    );
+    const skip = (page - 1) * limit;
+
+    const finalResult =
+      page > 1 ? await wishlistData({ userId, skip, limit }) : result;
+
+    const cart = await getCartCount(userId);
+
+    return res.render("Users/wishlist", {
+      wishlist: finalResult.data ?? [],
+      cart,
+      isLogged: req.session.user,
+      query: req.query,
+      totalPage,
+      currentPage: page,
+    });
+  } catch (error) {
+    console.error("Wishlist page error:", error);
+    return res.status(500).send("Something went wrong");
+  }
 };
 
 export const updateWishlist = async (req, res) => {

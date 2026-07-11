@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, unique + path.extname(file.originalname));
-  }
+  },
 });
 
 export const avatarUpload = multer({
@@ -21,7 +21,7 @@ export const avatarUpload = multer({
     const allowed = ["image/jpeg", "image/png", "image/webp"];
     if (allowed.includes(file.mimetype)) cb(null, true);
     else cb(new Error("Only JPG, PNG, WEBP allowed"));
-  }
+  },
 });
 
 const productStorage = multer.diskStorage({
@@ -33,7 +33,7 @@ const productStorage = multer.diskStorage({
   filename: function (req, file, cb) {
     const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, unique + path.extname(file.originalname));
-  }
+  },
 });
 
 export const productUpload = multer({
@@ -43,5 +43,5 @@ export const productUpload = multer({
     const allowed = ["image/jpeg", "image/png", "image/webp"];
     if (allowed.includes(file.mimetype)) cb(null, true);
     else cb(new Error("Only JPG, PNG, WEBP allowed"));
-  }
+  },
 });

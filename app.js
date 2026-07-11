@@ -29,18 +29,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");                        
 app.set("views", path.join(__dirname, "views"));
 
-// app.use(session({
-//   secret: process.env.SESSION_SECRET,
-//   resave: true,
-//   saveUninitialized: false,
-//   rolling: true,
-//   cookie: {
-//     httpOnly: true,
-//     secure: false,
-//     sameSite: "lax",
-//     maxAge: 1000 * 60 * 60 * 24 * 7,
-//   },
-// }));
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET,

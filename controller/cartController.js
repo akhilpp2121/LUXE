@@ -74,12 +74,10 @@ export const cartAdd = async (req, res) => {
     const userId = user._id || user.id;
     const userIsBlocked = await findUserBlocked(userId);
     if (userIsBlocked) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "user is blocked you can't add products in you cart",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "user is blocked you can't add products in you cart",
+      });
     }
 
     if (!variantId) {
@@ -97,12 +95,10 @@ export const cartAdd = async (req, res) => {
     }
 
     if (quantity > 10) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "You cannot add more than 10 pieces",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "You cannot add more than 10 pieces",
+      });
     }
 
     const cartAddProgress = await addToCart(variantId, userId, quantity);
@@ -173,12 +169,10 @@ export const quantityUpdate = async (req, res) => {
 
     const userIsBlocked = await findUserBlocked(userId);
     if (userIsBlocked) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "user is blocked you can't add products in you cart",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "user is blocked you can't add products in you cart",
+      });
     }
 
     if (!cartId || !variantId || !quantity) {

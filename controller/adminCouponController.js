@@ -1,4 +1,8 @@
-import { getCouponsService,toggleCouponStatusService,deleteCouponService } from "../service/adminCouponService.js";
+import {
+  getCouponsService,
+  toggleCouponStatusService,
+  deleteCouponService,
+} from "../service/adminCouponService.js";
 // GET /admin/coupons
 export const getCoupons = async (req, res) => {
   try {
@@ -7,11 +11,11 @@ export const getCoupons = async (req, res) => {
     const data = await getCouponsService({ page, search, status });
 
     res.render("Admin/couponPage", {
-      coupons:    data.coupons,
+      coupons: data.coupons,
       pagination: data.pagination,
-      stats:      data.stats,
-      search:     data.search,
-      status:     data.status,
+      stats: data.stats,
+      search: data.search,
+      status: data.status,
     });
   } catch (error) {
     console.error("getCoupons error:", error);
@@ -43,15 +47,11 @@ export const deleteCoupon = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
-
-
-import { addCouponService,getCouponByIdService,editCouponService } from "../service/adminCouponService.js";
+import {
+  addCouponService,
+  getCouponByIdService,
+  editCouponService,
+} from "../service/adminCouponService.js";
 
 // GET /admin/coupons-add
 export const getAddCoupon = (req, res) => {
@@ -70,7 +70,9 @@ export const postAddCoupon = async (req, res) => {
     res.redirect("/admin/coupons");
   } catch (error) {
     console.error("postAddCoupon error:", error);
-    res.render("Admin/addCouponPage", { error: "Server error. Please try again." });
+    res.render("Admin/addCouponPage", {
+      error: "Server error. Please try again.",
+    });
   }
 };
 
@@ -97,7 +99,7 @@ export const postEditCoupon = async (req, res) => {
       const couponResult = await getCouponByIdService(req.params.id);
       return res.render("Admin/editCouponPage", {
         coupon: couponResult.coupon,
-        error:  result.message,
+        error: result.message,
       });
     }
 

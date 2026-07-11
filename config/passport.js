@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { userModel } from "../model/usermodel.js";
@@ -57,7 +51,7 @@ passport.use(
 
         // ── Apply referral reward (only on fresh signup) ──────────
         const refToken = req.session?.referralToken;
-        console.log("Session ref value:", refToken); 
+        console.log("Session ref value:", refToken);
 
         if (refToken) {
           await applyReferralReward(newUser, refToken);
@@ -69,8 +63,8 @@ passport.use(
       } catch (err) {
         return done(err, null);
       }
-    }
-  )
+    },
+  ),
 );
 
 export default passport;

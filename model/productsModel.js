@@ -1,39 +1,39 @@
 import mongoose from "mongoose";
 
-let schema = mongoose.Schema
+let schema = mongoose.Schema;
 
-const productSchema = new schema({
-    name:{
-        type:String,
-        required:true,
-        
+const productSchema = new schema(
+  {
+    name: {
+      type: String,
+      required: true,
     },
-    description:{
-        type:String,
-        required:true
-
+    description: {
+      type: String,
+      required: true,
     },
-    categoryId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"category"
+    categoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "category",
     },
-    isActive:{
-        type:Boolean,
-        required:true,
-        default:true
+    isActive: {
+      type: Boolean,
+      required: true,
+      default: true,
     },
-    variants: [{                              
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Variant"
-  }],
-  offer: {
-        
+    variants: [
+      {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Offer",
-        default: null
-    }
+        ref: "Variant",
+      },
+    ],
+    offer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Offer",
+      default: null,
+    },
+  },
+  { timestamps: true },
+);
 
-
-},{timestamps:true})
-
-export default mongoose.model("Product",productSchema)
+export default mongoose.model("Product", productSchema);

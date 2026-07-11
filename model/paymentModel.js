@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 
-const paymentSchema = new mongoose.Schema({
+const paymentSchema = new mongoose.Schema(
+  {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     paypalOrderId: String,
     paypalCaptureId: String,
@@ -11,9 +12,9 @@ const paymentSchema = new mongoose.Schema({
     currency: String,
     paymentStatus: String,
     payerEmail: String,
-    payerName: String
+    payerName: String,
+  },
+  { timestamps: true },
+);
 
-},{timestamps:true})
-
-
-export default mongoose.model("Payment",paymentSchema)
+export default mongoose.model("Payment", paymentSchema);

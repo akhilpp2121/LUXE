@@ -1,12 +1,8 @@
-
 import mongoose from "mongoose";
 import category from "../model/categoryModel.js";
 import Product from "../model/productsModel.js";
 import Variant from "../model/variantModel.js";
 import offerModel from "../model/offerModel.js";
-
-
-
 
 export const productModelLoad = async (filter = {}, sort = {}, pageNo = 1) => {
   try {
@@ -17,11 +13,11 @@ export const productModelLoad = async (filter = {}, sort = {}, pageNo = 1) => {
     const total = await Product.countDocuments(filter);
     const totalPages = Math.ceil(total / limit);
 
-    const offers = await offerModel.find({ 
-  isActive: true, 
-  endDate: { $gte: new Date() },
-  type: 'PRODUCT'   // only product-type offers
-});
+    const offers = await offerModel.find({
+      isActive: true,
+      endDate: { $gte: new Date() },
+      type: "PRODUCT", // only product-type offers
+    });
 
     const products = await Product.find(filter)
       .populate("categoryId")
@@ -59,27 +55,30 @@ export const variantDataLoad = async (filter = {}) => {
   }
 };
 
-
-
-export const adminProductsAddLogic = async (productName, category, description, isActive, variants) => {
+export const adminProductsAddLogic = async (
+  productName,
+  category,
+  description,
+  isActive,
+  variants,
+) => {
   try {
     const newProduct = new Product({
       name: productName,
       categoryId: category,
       description,
-
     });
 
     const savedProduct = await newProduct.save();
 
-    const variantDocs = variants.map(v => ({
+    const variantDocs = variants.map((v) => ({
       productId: savedProduct._id,
       color: v.color,
       size: v.size,
       SKU: v.sku,
       stock: v.stock,
       price: v.price,
-      manualDiscount:v.manualDiscount,
+      manualDiscount: v.manualDiscount,
       discount: v.discount,
       images: v.images,
       isActive: true,
@@ -87,7 +86,7 @@ export const adminProductsAddLogic = async (productName, category, description, 
 
     const savedVariants = await Variant.insertMany(variantDocs);
 
-    savedProduct.variants = savedVariants.map(v => v._id);
+    savedProduct.variants = savedVariants.map((v) => v._id);
     await savedProduct.save();
 
     return { success: true };
@@ -97,32 +96,31 @@ export const adminProductsAddLogic = async (productName, category, description, 
   }
 };
 export async function generateUniqueSKU(productName, color, size, index = 1) {
-  
-  const nameCode = (productName || 'PRD')
+  const nameCode = (productName || "PRD")
     .trim()
     .split(/\s+/)
-    .map(w => w[0] || '')
-    .join('')
+    .map((w) => w[0] || "")
+    .join("")
     .toUpperCase()
     .slice(0, 4);
 
-  const colorCode = (color || 'CLR')
-    .replace(/\s+/g, '')
+  const colorCode = (color || "CLR")
+    .replace(/\s+/g, "")
     .slice(0, 3)
     .toUpperCase();
 
-  const sizeMap = { Small: 'S', Medium: 'M', Large: 'L', XL: 'XL', XXL: 'XXL' };
-  const sizeCode = sizeMap[size] || (size || 'SZ').slice(0, 2).toUpperCase();
+  const sizeMap = { Small: "S", Medium: "M", Large: "L", XL: "XL", XXL: "XXL" };
+  const sizeCode = sizeMap[size] || (size || "SZ").slice(0, 2).toUpperCase();
 
   const prefix = `${nameCode}-`;
   const existing = await Variant.find(
     { SKU: { $regex: `^${prefix}` } },
-    { SKU: 1 }
+    { SKU: 1 },
   );
 
   let maxSeq = 0;
-  existing.forEach(v => {
-    const parts = v.SKU?.split('-');
+  existing.forEach((v) => {
+    const parts = v.SKU?.split("-");
     if (parts && parts[1]) {
       const n = parseInt(parts[1], 10);
       if (!isNaN(n) && n > maxSeq) maxSeq = n;
@@ -132,15 +130,13 @@ export async function generateUniqueSKU(productName, color, size, index = 1) {
   let seq = maxSeq + index;
   let sku, collision;
   do {
-    sku = `${nameCode}-${String(seq).padStart(3, '0')}-${colorCode}-${sizeCode}`;
+    sku = `${nameCode}-${String(seq).padStart(3, "0")}-${colorCode}-${sizeCode}`;
     collision = await Variant.findOne({ SKU: sku });
     if (collision) seq++;
   } while (collision);
 
   return sku;
 }
-
-
 
 export const productFindById = async (id) => {
   try {
@@ -153,29 +149,28 @@ export const productFindById = async (id) => {
   }
 };
 
-
-export const updatedProducts=async({productId,name,categoryId,description})=>{
-
+export const updatedProducts = async ({
+  productId,
+  name,
+  categoryId,
+  description,
+}) => {
   try {
+    const updated = await Product.findByIdAndUpdate(
+      productId,
+      { name, categoryId, description },
+      { returnDocument: "after", runValidators: true },
+    );
 
-    const updated= await Product.findByIdAndUpdate(productId,{name,categoryId,description},{ returnDocument: 'after', runValidators: true }
-)
-
-    if(!updated){
-      return {success:false,message:"product not found"}
+    if (!updated) {
+      return { success: false, message: "product not found" };
     }
-    return {success:true,data:updated}
-    
+    return { success: true, data: updated };
   } catch (error) {
-    console.log("updated products error",error);
-    return ({success:false,message:error.message})
+    console.log("updated products error", error);
+    return { success: false, message: error.message };
   }
-
-}
-
-
-
- 
+};
 
 export const upsertVariant = async ({ productId, variantId, variantData }) => {
   try {
@@ -201,17 +196,20 @@ export const upsertVariant = async ({ productId, variantId, variantData }) => {
       const updated = await Variant.findByIdAndUpdate(
         variantId,
         { $set: safeData },
-        { returnDocument: 'after' }
-
+        { returnDocument: "after" },
       );
       if (!updated) return { success: false, message: "Variant not found" };
       return { success: true, data: updated };
     } else {
-      
-     const created = await Variant.create({ ...safeData, productId, isActive: true });
-  await Product.findByIdAndUpdate(productId, { $push: { variants: created._id } });
-  return { success: true, data: created };
-
+      const created = await Variant.create({
+        ...safeData,
+        productId,
+        isActive: true,
+      });
+      await Product.findByIdAndUpdate(productId, {
+        $push: { variants: created._id },
+      });
+      return { success: true, data: created };
     }
   } catch (err) {
     console.error("upsertVariant error:", err);
@@ -222,8 +220,8 @@ export const updateVariantStatuses = async (productId, changes) => {
   const ops = changes.map(({ variantId, isActive }) => ({
     updateOne: {
       filter: { _id: variantId },
-      update: { $set: { isActive } }
-    }
+      update: { $set: { isActive } },
+    },
   }));
 
   const result = await Variant.bulkWrite(ops);
@@ -232,8 +230,7 @@ export const updateVariantStatuses = async (productId, changes) => {
 
 // export const applyOffersToProduct = async (productId,offer) => {
 //   try {
-    
-    
+
 //     const product = await Product.findById(productId).populate("offer").populate("categoryId");
 //     if (!product) return { success: false, message: "Product not found" };
 
@@ -355,7 +352,6 @@ export const updateVariantStatuses = async (productId, changes) => {
 //   }
 // };
 
-
 export const applyOffersToProduct = async (productId) => {
   try {
     const product = await Product.findById(productId)
@@ -390,8 +386,18 @@ export const applyOffersToProduct = async (productId) => {
 
     // ── DEBUG ──
     console.log("productId:", productId);
-    console.log("productOffer:", productOffer ? `${productOffer.name} | ${productOffer.discountType} | ${productOffer.discountValue}` : "NONE");
-    console.log("categoryOffer:", categoryOffer ? `${categoryOffer.name} | ${categoryOffer.discountType} | ${categoryOffer.discountValue}` : "NONE");
+    console.log(
+      "productOffer:",
+      productOffer
+        ? `${productOffer.name} | ${productOffer.discountType} | ${productOffer.discountValue}`
+        : "NONE",
+    );
+    console.log(
+      "categoryOffer:",
+      categoryOffer
+        ? `${categoryOffer.name} | ${categoryOffer.discountType} | ${categoryOffer.discountValue}`
+        : "NONE",
+    );
 
     const calculateSavings = (price, offer) => {
       if (!offer) return 0;
@@ -411,10 +417,10 @@ export const applyOffersToProduct = async (productId) => {
     console.log("variants found:", variants.length);
 
     for (const variant of variants) {
-      const originalPrice   = variant.price;
-      const productSavings  = calculateSavings(originalPrice, productOffer);
+      const originalPrice = variant.price;
+      const productSavings = calculateSavings(originalPrice, productOffer);
       const categorySavings = calculateSavings(originalPrice, categoryOffer);
-      const bestSavings     = Math.max(productSavings, categorySavings);
+      const bestSavings = Math.max(productSavings, categorySavings);
 
       // ── DEBUG ──
       console.log("--- variant ---", variant._id);
@@ -435,12 +441,13 @@ export const applyOffersToProduct = async (productId) => {
       await variant.save();
 
       // verify it actually saved
-      const check = await Variant.findById(variant._id).select("discount price manualDiscount");
+      const check = await Variant.findById(variant._id).select(
+        "discount price manualDiscount",
+      );
       console.log("  DB after save:", check.discount, "| price:", check.price);
     }
 
     return { success: true };
-
   } catch (error) {
     console.error("applyOffersToProduct error:", error);
     return { success: false, message: error.message };

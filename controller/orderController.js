@@ -129,8 +129,6 @@ export const orderDetailsLoad = async (req, res) => {
 //   }
 // };
 
-
-
 export const downloadInvoice = async (req, res) => {
   try {
     const { id } = req.params;
@@ -145,7 +143,7 @@ export const downloadInvoice = async (req, res) => {
       .findById(id)
       .populate("orderItems.variantId")
       .populate("cancelledAt.cancelledProducts")
-      .populate("returnedAt.variant") 
+      .populate("returnedAt.variant")
       .lean();
 
     if (!order) {
@@ -166,15 +164,6 @@ export const downloadInvoice = async (req, res) => {
     return res.status(500).send("Could not generate invoice");
   }
 };
-
-
-
-
-
-
-
-
-
 
 export const cancellRequest = async (req, res) => {
   try {
@@ -209,7 +198,6 @@ export const cancellRequest = async (req, res) => {
   }
 };
 
-
 export const returnRequest = async (req, res) => {
   try {
     const { orderId, reason, remark, resolution, variant, quantity } = req.body;
@@ -235,7 +223,6 @@ export const returnRequest = async (req, res) => {
     return res.json({ success: false, message: "Server error" });
   }
 };
-
 
 export const userOrdersLoad = async (req, res) => {
   try {

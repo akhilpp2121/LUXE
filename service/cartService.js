@@ -1,6 +1,3 @@
-
-
-
 import mongoose from "mongoose";
 
 import cartModel from "../model/cartModel.js";
@@ -13,8 +10,8 @@ export const CartDataTake = async (userId) => {
       path: "items.variantId",
       populate: {
         path: "productId",
-        populate: { path: "categoryId" }
-      }
+        populate: { path: "categoryId" },
+      },
     });
 
     if (!cart || cart.items.length === 0) {
@@ -33,10 +30,12 @@ export const CartDataTake = async (userId) => {
     if (modified) await cart.save();
 
     return { success: true, data: cart.items };
-
   } catch (error) {
     console.error("Cart load error:", error);
-    return { success: false, message: "Something went wrong while loading cart" };
+    return {
+      success: false,
+      message: "Something went wrong while loading cart",
+    };
   }
 };
 
@@ -47,43 +46,56 @@ export const addToCart = async (variantId, userId, quantity) => {
       return { success: false, message: "Invalid request" };
     }
 
-    const variant = await variantModel.findOne({
-      _id: variantId,
-      isActive: true,
-      stock: { $gte: 1 }
-    }).populate({
-      path: "productId",
-      populate: { path: "categoryId", match: { isActive: true } }
-    });
+    const variant = await variantModel
+      .findOne({
+        _id: variantId,
+        isActive: true,
+        stock: { $gte: 1 },
+      })
+      .populate({
+        path: "productId",
+        populate: { path: "categoryId", match: { isActive: true } },
+      });
 
     if (!variant || !variant.productId?.categoryId) {
-      return { success: false, message: "Product might be blocked or out of stock" };
+      return {
+        success: false,
+        message: "Product might be blocked or out of stock",
+      };
     }
 
     const qty = quantity || 1;
     if (qty > variant.stock) {
-      return { success: false, message: `Only ${variant.stock} item(s) available in stock` };
+      return {
+        success: false,
+        message: `Only ${variant.stock} item(s) available in stock`,
+      };
     }
 
     const alreadyInCart = await cartModel.findOne({
       userId,
-      "items.variantId": variantId 
+      "items.variantId": variantId,
     });
 
     if (alreadyInCart) {
-      return { success: false, message: "Product already in cart, go to cart!" };
+      return {
+        success: false,
+        message: "Product already in cart, go to cart!",
+      };
     }
 
-   await cartModel.findOneAndUpdate(
-  { userId },
-  { $push: { items: { variantId, quantity: qty } } },
-  { upsert: true }
-);
+    await cartModel.findOneAndUpdate(
+      { userId },
+      { $push: { items: { variantId, quantity: qty } } },
+      { upsert: true },
+    );
     return { success: true, message: "Product added successfully" };
-
   } catch (error) {
     console.error("Cart add error:", error);
-    return { success: false, message: "Something went wrong while adding to cart" };
+    return {
+      success: false,
+      message: "Something went wrong while adding to cart",
+    };
   }
 };
 
@@ -93,28 +105,26 @@ export const cartDelete = async (userId, variantId) => {
     if (!userId || !variantId) {
       return { success: false, message: "Invalid request" };
     }
-    
 
     const result = await cartModel.findOneAndUpdate(
-  { userId },
-  { $pull: { items: { variantId } } },
-  { returnDocument: "after" }
-);
-
-
+      { userId },
+      { $pull: { items: { variantId } } },
+      { returnDocument: "after" },
+    );
 
     if (!result) {
       return { success: false, message: "Cart item not found" };
     }
 
     return { success: true, message: "Item removed from cart successfully" };
-
   } catch (error) {
     console.error("Cart delete error:", error);
-    return { success: false, message: "Something went wrong while removing item" };
+    return {
+      success: false,
+      message: "Something went wrong while removing item",
+    };
   }
 };
-
 
 export const cartEdit = async (userId, variantId, quantity) => {
   try {
@@ -123,23 +133,28 @@ export const cartEdit = async (userId, variantId, quantity) => {
       return { success: false, message: "Product not found" };
     }
 
-    if (quantity < 1)        return { success: false, message: "Quantity must be at least 1" };
-    if (quantity > 10)       return { success: false, message: "Cannot add more than 10" };
+    if (quantity < 1)
+      return { success: false, message: "Quantity must be at least 1" };
+    if (quantity > 10)
+      return { success: false, message: "Cannot add more than 10" };
     if (quantity > variant.stock) {
-      return { success: false, message: `Only ${variant.stock} items available` };
+      return {
+        success: false,
+        message: `Only ${variant.stock} items available`,
+      };
     }
 
     await cartModel.findOneAndUpdate(
       { userId, "items.variantId": variantId },
-      { $set: { "items.$.quantity": quantity } }  
+      { $set: { "items.$.quantity": quantity } },
     );
 
-    const unitPrice = variant.discount && variant.discount < variant.price
-      ? variant.discount
-      : variant.price;
+    const unitPrice =
+      variant.discount && variant.discount < variant.price
+        ? variant.discount
+        : variant.price;
 
     return { success: true, message: "Cart updated successfully", unitPrice };
-
   } catch (error) {
     console.error("Cart edit error:", error);
     return { success: false, message: "Server error" };
@@ -150,7 +165,7 @@ export const getCartCount = async (userId) => {
   try {
     if (!userId) return 0;
     const cart = await cartModel.findOne({ userId });
-    return cart?.items?.length ?? 0;   
+    return cart?.items?.length ?? 0;
   } catch (error) {
     console.error("Cart count error:", error);
     return 0;
@@ -159,10 +174,7 @@ export const getCartCount = async (userId) => {
 
 export const clearCart = async (userId) => {
   try {
-    await cartModel.findOneAndUpdate(
-      { userId },
-      { $set: { items: [] } }
-    );
+    await cartModel.findOneAndUpdate({ userId }, { $set: { items: [] } });
     return { success: true };
   } catch (error) {
     console.error("Cart clear error:", error);

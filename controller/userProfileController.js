@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import passport from "../config/passport.js";
 import { getCartCount } from "../service/cartService.js";
 import {
@@ -11,8 +5,6 @@ import {
   updateProfileService,
   uploadAvatarService,
   deleteAvatarService,
-  
-  
 } from "../service/userProfileService.js";
 
 import {
@@ -21,30 +13,26 @@ import {
   editAddressService,
   deleteAddressService,
   setDefaultAddressService,
-} from '../service/userProfileService.js'; 
+} from "../service/userProfileService.js";
 import { generateAndSendOtp } from "../service/userService.js";
 import { findUserBlocked } from "../service/userService.js";
 import bcrypt from "bcrypt";
 
-
 // Profile page
-
 
 export const profileLoadPage = async (req, res) => {
   try {
-
-
     const userId = req.session.user._id || req.session.user.id;
 
-
-         const isBlockedUser = await findUserBlocked(userId);
+    const isBlockedUser = await findUserBlocked(userId);
     if (isBlockedUser) {
       req.session.user = null;
-      req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
+      req.session.flashMessage = {
+        type: "error",
+        message: "Your account has been blocked.",
+      };
       return res.redirect("/login");
     }
-
-
 
     if (!req.session.user) return res.redirect("/login");
     const user = await getUserProfileService(req.session.user.id);
@@ -69,13 +57,16 @@ export const editProfileLoad = async (req, res) => {
     if (!req.session.user) return res.redirect("/login");
     const user = await getUserProfileService(req.session.user.id);
     if (!user) return res.redirect("/login");
-    return res.render("Users/editProfile", { user, error: null, success: null });
+    return res.render("Users/editProfile", {
+      user,
+      error: null,
+      success: null,
+    });
   } catch (err) {
     console.error("editProfileLoad error:", err);
     return res.redirect("/login");
   }
 };
-
 
 export const userProfileUpdate = async (req, res) => {
   try {
@@ -88,13 +79,13 @@ export const userProfileUpdate = async (req, res) => {
       return res.render("Users/editProfile", {
         user,
         error: result.message,
-        success: null
+        success: null,
       });
     }
 
-    req.session.user.fullName    = result.fullName;
+    req.session.user.fullName = result.fullName;
     req.session.user.phoneNumber = result.phoneNumber;
-    req.session.user.avatar      = result.avatar;
+    req.session.user.avatar = result.avatar;
 
     // STAY ON SAME PAGE WITH SUCCESS
     const updatedUser = await getUserProfileService(req.session.user.id);
@@ -102,34 +93,36 @@ export const userProfileUpdate = async (req, res) => {
     return res.render("Users/editProfile", {
       user: updatedUser,
       error: null,
-      success: result.message
+      success: result.message,
     });
-
   } catch (err) {
     console.error("userProfileUpdate error:", err);
     return res.status(500).send("Server error");
   }
 };
 
-
 // Avatar upload (AJAX)
 export const uploadAvatar = async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.status(401).json({ success: false, message: "Not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
     }
     if (!req.file) {
-      return res.status(400).json({ success: false, message: "No file uploaded" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
     }
 
     const result = await uploadAvatarService(
       req.session.user.id,
       req.file,
-      req.session.user.avatar  
+      req.session.user.avatar,
     );
 
     if (result.success) {
-      req.session.user.avatar = result.avatar; 
+      req.session.user.avatar = result.avatar;
     }
 
     return res.json(result);
@@ -142,16 +135,18 @@ export const uploadAvatar = async (req, res) => {
 export const deleteAvatar = async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.status(401).json({ success: false, message: "Not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
     }
 
     const result = await deleteAvatarService(
       req.session.user.id,
-      req.session.user.avatar
+      req.session.user.avatar,
     );
 
     if (result.success) {
-      req.session.user.avatar = "";  
+      req.session.user.avatar = "";
     }
 
     return res.json(result);
@@ -163,24 +158,23 @@ export const deleteAvatar = async (req, res) => {
 
 export const addressPageLoad = async (req, res) => {
   try {
-
-
     if (!req.session.user) return res.redirect("/login");
     const userId = req.session.user.id || req.session.user._id;
 
-    const cart=await getCartCount(userId)
-    return res.render("Users/address", { user: req.session.user,cart,data:[],price:0 });
+    const cart = await getCartCount(userId);
+    return res.render("Users/address", {
+      user: req.session.user,
+      cart,
+      data: [],
+      price: 0,
+    });
   } catch (err) {
     return res.redirect("/login");
   }
 };
 
-
-
 export const profileEditEmailLoad = async (req, res) => {
   try {
-    
-    
     if (!req.session.user) return res.redirect("/login");
     return res.render("Users/profileEditEmail", { user: req.session.user });
   } catch (err) {
@@ -189,47 +183,39 @@ export const profileEditEmailLoad = async (req, res) => {
 };
 
 export const emailChangeProfileController = async (req, res) => {
-  
-  
   try {
     const { newEmail, confirmEmail } = req.body;
 
     if (!newEmail || !confirmEmail) {
-      return res.send('All fields required');
+      return res.send("All fields required");
     }
 
     if (newEmail !== confirmEmail) {
-      return res.send('Emails do not match');
+      return res.send("Emails do not match");
     }
 
-    req.session.tempEmail = newEmail; 
+    req.session.tempEmail = newEmail;
     req.session.otpContext = "CHANGE_EMAIL";
-
 
     await generateAndSendOtp(req, newEmail);
 
-    return res.redirect('/otp');
-
+    return res.redirect("/otp");
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };
 
-export const changePasswordLoad= async(req,res)=>{
-
+export const changePasswordLoad = async (req, res) => {
   try {
-    if(!req.session.user){
-      return res.redirect("/login")
+    if (!req.session.user) {
+      return res.redirect("/login");
     }
     return res.render("Users/changePassword");
-    
   } catch (error) {
-    return res.status(500).send("server error")
-    
+    return res.status(500).send("server error");
   }
-
-}
+};
 
 export const changePasswordController = async (req, res) => {
   try {
@@ -251,13 +237,13 @@ export const changePasswordController = async (req, res) => {
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!isMatch) {
-  req.session.flashMessage = { 
-    type: "error", 
-    text: "Current password is incorrect!" 
-  };
-  req.session.save(() => res.redirect("/profile"));
-  return; 
-}
+      req.session.flashMessage = {
+        type: "error",
+        text: "Current password is incorrect!",
+      };
+      req.session.save(() => res.redirect("/profile"));
+      return;
+    }
 
     // check new password match
     if (newPassword !== confirmPassword) {
@@ -267,43 +253,35 @@ export const changePasswordController = async (req, res) => {
     //  hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    
-user.password = hashedPassword;
-await user.save();
-req.session.flashMessage = { type: "success", text: "Password changed successfully!" };
+    user.password = hashedPassword;
+    await user.save();
+    req.session.flashMessage = {
+      type: "success",
+      text: "Password changed successfully!",
+    };
 
-
-
-
-req.session.save(() => {
-  return res.redirect("/profile");
-});
-
+    req.session.save(() => {
+      return res.redirect("/profile");
+    });
   } catch (error) {
     console.error(error);
     return res.redirect("/profile");
   }
 };
 
-
-
-
-
-
 const handleError = (res, error) => {
-  console.error('[Address Controller]', error.message);
+  console.error("[Address Controller]", error.message);
   const status = error.statusCode || 500;
-  const message = error.statusCode ? error.message : 'Internal server error.';
+  const message = error.statusCode ? error.message : "Internal server error.";
   return res.status(status).json({ message });
 };
 
 export const getAddressesController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  
-    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const userId = req.session.user?.id;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const addresses = await getAllAddressesService(userId);
-    
-    
+
     return res.status(200).json({ addresses });
   } catch (error) {
     return handleError(res, error);
@@ -312,10 +290,16 @@ export const getAddressesController = async (req, res) => {
 
 export const addressAddController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  
-    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const userId = req.session.user?.id;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const newAddress = await addAddressService(userId, req.body);
-    return res.status(201).json({ success: true, message: 'Address added successfully.', address: newAddress });
+    return res
+      .status(201)
+      .json({
+        success: true,
+        message: "Address added successfully.",
+        address: newAddress,
+      });
   } catch (error) {
     return handleError(res, error);
   }
@@ -323,11 +307,13 @@ export const addressAddController = async (req, res) => {
 
 export const addressEditController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  
-    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const userId = req.session.user?.id;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const { id } = req.params;
     const updated = await editAddressService(userId, id, req.body);
-    return res.status(200).json({ message: 'Address updated successfully.', address: updated });
+    return res
+      .status(200)
+      .json({ message: "Address updated successfully.", address: updated });
   } catch (error) {
     return handleError(res, error);
   }
@@ -335,11 +321,16 @@ export const addressEditController = async (req, res) => {
 
 export const addressDeleteController = async (req, res) => {
   try {
-    const userId = req.session.user?.id;  
-    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+    const userId = req.session.user?.id;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const { id } = req.params;
     const result = await deleteAddressService(userId, id);
-    return res.status(200).json({ message: 'Address removed successfully.', deletedId: result.deletedId });
+    return res
+      .status(200)
+      .json({
+        message: "Address removed successfully.",
+        deletedId: result.deletedId,
+      });
   } catch (error) {
     return handleError(res, error);
   }
@@ -347,16 +338,19 @@ export const addressDeleteController = async (req, res) => {
 
 export const addressSetDefaultController = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id; 
-    if (!userId) return res.status(401).json({ success: false, message: 'Not authenticated' });
+    const userId = req.session.user?.id || req.session.user?._id;
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
 
     const { id } = req.params;
     const updated = await setDefaultAddressService(userId, id);
 
-    return res.status(200).json({ 
-      success: true,                        
-      message: 'Default address updated.', 
-      address: updated                      
+    return res.status(200).json({
+      success: true,
+      message: "Default address updated.",
+      address: updated,
     });
   } catch (error) {
     return handleError(res, error);
