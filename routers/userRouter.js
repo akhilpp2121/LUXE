@@ -17,7 +17,7 @@ import {
   resetPasswordLoad, resetPassword,googleCallback,
   logoutUserController,
   productListingLoad,
-  productDetailLoad
+  productDetailLoad,getProductVariants
 } from "../controller/userController.js";
 
 import {
@@ -35,6 +35,7 @@ import { moveToCart, updateWishlist, wishlistPageLoad ,removeWishlistItem} from 
 import { cartAdd } from "../controller/cartController.js";
 import { walletPageLoad } from "../controller/walletController.js";
 import { referalPageLoad,referalLinkGenerator } from "../controller/userReferalController.js";
+
 
 
 
@@ -94,6 +95,7 @@ router.get('/logout',logoutUserController);
 router.get("/product-listing",isUserAuthenticated,attachCart, productListingLoad);
 router.get("/product-details/:productId", isUserAuthenticated, attachCart, productDetailLoad);
 
+router.get("/product/:productId/variants", isUserAuthenticated, getProductVariants);
 
 
 router.get('/wishlist',isUserAuthenticated,wishlistPageLoad);
@@ -106,6 +108,7 @@ router.post('/wishlist/remove',isUserAuthenticated, removeWishlistItem);
 router.get('/wallet',isUserAuthenticated,walletPageLoad);
 router.get('/referal',isUserAuthenticated,referalPageLoad);
 router.post('/profile/referal-link',isUserAuthenticated,referalLinkGenerator);
+
 
 
 

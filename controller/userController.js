@@ -1,5 +1,3 @@
-
-
 import {
   userLoginLogic,
   resetPasswordService,
@@ -8,10 +6,14 @@ import {
   handleOtpVerifyService,
   canLoadResetPassword,
   resendOtpService,
-  findUserBlocked
+  findUserBlocked,
 } from "../service/userService.js";
 import { variantDataLoad } from "../service/productsService.js";
-import { getHomePageData,getProductDetailData } from "../service/userProductService.js";
+import variantModel from "../model/variantModel.js";
+import {
+  getHomePageData,
+  getProductDetailData,
+} from "../service/userProductService.js";
 
 export const userLandingLoad = (req, res) => {
   if (req.session.user) return res.redirect("/homePage");
@@ -35,16 +37,10 @@ export const userForgotPasswordLoad = (req, res) => {
 };
 
 export const otpPageLoad = (req, res) => {
-  
-  
-  
   const email = req.session.email || req.session.tempEmail;
   if (!email) return res.redirect("/login");
   return res.render("Users/otpPage", { email });
 };
-
-
-
 
 export const homeLoad = async (req, res) => {
   try {
@@ -56,7 +52,10 @@ export const homeLoad = async (req, res) => {
     const isBlockedUser = await findUserBlocked(userId);
     if (isBlockedUser) {
       req.session.user = null;
-      req.session.flashMessage = { type: "error", message: "Your account has been blocked." };
+      req.session.flashMessage = {
+        type: "error",
+        message: "Your account has been blocked.",
+      };
       return res.redirect("/login");
     }
 
@@ -72,7 +71,6 @@ export const homeLoad = async (req, res) => {
       product: products,
       searchQuery,
     });
-
   } catch (error) {
     console.error("Home page load error:", error);
     return res.redirect("/login");
@@ -82,18 +80,31 @@ export const homeLoad = async (req, res) => {
 export const registerController = async (req, res) => {
   try {
     const { fullName, email, phoneNumber, password, referralCode } = req.body;
-    console.log(email,password);
-    
-    const result = await registerPreCheckService(req, fullName, email, password, phoneNumber, referralCode);
+    console.log(email, password);
+
+    const result = await registerPreCheckService(
+      req,
+      fullName,
+      email,
+      password,
+      phoneNumber,
+      referralCode,
+    );
 
     if (!result.success) {
-      return res.render("Users/signUp", { message: result.message, referralToken: referralCode || "" });
+      return res.render("Users/signUp", {
+        message: result.message,
+        referralToken: referralCode || "",
+      });
     }
 
     return res.redirect(result.redirect);
   } catch (err) {
     console.error("registerController error:", err);
-    return res.render("Users/signUp", { message: "Server error. Please try again.", referralToken: req.body.referralCode || "" });
+    return res.render("Users/signUp", {
+      message: "Server error. Please try again.",
+      referralToken: req.body.referralCode || "",
+    });
   }
 };
 
@@ -102,7 +113,9 @@ export const loginController = async (req, res) => {
     const result = await userLoginLogic(req, req.body.email, req.body.password);
 
     if (!result.success) {
-      return res.status(401).json({ success: false, message: result.message, field: result.field });
+      return res
+        .status(401)
+        .json({ success: false, message: result.message, field: result.field });
     }
 
     return res.json({ success: true, redirect: "/homePage" });
@@ -112,21 +125,19 @@ export const loginController = async (req, res) => {
   }
 };
 
-
 export async function googleCallback(req, res) {
   try {
     const user = req.user;
 
     req.session.user = {
-      id:          user._id,
-      fullName:    user.fullName,
-      email:       user.email,
-      avatar:      user.avatar,
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      avatar: user.avatar,
       phoneNumber: user.phoneNumber || "",
     };
 
     return res.redirect("/homePage");
-
   } catch (err) {
     console.error("googleCallback error:", err);
     return res.redirect("/login");
@@ -134,11 +145,7 @@ export async function googleCallback(req, res) {
 }
 
 export const verifyEmailController = async (req, res) => {
- 
-  
   try {
-    
-    
     const result = await verifyEmailService(req, req.body.email);
     return res.status(result.success ? 200 : 400).json(result);
   } catch (err) {
@@ -148,13 +155,9 @@ export const verifyEmailController = async (req, res) => {
 };
 
 export const verifyOtpController = async (req, res) => {
-  try { 
-  
-  
+  try {
     const result = await handleOtpVerifyService(req);
-    
-    
-    
+
     return res.json(result);
   } catch (err) {
     console.error("verifyOtpController error:", err);
@@ -164,13 +167,11 @@ export const verifyOtpController = async (req, res) => {
 
 export const resetPasswordLoad = async (req, res) => {
   try {
+    let user = req.session.user;
 
-    let user=req.session.user;
-
-    if(user){
-      return res.redirect('/homePage')
+    if (user) {
+      return res.redirect("/homePage");
     }
-
 
     const allowed = await canLoadResetPassword(req);
     if (!allowed) return res.redirect("/login");
@@ -195,10 +196,13 @@ export const resetPassword = async (req, res) => {
     const result = await resetPasswordService(email, password);
     if (!result.success) return res.json(result);
 
-    req.session.email      = null;
+    req.session.email = null;
     req.session.otpContext = null;
 
-    return res.json({ success: true, message: "Password updated successfully" });
+    return res.json({
+      success: true,
+      message: "Password updated successfully",
+    });
   } catch (err) {
     console.error("resetPassword error:", err);
     return res.json({ success: false, message: "Server error" });
@@ -227,7 +231,6 @@ export const logoutUserController = (req, res) => {
   });
 };
 
-
 // product
 
 import { getCartCount } from "../service/cartService.js";
@@ -239,11 +242,9 @@ export const productListingLoad = async (req, res) => {
     const data = await getFilteredProducts(req.query);
 
     const cartCount = await getCartCount(req.session.user?._id);
-    const userId= req.session.user._id||req.session.user.id;
+    const userId = req.session.user._id || req.session.user.id;
     const wishlistResult = await wishlistCheck(userId);
-    const wishlistedIds  = wishlistResult.success ? wishlistResult.data : [];
-
-
+    const wishlistedIds = wishlistResult.success ? wishlistResult.data : [];
 
     const buildPagination = (current, total) => {
       if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -257,7 +258,7 @@ export const productListingLoad = async (req, res) => {
       const result = [];
 
       for (let i = 0; i < sorted.length; i++) {
-        if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('…');
+        if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push("…");
         result.push(sorted[i]);
       }
 
@@ -282,13 +283,12 @@ export const productListingLoad = async (req, res) => {
 
       error: "",
     });
-
   } catch (err) {
     console.error("productListingLoad:", err);
 
     res.render("Users/productListingPage", {
       product: [],
-       cartCount: 0,   
+      cartCount: 0,
 
       searchValue: "",
       sortValue: "",
@@ -301,17 +301,11 @@ export const productListingLoad = async (req, res) => {
       totalProducts: 0,
       paginationPages: [1],
       productsPerPage: 9,
-      wishlistedIds:   [],  
+      wishlistedIds: [],
       error: "Server error",
     });
   }
 };
-
-
-
-
-
-
 
 export const productDetailLoad = async (req, res) => {
   const { productId } = req.params;
@@ -320,37 +314,69 @@ export const productDetailLoad = async (req, res) => {
     const data = await getProductDetailData(productId);
 
     if (!data.success && data.reason === "not_found") {
-      return res.status(404).render("Users/404", { message: "Product not found" });
+      return res
+        .status(404)
+        .render("Users/404", { message: "Product not found" });
     }
 
     if (!data.success && data.reason === "unavailable") {
       return res.render("Users/productDetailsPage", {
-        product: null, variants: [], allVariants: [],
-        defaultVariant: null, sizes: [], colors: [],
-        relatedProducts: [], unavailable: true, error: "",
+        product: null,
+        variants: [],
+        allVariants: [],
+        defaultVariant: null,
+        sizes: [],
+        colors: [],
+        relatedProducts: [],
+        unavailable: true,
+        error: "",
       });
     }
 
     return res.render("Users/productDetailsPage", {
-      product:         data.product,
-      variants:        data.variants,       
-      allVariants:     data.allVariants,   
-      defaultVariant:  data.defaultVariant,
-      sizes:           data.sizes,
-      colors:          data.colors,
+      product: data.product,
+      variants: data.variants,
+      allVariants: data.allVariants,
+      defaultVariant: data.defaultVariant,
+      sizes: data.sizes,
+      colors: data.colors,
       relatedProducts: data.relatedProducts,
-      unavailable:     false,
-      error:           "",
+      unavailable: false,
+      error: "",
     });
-
   } catch (err) {
     console.error("productDetailLoad error:", err);
     return res.status(500).render("Users/productDetailsPage", {
-      product: null, variants: [], allVariants: [],
-      defaultVariant: null, sizes: [], colors: [],
-      relatedProducts: [], unavailable: false,
+      product: null,
+      variants: [],
+      allVariants: [],
+      defaultVariant: null,
+      sizes: [],
+      colors: [],
+      relatedProducts: [],
+      unavailable: false,
       error: "Something went wrong. Please try again.",
     });
   }
 };
 
+export const getProductVariants = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const variants = await variantModel.find({
+      productId,
+      isActive: true,
+      stock: { $gt: 0 },
+    }).select("size color price discount stock images");
+
+    if (!variants.length) {
+      return res.json({ success: false, message: "No variants available" });
+    }
+
+    return res.json({ success: true, variants });
+  } catch (error) {
+    console.error("getProductVariants error:", error);
+    return res.json({ success: false, message: "Server error" });
+  }
+};

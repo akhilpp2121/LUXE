@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -327,6 +326,19 @@
         const latestReturn = (order.returnedAt && order.returnedAt.length > 0)
           ? order.returnedAt[order.returnedAt.length - 1]
           : null;
+
+        /* ── Approved-returned quantity per variant (money math must agree
+           with the refund service, which only deducts stock/value once a
+           return is Approved — Pending/Rejected returns don't change the
+           amount the customer still owes). ── */
+        const approvedReturnedQtyByVariant = {};
+        (order.returnedAt || []).forEach(function(r) {
+          if (r.variant && r.returnRequestStatus === 'Approved') {
+            const vid = r.variant.toString ? r.variant.toString() : String(r.variant);
+            approvedReturnedQtyByVariant[vid] =
+              (approvedReturnedQtyByVariant[vid] || 0) + (r.quantity || 1);
+          }
+        });
       %>
 
       <!-- ── Order Header ── -->
@@ -591,42 +603,62 @@
           </div>
           <div class="card-body">
             <%
-              const activeSubTotal = (order.orderItems || [])
-                .filter(function(item) {
-                  return !cancelledVariantIds.has(
-                    item.variantId.toString ? item.variantId.toString() : String(item.variantId)
-                  );
-                })
+              /* ── Original subtotal: ALL items at their charged line total.
+                 This is the basis the coupon was originally applied against,
+                 and it must stay fixed regardless of later cancellations or
+                 returns — otherwise the coupon proration ratio below drifts. ── */
+              const originalSubTotal = (order.orderItems || [])
                 .reduce(function(sum, item) { return sum + (item.totalPrice || 0); }, 0);
 
+              /* ── Active subtotal: exclude cancelled items entirely, and for
+                 items with an Approved return, subtract only the refunded
+                 quantity's value (partial returns leave the rest active).
+                 This mirrors updateReturnRequestService's unitValue math
+                 (item.totalPrice / item.quantity) so admin + refund agree. ── */
+              const activeSubTotal = (order.orderItems || [])
+                .reduce(function(sum, item) {
+                  const vid = item.variantId.toString ? item.variantId.toString() : String(item.variantId);
+                  if (cancelledVariantIds.has(vid)) return sum;
+                  const unitValue = item.totalPrice / item.quantity;
+                  const approvedQty = approvedReturnedQtyByVariant[vid] || 0;
+                  const remainingQty = Math.max(item.quantity - approvedQty, 0);
+                  return sum + (unitValue * remainingQty);
+                }, 0);
+
+              const hasActiveItems = activeSubTotal > 0;
+
+              /* ── Coupon: prorate against the SAME active/original ratio
+                 used everywhere else, and only when something is still active. ── */
               let proratedCoupon = 0;
-              if (order.couponApplied > 0 && order.orderItems.length > 0) {
-                const originalSubTotal = (order.orderItems || [])
-                  .reduce(function(sum, item) { return sum + (item.totalPrice || 0); }, 0);
-                const ratio = originalSubTotal > 0 ? activeSubTotal / originalSubTotal : 0;
-                proratedCoupon = order.couponApplied * ratio;
-              }
+if (hasActiveItems && order.couponApplied > 0) {
+  proratedCoupon = Math.min(order.couponApplied, activeSubTotal);
+}
 
-              /* ── GST: recalculated live on the active items subtotal ──
-                 (kept in sync with the checkout page's 5% convention, and
-                 recomputed here rather than trusting order.gstAmount so it
-                 stays correct even after cancellations/returns adjust the
-                 active subtotal above) */
+              /* ── GST: computed on the TAXABLE value (active subtotal minus
+                 its share of the coupon) — this is the same basis
+                 updateReturnRequestService uses for itemGst, so a refund for
+                 one item always matches what that item was contributing to
+                 this Grand Total. Previously this taxed the pre-coupon
+                 active subtotal, which disagreed with the refund service. ── */
               const GST_RATE_VIEW = 0.05;
-              const gstAmountView = Math.round(activeSubTotal * GST_RATE_VIEW);
+              const taxableValueView = Math.max(activeSubTotal - proratedCoupon, 0);
+              const gstAmountView = Math.round(taxableValueView * GST_RATE_VIEW);
 
-              const finalTotal = activeSubTotal + (order.shippingCharge || 0) - proratedCoupon + gstAmountView;
+              /* ── Shipping: recomputed live from the active subtotal against
+                 the ₹999 free-shipping threshold, never charged when the
+                 active cart is empty (fully cancelled/returned). ── */
+              const SHIPPING_THRESHOLD_VIEW = 999;
+              const SHIPPING_FEE_VIEW       = 99;
+              const shippingChargeView = hasActiveItems
+                ? (activeSubTotal >= SHIPPING_THRESHOLD_VIEW ? 0 : SHIPPING_FEE_VIEW)
+                : 0;
+
+              const finalTotal = Math.max(0, taxableValueView + gstAmountView + shippingChargeView);
             %>
             <div class="info-row">
               <span class="label">Subtotal (Active Items)</span>
               <span class="value">₹<%= activeSubTotal.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}) %></span>
             </div>
-            <% if (order.shippingCharge > 0) { %>
-            <div class="info-row">
-              <span class="label">Shipping Charge</span>
-              <span class="value">₹<%= order.shippingCharge.toLocaleString('en-IN') %></span>
-            </div>
-            <% } %>
 
             <% if (proratedCoupon > 0) { %>
             <div class="info-row">
@@ -642,7 +674,7 @@
             </div>
             <% } %>
 
-            <!-- ── GST row ── -->
+            <!-- ── GST row (now computed on the post-coupon taxable value) ── -->
             <div class="info-row">
               <span class="label">
                 GST
@@ -652,6 +684,18 @@
               </span>
               <span class="value">+ ₹<%= gstAmountView.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}) %></span>
             </div>
+
+            <% if (shippingChargeView > 0) { %>
+            <div class="info-row">
+              <span class="label">Shipping Charge</span>
+              <span class="value">₹<%= shippingChargeView.toLocaleString('en-IN') %></span>
+            </div>
+            <% } else { %>
+            <div class="info-row">
+              <span class="label">Shipping Charge</span>
+              <span class="value" style="color:#4ade80;">FREE</span>
+            </div>
+            <% } %>
 
             <div class="info-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
               <span class="label" style="font-weight:700;color:var(--text);">Grand Total</span>

@@ -231,15 +231,26 @@
     var cancelled = cancelledVIds[variantId] || !!item.isCancelled || itemStatus === 'cancelled';
 
     // Calculate total quantity of this variant already returned/pending (exclude Rejected)
-    var activeReturnedQty = 0;
-    var returnStatus = null;
-    var adminRemark = null;
-    var lastRet = null;
+    // and track whether ANY return request (of any status) exists for this variant.
+    var activeReturnedQty  = 0;
+    // Quantity actually refunded (Approved only) — this is the basis for money
+    // math (subtotal/GST/total), since a Pending return hasn't been refunded
+    // yet and a Rejected one was never refunded at all. This must match
+    // updateReturnRequestService, which only deducts value on Approval.
+    var approvedReturnedQty = 0;
+    var returnStatus       = null;
+    var adminRemark        = null;
+    var lastRet             = null;
+    var hasReturnRequest   = false;
 
     returnedAt.forEach(function(r) {
       if (r.variant && r.variant.toString() === variantId) {
+        hasReturnRequest = true;
         if (r.returnRequestStatus !== 'Rejected') {
           activeReturnedQty += (r.quantity || 1);
+        }
+        if (r.returnRequestStatus === 'Approved') {
+          approvedReturnedQty += (r.quantity || 1);
         }
         lastRet = r;
       }
@@ -273,8 +284,12 @@
     // cancel only if item is still pending
     var canCancelItem = !cancelled && !returned && itemStatus === 'pending';
 
-    // return only if item is delivered and has remaining quantity
-    var canReturnItem = !cancelled && remainingReturnableQty > 0 && itemStatus === 'delivered';
+    // return only if item is delivered, has remaining quantity, AND no return
+    // request (pending / approved / rejected) has ever been made for it.
+    // Previously a Rejected request left remainingReturnableQty at full
+    // quantity, so the Return button reappeared after rejection — fixed
+    // by gating on hasReturnRequest as well.
+    var canReturnItem = !cancelled && !hasReturnRequest && remainingReturnableQty > 0 && itemStatus === 'delivered';
 
     return {
       variantId: variantId,
@@ -284,6 +299,8 @@
       cancelStatus: cancelStatus,
       returned: returned,
       returnStatus: returnStatus,
+      hasReturnRequest: hasReturnRequest,
+      approvedReturnedQty: approvedReturnedQty,
       adminRemark: adminRemark,
       itemStatus: itemStatus,
       canCancelItem: canCancelItem,
@@ -303,18 +320,52 @@
     if (!hasPending) canCancelAll = false;
   }
 
-  // Active subtotal (exclude cancelled items)
+  // ── Original subtotal: ALL items at their charged line total. This is the
+  // fixed basis the coupon was originally applied against — it must NOT
+  // change as items get cancelled/returned, or the coupon proration ratio
+  // below would drift with every cancellation. ──
+  var originalSubTotal = 0;
+  for (var i = 0; i < orderItems.length; i++) {
+    originalSubTotal += (orderItems[i].totalPrice || 0);
+  }
+
+  // ── Active subtotal: exclude cancelled items entirely; for items with an
+  // Approved return, subtract only the refunded quantity's value so a
+  // partial return correctly leaves the remaining quantity "active". This
+  // uses the SAME per-unit math (totalPrice / quantity) as
+  // updateReturnRequestService's unitValue, so this total and any refund
+  // issued for the item always agree. ──
   var activeSubTotal = 0;
   for (var i = 0; i < orderItems.length; i++) {
     var ri = resolveItem(orderItems[i]);
-    if (!ri.cancelled) activeSubTotal += (orderItems[i].totalPrice || 0);
+    if (ri.cancelled) continue;
+    var unitValue = orderItems[i].totalPrice / orderItems[i].quantity;
+    var remainingQty = Math.max(orderItems[i].quantity - ri.approvedReturnedQty, 0);
+    activeSubTotal += unitValue * remainingQty;
   }
 
-  // ---- BUGFIX: empty cart / fully-cancelled cart must not carry shipping
-  // or coupon discount into the total — otherwise the total can go negative.
-  // hasActiveItems is true only when there is at least one item AND that
-  // item contributes a positive amount to the subtotal.
+  // ---- BUGFIX: empty cart / fully-cancelled-or-returned cart must not carry
+  // shipping or coupon discount into the total — otherwise the total can go
+  // negative. hasActiveItems is true only when at least one item still
+  // contributes a positive amount to the subtotal.
   var hasActiveItems = orderItems.length > 0 && activeSubTotal > 0;
+
+
+  var couponDiscount = 0;
+if (hasActiveItems && ord.couponApplied > 0) {
+  couponDiscount = Math.min(ord.couponApplied, activeSubTotal);
+}
+
+  
+  
+  // ---- BUGFIX: GST must be computed on the TAXABLE value (active subtotal
+  // minus its share of the coupon), matching updateReturnRequestService's
+  // itemGst basis. Previously GST was taxed on the pre-coupon active
+  // subtotal, which meant a per-item refund never quite matched what that
+  // item had contributed to this order's Grand Total.
+  var GST_RATE = 0.05;
+  var taxableValue = Math.max(activeSubTotal - couponDiscount, 0);
+  var gstAmount     = Math.round(taxableValue * GST_RATE);
 
   // ---- BUGFIX: shipping must be recomputed from the live active subtotal
   // against the free-shipping threshold (₹999), not pulled straight from
@@ -326,11 +377,7 @@
     ? (activeSubTotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE)
     : 0;
 
-  // Coupon discount is also skipped entirely when there are no active items.
-  var couponDiscount = hasActiveItems ? (ord.couponApplied || 0) : 0;
-
-  var gstAmount      = Math.round(activeSubTotal * 0.05);
-  var activeTotalRaw = activeSubTotal + gstAmount + shippingCharge - couponDiscount;
+  var activeTotalRaw = taxableValue + gstAmount + shippingCharge;
   // Final safety net: total should never display as negative.
   var activeTotal    = +(Math.max(0, activeTotalRaw)).toFixed(2);
 
@@ -577,7 +624,7 @@
                       </span>
                     <% } %>
 
-                    <% if (r.returned) { %>
+                    <% if (r.hasReturnRequest) { %>
                       <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] uppercase tracking-widest rounded font-bold">
                         <span class="material-symbols-outlined text-xs">undo</span>
                         Return <%= r.returnStatus %>
@@ -591,7 +638,7 @@
                   <p class="font-mono text-[10px] text-on-surface-variant/70 uppercase tracking-widest mt-1">
                     Status: <span class="text-primary"><%= r.itemStatus.replace(/_/g, ' ') %></span>
                   </p>
-                  <% if (r.returned && r.adminRemark) { %>
+                  <% if (r.hasReturnRequest && r.adminRemark) { %>
                     <p class="text-xs text-error mt-2 font-medium">
                       Return Remark: <span class="text-on-surface-variant"><%= r.adminRemark %></span>
                     </p>
@@ -625,6 +672,12 @@
                 </button>
               <% } %>
 
+              <!--
+                Return button only shows when canReturnItem is true, which now
+                requires hasReturnRequest === false. Once a request exists
+                (Pending, Approved, or Rejected) the button is gone for good
+                and one of the status badges below is shown instead.
+              -->
               <% if (r.canReturnItem) { %>
                 <button data-return-btn
                   onclick="openReturnModal('<%= ord._id %>', '<%= r.variantId %>', '<%= item.productName %>', <%= r.remainingReturnableQty %>)"
@@ -634,7 +687,7 @@
                 </button>
               <% } %>
 
-              <% if (r.returned) { %>
+              <% if (r.hasReturnRequest) { %>
                 <% if (r.returnStatus === 'Pending') { %>
                   <span class="btn-atelier btn-ghost-da text-[10px] py-2 px-3 opacity-50 cursor-not-allowed">
                     <span class="material-symbols-outlined text-sm">hourglass_top</span>
@@ -653,7 +706,7 @@
                 <% } %>
               <% } %>
 
-              <% if (!r.cancelled && !r.returned && (r.itemStatus === 'shipped' || r.itemStatus === 'out_for_delivery')) { %>
+              <% if (!r.cancelled && !r.hasReturnRequest && (r.itemStatus === 'shipped' || r.itemStatus === 'out_for_delivery')) { %>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary/5 border border-primary/20 text-primary text-[9px] uppercase tracking-widest font-bold">
                   <span class="material-symbols-outlined text-xs">local_shipping</span>
                   In Transit
@@ -785,6 +838,13 @@
               <span class="text-white font-medium" id="displaySubtotal">&#8377;<%= activeSubTotal.toFixed(2) %></span>
             </div>
 
+            <% if (couponDiscount > 0) { %>
+              <div class="flex justify-between text-sm">
+                <span class="text-on-surface-variant">Coupon</span>
+                <span class="text-primary font-medium" id="displayCoupon">&#8722;&#8377;<%= couponDiscount.toFixed(2) %></span>
+              </div>
+            <% } %>
+
             <div class="flex justify-between text-sm">
               <span class="text-on-surface-variant flex items-center gap-1.5">
                 GST
@@ -799,17 +859,10 @@
                 <%= shippingCharge === 0 ? 'FREE' : '&#8377;' + shippingCharge.toFixed(2) %>
               </span>
             </div>
-
-            <% if (couponDiscount > 0) { %>
-              <div class="flex justify-between text-sm">
-                <span class="text-on-surface-variant">Coupon</span>
-                <span class="text-primary font-medium">&#8722;&#8377;<%= couponDiscount.toFixed(2) %></span>
-              </div>
-            <% } %>
           </div>
 
           <div class="border-t border-outline-variant/20"></div>
-          <p class="text-[10px] text-on-surface-variant/40 tracking-wide">GST of 5% applied on taxable subtotal (clothing) · Free shipping over &#8377;999</p>
+          <p class="text-[10px] text-on-surface-variant/40 tracking-wide">GST of 5% applied on the coupon-discounted taxable subtotal · Free shipping over &#8377;999</p>
 
           <div class="flex justify-between items-end">
             <span class="text-[10px] uppercase tracking-[.15em] font-bold text-white">Grand Total</span>
@@ -817,7 +870,7 @@
           </div>
 
           <% if (cancelledVIdCount > 0) { %>
-            <p class="text-[10px] text-on-surface-variant/50 text-right -mt-2">Cancelled items excluded</p>
+            <p class="text-[10px] text-on-surface-variant/50 text-right -mt-2">Cancelled / returned items excluded</p>
           <% } %>
         </div>
       </section>
@@ -1010,30 +1063,39 @@
   var SHIPPING_FEE       = 99;
   var COUPON             = <%= ord.couponApplied || 0 %>;
 
+  // ── Same fix applied here as server-side: originalSubTotal (ALL rows,
+  // cancelled or not) is the fixed coupon basis; activeSubTotal (only
+  // non-cancelled rows) is what the coupon/GST/shipping/total are actually
+  // computed against. This keeps the live "cancel item" preview in sync
+  // with the values the server will render on reload. Note: a Return
+  // action doesn't update these rows live (the page reloads after a
+  // successful return), so this function only needs to react to Cancel. ──
   function recalcTotal() {
-    var sub = 0;
+    var sub         = 0; // active (non-cancelled) subtotal
+    var originalSub = 0; // ALL items' subtotal — fixed coupon basis
     var rows = document.querySelectorAll('#itemList .item-row');
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i].dataset.cancelled !== 'true') sub += parseFloat(rows[i].dataset.price || 0);
+      var price = parseFloat(rows[i].dataset.price || 0);
+      originalSub += price;
+      if (rows[i].dataset.cancelled !== 'true') sub += price;
     }
 
-    // BUGFIX: if there's nothing left in the active cart (every item
-    // cancelled, or no items at all), shipping and coupon must not apply,
-    // and the total must never render as negative. Shipping below the
-    // ₹999 threshold is ₹99; at or above it, shipping is free.
     var hasActive  = sub > 0;
-    var gst        = Math.round(sub * GST_RATE);
+     var couponUsed = hasActive ? Math.min(COUPON, sub) : 0;
+    var taxable    = Math.max(sub - couponUsed, 0);
+    var gst        = Math.round(taxable * GST_RATE);
     var shipping   = hasActive ? (sub >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE) : 0;
-    var couponUsed = hasActive ? COUPON : 0;
-    var total      = Math.max(0, +(sub + gst + shipping - couponUsed).toFixed(2));
+    var total      = Math.max(0, +(taxable + gst + shipping).toFixed(2));
 
     var subEl      = document.getElementById('displaySubtotal');
+    var couponEl   = document.getElementById('displayCoupon');
     var gstEl      = document.getElementById('displayGst');
     var shippingEl = document.getElementById('displayShipping');
     var totalEl    = document.getElementById('displayTotal');
 
-    if (subEl)      subEl.textContent = '₹' + sub.toFixed(2);
-    if (gstEl)      gstEl.textContent = '+ ₹' + gst.toFixed(2);
+    if (subEl)    subEl.textContent = '₹' + sub.toFixed(2);
+    if (couponEl) couponEl.textContent = '−₹' + couponUsed.toFixed(2);
+    if (gstEl)    gstEl.textContent = '+ ₹' + gst.toFixed(2);
     if (shippingEl) {
       shippingEl.className   = shipping === 0 ? 'text-primary font-bold' : 'text-white font-medium';
       shippingEl.textContent = shipping === 0 ? 'FREE' : '₹' + shipping.toFixed(2);

@@ -54,14 +54,14 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
       subTotal += totalPrice;
 
       orderItems.push({
-        variantId:   variant._id,
+        variantId: variant._id,
         productName: product.name,
         variantName:
           variant.name ||
           `${variant.color || ""} ${variant.size || ""}`.trim() ||
           "Default Variant",
-        price:      finalPrice,
-        quantity:   qty,
+        price: finalPrice,
+        quantity: qty,
         totalPrice
       });
     }
@@ -69,9 +69,9 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
     if (!orderItems.length) throw new Error("No valid items in cart");
 
     // 4. Pricing
-    const GST       = 0.05;
+    const GST = 0.05;
     const gstAmount = Math.round(subTotal * GST);
-    const shipping  = subTotal >= 999 ? 0 : 99;
+    const shipping = subTotal >= 999 ? 0 : 99;
 
     // ── FIX: validate and apply coupon discount ──
     let appliedDiscount = 0;
@@ -106,21 +106,21 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
       userId,
       shippingAddressId: address._id,
       shippingAddress: {
-        username:       address.fullName,
-        phone_number:   address.phoneNumber,
+        username: address.fullName,
+        phone_number: address.phoneNumber,
         street_address: `${address.houseNumber}, ${address.streetName}`,
-        city:           address.city,
-        state:          address.state,
-        postal_code:    address.pincode,
-        country:        address.country
+        city: address.city,
+        state: address.state,
+        postal_code: address.pincode,
+        country: address.country
       },
       orderItems,
       subTotal,
       gstAmount,
       shippingCharge: shipping,
-      couponApplied:  appliedDiscount,   // ← was missing entirely before
-      totalAmount:    grandTotal,
-      orderMethod:    paymentMethod
+      couponApplied: appliedDiscount,   // ← was missing entirely before
+      totalAmount: grandTotal,
+      orderMethod: paymentMethod
     }], { session });
 
     // 7. Stock update
@@ -156,10 +156,10 @@ export const placeOrderLogic = async (userId, addressId, paymentMethod, couponCo
     session.endSession();
 
     return {
-      success:   true,
-      orderId:   order._id,
+      success: true,
+      orderId: order._id,
       orderCode: order.orderCode,
-      message:   "Order placed successfully"
+      message: "Order placed successfully"
     };
 
   } catch (error) {
@@ -182,7 +182,7 @@ export const getAvailableCoupon = async (orderTotal) => {
     });
   } catch (error) {
     console.log(error);
-    return []; 
+    return [];
   }
 };
 
@@ -212,7 +212,7 @@ export const applyCoupon = async (code, orderTotal) => {
     discount = coupon.discountValue;
   }
 
-  discount = Math.min(discount, orderTotal); 
+  discount = Math.min(discount, orderTotal);
 
   return {
     success: true,

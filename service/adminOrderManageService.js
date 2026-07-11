@@ -5,8 +5,7 @@ import variantModel from "../model/variantModel.js";
 import { creditWallet } from "../service/walletService.js";
 import mongoose from "mongoose";
 
-
-const LIMIT=10;
+const LIMIT = 10;
 const buildFilter = (status, search) => {
   const filter = {};
 
@@ -14,8 +13,6 @@ const buildFilter = (status, search) => {
   if (status === "processing") filter.deliveryStatus = "pending";
   if (status === "shipped") filter.deliveryStatus = "shipped";
   if (status === "delivered") filter.deliveryStatus = "delivered";
-
- 
 
   //  Search filter
   if (search) {
@@ -33,18 +30,13 @@ const buildFilter = (status, search) => {
   return filter;
 };
 
-
-
 export const orderManagementService = async ({
   page = 1,
   status = "all",
   search = "",
-  
- 
 }) => {
   const currentPage = Number(page) || 1;
   const filter = buildFilter(status, search);
-  
 
   const orders = await orderModel
     .find(filter)
@@ -68,8 +60,6 @@ export const orderManagementService = async ({
     { $group: { _id: null, total: { $sum: "$totalAmount" } } },
   ]);
 
-
-
   return {
     orders,
     totalOrders,
@@ -85,41 +75,41 @@ export const orderManagementService = async ({
   };
 };
 
-
-
-
-
-
-
-
 export const getOrderDetailsService = async (orderId) => {
-  if (!mongoose.Types.ObjectId.isValid(orderId)) return { success: false, message: "Invalid ID" };
+  if (!mongoose.Types.ObjectId.isValid(orderId))
+    return { success: false, message: "Invalid ID" };
 
   const order = await orderModel.findById(orderId);
-  return order ? { success: true, order } : { success: false, message: "Order not found" };
+  return order
+    ? { success: true, order }
+    : { success: false, message: "Order not found" };
 };
-
 
 const STATUS_RANK = {
-  pending:          0,
-  shipped:          1,
+  pending: 0,
+  shipped: 1,
   out_for_delivery: 2,
-  delivered:        3,
+  delivered: 3,
 };
 
-const VALID_ADMIN_STATUSES = ["pending", "shipped", "out_for_delivery", "delivered"];
+const VALID_ADMIN_STATUSES = [
+  "pending",
+  "shipped",
+  "out_for_delivery",
+  "delivered",
+];
 
 const deriveOrderStatus = (orderItems) => {
   const statuses = orderItems.map((item) => item.deliveryStatus || "pending");
 
   const activeStatuses = statuses.filter(
-    (s) => s !== "cancelled" && s !== "returned"
+    (s) => s !== "cancelled" && s !== "returned",
   );
 
   if (activeStatuses.length === 0) {
     return statuses.includes("returned")
-      ? { deliveryStatus: "returned",  orderStatus: "returned"   }
-      : { deliveryStatus: "cancelled", orderStatus: "cancelled"  };
+      ? { deliveryStatus: "returned", orderStatus: "returned" }
+      : { deliveryStatus: "cancelled", orderStatus: "cancelled" };
   }
 
   if (activeStatuses.every((s) => s === "delivered")) {
@@ -140,8 +130,6 @@ const deriveOrderStatus = (orderItems) => {
   return { deliveryStatus: "pending", orderStatus: "placed" };
 };
 
-  
-
 export const updateAllItemsStatusService = async (orderId, deliveryStatus) => {
   if (!mongoose.Types.ObjectId.isValid(orderId))
     return { success: false, message: "Invalid order ID" };
@@ -155,27 +143,34 @@ export const updateAllItemsStatusService = async (orderId, deliveryStatus) => {
   const newRank = STATUS_RANK[deliveryStatus];
 
   order.orderItems.forEach((item) => {
-    if (item.deliveryStatus === "cancelled" || item.deliveryStatus === "returned") return;
-
+    if (
+      item.deliveryStatus === "cancelled" ||
+      item.deliveryStatus === "returned"
+    )
+      return;
 
     item.deliveryStatus = deliveryStatus;
   });
 
-  const derived        = deriveOrderStatus(order.orderItems);
+  const derived = deriveOrderStatus(order.orderItems);
   order.deliveryStatus = derived.deliveryStatus;
-  order.orderStatus    = derived.orderStatus;
+  order.orderStatus = derived.orderStatus;
 
   await order.save();
 
   return {
-    success:        true,
+    success: true,
     deliveryStatus: order.deliveryStatus,
-    orderStatus:    order.orderStatus,
-    message:        "All items updated successfully",
+    orderStatus: order.orderStatus,
+    message: "All items updated successfully",
   };
 };
 
-export const updateOrderItemStatusService = async (orderId, variantId, deliveryStatus) => {
+export const updateOrderItemStatusService = async (
+  orderId,
+  variantId,
+  deliveryStatus,
+) => {
   if (!mongoose.Types.ObjectId.isValid(orderId))
     return { success: false, message: "Invalid order ID" };
 
@@ -189,7 +184,7 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
   if (!order) return { success: false, message: "Order not found" };
 
   const item = order.orderItems.find(
-    (i) => i.variantId.toString() === variantId.toString()
+    (i) => i.variantId.toString() === variantId.toString(),
   );
   if (!item) return { success: false, message: "Item not found in order" };
 
@@ -199,36 +194,30 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
   if (item.deliveryStatus === "returned")
     return { success: false, message: "Cannot update a returned item" };
 
-
   item.deliveryStatus = deliveryStatus;
 
-  const derived        = deriveOrderStatus(order.orderItems);
+  const derived = deriveOrderStatus(order.orderItems);
   order.deliveryStatus = derived.deliveryStatus;
-  order.orderStatus    = derived.orderStatus;
+  order.orderStatus = derived.orderStatus;
 
   await order.save();
 
   return {
-    success:        true,
-    itemStatus:     item.deliveryStatus,
+    success: true,
+    itemStatus: item.deliveryStatus,
     deliveryStatus: order.deliveryStatus,
-    orderStatus:    order.orderStatus,
-    message:        "Item status updated successfully",
+    orderStatus: order.orderStatus,
+    message: "Item status updated successfully",
   };
 };
-
-
-
-
 
 // export const updateReturnRequestService = async (
 //   orderId,
 //   action,
 //   variantId,
-//   adminRemark
+//   adminRemark,
 // ) => {
 //   try {
-//     // Basic validation
 //     if (!orderId || !action)
 //       return { success: false, message: "orderId & action required" };
 
@@ -239,6 +228,7 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
 //     if (!order) return { success: false, message: "Order not found" };
 
 //     const isPaid = ["paypal", "wallet", "cod"].includes(order.orderMethod);
+//     const GST_RATE = 0.05;
 
 //     if (!Array.isArray(order.returnedAt)) {
 //       order.returnedAt = [];
@@ -251,11 +241,16 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
 //     const pendingReturns = order.returnedAt.filter(
 //       (r) =>
 //         r.returnRequestStatus.toLowerCase() === "pending" &&
-//         (isAll || r.variant.toString() === variantId.toString())
+//         (isAll || r.variant.toString() === variantId.toString()),
 //     );
 
 //     if (!pendingReturns.length)
 //       return { success: true, message: "No pending return found" };
+
+//     const originalSubTotal = (order.orderItems || []).reduce(
+//       (sum, i) => sum + (i.totalPrice || 0),
+//       0,
+//     );
 
 //     for (const r of pendingReturns) {
 //       r.returnRequestStatus = action;
@@ -263,23 +258,36 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
 
 //       if (action === "Approved") {
 //         const item = order.orderItems.find(
-//           (i) => i.variantId.toString() === r.variant.toString()
+//           (i) => i.variantId.toString() === r.variant.toString(),
 //         );
 
 //         if (item) {
 //           const qty = r.quantity || item.quantity;
 
-//           // Stock restore
 //           await variantModel.updateOne(
 //             { _id: r.variant },
-//             { $inc: { stock: qty } }
+//             { $inc: { stock: qty } },
 //           );
 
-//           // Mark item as returned
 //           item.deliveryStatus = "returned";
 
-//           // Refund calculate
-//           totalRefund += item.price * qty;
+//           const itemLineValue = item.price * qty;
+
+//           let itemCouponShare = 0;
+//           if (order.couponApplied > 0 && originalSubTotal > 0) {
+//             const itemFullLineTotal = item.price * item.quantity;
+//             itemCouponShare =
+//               order.couponApplied *
+//               (itemFullLineTotal / originalSubTotal) *
+//               (qty / item.quantity);
+//           }
+
+//           const taxableValue = Math.round(
+//             Math.max(itemLineValue - itemCouponShare, 0),
+//           );
+//           const itemGst = Math.round(taxableValue * GST_RATE);
+
+//           totalRefund += taxableValue + itemGst;
 //         }
 //       }
 
@@ -294,12 +302,12 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
 
 //     await order.save();
 
-//     if (action === "Approved" && isPaid && totalRefund > 0 && (!order.couponApplied || order.couponApplied === 0)) {
+//     if (action === "Approved" && isPaid && totalRefund > 0) {
 //       await creditWallet(
 //         order.userId,
 //         totalRefund,
 //         `Refund for return in order #${order.orderCode}`,
-//         orderId
+//         orderId,
 //       );
 //     }
 
@@ -307,7 +315,7 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
 //       success: true,
 //       message:
 //         action === "Approved"
-//           ? `Return approved. ₹${totalRefund} refunded to wallet.`
+//           ? `Return approved. ₹${totalRefund.toFixed(2)} refunded to wallet.`
 //           : "Return request rejected",
 //     };
 //   } catch (error) {
@@ -316,11 +324,198 @@ export const updateOrderItemStatusService = async (orderId, variantId, deliveryS
 //   }
 // };
 
+// export const updateReturnRequestService = async (
+//   orderId,
+//   action,
+//   variantId,
+//   adminRemark,
+// ) => {
+//   try {
+//     if (!orderId || !action)
+//       return { success: false, message: "orderId & action required" };
+
+//     if (!["Approved", "Rejected"].includes(action))
+//       return { success: false, message: "Invalid action" };
+
+//     const order = await orderModel.findById(orderId);
+//     if (!order) return { success: false, message: "Order not found" };
+
+//     const isPaid = ["paypal", "wallet", "cod"].includes(order.orderMethod);
+//     const GST_RATE = 0.05;
+
+//     if (!Array.isArray(order.returnedAt)) {
+//       order.returnedAt = [];
+//     }
+
+//     let totalRefund = 0;
+//     const refundBreakdown = []; // for a clearer success message / UX
+
+//     const isAll = !variantId || variantId === "ALL";
+
+//     const pendingReturns = order.returnedAt.filter(
+//       (r) =>
+//         r.returnRequestStatus.toLowerCase() === "pending" &&
+//         (isAll || r.variant.toString() === variantId.toString()),
+//     );
+
+//     if (!pendingReturns.length)
+//       return { success: true, message: "No pending return found" };
+
+//     // Basis for all money math below must match how the order total/subtotal
+//     // was actually built — that's `totalPrice` per line, NOT `price` * qty.
+//     // `price` can be a pre-discount / MRP-style unit price that no longer
+//     // agrees with the discounted line total, which is what was causing
+//     // refunds to come out short (e.g. ₹3000 line refunding as ₹1500).
+//     const originalSubTotal = (order.orderItems || []).reduce(
+//       (sum, i) => sum + (i.totalPrice || 0),
+//       0,
+//     );
+
+//     for (const r of pendingReturns) {
+//       r.returnRequestStatus = action;
+//       r.adminRemark = adminRemark || "";
+
+//       if (action === "Approved") {
+//         const item = order.orderItems.find(
+//           (i) => i.variantId.toString() === r.variant.toString(),
+//         );
+
+//         if (item && item.quantity > 0) {
+//           const qty = r.quantity || item.quantity;
+
+//           await variantModel.updateOne(
+//             { _id: r.variant },
+//             { $inc: { stock: qty } },
+//           );
+
+//           item.deliveryStatus = "returned";
+
+//           // Per-unit value derived from the actual charged line total,
+//           // not the (possibly stale/discount-unaware) `price` field.
+//           const unitValue = item.totalPrice / item.quantity;
+//           const itemLineValue = unitValue * qty;
+
+//           let itemCouponShare = 0;
+//           if (order.couponApplied > 0 && originalSubTotal > 0) {
+//             // Same basis (totalPrice) used both for this item's full line
+//             // and for the subtotal denominator, so the proportional coupon
+//             // split is consistent.
+//             itemCouponShare =
+//               order.couponApplied *
+//               (item.totalPrice / originalSubTotal) *
+//               (qty / item.quantity);
+//           }
+
+//           const taxableValue = Math.max(itemLineValue - itemCouponShare, 0);
+//           const itemGst = taxableValue * GST_RATE;
+//           const itemRefund = taxableValue + itemGst;
+
+//           totalRefund += itemRefund;
+//           refundBreakdown.push({
+//             variant: r.variant.toString(),
+//             productName: item.productName,
+//             quantity: qty,
+//             refund: +itemRefund.toFixed(2),
+//           });
+//         }
+//       }
+//     }
+
+//     // Round once, at the end, on the summed total — rounding each line
+//     // separately and adding them up can drift a few paise off the true sum
+//     // when multiple items are returned together in one "Return All".
+//     totalRefund = +totalRefund.toFixed(2);
+
+//     if (action === "Approved") {
+//       const derived = deriveOrderStatus(order.orderItems);
+//       order.deliveryStatus = derived.deliveryStatus;
+//       order.orderStatus = derived.orderStatus;
+//     }
+
+//     await order.save();
+
+//     if (action === "Approved" && isPaid && totalRefund > 0) {
+//       await creditWallet(
+//         order.userId,
+//         totalRefund,
+//         `Refund for return in order #${order.orderCode}`,
+//         orderId,
+//       );
+//     }
+
+//     return {
+//       success: true,
+//       message:
+//         action === "Approved"
+//           ? `Return approved. ₹${totalRefund.toFixed(2)} refunded to wallet${
+//               refundBreakdown.length > 1
+//                 ? ` (${refundBreakdown.length} items)`
+//                 : ""
+//             }.`
+//           : "Return request rejected",
+//       refundBreakdown: action === "Approved" ? refundBreakdown : undefined,
+//       totalRefund: action === "Approved" ? totalRefund : undefined,
+//     };
+//   } catch (error) {
+//     console.error("updateReturnRequestService error:", error);
+//     return { success: false, message: "Server error" };
+//   }
+// };
+
+const GST_RATE = 0.05;
+const SHIPPING_THRESHOLD = 999;
+const SHIPPING_FEE = 99;
+
+function calcOrderTotal(
+  orderItems,
+  couponApplied,
+  cancelledVariantIds,
+  approvedQtyByVariant,
+) {
+  let activeSubTotal = 0;
+
+  for (const item of orderItems) {
+    const vid = item.variantId.toString();
+    if (cancelledVariantIds.has(vid)) continue;
+
+    // ✅ Safe division
+    const unitValue =
+      item.quantity > 0 ? item.totalPrice / item.quantity : 0;
+
+    // ✅ FIX: clamp approvedQty to item.quantity
+    const approvedQty = Math.min(
+      approvedQtyByVariant[vid] ?? 0,
+      item.quantity,
+    );
+
+    const remainingQty = Math.max(item.quantity - approvedQty, 0);
+
+    activeSubTotal += unitValue * remainingQty;
+  }
+
+  const hasActiveItems = activeSubTotal > 0;
+
+  const coupon = hasActiveItems
+    ? Math.min(couponApplied || 0, activeSubTotal)
+    : 0;
+
+  const taxable = Math.max(activeSubTotal - coupon, 0);
+  const gst = Math.round(taxable * GST_RATE);
+
+  const shipping = hasActiveItems
+    ? activeSubTotal >= SHIPPING_THRESHOLD
+      ? 0
+      : SHIPPING_FEE
+    : 0;
+
+  return Math.round(taxable + gst + shipping);
+}
+
 export const updateReturnRequestService = async (
   orderId,
   action,
   variantId,
-  adminRemark
+  adminRemark,
 ) => {
   try {
     if (!orderId || !action)
@@ -333,29 +528,42 @@ export const updateReturnRequestService = async (
     if (!order) return { success: false, message: "Order not found" };
 
     const isPaid = ["paypal", "wallet", "cod"].includes(order.orderMethod);
-    const GST_RATE = 0.05;
 
     if (!Array.isArray(order.returnedAt)) {
       order.returnedAt = [];
     }
-
-    let totalRefund = 0;
 
     const isAll = !variantId || variantId === "ALL";
 
     const pendingReturns = order.returnedAt.filter(
       (r) =>
         r.returnRequestStatus.toLowerCase() === "pending" &&
-        (isAll || r.variant.toString() === variantId.toString())
+        (isAll || r.variant.toString() === variantId.toString()),
     );
 
     if (!pendingReturns.length)
       return { success: true, message: "No pending return found" };
 
-    const originalSubTotal = (order.orderItems || []).reduce(
-      (sum, i) => sum + (i.totalPrice || 0),
-      0
-    );
+    // Snapshot of cancelled variants
+    const cancelledVariantIds = new Set();
+    (order.cancelledAt || []).forEach((c) => {
+      (c.cancelledProducts || []).forEach((pid) => {
+        cancelledVariantIds.add(pid._id ? pid._id.toString() : String(pid));
+      });
+    });
+
+    // Already approved quantities
+    const approvedQtyByVariant = {};
+    (order.returnedAt || []).forEach((r) => {
+      if (r.variant && r.returnRequestStatus === "Approved") {
+        const vid = r.variant.toString();
+        approvedQtyByVariant[vid] =
+          (approvedQtyByVariant[vid] || 0) + (r.quantity || 1);
+      }
+    });
+
+    let totalRefund = 0;
+    const refundBreakdown = [];
 
     for (const r of pendingReturns) {
       r.returnRequestStatus = action;
@@ -363,41 +571,55 @@ export const updateReturnRequestService = async (
 
       if (action === "Approved") {
         const item = order.orderItems.find(
-          (i) => i.variantId.toString() === r.variant.toString()
+          (i) => i.variantId.toString() === r.variant.toString(),
+        );
+        if (!item || item.quantity <= 0) continue;
+
+        const qty = r.quantity || item.quantity;
+        const vid = r.variant.toString();
+
+        await variantModel.updateOne(
+          { _id: r.variant },
+          { $inc: { stock: qty } },
         );
 
-        if (item) {
-          const qty = r.quantity || item.quantity;
+        item.deliveryStatus = "returned";
 
-          await variantModel.updateOne(
-            { _id: r.variant },
-            { $inc: { stock: qty } }
-          );
+        // Total BEFORE
+        const totalBefore = calcOrderTotal(
+          order.orderItems,
+          order.couponApplied,
+          cancelledVariantIds,
+          approvedQtyByVariant,
+        );
 
-          item.deliveryStatus = "returned";
+        // Apply return
+        approvedQtyByVariant[vid] =
+          (approvedQtyByVariant[vid] || 0) + qty;
 
-         
-          const itemLineValue = item.price * qty;
-          
+        // Total AFTER
+        const totalAfter = calcOrderTotal(
+          order.orderItems,
+          order.couponApplied,
+          cancelledVariantIds,
+          approvedQtyByVariant,
+        );
 
-          
-          let itemCouponShare = 0;
-          if (order.couponApplied > 0 && originalSubTotal > 0) {
-            const itemFullLineTotal = item.price * item.quantity;
-            itemCouponShare =
-              order.couponApplied * (itemFullLineTotal / originalSubTotal) *
-              (qty / item.quantity);
-          }
+        // Refund = difference
+        const itemRefund = Math.max(totalBefore - totalAfter, 0);
 
-          const taxableValue = Math.round(Math.max(itemLineValue - itemCouponShare, 0));
-          const itemGst = Math.round(taxableValue * GST_RATE);
+        totalRefund += itemRefund;
 
-          totalRefund += taxableValue + itemGst;
-        }
+        refundBreakdown.push({
+          variant: vid,
+          productName: item.productName,
+          quantity: qty,
+          refund: itemRefund,
+        });
       }
-
-      if (!isAll) break;
     }
+
+    totalRefund = Math.round(totalRefund);
 
     if (action === "Approved") {
       const derived = deriveOrderStatus(order.orderItems);
@@ -412,7 +634,7 @@ export const updateReturnRequestService = async (
         order.userId,
         totalRefund,
         `Refund for return in order #${order.orderCode}`,
-        orderId
+        orderId,
       );
     }
 
@@ -420,8 +642,14 @@ export const updateReturnRequestService = async (
       success: true,
       message:
         action === "Approved"
-          ? `Return approved. ₹${totalRefund.toFixed(2)} refunded to wallet.`
+          ? `Return approved. ₹${totalRefund} refunded to wallet${
+              refundBreakdown.length > 1
+                ? ` (${refundBreakdown.length} items)`
+                : ""
+            }.`
           : "Return request rejected",
+      refundBreakdown: action === "Approved" ? refundBreakdown : undefined,
+      totalRefund: action === "Approved" ? totalRefund : undefined,
     };
   } catch (error) {
     console.error("updateReturnRequestService error:", error);
