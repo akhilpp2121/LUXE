@@ -95,6 +95,14 @@ export const addCouponService = async (body) => {
   if (existing)
     return { success: false, message: "Coupon code already exists" };
 
+  // Percentage discount validation
+  if (discountType === "percentage" && Number(discountValue) > 99) {
+    return {
+      success: false,
+      message: "Percentage discount cannot be more than 99%",
+    };
+  }
+
   const limit = usageLimit ? Number(usageLimit) : null;
 
   await couponModel.create({
@@ -111,7 +119,6 @@ export const addCouponService = async (body) => {
 
   return { success: true };
 };
-
 // ─── Get Coupon for Edit ──────────────────────────────────
 export const getCouponByIdService = async (id) => {
   const coupon = await couponModel.findById(id);
@@ -142,6 +149,17 @@ export const editCouponService = async (id, body) => {
   });
   if (existing)
     return { success: false, message: "Coupon code already exists" };
+
+  // Percentage discount validation
+  if (discountType === "percentage") {
+    const val = Number(discountValue);
+    if (val <= 0 || val > 99) {
+      return {
+        success: false,
+        message: "Percentage discount must be between 1 and 99",
+      };
+    }
+  }
 
   const limit = usageLimit ? Number(usageLimit) : null;
 

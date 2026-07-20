@@ -77,6 +77,7 @@
 }
 
 </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased h-screen overflow-hidden">
 <div id="overlay" class="overlay hidden">
@@ -129,7 +130,7 @@
           <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Full Name</label>
           <div class="relative group">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">person</span>
-            <input id="fullName" name="fullName" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your name" type="text" autocomplete="name"/>
+            <input id="fullName" name="fullName" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your name" type="text" autocomplete="name" value="<%= typeof fullName !== 'undefined' ? fullName : '' %>"/>
           </div>
           <div class="err-msg" id="fullName-err"></div>
         </div>
@@ -139,7 +140,7 @@
           <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Email Address</label>
           <div class="relative group">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">mail</span>
-            <input id="email" name="email" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your email" type="email" autocomplete="email"/>
+            <input id="email" name="email" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your email" type="email" autocomplete="email" value="<%= typeof email !== 'undefined' ? email : '' %>"/>
           </div>
           <div class="err-msg" id="email-err"></div>
         </div>
@@ -149,7 +150,7 @@
           <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Phone Number</label>
           <div class="relative group">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">phone</span>
-            <input id="phoneNumber" name="phoneNumber" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your number" type="tel" autocomplete="tel"/>
+            <input id="phoneNumber" name="phoneNumber" class="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="Enter your number" type="tel" autocomplete="tel" value="<%= typeof phoneNumber !== 'undefined' ? phoneNumber : '' %>"/>
           </div>
           <div class="err-msg" id="phoneNumber-err"></div>
 
@@ -186,7 +187,7 @@
           <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Password</label>
           <div class="relative group">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">lock</span>
-            <input id="password" name="password" class="w-full pl-12 pr-12 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="••••••••" type="password" autocomplete="new-password"/>
+            <input id="password" name="password" class="w-full pl-12 pr-12 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="••••••••" type="password" autocomplete="new-password" value="<%= typeof password !== 'undefined' ? password : '' %>"/>
             <button id="eyeBtn" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none" type="button" aria-label="Toggle password visibility" tabindex="-1">
               <span id="eyeIcon" class="material-symbols-outlined text-[20px]">visibility</span>
             </button>

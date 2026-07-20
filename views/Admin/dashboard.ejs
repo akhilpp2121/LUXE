@@ -1,58 +1,28 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="dark" lang="en">
 
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>AdminPro - Sales Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <title>LUXE Admin - Sales Dashboard</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
       theme: {
         extend: {
-          "colors": {
-            "secondary": "#565e74",
-            "outline-variant": "#c3c6d7",
-            "surface-container-low": "#f2f4f6",
-            "surface-variant": "#e0e3e5",
-            "primary": "#004ac6",
-            "on-surface-variant": "#434655",
-            "background": "#f7f9fb",
-            "error": "#ba1a1a",
-            "on-surface": "#191c1e",
-            "surface-container": "#eceef0",
-            "outline": "#737686"
+          colors: {
+            "secondary-container": "#313aa1", "on-primary-fixed-variant": "#00266e", "tertiary-dim": "#ef8fe5", "surface-container-highest": "#192540", "on-surface-variant": "#a3aac4", "on-tertiary-fixed-variant": "#711f6f", "outline": "#6d758c", "error-container": "#9f0519", "surface-bright": "#1f2b49", "secondary-fixed": "#cbceff", "primary-dim": "#316bf3", "background": "#060e20", "surface-variant": "#192540", "surface-container-lowest": "#000000", "primary-fixed": "#7b9cff", "surface-container-high": "#141f38", "surface-container": "#0f1930", "on-secondary-fixed-variant": "#3c45ab", "on-secondary-fixed": "#1c248e", "inverse-surface": "#faf8ff", "tertiary": "#ffb4f4", "surface-tint": "#90abff", "secondary-dim": "#8b94ff", "secondary": "#8b94ff", "on-primary-container": "#001e5a", "surface": "#060e20", "primary-fixed-dim": "#658eff", "on-tertiary": "#722070", "on-secondary-container": "#caccff", "on-primary-fixed": "#000000", "error-dim": "#d7383b", "error": "#ff716c", "tertiary-fixed-dim": "#ef8fe5", "on-surface": "#dee5ff", "surface-container-low": "#091328", "on-error-container": "#ffa8a3", "surface-dim": "#060e20", "on-secondary": "#000478", "on-error": "#490006", "outline-variant": "#40485d", "on-primary": "#002873", "primary": "#90abff", "on-tertiary-container": "#661466", "secondary-fixed-dim": "#bbbfff", "primary-container": "#7b9cff", "tertiary-fixed": "#fe9cf4", "on-background": "#dee5ff", "tertiary-container": "#fe9cf4", "on-tertiary-fixed": "#480049", "inverse-primary": "#0053dc", "inverse-on-surface": "#4d556b"
           },
-          "borderRadius": {
-            "DEFAULT": "0.125rem",
-            "lg": "0.25rem",
-            "xl": "0.5rem",
-            "full": "0.75rem"
-          },
-          "spacing": {
-            "xl": "32px",
-            "md": "16px",
-            "base": "4px",
-            "gutter": "24px",
-            "xs": "4px",
-            "lg": "24px",
-            "sidebar-width": "280px",
-            "sm": "8px"
-          },
-          "fontFamily": { "body-lg": ["Inter"] },
-          "fontSize": {
-            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
-            "headline-xl": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
-            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
-            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
-            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
-            "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }]
-          }
+          fontFamily: { "headline": ["Manrope"], "body": ["Inter"], "label": ["Inter"] },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
         },
       },
     }
@@ -71,12 +41,29 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: transparent;
+      background: #060e20;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #e2e8f0;
+      background: #1f2b49;
       border-radius: 10px;
+    }
+
+    .glass-effect {
+      background: rgba(25, 37, 64, 0.7);
+      backdrop-filter: blur(20px);
+    }
+
+    .luxe-gradient {
+      background: linear-gradient(135deg, #316bf3 0%, #90abff 100%);
+    }
+
+    .search-btn {
+      transition: all 0.15s ease;
+    }
+
+    .search-btn:active {
+      transform: scale(0.93);
     }
 
     /* Pagination button styles */
@@ -89,40 +76,42 @@
       padding: 0 8px;
       border-radius: 6px;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      border: 1px solid #e0e3e5;
-      background: #fff;
-      color: #737686;
+      border: 1px solid rgba(64, 72, 93, 0.4);
+      background: #0f1930;
+      color: #a3aac4;
       transition: all 0.15s;
       user-select: none;
     }
 
     .page-btn:hover:not(:disabled) {
-      background: #f2f4f6;
-      color: #191c1e;
+      background: #1f2b49;
+      color: #fff;
     }
 
     .page-btn.active {
-      background: #004ac6;
+      background: linear-gradient(135deg, #316bf3 0%, #90abff 100%);
       color: #fff;
-      border-color: #004ac6;
+      border-color: transparent;
     }
 
     .page-btn:disabled {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
     }
   </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
 
-<body class="bg-background text-on-surface">
+<body class="bg-background text-on-background font-body antialiased min-h-screen">
 
-  <!-- SideNavBar -->
-  <aside class="fixed left-0 top-0 h-full w-sidebar-width flex flex-col p-lg bg-[#0c1424] z-50">
-    <div class="mb-xl px-4">
-      <h1 class="text-headline-lg font-bold text-white">AdminPro</h1>
-      <p class="text-label-sm text-[#a3aac4]">Enterprise Suite</p>
+  <!-- Sidebar -->
+  <aside class="h-screen w-64 fixed left-0 top-0 bg-[#091328] dark:bg-slate-950 flex flex-col py-8 px-4 z-50">
+
+    <div class="mb-10 px-4">
+      <h1 class="font-['Manrope'] font-extrabold text-xl tracking-tighter text-white">LUXE Admin</h1>
+      <p class="text-on-surface-variant text-[10px] uppercase tracking-widest mt-1">Premium Command</p>
     </div>
 
     <nav class="flex-1 space-y-1">
@@ -158,254 +147,258 @@
         href="/admin/offer">
         <span class="material-symbols-outlined text-lg">local_offer</span>Offers
       </a>
-     
+      
     </nav>
 
-    <div class="mt-auto px-4 py-lg border-t border-[#1f2b49] flex items-center gap-sm">
-      <div class="overflow-hidden">
-        <p class="text-label-md font-semibold text-white truncate">Organization Logo</p>
-        <p class="text-label-sm text-[#a3aac4] truncate">Premium Admin</p>
-      </div>
+    <div class="mt-auto px-4 pt-6 border-t border-[#1f2a44]">
+      <form action="/admin/logout" method="POST">
+        <button type="submit"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight">
+          <span class="material-symbols-outlined text-lg">logout</span>
+          Logout
+        </button>
+      </form>
     </div>
+
   </aside>
 
-  <!-- TopAppBar -->
-  <!-- <header
-    class="flex justify-between items-center h-16 px-lg ml-sidebar-width w-[calc(100%-280px)] bg-white sticky top-0 z-40 border-b border-surface-variant">
-    <div class="flex items-center gap-md flex-1">
-      <div class="relative w-full max-w-md">
-        <span
-          class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
-        <input
-          class="w-full bg-surface-container-low border-none rounded-xl pl-10 py-2 font-body-sm focus:ring-2 focus:ring-primary/20"
-          placeholder="Search analytics, products, transactions..." type="text" />
-      </div>
-    </div>
-    <div class="flex items-center gap-lg">
-      <button class="font-label-md text-label-md text-on-surface-variant hover:text-primary">Settings</button>
-      <button
-        class="bg-primary text-white px-md py-sm rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">Profile</button>
-    </div>
-  </header> -->
-
   <!-- Main Content -->
-  <main class="ml-sidebar-width p-lg min-h-[calc(100vh-64px)] overflow-y-auto">
+  <main class="ml-64 min-h-screen relative">
 
-    <section class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-lg">
-      <div>
-        <h2 class="font-headline-xl text-headline-xl text-on-surface">Sales Dashboard</h2>
-        <p class="font-body-md text-body-md text-outline">Real-time performance metrics and revenue tracking.</p>
+    <!-- Top Nav -->
+    <header
+      class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-[#060e20]/70 backdrop-blur-xl shadow-2xl shadow-blue-900/10 flex items-center justify-between px-8 z-40">
+      <div class="flex items-center gap-6">
+        <h2 class="font-['Manrope'] font-semibold text-lg text-[#90abff]">Dashboard</h2>
       </div>
-    </section>
 
-    <% const revenueSeries=(chartData && chartData.data) ? chartData.data : { labels: [], values: [] }; const
-      fullRevenue=chartData && typeof chartData.fullRevenue==="number" ? chartData.fullRevenue : 0; const
-      totalOrders=chartData && typeof chartData.totalOrders==="number" ? chartData.totalOrders : 0; const tabs=[ {
-      key: "weekly" , label: "Weekly" }, { key: "monthly" , label: "Monthly" }, { key: "yearly" , label: "Yearly" } ];
-      %>
-
-      <!-- Revenue Performance -->
-      <div class="bg-white rounded-xl shadow-sm border border-surface-variant overflow-hidden mb-lg">
-        <div
-          class="p-lg border-b border-surface-container-low flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
-          <div>
-            <h3 class="font-headline-md text-headline-md text-on-surface">Revenue Performance</h3>
-            <div class="flex items-center gap-sm mt-1">
-              <span class="font-headline-lg text-headline-lg text-primary">
-                ₹<%= fullRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-              </span>
-              <span
-                class="text-secondary bg-surface-container-low px-2 py-0.5 rounded-full font-label-sm text-label-sm">
-                <%= totalOrders %> units sold
-              </span>
-            </div>
-          </div>
-          <div class="flex p-1 bg-surface-container-low rounded-xl">
-            <% tabs.forEach(tab=> { %>
-              <a href="/admin/dashboard?filter=<%= tab.key %>"
-                class="px-md py-1.5 rounded-lg text-label-md font-label-md transition-colors <%= filter === tab.key ? 'bg-white shadow-sm text-primary' : 'text-outline hover:text-on-surface' %>">
-                <%= tab.label %>
-              </a>
-              <% }) %>
-          </div>
-        </div>
-
-        <div class="p-lg h-[320px] relative">
-          <% if (!revenueSeries.labels || revenueSeries.labels.length===0) { %>
-            <div class="absolute inset-0 flex items-center justify-center text-outline font-body-sm">
-              No revenue data available for this period.
-            </div>
-            <% } else { %>
-              <canvas id="revenueChart"></canvas>
-              <% } %>
+      <div class="flex items-center gap-4">
+        <button class="p-2 text-on-surface-variant hover:text-white transition-colors">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button class="p-2 text-on-surface-variant hover:text-white transition-colors">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+        <div class="h-8 w-px bg-outline-variant/20 mx-2"></div>
+        <div class="w-9 h-9 rounded-full luxe-gradient flex items-center justify-center text-white text-xs font-bold">
+          A
         </div>
       </div>
+    </header>
 
-      <!-- Insights Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-lg mb-lg">
+    <!-- Page Content -->
+    <div class="pt-24 px-8 pb-12">
 
-        <!-- Top Products -->
-        <!-- Top Products -->
-<div class="bg-white rounded-xl shadow-sm border border-surface-variant p-lg">
-  <div class="flex justify-between items-center mb-xl">
-    <h3 class="font-headline-md text-headline-md text-on-surface">Top 10 Products</h3>
-  </div>
-  <% if (!topProducts || topProducts.length===0) { %>
-    <p class="text-body-sm text-outline">No product sales recorded yet.</p>
-    <% } else { %>
-      <div class="space-y-md">
-        <% const maxUnitsSold=topProducts[0].unitsSold || 1; %>
-          <% topProducts.forEach(product=> { %>
-            <div class="space-y-xs">
-              <div class="flex justify-between text-body-sm font-medium">
-                <span>
-                  <%= product.name %>
-                </span>
-                <span class="text-primary"><%= product.unitsSold || 0 %> units sold</span>
-              </div>
-              <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
-                <div class="h-full bg-primary rounded-full"
-                  style="width: <%= Math.min((product.unitsSold / maxUnitsSold) * 100, 100) %>%"></div>
-              </div>
-            </div>
-            <% }) %>
-      </div>
-      <% } %>
-</div>
+      <section class="mb-8">
+        <h2 class="font-['Manrope'] font-extrabold text-2xl text-white">Sales Dashboard</h2>
+        <p class="text-on-surface-variant text-sm mt-1">Real-time performance metrics and revenue tracking.</p>
+      </section>
 
-        <!-- Category Performance -->
+      <% const revenueSeries=(chartData && chartData.data) ? chartData.data : { labels: [], values: [] }; const
+        fullRevenue=chartData && typeof chartData.fullRevenue==="number" ? chartData.fullRevenue : 0; const
+        totalOrders=chartData && typeof chartData.totalOrders==="number" ? chartData.totalOrders : 0; const tabs=[ {
+        key: "weekly" , label: "Weekly" }, { key: "monthly" , label: "Monthly" }, { key: "yearly" , label: "Yearly" }
+        ]; %>
 
-
-
-
-
-
-
-        <!-- Category Performance -->
-<div class="bg-white rounded-xl shadow-sm border border-surface-variant p-lg">
-  <div class="flex justify-between items-center mb-xl">
-    <h3 class="font-headline-md text-headline-md text-on-surface">Top 10 Categories</h3>
-  </div>
-  <% if (!topCategories || topCategories.length===0) { %>
-    <p class="text-body-sm text-outline">No category sales recorded yet.</p>
-    <% } else { %>
-      <div class="space-y-md">
-        <% const maxCategoryUnitsSold=topCategories[0].unitsSold || 1; %>
-          <% topCategories.forEach(cat=> { %>
-            <div class="space-y-xs">
-              <div class="flex justify-between text-body-sm font-medium">
-                <span>
-                  <%= cat.name %>
-                </span>
-                <span class="text-primary"><%= cat.unitsSold || 0 %> units sold</span>
-              </div>
-              <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
-                <div class="h-full bg-primary rounded-full"
-                  style="width: <%= Math.min((cat.unitsSold / maxCategoryUnitsSold) * 100, 100) %>%"></div>
-              </div>
-            </div>
-            <% }) %>
-      </div>
-      <% } %>
-</div>
-
-
-
-        
-        
-      </div>
-
-  <%
-    // ─── Net Balance Fix ───────────────────────────────────────────────────────
-    // Previously: netBalance = ledger[last].runningBalance
-    // Bug: if runningBalance isn't computed server-side, it comes through as 0.
-    // Fix: recompute runningBalance client-side from credit/debit on each row,
-    //       and derive the header totals + net from the full array, not the last row.
-    //
-    // Also ensure ledger rows always have a valid runningBalance by computing it
-    // here if the server didn't supply one.
-    let runningTotal = 0;
-    const ledgerWithBalance = (ledger || []).map(entry => {
-      runningTotal += (entry.credit || 0) - (entry.debit || 0);
-      return { ...entry, runningBalance: entry.runningBalance || runningTotal };
-    });
-
-    const ledgerTotals = ledgerWithBalance.reduce((acc, entry) => {
-      acc.credit += entry.credit || 0;
-      acc.debit  += entry.debit  || 0;
-      return acc;
-    }, { credit: 0, debit: 0 });
-
-    // Net balance = last row's running balance (or sum of credits minus debits)
-    const netBalance = ledgerWithBalance.length > 0
-      ? ledgerWithBalance[ledgerWithBalance.length - 1].runningBalance
-      : 0;
-  %>
-
-        <!-- Ledger Book -->
-        <section class="bg-white rounded-xl shadow-sm border border-surface-variant overflow-hidden">
+        <!-- Revenue Performance -->
+        <div class="bg-surface-container-high rounded-2xl shadow-2xl overflow-hidden mb-8">
           <div
-            class="p-lg border-b border-surface-container-low flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+            class="p-6 border-b border-outline-variant/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h3 class="font-headline-md text-headline-md text-on-surface">Ledger Book</h3>
-              <p class="text-body-sm text-outline mt-1">Last 30 days — completed sales (credit) vs returns (debit)</p>
+              <h3 class="font-['Manrope'] font-bold text-base text-white">Revenue Performance</h3>
+              <div class="flex items-center gap-3 mt-1.5">
+                <span class="font-['Manrope'] font-extrabold text-2xl text-primary">
+                  ₹<%= fullRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                </span>
+                <span
+                  class="text-[10px] font-bold text-on-surface-variant bg-surface-container-low px-2.5 py-1 rounded-full uppercase tracking-widest">
+                  <%= totalOrders %> units sold
+                </span>
+              </div>
             </div>
-            <div class="flex items-center gap-lg">
-              <div class="text-right">
-                <p class="text-label-sm text-outline uppercase tracking-wider">Total Credit</p>
-                <p class="font-headline-md text-emerald-600">+₹<%= ledgerTotals.credit.toLocaleString('en-IN', {
-                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                </p>
-              </div>
-              <div class="text-right">
-                <p class="text-label-sm text-outline uppercase tracking-wider">Total Debit</p>
-                <p class="font-headline-md text-error">-₹<%= ledgerTotals.debit.toLocaleString('en-IN', {
-                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                </p>
-              </div>
-              <div class="text-right border-l border-surface-variant pl-lg">
-                <p class="text-label-sm text-outline uppercase tracking-wider">Net Balance</p>
-                <p class="font-headline-md text-on-surface">₹<%= netBalance.toLocaleString('en-IN', {
-                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                </p>
-              </div>
+            <div class="flex p-1 bg-surface-container-low rounded-xl">
+              <% tabs.forEach(tab=> { %>
+                <a href="/admin/dashboard?filter=<%= tab.key %>"
+                  class="px-4 py-1.5 rounded-lg text-xs font-bold transition-colors <%= filter === tab.key ? 'luxe-gradient text-white' : 'text-on-surface-variant hover:text-white' %>">
+                  <%= tab.label %>
+                </a>
+                <% }) %>
             </div>
           </div>
 
-          <% if (!ledgerWithBalance || ledgerWithBalance.length===0) { %>
-            <div class="p-lg text-body-sm text-outline">No transactions in the last 30 days.</div>
-            <% } else { %>
-              <!-- Table (rows injected by JS pagination) -->
-              <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                  <thead class="bg-surface-bright border-b border-surface-variant sticky top-0">
-                    <tr>
-                      <th class="px-lg py-md font-label-md text-label-md text-outline uppercase tracking-wider">Date
-                      </th>
-                      <th
-                        class="px-lg py-md font-label-md text-label-md text-outline uppercase tracking-wider text-right">
-                        Credit</th>
-                      <th
-                        class="px-lg py-md font-label-md text-label-md text-outline uppercase tracking-wider text-right">
-                        Debit</th>
-                      <th
-                        class="px-lg py-md font-label-md text-label-md text-outline uppercase tracking-wider text-right">
-                        Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody id="ledger-tbody" class="divide-y divide-surface-container-low font-body-sm text-body-sm">
-                    <%# rows rendered by renderLedgerPage() JS below %>
-                  </tbody>
-                </table>
+          <div class="p-6 h-[320px] relative">
+            <% if (!revenueSeries.labels || revenueSeries.labels.length===0) { %>
+              <div class="absolute inset-0 flex items-center justify-center text-on-surface-variant text-sm">
+                No revenue data available for this period.
               </div>
+              <% } else { %>
+                <canvas id="revenueChart"></canvas>
+                <% } %>
+          </div>
+        </div>
 
-              <!-- Pagination controls -->
-              <div class="flex items-center justify-between px-lg py-md border-t border-surface-container-low">
-                <span id="ledger-range-label" class="text-body-sm text-outline"></span>
-                <div id="ledger-pagination" class="flex items-center gap-1"></div>
+        <!-- Insights Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+          <!-- Top Products -->
+          <div class="bg-surface-container-high rounded-2xl shadow-2xl p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="font-['Manrope'] font-bold text-base text-white">Top 10 Products</h3>
+            </div>
+            <% if (!topProducts || topProducts.length===0) { %>
+              <p class="text-sm text-on-surface-variant">No product sales recorded yet.</p>
+              <% } else { %>
+                <div class="space-y-4">
+                  <% const maxUnitsSold=topProducts[0].unitsSold || 1; %>
+                    <% topProducts.forEach(product=> { %>
+                      <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-bold">
+                          <span class="text-on-surface">
+                            <%= product.name %>
+                          </span>
+                          <span class="text-primary">
+                            <%= product.unitsSold || 0 %> units sold
+                          </span>
+                        </div>
+                        <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+                          <div class="h-full luxe-gradient rounded-full"
+                            style="width: <%= Math.min((product.unitsSold / maxUnitsSold) * 100, 100) %>%"></div>
+                        </div>
+                      </div>
+                      <% }) %>
+                </div>
+                <% } %>
+          </div>
+
+          <!-- Category Performance -->
+          <div class="bg-surface-container-high rounded-2xl shadow-2xl p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="font-['Manrope'] font-bold text-base text-white">Top 10 Categories</h3>
+            </div>
+            <% if (!topCategories || topCategories.length===0) { %>
+              <p class="text-sm text-on-surface-variant">No category sales recorded yet.</p>
+              <% } else { %>
+                <div class="space-y-4">
+                  <% const maxCategoryUnitsSold=topCategories[0].unitsSold || 1; %>
+                    <% topCategories.forEach(cat=> { %>
+                      <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-bold">
+                          <span class="text-on-surface">
+                            <%= cat.name %>
+                          </span>
+                          <span class="text-primary">
+                            <%= cat.unitsSold || 0 %> units sold
+                          </span>
+                        </div>
+                        <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+                          <div class="h-full luxe-gradient rounded-full"
+                            style="width: <%= Math.min((cat.unitsSold / maxCategoryUnitsSold) * 100, 100) %>%"></div>
+                        </div>
+                      </div>
+                      <% }) %>
+                </div>
+                <% } %>
+          </div>
+
+        </div>
+
+        <%
+          // ─── Net Balance Fix ───────────────────────────────────────────────────────
+          // Previously: netBalance = ledger[last].runningBalance
+          // Bug: if runningBalance isn't computed server-side, it comes through as 0.
+          // Fix: recompute runningBalance client-side from credit/debit on each row,
+          //       and derive the header totals + net from the full array, not the last row.
+          //
+          // Also ensure ledger rows always have a valid runningBalance by computing it
+          // here if the server didn't supply one.
+          let runningTotal = 0;
+          const ledgerWithBalance = (ledger || []).map(entry => {
+            runningTotal += (entry.credit || 0) - (entry.debit || 0);
+            return { ...entry, runningBalance: entry.runningBalance || runningTotal };
+          });
+
+          const ledgerTotals = ledgerWithBalance.reduce((acc, entry) => {
+            acc.credit += entry.credit || 0;
+            acc.debit  += entry.debit  || 0;
+            return acc;
+          }, { credit: 0, debit: 0 });
+
+          // Net balance = last row's running balance (or sum of credits minus debits)
+          const netBalance = ledgerWithBalance.length > 0
+            ? ledgerWithBalance[ledgerWithBalance.length - 1].runningBalance
+            : 0;
+        %>
+
+          <!-- Ledger Book -->
+          <section class="bg-surface-container-high rounded-2xl shadow-2xl overflow-hidden">
+            <div
+              class="p-6 border-b border-outline-variant/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h3 class="font-['Manrope'] font-bold text-base text-white">Ledger Book</h3>
+                <p class="text-xs text-on-surface-variant mt-1">Last 30 days — completed sales (credit) vs returns
+                  (debit)</p>
               </div>
-              <% } %>
-        </section>
+              <div class="flex items-center gap-6">
+                <div class="text-right">
+                  <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Total Credit</p>
+                  <p class="font-['Manrope'] font-bold text-emerald-400">
+                    +₹<%= ledgerTotals.credit.toLocaleString('en-IN', { minimumFractionDigits: 2,
+                        maximumFractionDigits: 2 }) %>
+                  </p>
+                </div>
+                <div class="text-right">
+                  <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Total Debit</p>
+                  <p class="font-['Manrope'] font-bold text-error">
+                    -₹<%= ledgerTotals.debit.toLocaleString('en-IN', { minimumFractionDigits: 2,
+                        maximumFractionDigits: 2 }) %>
+                  </p>
+                </div>
+                <div class="text-right border-l border-outline-variant/10 pl-6">
+                  <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Net Balance</p>
+                  <p class="font-['Manrope'] font-bold text-white">
+                    ₹<%= netBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <% if (!ledgerWithBalance || ledgerWithBalance.length===0) { %>
+              <div class="p-6 text-sm text-on-surface-variant">No transactions in the last 30 days.</div>
+              <% } else { %>
+                <!-- Table (rows injected by JS pagination) -->
+                <div class="overflow-x-auto">
+                  <table class="w-full border-collapse">
+                    <thead>
+                      <tr class="bg-surface-container-low/50">
+                        <th
+                          class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                          Date</th>
+                        <th
+                          class="px-6 py-5 text-right text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                          Credit</th>
+                        <th
+                          class="px-6 py-5 text-right text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                          Debit</th>
+                        <th
+                          class="px-6 py-5 text-right text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                          Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ledger-tbody" class="divide-y divide-outline-variant/10 text-sm">
+                      <%# rows rendered by renderLedgerPage() JS below %>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination controls -->
+                <div class="flex items-center justify-between px-6 py-5 bg-surface-container-low/30">
+                  <span id="ledger-range-label" class="text-xs text-on-surface-variant"></span>
+                  <div id="ledger-pagination" class="flex items-center gap-1"></div>
+                </div>
+                <% } %>
+          </section>
+
+    </div>
 
   </main>
 
@@ -423,8 +416,8 @@
           datasets: [{
             label: 'Revenue',
             data: revenueSeries.values,
-            borderColor: '#004ac6',
-            backgroundColor: 'rgba(0, 74, 198, 0.1)',
+            borderColor: '#90abff',
+            backgroundColor: 'rgba(144, 171, 255, 0.12)',
             fill: true,
             tension: 0.4,
           }]
@@ -434,11 +427,17 @@
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
+            x: {
+              ticks: { color: '#a3aac4' },
+              grid: { color: 'rgba(64,72,93,0.25)' }
+            },
             y: {
               beginAtZero: true,
               ticks: {
+                color: '#a3aac4',
                 callback: (value) => '₹' + value.toLocaleString('en-IN')
-              }
+              },
+              grid: { color: 'rgba(64,72,93,0.25)' }
             }
           }
         }
@@ -467,15 +466,15 @@
       const slice = LEDGER_DATA.slice(start, end);
 
       tbody.innerHTML = slice.map(entry => `
-      <tr class="hover:bg-surface-container-low transition-colors">
-        <td class="px-lg py-md font-medium">${entry.date}</td>
-        <td class="px-lg py-md text-right font-medium text-emerald-600">
+      <tr class="hover:bg-surface-bright/50 transition-colors">
+        <td class="px-6 py-4 font-medium text-on-surface">${entry.date}</td>
+        <td class="px-6 py-4 text-right font-bold text-emerald-400">
           ${entry.credit > 0 ? '+' + fmtINR(entry.credit) : '—'}
         </td>
-        <td class="px-lg py-md text-right font-medium" style="color:#ba1a1a">
+        <td class="px-6 py-4 text-right font-bold text-error">
           ${entry.debit > 0 ? '-' + fmtINR(entry.debit) : '—'}
         </td>
-        <td class="px-lg py-md text-right font-semibold text-on-surface">
+        <td class="px-6 py-4 text-right font-bold text-white">
           ${fmtINR(entry.runningBalance)}
         </td>
       </tr>
@@ -507,7 +506,7 @@
       let prev = null;
       for (const p of sorted) {
         if (prev !== null && p - prev > 1) {
-          html += `<span class="page-btn" style="cursor:default;border:none;color:#737686">…</span>`;
+          html += `<span class="page-btn" style="cursor:default;border:none;background:transparent;color:#6d758c">…</span>`;
         }
         html += `<button class="page-btn ${p === page ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
         prev = p;

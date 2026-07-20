@@ -1,487 +1,589 @@
 <!DOCTYPE html>
 <html class="dark" lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;500;700&family=Lexend:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface": "#e4e1e8", "inverse-primary": "#4c599f", "surface-dim": "#131318", "surface-bright": "#39393e", background: "#131318", "secondary-fixed-dim": "#c1c4e6", "inverse-surface": "#e4e1e8", "on-primary-container": "#7e8bd4", surface: "#131318", "surface-container-low": "#1b1b20", "surface-container-highest": "#343439", "on-error": "#690005", "primary-fixed": "#dee1ff", "on-tertiary-container": "#cc7a59", "secondary-container": "#414561", "primary-container": "#122165", "on-surface-variant": "#c6c5d2", "error-container": "#93000a", "surface-variant": "#343439", "on-secondary-container": "#afb3d4", "tertiary-fixed-dim": "#ffb598", "on-error-container": "#ffdad6", "surface-container-lowest": "#0d0e12", "on-tertiary-fixed": "#370e00", "inverse-on-surface": "#303035", "tertiary-container": "#4c1700", "outline-variant": "#454650", "secondary-fixed": "#dee0ff", error: "#ffb4ab", "primary-fixed-dim": "#bac3ff", "on-secondary-fixed": "#151a33", "on-tertiary": "#571f04", "on-primary-fixed": "#001159", tertiary: "#ffb598", "surface-tint": "#bac3ff", "surface-container-high": "#29292f", "on-secondary-fixed-variant": "#414561", secondary: "#c1c4e6", "on-primary": "#1c2a6d"}, borderRadius: {DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem"}, spacing: {base: "4px", lg: "24px", sm: "12px", xl: "32px", xs: "8px", gutter: "20px", md: "16px", margin: "24px"}, fontFamily: {h1: ["Inter"], "label-sm": ["Inter"], "body-md": ["Lexend"], h3: ["Inter"], "body-sm": ["Inter"], "label-md": ["Inter"], "body-lg": ["Lexend"], h2: ["Inter"], "headline-sm": ["Literata"], "headline-lg": ["Literata"], "headline-md": ["Literata"]}, fontSize: {h1: ["30px", {lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "700"}], "label-sm": ["11px", {lineHeight: "14px", letterSpacing: "0em", fontWeight: "500"}], "body-md": ["14px", {lineHeight: "20px", letterSpacing: "0em", fontWeight: "400"}], h3: ["20px", {lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600"}], "body-sm": ["12px", {lineHeight: "16px", fontWeight: "400"}], "label-md": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "body-lg": ["16px", {lineHeight: "24px", letterSpacing: "0em", fontWeight: "400"}], h2: ["24px", {lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-sm": ["20px", {lineHeight: "28px", letterSpacing: "0em", fontWeight: "500"}], "headline-lg": ["30px", {lineHeight: "38px", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-md": ["24px", {lineHeight: "32px", letterSpacing: "0em", fontWeight: "600"}]}}}};</script>
-<style>
-  body { font-family: 'Inter', sans-serif; }
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  }
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>LUXE Admin - Edit Category</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-container": "#313aa1", "on-primary-fixed-variant": "#00266e", "tertiary-dim": "#ef8fe5", "surface-container-highest": "#192540", "on-surface-variant": "#a3aac4", "on-tertiary-fixed-variant": "#711f6f", "outline": "#6d758c", "error-container": "#9f0519", "surface-bright": "#1f2b49", "secondary-fixed": "#cbceff", "primary-dim": "#316bf3", "background": "#060e20", "surface-variant": "#192540", "surface-container-lowest": "#000000", "primary-fixed": "#7b9cff", "surface-container-high": "#141f38", "surface-container": "#0f1930", "on-secondary-fixed-variant": "#3c45ab", "on-secondary-fixed": "#1c248e", "inverse-surface": "#faf8ff", "tertiary": "#ffb4f4", "surface-tint": "#90abff", "secondary-dim": "#8b94ff", "secondary": "#8b94ff", "on-primary-container": "#001e5a", "surface": "#060e20", "primary-fixed-dim": "#658eff", "on-tertiary": "#722070", "on-secondary-container": "#caccff", "on-primary-fixed": "#000000", "error-dim": "#d7383b", "error": "#ff716c", "tertiary-fixed-dim": "#ef8fe5", "on-surface": "#dee5ff", "surface-container-low": "#091328", "on-error-container": "#ffa8a3", "surface-dim": "#060e20", "on-secondary": "#000478", "on-error": "#490006", "outline-variant": "#40485d", "on-primary": "#002873", "primary": "#90abff", "on-tertiary-container": "#661466", "secondary-fixed-dim": "#bbbfff", "primary-container": "#7b9cff", "tertiary-fixed": "#fe9cf4", "on-background": "#dee5ff", "tertiary-container": "#fe9cf4", "on-tertiary-fixed": "#480049", "inverse-primary": "#0053dc", "inverse-on-surface": "#4d556b"
+          },
+          fontFamily: { "headline": ["Manrope"], "body": ["Inter"], "label": ["Inter"] },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
 
-  /* Modal backdrop animation */
-  #status-confirm-modal {
-    animation: fadeIn 0.15s ease;
-  }
-  #status-confirm-modal .modal-card {
-    animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes slideUp {
-    from { transform: translateY(12px) scale(0.97); opacity: 0; }
-    to   { transform: translateY(0)    scale(1);    opacity: 1; }
-  }
-</style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #060e20;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1f2b49;
+      border-radius: 10px;
+    }
+
+    .luxe-gradient {
+      background: linear-gradient(135deg, #316bf3 0%, #90abff 100%);
+    }
+
+    /* ── Form fields ── */
+    label.lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: #a3aac4;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    label.lbl .req { color: #ff716c; margin-left: 2px; }
+
+    input[type="text"], textarea {
+      width: 100%;
+      background-color: #091328 !important;
+      border: 1px solid #40485d;
+      border-radius: 0.75rem;
+      color: #dee5ff !important;
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    input[type="text"] { height: 46px; }
+    textarea { resize: none; }
+    input:focus, textarea:focus {
+      border-color: #90abff;
+      background-color: #0f1930 !important;
+      box-shadow: 0 0 0 3px rgba(144,171,255,0.12);
+    }
+    input::placeholder, textarea::placeholder { color: #40485d; }
+
+    .field-error { border-color: #ff716c !important; background: rgba(255,113,108,0.06) !important; box-shadow: 0 0 0 3px rgba(255,113,108,0.1) !important; }
+    .err-msg { font-size: 11px; font-weight: 600; color: #ff716c; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+    .err-msg.hidden { display: none; }
+
+    /* ── Status radio cards ── */
+    .status-radio {
+      display: flex; align-items: flex-start; gap: 12px; padding: 14px;
+      border: 1px solid #40485d; border-radius: 0.75rem; cursor: pointer;
+      transition: all 0.15s; background: #091328;
+    }
+    .status-radio:hover { background: #0f1930; }
+    .status-radio input[type="radio"] {
+      width: 16px; height: 16px; margin-top: 2px; accent-color: #90abff; flex-shrink: 0;
+    }
+    .status-radio.active-radio:has(input:checked) {
+      border-color: rgba(52,211,153,0.5); background: rgba(52,211,153,0.06);
+    }
+    .status-radio.inactive-radio:has(input:checked) {
+      border-color: rgba(255,113,108,0.5); background: rgba(255,113,108,0.06);
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      height: 40px; padding: 0 24px;
+      background: linear-gradient(135deg, #316bf3 0%, #90abff 100%);
+      border: none; border-radius: 0.75rem; color: #fff;
+      font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.18s;
+    }
+    .btn-primary:hover { opacity: 0.92; box-shadow: 0 4px 16px rgba(144,171,255,0.2); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-ghost {
+      height: 40px; padding: 0 20px; background: transparent; border: 1px solid #40485d;
+      border-radius: 0.75rem; color: #a3aac4; font-family: 'Inter', sans-serif; font-size: 13.5px;
+      font-weight: 600; cursor: pointer; transition: all 0.18s;
+    }
+    .btn-ghost:hover { background: #141f38; color: #fff; border-color: #6d758c; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fu1 { animation: fadeUp 0.32s ease forwards; }
+    .fu2 { animation: fadeUp 0.32s 0.08s ease both; opacity: 0; }
+    .fu3 { animation: fadeUp 0.32s 0.16s ease both; opacity: 0; }
+
+    /* ── Modal backdrop animation ── */
+    #status-confirm-modal { animation: modalFadeIn 0.15s ease; }
+    #status-confirm-modal .modal-card { animation: modalSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modalSlideUp {
+      from { transform: translateY(12px) scale(0.97); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-btn-confirm-active {
+      background: linear-gradient(135deg, #316bf3 0%, #90abff 100%); color: #fff;
+    }
+    .modal-btn-confirm-inactive { background: #ff716c; color: #060e20; }
+  </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
-<body class="bg-gray-950 text-white">
 
-<!-- ───────────────────────────── Sidebar ───────────────────────────── -->
-<aside class="fixed flex flex-col h-full py-4 bg-gray-950 h-screen w-64 left-0 border-r border-gray-800 z-50">
+<body class="bg-background text-on-background font-body antialiased min-h-screen">
 
-  <div class="px-6 mb-8 flex items-center gap-3">
-    <div class="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center text-white font-black text-sm shadow-md">
-      L
+  <!-- Sidebar -->
+  <aside class="h-screen w-64 fixed left-0 top-0 bg-[#091328] dark:bg-slate-950 flex flex-col py-8 px-4 z-50">
+
+    <div class="mb-10 px-4">
+      <h1 class="font-['Manrope'] font-extrabold text-xl tracking-tighter text-white">LUXE Admin</h1>
+      <p class="text-on-surface-variant text-[10px] uppercase tracking-widest mt-1">Premium Command</p>
     </div>
-    <div>
-      <h2 class="text-lg font-black text-on-surface leading-tight">System Admin</h2>
-      <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">LUXE</p>
-    </div>
-  </div>
 
-  <nav class="flex flex-col gap-2 px-4">
-    <a href="/admin/dashboard" class="text-white bg-gray-900 border border-purple-500/30 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl flex items-center gap-4 font-bold">
-      <span class="material-symbols-outlined text-lg opacity-70">dashboard</span>
-      <span>Dashboard</span>
-    </a>
-    <a href="/admin/orders" class="text-white bg-gray-900 border border-purple-500/30 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl flex items-center gap-4 font-bold">
-      <span class="material-symbols-outlined text-lg opacity-70">shopping_cart</span>
-      <span>Orders</span>
-    </a>
-    <a href="/admin/products" class="text-white bg-gray-900 border border-purple-500/30 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl flex items-center gap-4 font-bold">
-      <span class="material-symbols-outlined text-lg opacity-70">inventory_2</span>
-      <span>Products</span>
-    </a>
-    <!-- Active: Categories -->
-    <a href="/admin/category" class="text-white bg-purple-600/20 border border-purple-500 shadow-lg shadow-purple-500/20 px-4 py-3 rounded-xl flex items-center gap-4 font-bold">
-      <span class="material-symbols-outlined text-lg text-primary">category</span>
-      <span>Categories</span>
-    </a>
-    <a href="/admin/users" class="text-white bg-gray-900 border border-purple-500/30 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl flex items-center gap-4 font-bold">
-      <span class="material-symbols-outlined text-lg opacity-70">group</span>
-      <span>Users</span>
-    </a>
-    <a href="/admin/analytics" class="text-white bg-gray-900 border border-purple-500/30 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl flex items-center gap-4 font-bold">
-      <span class="material-symbols-outlined text-lg opacity-70">analytics</span>
-      <span>Analytics</span>
-    </a>
-    <a href="/admin/coupons" class="text-white bg-gray-900 border border-purple-500/30 shadow-lg shadow-purple-500/10 px-4 py-3 rounded-xl flex items-center gap-4 font-bold">
-      <span class="material-symbols-outlined text-lg opacity-70">image</span>
-      <span>coupons</span>
-    </a>
-  </nav>
-
-</aside>
-
-<!-- ───────────────────────────── Main ───────────────────────────── -->
-<main class="ml-64 min-h-screen bg-gray-950">
-
-  <!-- TopNav -->
-  <header class="flex items-center justify-between px-6 h-16 w-full bg-surface-container-low border-b border-outline-variant sticky top-0 z-40 font-['Inter'] antialiased">
-    <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text"
-            style="font-variation-settings: 'FILL' 1;">
-        add_circle
-      </span>
-      <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-        AdminConsole
-      </h1>
-    </div>
-    <div class="flex items-center gap-6">
-      <div class="flex items-center gap-1">
-        <button class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded"></button>
-        <button class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded"></button>
-        <button class="p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer rounded"></button>
-      </div>
-    </div>
-  </header>
-  
-  <!-- Page Canvas -->
-  <div class="p-lg md:p-xl max-w-5xl mx-auto">
-
-    <!-- Breadcrumbs -->
-    <nav class="flex items-center gap-2 text-body-sm text-on-secondary-container mb-md">
-      <span class="material-symbols-outlined text-sm">chevron_right</span>
-      <a href="/admin/category" class="hover:text-primary transition-colors">Categories</a>
-      <span class="material-symbols-outlined text-sm">chevron_right</span>
-      <span class="font-semibold text-on-surface">Edit Category</span>
+    <nav class="flex-1 space-y-1">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/dashboard">
+        <span class="material-symbols-outlined text-lg">dashboard</span>Dashboard
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/order-management">
+        <span class="material-symbols-outlined text-lg">shopping_cart</span>Orders
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/products">
+        <span class="material-symbols-outlined text-lg">inventory_2</span>Products
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/users">
+        <span class="material-symbols-outlined text-lg">group</span>Users
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/analystic">
+        <span class="material-symbols-outlined text-lg">monitoring</span>Analytics
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/coupons">
+        <span class="material-symbols-outlined text-lg">confirmation_number</span>Coupons
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white border-l-4 border-[#90abff] bg-[#1f2b49] font-bold text-sm"
+        href="/admin/category">
+        <span class="material-symbols-outlined text-lg">category</span>Categories
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/offer">
+        <span class="material-symbols-outlined text-lg">local_offer</span>Offers
+      </a>
+      
     </nav>
 
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-md">
-      <div>
-        <h2 class="font-h1 text-h1 text-on-surface mb-xs">Edit Category</h2>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          Update the product classification details.
-        </p>
-      </div>
-      <div class="flex gap-sm">
-        <button type="button" onclick="window.location.href='/admin/category'"
-          class="px-md h-10 border border-gray-700 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all">
-          Cancel
+    <div class="mt-auto px-4 pt-6 border-t border-[#1f2a44]">
+      <form action="/admin/logout" method="POST">
+        <button type="submit"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight">
+          <span class="material-symbols-outlined text-lg">logout</span>
+          Logout
         </button>
-        <button type="submit" form="editCategoryForm"
-          class="px-6 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white 
-          font-semibold rounded-lg flex items-center gap-2 shadow-lg shadow-purple-500/30 
-          hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all duration-200">
-          <span class="material-symbols-outlined text-[20px]">save</span>
-          <span class="tracking-wide">Update Category</span>
-        </button>
-      </div>
+      </form>
     </div>
 
-    <!-- Form -->
-    <form id="editCategoryForm">
-      <div class="grid grid-cols-12 gap-6">
+  </aside>
 
-        <!-- Left Column -->
-        <div class="col-span-12 lg:col-span-8 space-y-6">
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-              <span class="material-symbols-outlined text-purple-500">info</span>
-              Category Details
-            </h3>
+  <!-- Main Content -->
+  <main class="ml-64 min-h-screen relative">
 
-            <div class="space-y-6">
+    <!-- Top Nav -->
+    <header
+      class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-[#060e20]/70 backdrop-blur-xl shadow-2xl shadow-blue-900/10 flex items-center justify-between px-8 z-40">
+      <div class="flex items-center gap-4">
+        <a href="/admin/category"
+          class="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-white transition-colors">
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span>Back to Categories
+        </a>
+        <span class="text-outline-variant">|</span>
+        <nav class="flex items-center gap-1 text-xs font-bold text-on-surface-variant">
+          <a href="/admin/dashboard" class="hover:text-white transition-colors">Home</a>
+          <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+          <a href="/admin/category" class="hover:text-white transition-colors">Categories</a>
+          <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+          <span class="text-[#90abff]">Edit</span>
+        </nav>
+      </div>
 
-              <!-- Category Name -->
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">
-                  Category Name <span class="text-red-500">*</span>
-                </label>
-                <input
-                  id="category_name"
-                  name="category_name"
-                  type="text"
-                  value="<%= name %>"
-                  placeholder="Enter category name"
-                  class="w-full px-4 py-3 rounded-lg bg-gray-950 border border-gray-700
-                  text-white placeholder-gray-400 focus:border-purple-500 
-                  focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
-                />
-                <p id="nameError" class="text-xs text-red-500 mt-1 hidden"></p>
-                <p class="text-xs text-gray-500 mt-1 italic">
-                  This name will be visible to customers.
-                </p>
+      <div class="flex items-center gap-4">
+        <button class="p-2 text-on-surface-variant hover:text-white transition-colors">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button class="p-2 text-on-surface-variant hover:text-white transition-colors">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+        <div class="h-8 w-px bg-outline-variant/20 mx-2"></div>
+        <div class="w-9 h-9 rounded-full luxe-gradient flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="pt-24 px-8 pb-12 max-w-5xl mx-auto">
+
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 fu1">
+        <div>
+          <h2 class="font-['Manrope'] font-extrabold text-2xl text-white">Edit Category</h2>
+          <p class="text-on-surface-variant text-sm mt-1">Update the product classification details.</p>
+        </div>
+        <div class="hidden lg:flex gap-3">
+          <button type="button" onclick="window.location.href='/admin/category'" class="btn-ghost">
+            Cancel
+          </button>
+          <button type="submit" form="editCategoryForm" class="btn-primary">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            Update Category
+          </button>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="editCategoryForm">
+        <div class="grid grid-cols-12 gap-6">
+
+          <!-- Primary Form Area -->
+          <div class="col-span-12 lg:col-span-8 space-y-6">
+
+            <div class="bg-surface-container-high rounded-2xl shadow-2xl p-6 fu2">
+
+              <div class="flex items-center gap-3 mb-6 pb-4 border-b border-outline-variant/10">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary text-[18px]">info</span>
+                </div>
+                <span class="font-['Manrope'] font-bold text-sm text-white">Category details</span>
               </div>
 
-              <!-- Description -->
+              <div class="space-y-6">
+
+                <!-- Category Name -->
+                <div>
+                  <label class="lbl" for="category_name">Category name <span class="req">*</span></label>
+                  <input id="category_name" name="category_name" type="text" value="<%= name %>"
+                    placeholder="Enter category name" class="mt-2" />
+                  <p id="nameError" class="err-msg hidden"></p>
+                  <p class="text-[11px] text-on-surface-variant mt-1.5 italic">
+                    This name will be visible to customers.
+                  </p>
+                </div>
+
+                <!-- Description -->
+                <div>
+                  <label class="lbl" for="description">Description <span class="req">*</span></label>
+                  <textarea id="description" name="description" rows="5" placeholder="Enter description..."
+                    class="mt-2"><%= description %></textarea>
+                  <p id="descError" class="err-msg hidden"></p>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Secondary Column -->
+          <div class="col-span-12 lg:col-span-4 space-y-6">
+
+            <div class="bg-surface-container-high rounded-2xl shadow-2xl p-6 fu3">
+
+              <h3 class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">
+                Settings
+              </h3>
+
+              <!-- Status -->
               <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">
-                  Description <span class="text-red-500">*</span>
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows="5"
-                  placeholder="Enter description..."
-                  class="w-full px-4 py-3 rounded-lg bg-gray-950 border border-gray-700
-                  text-white placeholder-gray-400 focus:border-purple-500 
-                  focus:ring-2 focus:ring-purple-500/20 outline-none transition-all resize-none"
-                ><%= description %></textarea>
-                <p id="descError" class="text-xs text-red-500 mt-1 hidden"></p>
+                <label class="lbl block mb-3">Category status</label>
+
+                <div class="flex flex-col gap-3">
+
+                  <!-- Active -->
+                  <label class="status-radio active-radio">
+                    <input name="status" type="radio" value="active" <%= status === true ? 'checked' : '' %>
+                      onchange="requestStatusChange(this)" />
+                    <div>
+                      <span class="font-bold text-white text-sm">Active</span>
+                      <p class="text-[11px] text-on-surface-variant mt-0.5">
+                        Visible and available for products
+                      </p>
+                    </div>
+                  </label>
+
+                  <!-- Inactive -->
+                  <label class="status-radio inactive-radio">
+                    <input name="status" type="radio" value="inactive" <%= status === false ? 'checked' : '' %>
+                      onchange="requestStatusChange(this)" />
+                    <div>
+                      <span class="font-bold text-white text-sm">Inactive</span>
+                      <p class="text-[11px] text-on-surface-variant mt-0.5">
+                        Hidden from storefront
+                      </p>
+                    </div>
+                  </label>
+
+                </div>
+
+                <!-- Current status indicator -->
+                <div id="status-indicator" class="mt-4 flex items-center gap-2">
+                  <span id="status-dot" class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+                  <span class="text-[11px] text-on-surface-variant">Currently:
+                    <span id="status-label" class="text-white font-bold">Active</span>
+                  </span>
+                </div>
               </div>
 
             </div>
+
           </div>
+
         </div>
 
-        <!-- Right Column -->
-        <div class="col-span-12 lg:col-span-4 space-y-6">
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 class="text-xs text-gray-400 mb-4 uppercase tracking-wider">Settings</h3>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-3">
-                Category Status
-              </label>
-              <div class="flex flex-col gap-3">
-
-                <!-- Active -->
-                <label class="flex items-center gap-3 p-3 border border-gray-700 rounded-lg 
-                cursor-pointer hover:bg-gray-800 transition-all 
-                has-[:checked]:border-purple-500 has-[:checked]:bg-purple-500/10">
-                  <input
-                    name="status" type="radio" value="active"
-                    <%= status === true ? 'checked' : '' %>
-                    class="w-4 h-4 accent-purple-500"
-                    onchange="requestStatusChange(this)"
-                  />
-                  <div>
-                    <span class="font-medium text-white">Active</span>
-                    <p class="text-xs text-gray-400">Visible and available for products</p>
-                  </div>
-                </label>
-
-                <!-- Inactive -->
-                <label class="flex items-center gap-3 p-3 border border-gray-700 rounded-lg 
-                cursor-pointer hover:bg-gray-800 transition-all 
-                has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-500/10">
-                  <input
-                    name="status" type="radio" value="inactive"
-                    <%= status === false ? 'checked' : '' %>
-                    class="w-4 h-4 accent-indigo-500"
-                    onchange="requestStatusChange(this)"
-                  />
-                  <div>
-                    <span class="font-medium text-white">Inactive</span>
-                    <p class="text-xs text-gray-400">Hidden from storefront</p>
-                  </div>
-                </label>
-
-              </div>
-
-              <!-- Current status indicator -->
-              <div id="status-indicator" class="mt-3 flex items-center gap-2">
-                <span id="status-dot" class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
-                <span class="text-xs text-gray-400">Currently: <span id="status-label" class="text-gray-200 font-medium">Active</span></span>
-              </div>
-            </div>
-          </div>
+        <!-- Mobile Footer Actions (Visible on small screens only) -->
+        <div class="mt-8 lg:hidden flex flex-col gap-3">
+          <button type="submit" class="btn-primary w-full">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            Update Category
+          </button>
+          <button type="button" onclick="window.location.href='/admin/category'" class="btn-ghost w-full">Cancel</button>
         </div>
 
+      </form><!-- Form ends here -->
+
+    </div>
+  </main>
+
+  <!-- ───────────────── Status Confirmation Modal ───────────────── -->
+  <div id="status-confirm-modal" class="hidden fixed inset-0 z-[9998] flex items-center justify-center" role="dialog"
+    aria-modal="true" aria-labelledby="modal-heading">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="cancelStatusChange()"></div>
+
+    <!-- Card -->
+    <div class="modal-card relative z-10 w-[340px] bg-surface-container-high border border-outline-variant/20 rounded-2xl shadow-2xl p-6">
+
+      <!-- Icon + Title -->
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-9 h-9 rounded-lg bg-tertiary/15 border border-tertiary/30 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-tertiary text-[20px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+        </div>
+        <div>
+          <h3 id="modal-heading" class="text-base font-bold text-white leading-snug">Confirm status change</h3>
+          <p id="modal-new-status" class="text-xs text-on-surface-variant mt-0.5"></p>
+        </div>
       </div>
-    </form>
 
-  </div>
-</main>
+      <!-- Body -->
+      <p id="modal-body" class="text-sm text-on-surface-variant leading-relaxed mb-5 pl-12"></p>
 
-<!-- ───────────────── Status Confirmation Modal ───────────────── -->
-<div
-  id="status-confirm-modal"
-  class="hidden fixed inset-0 z-[9998] flex items-center justify-center"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modal-heading"
->
-  <!-- Backdrop -->
-  <div
-    class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-    onclick="cancelStatusChange()"
-  ></div>
+      <!-- Divider -->
+      <div class="border-t border-outline-variant/10 mb-4"></div>
 
-  <!-- Card -->
-  <div class="modal-card relative z-10 w-[340px] bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl shadow-black/60 p-6">
-
-    <!-- Icon + Title -->
-    <div class="flex items-start gap-3 mb-3">
-      <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
-        <span class="material-symbols-outlined text-amber-400 text-[20px]"
-              style="font-variation-settings: 'FILL' 1;">warning</span>
-      </div>
-      <div>
-        <h3 id="modal-heading" class="text-base font-semibold text-white leading-snug">Confirm status change</h3>
-        <p id="modal-new-status" class="text-xs text-gray-400 mt-0.5"></p>
+      <!-- Actions -->
+      <div class="flex gap-3 justify-end">
+        <button onclick="cancelStatusChange()" class="btn-ghost !h-9 !px-4 text-sm">
+          Keep current
+        </button>
+        <button id="modal-confirm-btn" onclick="confirmStatusChange()"
+          class="px-4 h-9 text-sm font-bold rounded-lg transition-all">
+          Confirm
+        </button>
       </div>
     </div>
-
-    <!-- Body -->
-    <p id="modal-body" class="text-sm text-gray-400 leading-relaxed mb-5 pl-12"></p>
-
-    <!-- Divider -->
-    <div class="border-t border-gray-800 mb-4"></div>
-
-    <!-- Actions -->
-    <div class="flex gap-3 justify-end">
-      <button
-        onclick="cancelStatusChange()"
-        class="px-4 h-9 text-sm font-medium border border-gray-700 bg-gray-800 text-gray-300 
-        rounded-lg hover:bg-gray-700 hover:text-white transition-all"
-      >
-        Keep current
-      </button>
-      <button
-        id="modal-confirm-btn"
-        onclick="confirmStatusChange()"
-        class="px-4 h-9 text-sm font-semibold rounded-lg transition-all"
-      >
-        Confirm
-      </button>
-    </div>
   </div>
-</div>
 
-<!-- ───────────────── Toast Notification ───────────────── -->
-<div id="toast" class="fixed top-6 right-6 z-[9999] hidden items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-semibold transition-all duration-300">
-  <span id="toastIcon" class="material-symbols-outlined text-[20px]"></span>
-  <span id="toastMsg"></span>
-</div>
+  <!-- ───────────────── Toast Notification ───────────────── -->
+  <div id="toast"
+    class="fixed top-6 right-6 z-[9999] hidden items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-bold transition-all duration-300">
+    <span id="toastIcon" class="material-symbols-outlined text-[20px]"></span>
+    <span id="toastMsg"></span>
+  </div>
 
-<!-- ───────────────────────────── Scripts ───────────────────────────── -->
-<script>
-  /* ── Status confirmation logic ── */
-  let _confirmedStatus = document.querySelector('input[name="status"]:checked')?.value || 'active';
-  let _pendingStatus   = null;
+  <script>
+    /* ── Status confirmation logic ── */
+    let _confirmedStatus = document.querySelector('input[name="status"]:checked')?.value || 'active';
+    let _pendingStatus = null;
 
-  const statusConfig = {
-  active: {
-    label: 'Active',
-    subtitle: 'Set category to Active',
-    body: 'This will make the category visible to customers.',
-    dotColor: 'bg-green-500',
-    btnClass: 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white',
-  },
-  inactive: {
-    label: 'Inactive',
-    subtitle: 'Set category to Inactive',
-    body: 'This will hide the category from customers.',
-    dotColor: 'bg-gray-500',
-    btnClass: 'bg-red-600 text-white',
-  },
-};
+    const statusConfig = {
+      active: {
+        label: 'Active',
+        subtitle: 'Set category to Active',
+        body: 'This will make the category visible to customers.',
+        dotClass: 'bg-emerald-400',
+        btnClass: 'modal-btn-confirm-active',
+      },
+      inactive: {
+        label: 'Inactive',
+        subtitle: 'Set category to Inactive',
+        body: 'This will hide the category from customers.',
+        dotClass: 'bg-outline',
+        btnClass: 'modal-btn-confirm-inactive',
+      },
+    };
 
-  function syncStatusIndicator(value) {
-    const cfg = statusConfig[value];
-    document.getElementById('status-dot').className   = `w-2 h-2 rounded-full inline-block ${cfg.dotColor}`;
-    document.getElementById('status-label').textContent = cfg.label;
-  }
+    function syncStatusIndicator(value) {
+      const cfg = statusConfig[value];
+      document.getElementById('status-dot').className = `w-2 h-2 rounded-full inline-block ${cfg.dotClass}`;
+      document.getElementById('status-label').textContent = cfg.label;
+    }
 
-  // Initialise indicator on load
-  syncStatusIndicator(_confirmedStatus);
-
-  function requestStatusChange(input) {
-    const newVal = input.value;
-    if (newVal === _confirmedStatus) return;
-
-    _pendingStatus = newVal;
-
-    const cfg = statusConfig[newVal];
-
-    document.getElementById('modal-new-status').textContent = cfg.subtitle;
-    document.getElementById('modal-body').textContent       = cfg.body;
-
-    const confirmBtn = document.getElementById('modal-confirm-btn');
-    confirmBtn.className = `px-4 h-9 text-sm font-semibold rounded-lg transition-all ${cfg.btnClass}`;
-    confirmBtn.textContent = `Set ${cfg.label}`;
-
-    document.getElementById('status-confirm-modal').classList.remove('hidden');
-    document.getElementById('status-confirm-modal').classList.add('flex');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function confirmStatusChange() {
-    _confirmedStatus = _pendingStatus;
-    _pendingStatus   = null;
-    closeModal();
+    // Initialise indicator on load
     syncStatusIndicator(_confirmedStatus);
-    // Ensure the correct radio stays checked (edge case guard)
-    document.querySelectorAll('input[name="status"]').forEach(r => {
-      r.checked = r.value === _confirmedStatus;
-    });
-  }
 
-  function cancelStatusChange() {
-    // Revert radio to last confirmed value
-    document.querySelectorAll('input[name="status"]').forEach(r => {
-      r.checked = r.value === _confirmedStatus;
-    });
-    _pendingStatus = null;
-    closeModal();
-  }
+    function requestStatusChange(input) {
+      const newVal = input.value;
+      if (newVal === _confirmedStatus) return;
 
-  function closeModal() {
-    document.getElementById('status-confirm-modal').classList.add('hidden');
-    document.getElementById('status-confirm-modal').classList.remove('flex');
-    document.body.style.overflow = '';
-  }
+      _pendingStatus = newVal;
 
-  // Close on Escape key
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') cancelStatusChange();
-  });
+      const cfg = statusConfig[newVal];
 
+      document.getElementById('modal-new-status').textContent = cfg.subtitle;
+      document.getElementById('modal-body').textContent = cfg.body;
 
-  /* ── Toast ── */
-  function showToast(message, type = "success") {
-    const toast     = document.getElementById("toast");
-    const toastMsg  = document.getElementById("toastMsg");
-    const toastIcon = document.getElementById("toastIcon");
+      const confirmBtn = document.getElementById('modal-confirm-btn');
+      confirmBtn.className = `px-4 h-9 text-sm font-bold rounded-lg transition-all ${cfg.btnClass}`;
+      confirmBtn.textContent = `Set ${cfg.label}`;
 
-    toastMsg.innerText = message;
-
-    if (type === "success") {
-      toast.className = "fixed top-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-semibold bg-green-900/90 border-green-500/50 text-green-300";
-      toastIcon.innerText = "check_circle";
-    } else {
-      toast.className = "fixed top-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-semibold bg-red-900/90 border-red-500/50 text-red-300";
-      toastIcon.innerText = "error";
+      document.getElementById('status-confirm-modal').classList.remove('hidden');
+      document.getElementById('status-confirm-modal').classList.add('flex');
+      document.body.style.overflow = 'hidden';
     }
 
-    setTimeout(() => {
-      toast.classList.add("hidden");
-    }, 3000);
-  }
-
-
-  /* ── Form submission ── */
-  const form = document.getElementById("editCategoryForm");
-
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const nameEl  = document.getElementById("category_name");
-    const descEl  = document.getElementById("description");
-    const nameErr = document.getElementById("nameError");
-    const descErr = document.getElementById("descError");
-
-    // Reset errors
-    nameErr.classList.add("hidden");
-    descErr.classList.add("hidden");
-    nameEl.classList.remove("border-red-500");
-    descEl.classList.remove("border-red-500");
-
-    let isValid = true;
-
-    if (nameEl.value.trim() === "") {
-      nameErr.innerText = "Category name is required";
-      nameErr.classList.remove("hidden");
-      nameEl.classList.add("border-red-500");
-      isValid = false;
-    } else if (nameEl.value.trim().length < 3) {
-      nameErr.innerText = "Minimum 3 characters required";
-      nameErr.classList.remove("hidden");
-      nameEl.classList.add("border-red-500");
-      isValid = false;
+    function confirmStatusChange() {
+      _confirmedStatus = _pendingStatus;
+      _pendingStatus = null;
+      closeModal();
+      syncStatusIndicator(_confirmedStatus);
+      // Ensure the correct radio stays checked (edge case guard)
+      document.querySelectorAll('input[name="status"]').forEach(r => {
+        r.checked = r.value === _confirmedStatus;
+      });
     }
 
-    if (descEl.value.trim() === "") {
-      descErr.innerText = "Description is required";
-      descErr.classList.remove("hidden");
-      descEl.classList.add("border-red-500");
-      isValid = false;
+    function cancelStatusChange() {
+      // Revert radio to last confirmed value
+      document.querySelectorAll('input[name="status"]').forEach(r => {
+        r.checked = r.value === _confirmedStatus;
+      });
+      _pendingStatus = null;
+      closeModal();
     }
 
-    if (!isValid) return;
+    function closeModal() {
+      document.getElementById('status-confirm-modal').classList.add('hidden');
+      document.getElementById('status-confirm-modal').classList.remove('flex');
+      document.body.style.overflow = '';
+    }
 
-    const formData = new FormData(form);
-
-    const res = await fetch("/admin/editCategory/<%= id %>", {
-      method: "POST",
-      body: new URLSearchParams(formData),
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') cancelStatusChange();
     });
 
-    const data = await res.json();
+    /* ── Toast ── */
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toastMsg");
+      const toastIcon = document.getElementById("toastIcon");
 
-    if (data.success) {
-      showToast("Category updated successfully!", "success");
+      toastMsg.innerText = message;
+      toast.classList.remove("hidden");
+      toast.classList.add("flex");
+
+      if (type === "success") {
+        toast.className = "fixed top-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-bold bg-surface-container-high border-emerald-400/40 text-emerald-400";
+        toastIcon.innerText = "check_circle";
+      } else {
+        toast.className = "fixed top-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-bold bg-surface-container-high border-error/40 text-error";
+        toastIcon.innerText = "error";
+      }
+
       setTimeout(() => {
-        window.location.href = data.redirect;
-      }, 1500);
-    } else {
-      showToast(data.message, "error");
-      nameErr.innerText = data.message;
-      nameErr.classList.remove("hidden");
-      nameEl.classList.add("border-red-500");
+        toast.classList.add("hidden");
+        toast.classList.remove("flex");
+      }, 3000);
     }
-  });
-</script>
+
+    /* ── Form submission ── */
+    const form = document.getElementById("editCategoryForm");
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const nameEl = document.getElementById("category_name");
+      const descEl = document.getElementById("description");
+      const nameErr = document.getElementById("nameError");
+      const descErr = document.getElementById("descError");
+
+      // Reset errors
+      nameErr.classList.add("hidden");
+      descErr.classList.add("hidden");
+      nameEl.classList.remove("field-error");
+      descEl.classList.remove("field-error");
+
+      let isValid = true;
+
+      if (nameEl.value.trim() === "") {
+        nameErr.innerText = "Category name is required";
+        nameErr.classList.remove("hidden");
+        nameEl.classList.add("field-error");
+        isValid = false;
+      } else if (nameEl.value.trim().length < 3) {
+        nameErr.innerText = "Minimum 3 characters required";
+        nameErr.classList.remove("hidden");
+        nameEl.classList.add("field-error");
+        isValid = false;
+      }
+
+      if (descEl.value.trim() === "") {
+        descErr.innerText = "Description is required";
+        descErr.classList.remove("hidden");
+        descEl.classList.add("field-error");
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      const formData = new FormData(form);
+
+      const res = await fetch("/admin/editCategory/<%= id %>", {
+        method: "POST",
+        body: new URLSearchParams(formData),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        showToast("Category updated successfully!", "success");
+        setTimeout(() => {
+          window.location.href = data.redirect;
+        }, 1500);
+      } else {
+        showToast(data.message, "error");
+        nameErr.innerText = data.message;
+        nameErr.classList.remove("hidden");
+        nameEl.classList.add("field-error");
+      }
+    });
+  </script>
 
 </body>
+
 </html>

@@ -19,6 +19,10 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; overflow-x: hidden; }
+  .flash { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 24px; border: 1px solid; position: relative; z-index: 1; }
+  .flash.success { background: rgba(34,197,94,.08); border-color: rgba(34,197,94,.2); color: #4ade80; }
+  .flash.error { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.2); color: #f87171; }
+  .flash .close-btn { margin-left: auto; cursor: pointer; font-size: 1.1rem; user-select: none; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--sur4); border-radius: 99px; }
@@ -273,6 +277,7 @@
     .page-header-left h1 { font-size: 2.4rem; }
   }
 </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
 <body>
 
@@ -331,6 +336,14 @@
 
 <!-- MAIN -->
 <main>
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="flash error">
+      <span class="ms material-symbols-outlined icon">error</span>
+      <span><%= error %></span>
+      <span class="close-btn" onclick="closeFlash(this)">×</span>
+    </div>
+  <% } %>
+
   <div class="page-header">
     <div class="page-header-left">
       <div class="eyebrow">Account Security</div>
@@ -564,6 +577,11 @@
     this.submit();
   });
 })();
+
+function closeFlash(btn) {
+  const el = btn.parentElement;
+  if (el) el.remove();
+}
 </script>
 </body>
 </html>

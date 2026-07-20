@@ -503,6 +503,7 @@
     aside::-webkit-scrollbar-track { background: transparent; }
     aside::-webkit-scrollbar-thumb { background: var(--outline-variant); border-radius: 4px; }
   </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
 <body>
 
@@ -564,7 +565,7 @@
         <span class="ms">inventory_2</span>
         Products
       </a>
-      <a class="sidebar-link <%= activePage === 'categories' ? 'active' : '' %>" href="/admin/categories">
+      <a class="sidebar-link <%= activePage === 'categories' ? 'active' : '' %>" href="/admin/category">
         <span class="ms">category</span>
         Categories
       </a>
@@ -572,7 +573,7 @@
 
     <div class="sidebar-section">
       <p class="sidebar-label">Commerce</p>
-      <a class="sidebar-link <%= activePage === 'orders' ? 'active' : '' %>" href="/admin/orders">
+      <a class="sidebar-link <%= activePage === 'orders' ? 'active' : '' %>" href="/admin/order-management">
         <span class="ms">shopping_cart</span>
         Orders
       </a>
@@ -584,7 +585,7 @@
         <span class="ms">confirmation_number</span>
         Coupons
       </a>
-      <a class="sidebar-link <%= activePage === 'offers' ? 'active' : '' %>" href="/admin/offers">
+      <a class="sidebar-link <%= activePage === 'offers' ? 'active' : '' %>" href="/admin/offer">
         <span class="ms">local_offer</span>
         Offers
       </a>
@@ -592,7 +593,7 @@
         <span class="ms">ad_units</span>
         coupons
       </a>
-      <a class="sidebar-link <%= activePage === 'analytics' ? 'active' : '' %>" href="/admin/analytics">
+      <a class="sidebar-link <%= activePage === 'analytics' ? 'active' : '' %>" href="/admin/analystic">
         <span class="ms">monitoring</span>
         Analytics
       </a>

@@ -22,6 +22,9 @@ export const userLandingLoad = (req, res) => {
 
 export const userLoginLoad = (req, res) => {
   if (req.session.user) return res.redirect("/homePage");
+  if (req.query.redirect) {
+    req.session.redirectTo = req.query.redirect;
+  }
   return res.render("Users/login", { message: null });
 };
 
@@ -95,6 +98,10 @@ export const registerController = async (req, res) => {
       return res.render("Users/signUp", {
         message: result.message,
         referralToken: referralCode || "",
+        fullName: fullName || "",
+        email: email || "",
+        phoneNumber: phoneNumber || "",
+        password: password || "",
       });
     }
 
@@ -104,6 +111,10 @@ export const registerController = async (req, res) => {
     return res.render("Users/signUp", {
       message: "Server error. Please try again.",
       referralToken: req.body.referralCode || "",
+      fullName: req.body.fullName || "",
+      email: req.body.email || "",
+      phoneNumber: req.body.phoneNumber || "",
+      password: req.body.password || "",
     });
   }
 };
@@ -118,7 +129,9 @@ export const loginController = async (req, res) => {
         .json({ success: false, message: result.message, field: result.field });
     }
 
-    return res.json({ success: true, redirect: "/homePage" });
+    const redirectUrl = req.session.redirectTo || "/homePage";
+    req.session.redirectTo = null;
+    return res.json({ success: true, redirect: redirectUrl });
   } catch (err) {
     console.error("loginController error:", err);
     return res.status(500).json({ success: false, message: "Server error" });
@@ -137,7 +150,9 @@ export async function googleCallback(req, res) {
       phoneNumber: user.phoneNumber || "",
     };
 
-    return res.redirect("/homePage");
+    const redirectUrl = req.session.redirectTo || "/homePage";
+    req.session.redirectTo = null;
+    return res.redirect(redirectUrl);
   } catch (err) {
     console.error("googleCallback error:", err);
     return res.redirect("/login");
@@ -241,10 +256,14 @@ export const productListingLoad = async (req, res) => {
   try {
     const data = await getFilteredProducts(req.query);
 
-    const cartCount = await getCartCount(req.session.user?._id);
-    const userId = req.session.user._id || req.session.user.id;
-    const wishlistResult = await wishlistCheck(userId);
-    const wishlistedIds = wishlistResult.success ? wishlistResult.data : [];
+    const user = req.session.user || null;
+    const cartCount = user ? await getCartCount(user._id || user.id) : 0;
+    let wishlistedIds = [];
+    if (user) {
+      const userId = user._id || user.id;
+      const wishlistResult = await wishlistCheck(userId);
+      wishlistedIds = wishlistResult.success ? wishlistResult.data : [];
+    }
 
     const buildPagination = (current, total) => {
       if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -266,6 +285,7 @@ export const productListingLoad = async (req, res) => {
     };
 
     return res.render("Users/productListingPage", {
+      user,
       product: data.products,
       cartCount: cartCount,
       searchValue: data.filters.search,
@@ -287,6 +307,7 @@ export const productListingLoad = async (req, res) => {
     console.error("productListingLoad:", err);
 
     res.render("Users/productListingPage", {
+      user: req.session.user || null,
       product: [],
       cartCount: 0,
 
@@ -333,7 +354,31 @@ export const productDetailLoad = async (req, res) => {
       });
     }
 
+    const user = req.session.user || null;
+    let wishlistedIds = [];
+    if (user) {
+      const userId = user._id || user.id;
+      const wishlistResult = await wishlistCheck(userId);
+      wishlistedIds = wishlistResult.success ? wishlistResult.data : [];
+    }
+
+    // Set isWishlisted flag on variants
+    if (data.allVariants) {
+      data.allVariants.forEach(v => {
+        v.isWishlisted = wishlistedIds.includes(v._id.toString());
+      });
+    }
+    if (data.variants) {
+      data.variants.forEach(v => {
+        v.isWishlisted = wishlistedIds.includes(v._id.toString());
+      });
+    }
+    if (data.defaultVariant) {
+      data.defaultVariant.isWishlisted = wishlistedIds.includes(data.defaultVariant._id.toString());
+    }
+
     return res.render("Users/productDetailsPage", {
+      user,
       product: data.product,
       variants: data.variants,
       allVariants: data.allVariants,
@@ -347,6 +392,7 @@ export const productDetailLoad = async (req, res) => {
   } catch (err) {
     console.error("productDetailLoad error:", err);
     return res.status(500).render("Users/productDetailsPage", {
+      user: req.session.user || null,
       product: null,
       variants: [],
       allVariants: [],

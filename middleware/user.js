@@ -21,5 +21,6 @@ export const isUserAuthenticated = (req, res, next) => {
     return next();
   }
 
+  req.session.redirectTo = req.originalUrl;
   return res.redirect("/login");
 };
