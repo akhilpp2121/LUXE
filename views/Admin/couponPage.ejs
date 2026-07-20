@@ -1,566 +1,640 @@
 <!DOCTYPE html>
 <html class="dark" lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Coupon Manager | All Coupons</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        "colors": {
-          "inverse-primary": "#00668a",
-          "on-secondary-fixed-variant": "#39485a",
-          "background": "#0b1326",
-          "on-tertiary-fixed-variant": "#653e00",
-          "secondary-container": "#39485a",
-          "on-tertiary": "#472a00",
-          "surface": "#0b1326",
-          "outline": "#87929a",
-          "on-tertiary-container": "#613b00",
-          "tertiary-container": "#f1a02b",
-          "inverse-surface": "#dae2fd",
-          "error": "#ffb4ab",
-          "error-container": "#93000a",
-          "on-secondary-fixed": "#0d1c2d",
-          "on-primary-fixed-variant": "#004c69",
-          "on-surface-variant": "#bdc8d1",
-          "on-error-container": "#ffdad6",
-          "secondary": "#b9c8de",
-          "on-secondary": "#233143",
-          "on-error": "#690005",
-          "on-primary-fixed": "#001e2c",
-          "surface-variant": "#2d3449",
-          "primary-container": "#38bdf8",
-          "inverse-on-surface": "#283044",
-          "secondary-fixed": "#d4e4fa",
-          "on-secondary-container": "#a7b6cc",
-          "surface-container": "#171f33",
-          "surface-container-lowest": "#060e20",
-          "primary": "#8ed5ff",
-          "tertiary": "#ffc176",
-          "surface-container-highest": "#2d3449",
-          "surface-container-low": "#131b2e",
-          "surface-bright": "#31394d",
-          "secondary-fixed-dim": "#b9c8de",
-          "surface-dim": "#0b1326",
-          "tertiary-fixed": "#ffddb8",
-          "on-surface": "#dae2fd",
-          "surface-tint": "#7bd0ff",
-          "primary-fixed": "#c4e7ff",
-          "on-primary": "#00354a",
-          "primary-fixed-dim": "#7bd0ff",
-          "tertiary-fixed-dim": "#ffb960",
-          "on-tertiary-fixed": "#2a1700",
-          "on-primary-container": "#004965",
-          "outline-variant": "#3e484f",
-          "surface-container-high": "#222a3d",
-          "on-background": "#dae2fd"
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>LUXE Admin | Coupon Manager</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-container": "#313aa1", "on-primary-fixed-variant": "#00266e", "tertiary-dim": "#ef8fe5", "surface-container-highest": "#192540", "on-surface-variant": "#a3aac4", "on-tertiary-fixed-variant": "#711f6f", "outline": "#6d758c", "error-container": "#9f0519", "surface-bright": "#1f2b49", "secondary-fixed": "#cbceff", "primary-dim": "#316bf3", "background": "#060e20", "surface-variant": "#192540", "surface-container-lowest": "#000000", "primary-fixed": "#7b9cff", "surface-container-high": "#141f38", "surface-container": "#0f1930", "on-secondary-fixed-variant": "#3c45ab", "on-secondary-fixed": "#1c248e", "inverse-surface": "#faf8ff", "tertiary": "#ffb4f4", "surface-tint": "#90abff", "secondary-dim": "#8b94ff", "secondary": "#8b94ff", "on-primary-container": "#001e5a", "surface": "#060e20", "primary-fixed-dim": "#658eff", "on-tertiary": "#722070", "on-secondary-container": "#caccff", "on-primary-fixed": "#000000", "error-dim": "#d7383b", "error": "#ff716c", "tertiary-fixed-dim": "#ef8fe5", "on-surface": "#dee5ff", "surface-container-low": "#091328", "on-error-container": "#ffa8a3", "surface-dim": "#060e20", "on-secondary": "#000478", "on-error": "#490006", "outline-variant": "#40485d", "on-primary": "#002873", "primary": "#90abff", "on-tertiary-container": "#661466", "secondary-fixed-dim": "#bbbfff", "primary-container": "#7b9cff", "tertiary-fixed": "#fe9cf4", "on-background": "#dee5ff", "tertiary-container": "#fe9cf4", "on-tertiary-fixed": "#480049", "inverse-primary": "#0053dc", "inverse-on-surface": "#4d556b"
+          },
+          fontFamily: { "headline": ["Manrope"], "body": ["Inter"], "label": ["Inter"], "mono": ["JetBrains Mono"] },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
         },
-        "borderRadius": {
-          "DEFAULT": "0.125rem","lg": "0.25rem","xl": "0.5rem","full": "0.75rem"
-        },
-        "fontFamily": {
-          "label-md": ["JetBrains Mono"],
-          "body-lg": ["Inter"], "body-md": ["Inter"],
-          "headline-xl-mobile": ["IBM Plex Sans"],
-          "label-sm": ["JetBrains Mono"],
-          "body-sm": ["Inter"],
-          "headline-lg": ["IBM Plex Sans"],
-          "headline-md": ["IBM Plex Sans"],
-          "headline-xl": ["IBM Plex Sans"]
-        }
-      }
+      },
     }
-  }
-</script>
-<style>
-  body { font-family: 'Inter', sans-serif; }
-  h1, h2, h3, h4 { font-family: 'IBM Plex Sans', sans-serif; }
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    vertical-align: middle;
-  }
-  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: #3e484f; border-radius: 10px; }
-  #clearBtn { display: none; }
-  #clearBtn.visible { display: flex; }
-</style>
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #060e20;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1f2b49;
+      border-radius: 10px;
+    }
+
+    .glass-effect {
+      background: rgba(25, 37, 64, 0.7);
+      backdrop-filter: blur(20px);
+    }
+
+    .luxe-gradient {
+      background: linear-gradient(135deg, #316bf3 0%, #90abff 100%);
+    }
+
+    .search-btn {
+      transition: all 0.15s ease;
+    }
+
+    .search-btn:active {
+      transform: scale(0.93);
+    }
+
+    #clearBtn {
+      display: none;
+    }
+
+    #clearBtn.visible {
+      display: flex;
+    }
+  </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
-<body class="bg-background text-on-background min-h-screen">
 
-<!-- Sidebar -->
-<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface border-r border-outline-variant flex flex-col py-6 shadow-sm z-50">
-  <div class="px-6 mb-8">
-    <h1 class="font-bold text-2xl text-primary-fixed-dim">AdminPanel</h1>
-    <p class="text-on-surface-variant text-sm">Coupon Management</p>
-  </div>
-  <nav class="flex-1 px-4 space-y-1">
-    <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high" href="/admin/dashboard">
-      <span class="material-symbols-outlined">dashboard</span>
-      <span>Dashboard</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary-container font-bold border-r-4 border-primary-container bg-surface-container-high" href="/admin/coupons">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">confirmation_number</span>
-      <span>Coupons</span>
-    </a>
-  </nav>
-  <div class="px-4 mt-auto">
-    <a href="/admin/coupons-add">
-      <button class="w-full bg-primary-container text-on-primary-container py-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90">
-        <span class="material-symbols-outlined">add_circle</span>
-        New Coupon
-      </button>
-    </a>
-  </div>
-</aside>
+<body class="bg-background text-on-background font-body antialiased min-h-screen">
 
-<!-- Top Nav -->
-<header class="fixed top-0 right-0 left-[280px] h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-8 z-40">
-  <div class="flex items-center flex-1 max-w-md">
-    <div class="relative w-full">
-      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-      <input
-        id="searchInput"
-        class="w-full pl-10 pr-10 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-container/40 text-sm text-on-surface"
-        placeholder="Search coupons..."
-        type="text"
-        value="<%= search %>"
-        oninput="handleSearch(this.value); toggleClearBtn(this.value)"
-      />
-      <!-- Clear button -->
-      <button
-        id="clearBtn"
-        onclick="clearSearch()"
-        class="absolute right-2 top-1/2 -translate-y-1/2 items-center justify-center w-5 h-5 rounded-full bg-outline-variant hover:bg-on-surface-variant transition-colors"
-        title="Clear search"
-      >
-        <span class="material-symbols-outlined text-on-background" style="font-size:14px;line-height:1">close</span>
-      </button>
+  <!-- Sidebar -->
+  <aside class="h-screen w-64 fixed left-0 top-0 bg-[#091328] dark:bg-slate-950 flex flex-col py-8 px-4 z-50">
+
+    <div class="mb-10 px-4">
+      <h1 class="font-['Manrope'] font-extrabold text-xl tracking-tighter text-white">LUXE Admin</h1>
+      <p class="text-on-surface-variant text-[10px] uppercase tracking-widest mt-1">Premium Command</p>
     </div>
-  </div>
-  <div class="flex items-center gap-4">
-    <a href="/admin/coupons-add">
-      <button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg text-sm font-bold hover:opacity-90">
-        Create New Coupon
-      </button>
-    </a>
-    <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary-fixed-dim">
-      <span class="material-symbols-outlined">account_circle</span>
+
+    <nav class="flex-1 space-y-1">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/dashboard">
+        <span class="material-symbols-outlined text-lg">dashboard</span>Dashboard
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/order-management">
+        <span class="material-symbols-outlined text-lg">shopping_cart</span>Orders
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/products">
+        <span class="material-symbols-outlined text-lg">inventory_2</span>Products
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/users">
+        <span class="material-symbols-outlined text-lg">group</span>Users
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/analystic">
+        <span class="material-symbols-outlined text-lg">monitoring</span>Analytics
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white border-l-4 border-[#90abff] bg-[#1f2b49] font-bold text-sm"
+        href="/admin/coupons">
+        <span class="material-symbols-outlined text-lg">confirmation_number</span>Coupons
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/category">
+        <span class="material-symbols-outlined text-lg">category</span>Categories
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-bold text-sm"
+        href="/admin/offer">
+        <span class="material-symbols-outlined text-lg">local_offer</span>Offers
+      </a>
+     
+    </nav>
+
+    <div class="mt-auto px-4 pt-6 border-t border-[#1f2a44] space-y-2">
+      <a href="/admin/coupons-add">
+        <button
+          class="w-full luxe-gradient text-on-primary py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-lg">add_circle</span>
+          New Coupon
+        </button>
+      </a>
+      <form action="/admin/logout" method="POST">
+        <button type="submit"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#a3aac4] hover:text-white hover:bg-[#141f38] transition-colors font-['Inter'] font-bold text-sm tracking-tight">
+          <span class="material-symbols-outlined text-lg">logout</span>
+          Logout
+        </button>
+      </form>
     </div>
-  </div>
-</header>
 
-<!-- Main -->
-<main class="ml-[280px] pt-16 min-h-screen">
-  <div class="p-8 space-y-6">
+  </aside>
 
-    <!-- Page Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-3xl font-bold text-primary-fixed-dim">Coupons</h2>
+  <!-- Main Content -->
+  <main class="ml-64 min-h-screen relative">
+
+    <!-- Top Nav -->
+    <header
+      class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-[#060e20]/70 backdrop-blur-xl shadow-2xl shadow-blue-900/10 flex items-center justify-between px-8 z-40">
+      <div class="flex items-center gap-6">
+        <h2 class="font-['Manrope'] font-semibold text-lg text-[#90abff]">Coupons</h2>
+
+        <div class="relative flex items-center">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm pointer-events-none">search</span>
+          <input id="searchInput"
+            class="w-80 bg-surface-container-lowest border-b-2 border-transparent focus:border-primary py-2 pl-10 pr-10 text-sm text-on-surface transition-all outline-none rounded-sm"
+            placeholder="Search coupons..." type="text" value="<%= search %>"
+            oninput="handleSearch(this.value); toggleClearBtn(this.value)" />
+          <!-- Clear button -->
+          <button id="clearBtn" onclick="clearSearch()"
+            class="absolute right-2.5 top-1/2 -translate-y-1/2 items-center justify-center w-5 h-5 rounded-full bg-surface-bright hover:bg-outline-variant transition-colors"
+            title="Clear search">
+            <span class="material-symbols-outlined text-white" style="font-size:14px;line-height:1">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a href="/admin/coupons-add">
+          <button
+            class="luxe-gradient text-on-primary font-['Inter'] font-bold text-xs px-6 py-2.5 rounded-md hover:brightness-110 active:scale-95 transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">add</span>
+            Create New Coupon
+          </button>
+        </a>
+        <button class="p-2 text-on-surface-variant hover:text-white transition-colors">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <div class="h-8 w-px bg-outline-variant/20 mx-2"></div>
+        <div class="w-9 h-9 rounded-full luxe-gradient flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="pt-24 px-8 pb-12">
+
+      <div class="mb-8">
+        <h2 class="font-['Manrope'] font-extrabold text-2xl text-white">Coupons</h2>
         <p class="text-on-surface-variant text-sm mt-1">Manage and monitor your promotional discount campaigns.</p>
       </div>
-    </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 
-      <!-- Active -->
-      <div class="bg-surface-container-low border border-outline-variant p-6 rounded-xl flex items-start justify-between">
-        <div>
-          <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider mb-1">Active Coupons</p>
-          <h3 class="text-3xl font-bold text-on-surface"><%= stats.activeCoupons %></h3>
-          <p class="text-primary text-xs flex items-center gap-1 mt-2">
-            <span class="material-symbols-outlined text-sm">confirmation_number</span>
-            Total active
-          </p>
-        </div>
-        <div class="w-12 h-12 bg-primary-container/20 rounded-lg flex items-center justify-center text-primary-container">
-          <span class="material-symbols-outlined">confirmation_number</span>
-        </div>
-      </div>
-
-      <!-- Expired -->
-      <div class="bg-surface-container-low border border-outline-variant p-6 rounded-xl flex items-start justify-between">
-        <div>
-          <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider mb-1">Expired Coupons</p>
-          <h3 class="text-3xl font-bold text-on-surface"><%= stats.expiredCoupons %></h3>
-          <p class="text-on-surface-variant text-xs flex items-center gap-1 mt-2">
-            <span class="material-symbols-outlined text-sm">event_busy</span>
-            Past expiry date
-          </p>
-        </div>
-        <div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center text-on-surface-variant">
-          <span class="material-symbols-outlined">event_busy</span>
-        </div>
-      </div>
-
-      <!-- Expiring Soon -->
-      <div class="bg-surface-container-low border border-outline-variant p-6 rounded-xl flex items-start justify-between">
-        <div>
-          <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider mb-1">Expiring Soon</p>
-          <h3 class="text-3xl font-bold text-on-surface"><%= stats.expiringSoon %></h3>
-          <p class="text-error text-xs flex items-center gap-1 mt-2">
-            <span class="material-symbols-outlined text-sm">schedule</span>
-            Within 7 days
-          </p>
-        </div>
-        <div class="w-12 h-12 bg-error-container rounded-lg flex items-center justify-center text-on-error-container">
-          <span class="material-symbols-outlined">timer</span>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Table Card -->
-    <div class="bg-surface-container-low border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
-
-      <!-- Filters -->
-      <div class="p-6 border-b border-outline-variant flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-4 w-full md:w-auto">
-
-          <!-- Status Filter -->
-          <div class="relative w-full md:w-56">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">filter_list</span>
-            <select
-              onchange="handleStatus(this.value)"
-              class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none text-on-surface text-sm appearance-none cursor-pointer"
-            >
-              <option value="" <%= status === '' ? 'selected' : '' %>>All Statuses</option>
-              <option value="true"  <%= status === 'true'  ? 'selected' : '' %>>Active</option>
-              <option value="false" <%= status === 'false' ? 'selected' : '' %>>Inactive</option>
-            </select>
+        <!-- Active -->
+        <div class="bg-surface-container-high rounded-2xl p-6 shadow-xl flex items-start justify-between">
+          <div>
+            <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant mb-1.5">Active Coupons
+            </p>
+            <h3 class="text-3xl font-extrabold text-on-surface">
+              <%= stats.activeCoupons %>
+            </h3>
+            <p class="text-primary text-xs flex items-center gap-1 mt-2 font-semibold">
+              <span class="material-symbols-outlined text-sm">confirmation_number</span>
+              Total active
+            </p>
           </div>
+          <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined">confirmation_number</span>
+          </div>
+        </div>
 
-          <!-- Reset -->
-          <a href="/admin/coupons">
-            <button class="px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface text-sm hover:bg-surface-container flex items-center gap-2">
+        <!-- Expired -->
+        <div class="bg-surface-container-high rounded-2xl p-6 shadow-xl flex items-start justify-between">
+          <div>
+            <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant mb-1.5">Expired
+              Coupons</p>
+            <h3 class="text-3xl font-extrabold text-on-surface">
+              <%= stats.expiredCoupons %>
+            </h3>
+            <p class="text-on-surface-variant text-xs flex items-center gap-1 mt-2 font-semibold">
+              <span class="material-symbols-outlined text-sm">event_busy</span>
+              Past expiry date
+            </p>
+          </div>
+          <div
+            class="w-12 h-12 bg-surface-container-low rounded-xl flex items-center justify-center text-on-surface-variant">
+            <span class="material-symbols-outlined">event_busy</span>
+          </div>
+        </div>
+
+        <!-- Expiring Soon -->
+        <div class="bg-surface-container-high rounded-2xl p-6 shadow-xl flex items-start justify-between">
+          <div>
+            <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant mb-1.5">Expiring Soon
+            </p>
+            <h3 class="text-3xl font-extrabold text-on-surface">
+              <%= stats.expiringSoon %>
+            </h3>
+            <p class="text-error text-xs flex items-center gap-1 mt-2 font-semibold">
+              <span class="material-symbols-outlined text-sm">schedule</span>
+              Within 7 days
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-error/10 rounded-xl flex items-center justify-center text-error">
+            <span class="material-symbols-outlined">timer</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Table Card -->
+      <div class="bg-surface-container-high rounded-2xl overflow-hidden shadow-2xl">
+
+        <!-- Filters -->
+        <div
+          class="p-6 border-b border-outline-variant/10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3 w-full md:w-auto">
+
+            <!-- Status Filter -->
+            <div
+              class="bg-surface-container-low rounded-lg px-4 py-2 flex items-center gap-3 border border-outline-variant/5">
+              <span class="material-symbols-outlined text-on-surface-variant text-sm">filter_list</span>
+              <select onchange="handleStatus(this.value)"
+                class="text-xs font-bold text-on-surface bg-transparent outline-none cursor-pointer">
+                <option value="" class="bg-surface-container-high" <%=status==='' ? 'selected' : '' %>>All Statuses</option>
+                <option value="true" class="bg-surface-container-high" <%=status==='true' ? 'selected' : '' %>>Active</option>
+                <option value="false" class="bg-surface-container-high" <%=status==='false' ? 'selected' : '' %>>Inactive</option>
+              </select>
+              <span class="material-symbols-outlined text-xs text-on-surface-variant">expand_more</span>
+            </div>
+
+            <!-- Reset -->
+            <a href="/admin/coupons"
+              class="search-btn flex items-center justify-center gap-1.5 h-[38px] px-3 bg-surface-container-low border border-outline-variant/10 hover:border-primary/40 text-on-surface-variant hover:text-primary font-['Inter'] font-bold text-xs rounded-sm">
               <span class="material-symbols-outlined text-sm">refresh</span>
               Reset
-            </button>
-          </a>
+            </a>
 
+          </div>
+          <div class="text-on-surface-variant text-xs font-medium">
+            Showing
+            <span class="text-on-surface font-bold">
+              <%= pagination.total === 0 ? 0 : (pagination.currentPage - 1) * pagination.limit + 1 %>–<%= Math.min(pagination.currentPage * pagination.limit, pagination.total) %>
+            </span>
+            of
+            <span class="text-on-surface font-bold">
+              <%= pagination.total %>
+            </span> coupons
+          </div>
         </div>
-        <div class="text-on-surface-variant text-xs font-bold">
-          Showing
-          <span class="text-on-surface">
-            <%= pagination.total === 0 ? 0 : (pagination.currentPage - 1) * pagination.limit + 1 %>–<%= Math.min(pagination.currentPage * pagination.limit, pagination.total) %>
-          </span>
-          of
-          <span class="text-on-surface"><%= pagination.total %></span>
-          coupons
-        </div>
-      </div>
 
-      <!-- Table -->
-      <div class="overflow-x-auto custom-scrollbar">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-surface-container-lowest border-b border-outline-variant">
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase">#</th>
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase">Coupon Code</th>
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase">Type</th>
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase">Value</th>
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase">Min Order</th>
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase">Expiry</th>
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase">Usage</th>
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase text-center">Status</th>
-              <th class="px-6 py-4 text-on-surface-variant text-xs font-bold uppercase text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-outline-variant">
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low/50">
+                <th
+                  class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  #</th>
+                <th
+                  class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  Coupon Code</th>
+                <th
+                  class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  Type</th>
+                <th
+                  class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  Value</th>
+                <th
+                  class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  Min Order</th>
+                <th
+                  class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  Expiry</th>
+                <th
+                  class="px-6 py-5 text-left text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  Usage</th>
+                <th
+                  class="px-6 py-5 text-center text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  Status</th>
+                <th
+                  class="px-6 py-5 text-right text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">
+                  Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10">
 
-            <% if (coupons.length === 0) { %>
-            <tr>
-              <td colspan="9" class="px-6 py-16 text-center text-on-surface-variant">
-                <span class="material-symbols-outlined text-5xl block mb-3">confirmation_number</span>
-                No coupons found
-              </td>
-            </tr>
-            <% } %>
-
-            <% coupons.forEach((c, i) => { %>
-            <%
-              const now = new Date();
-              const isExpired = new Date(c.expiryDate) < now;
-              const usagePercent = c.baseLimit ? Math.round(((c.baseLimit - c.usageLimit) / c.baseLimit) * 100) : 0;
-              const usedCount = c.baseLimit ? (c.baseLimit - c.usageLimit) : 0;
-            %>
-            <tr class="hover:bg-surface-container-highest transition-colors">
-
-              <!-- # -->
-              <td class="px-6 py-4 text-on-surface-variant text-sm">
-                <%= (pagination.currentPage - 1) * pagination.limit + i + 1 %>
-              </td>
-
-              <!-- Code -->
-              <td class="px-6 py-4">
-                <span class="font-bold text-on-surface text-sm font-mono"><%= c.code %></span>
-              </td>
-
-              <!-- Type -->
-              <td class="px-6 py-4 text-on-surface text-sm">
-                <%= c.discountType === 'PERCENTAGE' ? 'Percentage' : 'Flat Amount' %>
-              </td>
-
-              <!-- Value -->
-              <td class="px-6 py-4 text-on-surface text-sm font-bold">
-                <% if (c.discountType === 'PERCENTAGE') { %>
-                  <%= c.discountValue %>%
-                <% } else { %>
-                  ₹<%= c.discountValue %>
-                <% } %>
-              </td>
-
-              <!-- Min Order -->
-              <td class="px-6 py-4 text-on-surface-variant text-sm">
-                <% if (c.minOrderValue > 0) { %>
-                  ₹<%= c.minOrderValue %>
-                <% } else { %>
-                  <span class="text-on-surface-variant">—</span>
-                <% } %>
-              </td>
-
-              <!-- Expiry -->
-              <td class="px-6 py-4 text-sm">
-                <span class="<%= isExpired ? 'text-error' : 'text-on-surface-variant' %>">
-                  <%= new Date(c.expiryDate).toDateString() %>
-                </span>
-              </td>
-
-              <!-- Usage -->
-              <td class="px-6 py-4">
-                <% if (c.baseLimit) { %>
-                <div class="w-full max-w-[100px]">
-                  <div class="flex justify-between text-[10px] text-on-surface-variant mb-1">
-                    <span><%= usedCount %>/<%= c.baseLimit %></span>
-                    <span><%= usagePercent %>%</span>
-                  </div>
-                  <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                    <div class="h-full rounded-full
-                      <%= usagePercent >= 100 ? 'bg-error' : usagePercent >= 80 ? 'bg-tertiary' : 'bg-primary-container' %>"
-                      style="width: <%= Math.min(usagePercent, 100) %>%">
+              <% if (coupons.length===0) { %>
+                <tr>
+                  <td colspan="9" class="px-6 py-16 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                      <span
+                        class="material-symbols-outlined text-4xl text-on-surface-variant">confirmation_number</span>
+                      <p class="text-sm font-bold text-on-surface-variant">No coupons found</p>
                     </div>
-                  </div>
-                </div>
-                <% } else { %>
-                <span class="text-on-surface-variant text-xs">Unlimited</span>
+                  </td>
+                </tr>
                 <% } %>
-              </td>
 
-              <!-- Status -->
-              <td class="px-6 py-4 text-center">
-                <% if (isExpired) { %>
-                  <span class="px-2 py-1 rounded bg-error-container text-on-error-container text-xs font-bold uppercase">Expired</span>
-                <% } else if (c.isActive) { %>
-                  <span class="px-2 py-1 rounded bg-primary-container/20 text-primary-fixed-dim text-xs font-bold uppercase">Active</span>
-                <% } else { %>
-                  <span class="px-2 py-1 rounded bg-surface-container text-on-surface-variant text-xs font-bold uppercase">Inactive</span>
-                <% } %>
-              </td>
+                  <% coupons.forEach((c, i)=> { %>
+                    <%
+                      const now = new Date();
+                      const isExpired = new Date(c.expiryDate) < now;
+                      const usagePercent = c.baseLimit ? Math.round(((c.baseLimit - c.usageLimit) / c.baseLimit) * 100) : 0;
+                      const usedCount = c.baseLimit ? (c.baseLimit - c.usageLimit) : 0;
+                    %>
+                    <tr class="group hover:bg-surface-bright/50 transition-colors">
 
-              <!-- Actions -->
-              <td class="px-6 py-4 text-right space-x-1">
-                <!-- Edit -->
-                <a href="/admin/coupon-edit/<%= c._id %>">
-                  <button class="p-1 text-on-surface-variant hover:text-primary transition-colors" title="Edit">
-                    <span class="material-symbols-outlined text-[20px]">edit</span>
-                  </button>
-                </a>
-                <!-- Toggle Status -->
-                <button
-                  onclick="toggleStatus('<%= c._id %>', <%= c.isActive %>)"
-                  class="p-1 text-on-surface-variant hover:text-tertiary transition-colors"
-                  title="<%= c.isActive ? 'Deactivate' : 'Activate' %>"
-                >
-                  <span class="material-symbols-outlined text-[20px]">
-                    <%= c.isActive ? 'toggle_on' : 'toggle_off' %>
-                  </span>
-                </button>
-                <!-- Delete -->
-                <button
-                  onclick="deleteCoupon('<%= c._id %>')"
-                  class="p-1 text-on-surface-variant hover:text-error transition-colors"
-                  title="Delete"
-                >
-                  <span class="material-symbols-outlined text-[20px]">delete</span>
-                </button>
-              </td>
+                      <!-- # -->
+                      <td class="px-6 py-4 text-on-surface-variant text-xs font-mono">
+                        <%= (pagination.currentPage - 1) * pagination.limit + i + 1 %>
+                      </td>
 
-            </tr>
-            <% }) %>
+                      <!-- Code -->
+                      <td class="px-6 py-4">
+                        <span class="font-bold text-white text-sm font-mono">
+                          <%= c.code %>
+                        </span>
+                      </td>
 
-          </tbody>
-        </table>
-      </div>
+                      <!-- Type -->
+                      <td class="px-6 py-4 text-on-surface text-xs">
+                        <%= c.discountType==='PERCENTAGE' ? 'Percentage' : 'Flat Amount' %>
+                      </td>
 
-      <!-- Pagination -->
-      <div class="p-6 border-t border-outline-variant flex items-center justify-between">
+                      <!-- Value -->
+                      <td class="px-6 py-4 text-on-surface text-sm font-bold">
+                        <% if (c.discountType==='PERCENTAGE' ) { %>
+                          <%= c.discountValue %>%
+                            <% } else { %>
+                              ₹<%= c.discountValue %>
+                                <% } %>
+                      </td>
 
-        <% if (pagination.currentPage > 1) { %>
-        <a href="?page=<%= pagination.currentPage - 1 %>&search=<%= search %>&status=<%= status %>">
-          <button class="px-4 py-2 border border-outline-variant rounded-lg text-on-surface text-sm hover:bg-surface-container">
-            Previous
-          </button>
-        </a>
-        <% } else { %>
-        <button class="px-4 py-2 border border-outline-variant rounded-lg text-on-surface-variant text-sm opacity-40 cursor-not-allowed">
-          Previous
-        </button>
-        <% } %>
+                      <!-- Min Order -->
+                      <td class="px-6 py-4 text-on-surface-variant text-xs">
+                        <% if (c.minOrderValue> 0) { %>
+                          ₹<%= c.minOrderValue %>
+                            <% } else { %>
+                              <span class="text-on-surface-variant/50">—</span>
+                              <% } %>
+                      </td>
 
-        <div class="flex gap-2">
-          <% for (let p = 1; p <= pagination.totalPages; p++) { %>
-            <% if (
-              p === 1 ||
-              p === pagination.totalPages ||
-              Math.abs(p - pagination.currentPage) <= 1
-            ) { %>
-              <a href="?page=<%= p %>&search=<%= search %>&status=<%= status %>">
-                <button class="w-8 h-8 rounded text-sm
-                  <%= p === pagination.currentPage
-                    ? 'bg-primary-container text-on-primary-container font-bold'
-                    : 'hover:bg-surface-container text-on-surface-variant' %>">
-                  <%= p %>
-                </button>
-              </a>
-            <% } else if (Math.abs(p - pagination.currentPage) === 2) { %>
-              <span class="px-1 text-on-surface-variant self-center">...</span>
-            <% } %>
-          <% } %>
+                      <!-- Expiry -->
+                      <td class="px-6 py-4 text-xs">
+                        <span class="<%= isExpired ? 'text-error font-bold' : 'text-on-surface-variant' %>">
+                          <%= new Date(c.expiryDate).toDateString() %>
+                        </span>
+                      </td>
+
+                      <!-- Usage -->
+                      <td class="px-6 py-4">
+                        <% if (c.baseLimit) { %>
+                          <div class="w-full max-w-[100px]">
+                            <div class="flex justify-between text-[10px] text-on-surface-variant mb-1">
+                              <span>
+                                <%= usedCount %>/<%= c.baseLimit %>
+                              </span>
+                              <span>
+                                <%= usagePercent %>%
+                              </span>
+                            </div>
+                            <div class="w-full h-1.5 bg-surface-container-low rounded-full overflow-hidden">
+                              <div class="h-full rounded-full
+                      <%= usagePercent>= 100 ? 'bg-error' : usagePercent >= 80 ? 'bg-tertiary' : 'luxe-gradient' %>"
+                                style="width: <%= Math.min(usagePercent, 100) %>%">
+                              </div>
+                            </div>
+                          </div>
+                          <% } else { %>
+                            <span class="text-on-surface-variant text-xs">Unlimited</span>
+                            <% } %>
+                      </td>
+
+                      <!-- Status -->
+                      <td class="px-6 py-4 text-center">
+                        <% if (isExpired) { %>
+                          <span
+                            class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-error/10 text-error">
+                            <span class="w-1.5 h-1.5 rounded-full bg-error inline-block"></span>
+                            Expired
+                          </span>
+                          <% } else if (c.isActive) { %>
+                            <span
+                              class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400">
+                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                              Active
+                            </span>
+                            <% } else { %>
+                              <span
+                                class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-surface-container-low text-on-surface-variant">
+                                <span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant inline-block"></span>
+                                Inactive
+                              </span>
+                              <% } %>
+                      </td>
+
+                      <!-- Actions -->
+                      <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-1">
+                          <!-- Edit -->
+                          <a href="/admin/coupon-edit/<%= c._id %>">
+                            <button class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-colors"
+                              title="Edit">
+                              <span class="material-symbols-outlined text-lg">edit</span>
+                            </button>
+                          </a>
+                          <!-- Toggle Status -->
+                          <button onclick="toggleStatus('<%= c._id %>', <%= c.isActive %>)"
+                            class="p-2 hover:bg-surface-container-low rounded-lg text-tertiary transition-colors"
+                            title="<%= c.isActive ? 'Deactivate' : 'Activate' %>">
+                            <span class="material-symbols-outlined text-lg">
+                              <%= c.isActive ? 'toggle_on' : 'toggle_off' %>
+                            </span>
+                          </button>
+                          <!-- Delete -->
+                          <button onclick="deleteCoupon('<%= c._id %>')"
+                            class="p-2 hover:bg-surface-container-low rounded-lg text-error transition-colors"
+                            title="Delete">
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                          </button>
+                        </div>
+                      </td>
+
+                    </tr>
+                    <% }) %>
+
+            </tbody>
+          </table>
         </div>
 
-        <% if (pagination.currentPage < pagination.totalPages) { %>
-        <a href="?page=<%= pagination.currentPage + 1 %>&search=<%= search %>&status=<%= status %>">
-          <button class="px-4 py-2 border border-outline-variant rounded-lg text-on-surface text-sm hover:bg-surface-container">
-            Next
-          </button>
-        </a>
-        <% } else { %>
-        <button class="px-4 py-2 border border-outline-variant rounded-lg text-on-surface-variant text-sm opacity-40 cursor-not-allowed">
-          Next
-        </button>
-        <% } %>
+        <!-- Pagination -->
+        <div class="px-8 py-6 bg-surface-container-low/30 flex items-center justify-between">
+
+          <% if (pagination.currentPage> 1) { %>
+            <a href="?page=<%= pagination.currentPage - 1 %>&search=<%= search %>&status=<%= status %>">
+              <button
+                class="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">chevron_left</span>Previous
+              </button>
+            </a>
+            <% } else { %>
+              <button disabled
+                class="px-4 py-2 text-xs font-bold text-on-surface-variant/30 flex items-center gap-2 cursor-not-allowed">
+                <span class="material-symbols-outlined text-sm">chevron_left</span>Previous
+              </button>
+              <% } %>
+
+                <div class="flex items-center gap-2">
+                  <% for (let p=1; p <=pagination.totalPages; p++) { %>
+                    <% if ( p===1 || p===pagination.totalPages || Math.abs(p - pagination.currentPage) <=1 ) { %>
+                      <a href="?page=<%= p %>&search=<%= search %>&status=<%= status %>">
+                        <button
+                          class="w-8 h-8 rounded-lg text-xs font-bold <%= p === pagination.currentPage ? 'luxe-gradient text-white' : 'hover:bg-surface-bright text-on-surface-variant' %>">
+                          <%= p %>
+                        </button>
+                      </a>
+                      <% } else if (Math.abs(p - pagination.currentPage)===2) { %>
+                        <span
+                          class="w-8 h-8 flex items-center justify-center text-xs text-on-surface-variant">…</span>
+                        <% } %>
+                          <% } %>
+                </div>
+
+                <% if (pagination.currentPage < pagination.totalPages) { %>
+                  <a href="?page=<%= pagination.currentPage + 1 %>&search=<%= search %>&status=<%= status %>">
+                    <button
+                      class="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
+                      Next<span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </button>
+                  </a>
+                  <% } else { %>
+                    <button disabled
+                      class="px-4 py-2 text-xs font-bold text-on-surface-variant/30 flex items-center gap-2 cursor-not-allowed">
+                      Next<span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </button>
+                    <% } %>
+
+        </div>
 
       </div>
+
     </div>
 
-  </div>
-</main>
+  </main>
 
-<script>
-  // Show/hide clear button based on input value
-  function toggleClearBtn(value) {
-    const btn = document.getElementById("clearBtn");
-    if (value.length > 0) btn.classList.add("visible");
-    else btn.classList.remove("visible");
-  }
+  <script>
+    // Show/hide clear button based on input value
+    function toggleClearBtn(value) {
+      const btn = document.getElementById("clearBtn");
+      if (value.length > 0) btn.classList.add("visible");
+      else btn.classList.remove("visible");
+    }
 
-  // Clear search and redirect
-  function clearSearch() {
-    const input = document.getElementById("searchInput");
-    input.value = "";
-    toggleClearBtn("");
-    const params = new URLSearchParams(window.location.search);
-    params.delete("search");
-    params.set("page", 1);
-    window.location.search = params.toString();
-  }
-
-  // Show clear button on load if search has a value
-  window.addEventListener("DOMContentLoaded", () => {
-    const input = document.getElementById("searchInput");
-    toggleClearBtn(input.value);
-  });
-
-  // Search with debounce
-  let timer;
-  function handleSearch(value) {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
+    // Clear search and redirect
+    function clearSearch() {
+      const input = document.getElementById("searchInput");
+      input.value = "";
+      toggleClearBtn("");
       const params = new URLSearchParams(window.location.search);
-      params.set("search", value);
+      params.delete("search");
       params.set("page", 1);
       window.location.search = params.toString();
-    }, 400);
-  }
-
-  // Status filter
-  function handleStatus(value) {
-    const params = new URLSearchParams(window.location.search);
-    if (value) params.set("status", value);
-    else params.delete("status");
-    params.set("page", 1);
-    window.location.search = params.toString();
-  }
-
-  // Toggle active/inactive
-  async function toggleStatus(id, isActive) {
-    const result = await Swal.fire({
-      title: isActive ? "Deactivate Coupon?" : "Activate Coupon?",
-      text:  isActive ? "This coupon will no longer be usable." : "This coupon will become usable.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Yes",
-      background: "#171f33",
-      color: "#dae2fd",
-      confirmButtonColor: "#38bdf8",
-    });
-    if (!result.isConfirmed) return;
-
-    const res  = await fetch(`/admin/coupons/${id}/toggle`, { method: "PATCH" });
-    const data = await res.json();
-
-    if (data.success) {
-      Swal.fire({
-        title: "Done!",
-        icon: "success",
-        timer: 1200,
-        showConfirmButton: false,
-        background: "#171f33",
-        color: "#dae2fd",
-      }).then(() => location.reload());
     }
-  }
 
-  // Delete
-  async function deleteCoupon(id) {
-    const result = await Swal.fire({
-      title: "Delete Coupon?",
-      text: "This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      background: "#171f33",
-      color: "#dae2fd",
-      confirmButtonColor: "#93000a",
+    // Show clear button on load if search has a value
+    window.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("searchInput");
+      toggleClearBtn(input.value);
     });
-    if (!result.isConfirmed) return;
 
-    const res  = await fetch(`/admin/coupons/${id}`, { method: "DELETE" });
-    const data = await res.json();
-
-    if (data.success) {
-      Swal.fire({
-        title: "Deleted!",
-        icon: "success",
-        timer: 1200,
-        showConfirmButton: false,
-        background: "#171f33",
-        color: "#dae2fd",
-      }).then(() => location.reload());
+    // Search with debounce
+    let timer;
+    function handleSearch(value) {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const params = new URLSearchParams(window.location.search);
+        params.set("search", value);
+        params.set("page", 1);
+        window.location.search = params.toString();
+      }, 400);
     }
-  }
-</script>
+
+    // Status filter
+    function handleStatus(value) {
+      const params = new URLSearchParams(window.location.search);
+      if (value) params.set("status", value);
+      else params.delete("status");
+      params.set("page", 1);
+      window.location.search = params.toString();
+    }
+
+    // Toggle active/inactive
+    async function toggleStatus(id, isActive) {
+      const result = await Swal.fire({
+        title: isActive ? "Deactivate Coupon?" : "Activate Coupon?",
+        text: isActive ? "This coupon will no longer be usable." : "This coupon will become usable.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        background: "#141f38",
+        color: "#dee5ff",
+        confirmButtonColor: "#316bf3",
+      });
+      if (!result.isConfirmed) return;
+
+      const res = await fetch(`/admin/coupons/${id}/toggle`, { method: "PATCH" });
+      const data = await res.json();
+
+      if (data.success) {
+        Swal.fire({
+          title: "Done!",
+          icon: "success",
+          timer: 1200,
+          showConfirmButton: false,
+          background: "#141f38",
+          color: "#dee5ff",
+        }).then(() => location.reload());
+      }
+    }
+
+    // Delete
+    async function deleteCoupon(id) {
+      const result = await Swal.fire({
+        title: "Delete Coupon?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Delete",
+        background: "#141f38",
+        color: "#dee5ff",
+        confirmButtonColor: "#ff716c",
+      });
+      if (!result.isConfirmed) return;
+
+      const res = await fetch(`/admin/coupons/${id}`, { method: "DELETE" });
+      const data = await res.json();
+
+      if (data.success) {
+        Swal.fire({
+          title: "Deleted!",
+          icon: "success",
+          timer: 1200,
+          showConfirmButton: false,
+          background: "#141f38",
+          color: "#dee5ff",
+        }).then(() => location.reload());
+      }
+    }
+  </script>
 </body>
+
 </html>

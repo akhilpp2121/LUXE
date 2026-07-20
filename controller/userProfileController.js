@@ -14,7 +14,7 @@ import {
   deleteAddressService,
   setDefaultAddressService,
 } from "../service/userProfileService.js";
-import { generateAndSendOtp } from "../service/userService.js";
+import { generateAndSendOtp, checkAndRecordOtpRequest } from "../service/userService.js";
 import { findUserBlocked } from "../service/userService.js";
 import bcrypt from "bcrypt";
 
@@ -76,6 +76,10 @@ export const userProfileUpdate = async (req, res) => {
 
     if (!result.success) {
       const user = await getUserProfileService(req.session.user.id);
+      if (user) {
+        if (req.body.fullName !== undefined) user.fullName = req.body.fullName;
+        if (req.body.phoneNumber !== undefined) user.phoneNumber = req.body.phoneNumber;
+      }
       return res.render("Users/editProfile", {
         user,
         error: result.message,
@@ -187,11 +191,25 @@ export const emailChangeProfileController = async (req, res) => {
     const { newEmail, confirmEmail } = req.body;
 
     if (!newEmail || !confirmEmail) {
-      return res.send("All fields required");
+      return res.render("Users/profileEditEmail", {
+        user: req.session.user,
+        error: "All fields required"
+      });
     }
 
     if (newEmail !== confirmEmail) {
-      return res.send("Emails do not match");
+      return res.render("Users/profileEditEmail", {
+        user: req.session.user,
+        error: "Emails do not match"
+      });
+    }
+
+    const otpLimit = await checkAndRecordOtpRequest(newEmail);
+    if (!otpLimit.allowed) {
+      return res.render("Users/profileEditEmail", {
+        user: req.session.user,
+        error: otpLimit.message
+      });
     }
 
     req.session.tempEmail = newEmail;

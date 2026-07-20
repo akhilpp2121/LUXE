@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { userModel } from "../model/usermodel.js";
 import { sendOtpEmail } from "../utilites/otp.js";
 import { applyReferralReward } from "./referalService.js";
+import otpLogModel from "../model/otpLogModel.js";
 
 export const findUserByEmail = (email) => userModel.findOne({ email });
 export const findUserBlocked = (userId) => {
@@ -88,6 +89,62 @@ export const userLoginLogic = async (req, email, password) => {
   }
 };
 
+// Checks and logs an OTP request for an email address.
+// Enforces:
+// 1. Min 60 seconds cooldown between requests.
+// 2. Max 4 requests in a rolling 15-minute window.
+export const checkAndRecordOtpRequest = async (email) => {
+  if (!email) return { allowed: false, message: "Email is required" };
+  const normalizedEmail = email.toLowerCase().trim();
+  const now = new Date();
+  const timeLimitMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 4;
+  const cooldownMs = 60 * 1000; // 60 seconds
+
+  let otpLog = await otpLogModel.findOne({ email: normalizedEmail });
+
+  if (otpLog) {
+    // 1. Check cooldown
+    const timeSinceLast = now.getTime() - otpLog.lastRequestedAt.getTime();
+    if (timeSinceLast < cooldownMs) {
+      const remainingCooldown = Math.ceil((cooldownMs - timeSinceLast) / 1000);
+      return {
+        allowed: false,
+        message: `Please wait ${remainingCooldown} seconds before requesting another OTP.`
+      };
+    }
+
+    // 2. Check rolling window
+    const cutoff = new Date(now.getTime() - timeLimitMs);
+    const recentRequests = otpLog.requests.filter(reqTime => new Date(reqTime) > cutoff);
+
+    if (recentRequests.length >= maxRequests) {
+      const oldestRecent = new Date(recentRequests[0]);
+      const waitTimeMs = oldestRecent.getTime() + timeLimitMs - now.getTime();
+      const waitMinutes = Math.ceil(waitTimeMs / (60 * 1000));
+      return {
+        allowed: false,
+        message: `Too many OTP requests. Please try again in ${waitMinutes} minutes.`
+      };
+    }
+
+    // 3. Update existing log
+    otpLog.requests = [...recentRequests, now];
+    otpLog.lastRequestedAt = now;
+    await otpLog.save();
+  } else {
+    // 4. Create new log
+    otpLog = new otpLogModel({
+      email: normalizedEmail,
+      requests: [now],
+      lastRequestedAt: now
+    });
+    await otpLog.save();
+  }
+
+  return { allowed: true };
+};
+
 // ─── OTP ────────────────────────────────────────────────────────────
 export const generateAndSendOtp = async (req, email) => {
   try {
@@ -144,6 +201,11 @@ export const verifyEmailService = async (req, email) => {
     if (!user)
       return { success: false, message: "No account found with this email" };
 
+    const otpLimit = await checkAndRecordOtpRequest(email);
+    if (!otpLimit.allowed) {
+      return { success: false, message: otpLimit.message };
+    }
+
     req.session.email = email;
     req.session.otpContext = "RESET_PASSWORD";
 
@@ -175,6 +237,11 @@ export const registerPreCheckService = async (
     const phoneExists = await userModel.findOne({ phoneNumber });
     if (phoneExists)
       return { success: false, message: "Phone number already exists" };
+
+    const otpLimit = await checkAndRecordOtpRequest(email);
+    if (!otpLimit.allowed) {
+      return { success: false, message: otpLimit.message };
+    }
 
     req.session.tempUser = {
       fullName,
@@ -300,6 +367,11 @@ export const resendOtpService = async (req) => {
     const email = req.session.tempEmail || req.session.email;
     if (!email)
       return { success: false, message: "Session expired. Please start over." };
+
+    const otpLimit = await checkAndRecordOtpRequest(email);
+    if (!otpLimit.allowed) {
+      return { success: false, message: otpLimit.message };
+    }
 
     await generateAndSendOtp(req, email);
     return { success: true, message: "OTP resent successfully" };

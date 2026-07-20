@@ -139,6 +139,7 @@
         .vm-color-swatch.selected { border-color: #1152d4; }
         .vm-color-swatch .swatch-inner { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); }
     </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
@@ -150,7 +151,7 @@
             <div class="flex items-center gap-12">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-3xl">diamond</span>
-                    <a href="/homepage"
+                    <a href="/homePage"
                         class="text-2xl font-bold tracking-tighter text-slate-900 dark:text-white uppercase hover:text-gray-500 transition">
                         Luxe
                     </a>
@@ -162,7 +163,7 @@
                 </nav>
             </div>
 
-            <form method="GET" action="/homepage" class="search-wrap relative flex items-center"
+            <form method="GET" action="/homePage" class="search-wrap relative flex items-center"
                 onsubmit="const i=this.querySelector('[name=search]'); i.value=i.value.trim();">
                 <span class="material-symbols-outlined ic-search">search</span>
                 <input name="search" type="text" placeholder="Search products..." value="<%= searchQuery || '' %>" />
@@ -324,7 +325,7 @@
                                                     <% } %>
                                     </p>
                                     <% if (searchQuery) { %>
-                                        <a href="/homepage"
+                                        <a href="/homePage"
                                             class="text-primary text-sm font-bold hover:underline mt-2 inline-block">Clear
                                             search</a>
                                         <% } %>

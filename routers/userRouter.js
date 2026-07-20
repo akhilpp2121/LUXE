@@ -92,10 +92,10 @@ router.post("/profile/avatar/upload",isUserAuthenticated, avatarUpload.single("a
 router.delete("/profile/avatar",isUserAuthenticated, deleteAvatar);
 router.get('/logout',logoutUserController);
 
-router.get("/product-listing",isUserAuthenticated,attachCart, productListingLoad);
-router.get("/product-details/:productId", isUserAuthenticated, attachCart, productDetailLoad);
+router.get("/product-listing", attachCart, productListingLoad);
+router.get("/product-details/:productId", attachCart, productDetailLoad);
 
-router.get("/product/:productId/variants", isUserAuthenticated, getProductVariants);
+router.get("/product/:productId/variants", getProductVariants);
 
 
 router.get('/wishlist',isUserAuthenticated,wishlistPageLoad);

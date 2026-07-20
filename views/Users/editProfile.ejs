@@ -185,6 +185,7 @@
   @media (max-width: 900px) { :root { --side-w: 0px; } aside.sidebar { display: none; } main { padding: calc(var(--nav-h) + 28px) 20px 60px; } .nav-links { display: none; } .page-header { flex-direction: column; align-items: flex-start; gap: 12px; } }
   @media (max-width: 600px) { .fields-grid { grid-template-columns: 1fr; } }
 </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
 <body>
 
@@ -279,11 +280,9 @@
       <%= isGoogleAvatar ? 'Replace' : 'Upload' %>
     </button>
 
-    <% if (!isGoogleAvatar) { %>
-    <button type="button" class="av-btn remove" id="removeAvatarBtn">
+    <button type="button" class="av-btn remove" id="removeAvatarBtn" style="display: <%= (user.avatar && !user.avatar.startsWith('http')) ? 'flex' : 'none' %>;">
       <span class="ms material-symbols-outlined">delete</span>Remove
     </button>
-    <% } %>
   </div>
 
   <p class="av-err" id="avatarErr"></p>
@@ -441,15 +440,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (data.success) {
         avatarPreview.src = data.avatar + '?t=' + Date.now();
-        showToast(data.message)
+        if (removeBtn) removeBtn.style.display = 'flex';
+        showToast(data.message);
       } else {
         avatarErr.textContent = data.message || 'Upload failed.';
         avatarPreview.src = DEFAULT_AVATAR;
+        if (removeBtn) removeBtn.style.display = 'none';
       }
     } catch (err) {
       console.error('Upload fetch error:', err);
       avatarErr.textContent = 'Upload failed. Please try again.';
       avatarPreview.src = DEFAULT_AVATAR;
+      if (removeBtn) removeBtn.style.display = 'none';
     } finally {
       uploadBtn.innerHTML = '<span class="ms material-symbols-outlined">upload</span>Upload';
       uploadBtn.disabled = false;
@@ -470,6 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (data.success) {
           avatarPreview.src = DEFAULT_AVATAR;
+          if (removeBtn) removeBtn.style.display = 'none';
           showToast(data.message);
         } else {
           avatarErr.textContent = data.message || 'Could not remove avatar.';

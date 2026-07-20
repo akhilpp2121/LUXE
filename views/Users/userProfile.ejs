@@ -153,6 +153,7 @@
   @media (max-width: 900px) { :root { --side-w: 0px; } aside.sidebar { display: none; } main { padding: calc(var(--nav-h) + 28px) 20px 60px; } .nav-links { display: none; } }
   @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } .mc-inner { flex-direction: column; align-items: flex-start; } }
 </style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
 <body>
 
@@ -235,7 +236,7 @@
       <div class="avatar-banner"></div>
       <div class="avatar-wrap">
         <div class="avatar-ring">
-          <img src="<%= user.avatar || '/images/default-avatar.png' %>" alt="<%= user.fullName %>"/>
+          <img src="<%= user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.fullName || 'User') + '&background=1a2338&color=c9a96e&size=100' %>" alt="<%= user.fullName %>"/>
           <div class="avatar-online"></div>
         </div>
         <div class="user-name"><%= user.fullName %></div>

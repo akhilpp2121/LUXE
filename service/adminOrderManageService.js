@@ -7,29 +7,34 @@ import mongoose from "mongoose";
 
 const LIMIT = 10;
 const buildFilter = (status, search) => {
-  const filter = {};
+  const conditions = [];
 
   // Status filter
-  if (status === "processing") filter.deliveryStatus = "pending";
-  if (status === "shipped") filter.deliveryStatus = "shipped";
-  if (status === "delivered") filter.deliveryStatus = "delivered";
-
-  //  Search filter
-  if (search) {
-    const regex = new RegExp(search, "i");
-
-    filter.$or = [
-      { orderCode: regex },
-      { orderStatus: regex },
-      { deliveryStatus: regex },
-      { "shippingAddress.username": regex },
-      { "shippingAddress.phone_number": regex },
-    ];
+  if (status === "processing") conditions.push({ deliveryStatus: "pending" });
+  if (status === "shipped") conditions.push({ deliveryStatus: "shipped" });
+  if (status === "delivered") conditions.push({ deliveryStatus: "delivered" });
+  if (status === "cancelled") {
+    conditions.push({
+      $or: [{ deliveryStatus: "cancelled" }, { orderStatus: "cancelled" }],
+    });
   }
 
-  return filter;
-};
+  // Search filter
+  if (search) {
+    const regex = new RegExp(search, "i");
+    conditions.push({
+      $or: [
+        { orderCode: regex },
+        { orderStatus: regex },
+        { deliveryStatus: regex },
+        { "shippingAddress.username": regex },
+        { "shippingAddress.phone_number": regex },
+      ],
+    });
+  }
 
+  return conditions.length ? { $and: conditions } : {};
+};
 export const orderManagementService = async ({
   page = 1,
   status = "all",
@@ -90,6 +95,7 @@ const STATUS_RANK = {
   shipped: 1,
   out_for_delivery: 2,
   delivered: 3,
+  
 };
 
 const VALID_ADMIN_STATUSES = [
@@ -97,6 +103,7 @@ const VALID_ADMIN_STATUSES = [
   "shipped",
   "out_for_delivery",
   "delivered",
+  
 ];
 
 const deriveOrderStatus = (orderItems) => {
@@ -125,6 +132,9 @@ const deriveOrderStatus = (orderItems) => {
   }
   if (activeStatuses.includes("shipped")) {
     return { deliveryStatus: "shipped", orderStatus: "placed" };
+  }
+  if(activeStatuses.includes("cancelled")){
+    return {deliveryStatus:"cancelled",orderStatus:"cancelled"}
   }
 
   return { deliveryStatus: "pending", orderStatus: "placed" };

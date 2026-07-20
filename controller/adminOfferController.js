@@ -45,8 +45,14 @@ export const offerAddPage = (req, res) => {
   }
 };
 
+
+
+
+
 export const offerAdd = async (req, res) => {
   try {
+   console.log(req.body);
+   
     const {
       name,
       type,
@@ -56,6 +62,8 @@ export const offerAdd = async (req, res) => {
       endDate,
       maxDiscount,
     } = req.body;
+    
+    
 
     if (
       !name ||
