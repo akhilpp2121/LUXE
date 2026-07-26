@@ -370,12 +370,7 @@ export const generateInvoicePDF = (order, stream) => {
     return isExcluded ? sum : sum + (item.totalPrice || 0);
   }, 0);
 
-  // BUGFIX: if every item is cancelled/returned (or there are none),
-  // activeSubTotal is 0 — which is < 999, so a naive threshold check would
-  // charge shipping on an order with nothing left, and would also apply
-  // the coupon discount to an empty cart, potentially driving the total
-  // negative. hasActiveItems guards both shipping and coupon, matching the
-  // order details page logic exactly.
+  
   const hasActiveItems =
     (order.orderItems || []).length > 0 && activeSubTotal > 0;
 
@@ -571,6 +566,35 @@ export const generateInvoicePDF = (order, stream) => {
   doc.end();
 };
 
+// ── Order-total calculator, shared logic for cancel & full-cancel ──
+const GST_RATE = 0.05;
+const SHIPPING_THRESHOLD = 999;
+const SHIPPING_FEE = 99;
+
+function calcActiveOrderTotal(orderItems, couponApplied, excludedVariantIds) {
+  let activeSubTotal = 0;
+  for (const item of orderItems) {
+    if (excludedVariantIds.has(item.variantId.toString())) continue;
+    activeSubTotal += item.totalPrice;
+  }
+
+  const hasActiveItems = activeSubTotal > 0;
+  const coupon = hasActiveItems ? Math.min(couponApplied || 0, activeSubTotal) : 0;
+  const taxable = Math.max(activeSubTotal - coupon, 0);
+  const gst = Math.round(taxable * GST_RATE);
+  const shipping = hasActiveItems
+    ? (activeSubTotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE)
+    : 0;
+
+  return {
+    subTotal: activeSubTotal,
+    couponApplied: coupon,
+    gstAmount: gst,
+    shippingCharge: shipping,
+    totalAmount: Math.round(taxable + gst + shipping),
+  };
+}
+
 export const cancelRequestLogic = async (
   id,
   reason,
@@ -592,15 +616,12 @@ export const cancelRequestLogic = async (
       return { success: false, message: "Cannot cancel after shipping" };
     }
 
-    // ensure array exists
     if (!order.cancelledAt) order.cancelledAt = [];
 
-    //  full order cancell
+    // ══════════ FULL ORDER CANCEL ══════════
     if (id === "ALL") {
-      // take refund BEFORE modifying
-      const refundAmount = order.totalAmount;
+      const refundAmount = order.totalAmount; // take refund BEFORE modifying
 
-      //  restore stock
       for (const item of order.orderItems) {
         await variantModel.updateOne(
           { _id: item.variantId },
@@ -609,10 +630,10 @@ export const cancelRequestLogic = async (
         item.deliveryStatus = "cancelled";
       }
 
-      //  update order
       order.subTotal = 0;
       order.shippingCharge = 0;
-      order.taxAmount = 0;
+      order.gstAmount = 0;       
+      order.couponApplied = 0;   
       order.totalAmount = 0;
       order.orderStatus = "cancelled";
       order.deliveryStatus = "cancelled";
@@ -621,31 +642,32 @@ export const cancelRequestLogic = async (
       order.cancelledAt.push({
         reason: reason || "",
         remarks: remark || "",
-        cancelledBy: "user",
         requestedAt: new Date(),
         cancelledProducts: order.orderItems.map((i) => i.variantId),
       });
 
       await order.save();
 
-      if (["paypal", "wallet"].includes(order.orderMethod)) {
+      if (["paypal", "wallet"].includes(order.orderMethod) && refundAmount > 0) {
         const refundResult = await creditWallet(
           userId,
           refundAmount,
           `Refund for order #${order.orderCode || orderId}`,
           orderId,
         );
-
         if (!refundResult.success) {
           console.error("Refund failed for full order:", orderId);
         }
       }
 
-      return { success: true, message: "Full order cancelled" };
+      return {
+        success: true,
+        message: `Full order cancelled. ₹${refundAmount} refunded to wallet.`,
+        refundAmount,
+      };
     }
 
-    // single item cancell
-
+    // ══════════ SINGLE ITEM CANCEL ══════════
     const item = order.orderItems.find(
       (i) => i.variantId.toString() === id.toString(),
     );
@@ -654,7 +676,25 @@ export const cancelRequestLogic = async (
       return { success: false, message: "Item not found" };
     }
 
-    //  restore stock
+    if (item.deliveryStatus === "cancelled") {
+      return { success: false, message: "Item already cancelled" };
+    }
+
+    // ── STEP 1: snapshot of currently-excluded variants (before this cancel) ──
+    const excludedBefore = new Set(
+      order.cancelledAt.flatMap((c) =>
+        c.cancelledProducts.map((v) => v.toString()),
+      ),
+    );
+
+    // ── STEP 2: totals BEFORE this cancel ──
+    const before = calcActiveOrderTotal(
+      order.orderItems,
+      order.couponApplied,
+      excludedBefore,
+    );
+
+    // ── STEP 3: apply the cancel + restore stock ──
     await variantModel.updateOne(
       { _id: item.variantId },
       { $inc: { stock: item.quantity } },
@@ -664,36 +704,31 @@ export const cancelRequestLogic = async (
     order.cancelledAt.push({
       reason: reason || "",
       remarks: remark || "",
-      cancelledBy: "user",
       requestedAt: new Date(),
       cancelledProducts: [item.variantId],
     });
 
-    //  get all cancelled product IDs
-    const cancelledIds = new Set(
-      order.cancelledAt.flatMap((c) =>
-        c.cancelledProducts.map((id) => id.toString()),
-      ),
+    const excludedAfter = new Set(excludedBefore);
+    excludedAfter.add(item.variantId.toString());
+
+    // ── STEP 4: totals AFTER this cancel ──
+    const after = calcActiveOrderTotal(
+      order.orderItems,
+      order.couponApplied,
+      excludedAfter,
     );
 
-    //  remaining items
-    const activeItems = order.orderItems.filter(
-      (i) => !cancelledIds.has(i.variantId.toString()),
-    );
+    // ── STEP 5: refund = exact difference — no rounding drift ──
+    const refundAmount = Math.max(before.totalAmount - after.totalAmount, 0);
 
-    //  recalculate subtotal
-    const subTotal = activeItems.reduce(
-      (sum, i) => sum + i.price * i.quantity,
-      0,
-    );
+    // ── STEP 6: persist recalculated order fields ──
+    order.subTotal = after.subTotal;
+    order.gstAmount = after.gstAmount;
+    order.shippingCharge = after.shippingCharge;
+    order.couponApplied = after.couponApplied;
+    order.totalAmount = after.totalAmount;
 
-    order.subTotal = subTotal;
-
-    // shipping logic
-    order.shippingCharge = subTotal === 0 ? 0 : subTotal >= 999 ? 0 : 99;
-    order.totalAmount = subTotal + order.shippingCharge;
-
-    if (activeItems.length === 0) {
+    if (after.subTotal === 0) {
       order.orderStatus = "cancelled";
       order.deliveryStatus = "cancelled";
       order.expectedDeliveryDate = null;
@@ -701,22 +736,25 @@ export const cancelRequestLogic = async (
 
     await order.save();
 
-    if (["paypal", "wallet"].includes(order.orderMethod)) {
-      const refundAmount = item.price * item.quantity;
-
+    if (["paypal", "wallet"].includes(order.orderMethod) && refundAmount > 0) {
       const refundResult = await creditWallet(
         userId,
         refundAmount,
         `Refund for item in order #${order.orderCode || orderId}`,
         orderId,
       );
-
       if (!refundResult.success) {
         console.error("Refund failed for item:", item.variantId);
       }
     }
 
-    return { success: true, message: "Item cancelled" };
+    return {
+      success: true,
+      message: refundAmount > 0
+        ? `Item cancelled. ₹${refundAmount} refunded to wallet.`
+        : "Item cancelled successfully.",
+      refundAmount,
+    };
   } catch (error) {
     console.error("cancelRequestLogic error:", error);
     return { success: false, message: "Something went wrong" };

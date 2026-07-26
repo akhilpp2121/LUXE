@@ -54,7 +54,7 @@ export const userLoginLogic = async (req, email, password) => {
       return { success: false, field: "email", message: "Email is incorrect" };
 
     if (user.isBlocked)
-      return { success: false, field: "email", message: "Account is blocked" };
+      return { success: false, field: "email", message: "Your account has been blocked by the admin" };
 
     // Account exists but has no password (e.g. created via Google) — can't login with password
     if (!user.password) {
@@ -89,10 +89,7 @@ export const userLoginLogic = async (req, email, password) => {
   }
 };
 
-// Checks and logs an OTP request for an email address.
-// Enforces:
-// 1. Min 60 seconds cooldown between requests.
-// 2. Max 4 requests in a rolling 15-minute window.
+
 export const checkAndRecordOtpRequest = async (email) => {
   if (!email) return { allowed: false, message: "Email is required" };
   const normalizedEmail = email.toLowerCase().trim();
@@ -218,17 +215,24 @@ export const verifyEmailService = async (req, email) => {
   }
 };
 
+
+
 export const registerPreCheckService = async (
   req,
   fullName,
   email,
   password,
+  confirmPassword,
   phoneNumber,
   referralCode,
 ) => {
   try {
-    if (!fullName || !email || !password || !phoneNumber) {
+    if (!fullName || !email || !password || !confirmPassword || !phoneNumber) {
       return { success: false, message: "All fields are required" };
+    }
+
+    if (password !== confirmPassword) {
+      return { success: false, message: "Passwords do not match" };
     }
 
     const emailExists = await userModel.findOne({ email: email.toLowerCase() });
@@ -300,7 +304,11 @@ export const handleOtpVerifyService = async (req) => {
       req.session.tempUser = null;
       req.session.tempEmail = null;
 
-      return { success: true, message: "Account created!", redirect: "/login" };
+      return {
+        success: true,
+        message: "Account created successfully!",
+        redirect: "/login",
+      };
     }
 
     // EMAIL EDIT
@@ -331,7 +339,7 @@ export const handleOtpVerifyService = async (req) => {
 
       return {
         success: true,
-        message: "Email updated success fully!",
+        message: "Email updated successfully!",
         redirect: "/profile",
       };
     }
@@ -342,7 +350,11 @@ export const handleOtpVerifyService = async (req) => {
         { email: req.session.email },
         { isVerified: true },
       );
-      return { success: true, redirect: "/reset-password" };
+      return {
+        success: true,
+        message: "Identity verified! You can now reset your password.",
+        redirect: "/reset-password",
+      };
     }
 
     return { success: false, message: "Invalid flow" };
@@ -351,7 +363,6 @@ export const handleOtpVerifyService = async (req) => {
     return { success: false, message: "Server error" };
   }
 };
-
 export const canLoadResetPassword = async (req) => {
   try {
     if (!req.session.email) return false;

@@ -78,65 +78,48 @@ export const adminCategoryLoad = async (req, res) => {
   }
 };
 
-// export const adminCategoryOfferAdd = async (req, res) => {
-//   try {
-//     const { categoryId, offerId } = req.body;
-//     if (!categoryId) {
-//       return res.status(400).json({ success: false, message: "categoryId is required" });
-//     }
 
-//     // Save offer on category
-//     await categoryModel.findByIdAndUpdate(categoryId, {
-//       offer: offerId || null,
-//     });
 
-//     // Find all products in this category (with variants + their own offer)
-//     const products = await Product.find({ categoryId })
-//       .populate("variants")
-//       .populate("offer")
-//       .lean();
 
-//     for (const product of products) {
-//       const bestOffer = await resolveBestOffer(product);
-
-//       // Write the best offer back onto the product before recalculating
-//       await Product.findByIdAndUpdate(product._id, {
-//         appliedOffer: bestOffer?._id || null,
-//       });
-
-//       await applyOffersToProduct(product._id, bestOffer);
-//     }
-
-//     return res.json({
-//       success: true,
-//       message: "Best offer applied to category products successfully",
-//     });
-//   } catch (error) {
-//     console.error("adminCategoryOfferAdd error:", error);
-//     return res.status(500).json({ success: false, message: "Server error" });
-//   }
-// };
+import mongoose from "mongoose";
 
 export const adminCategoryOfferAdd = async (req, res) => {
   try {
     const { categoryId, offerId } = req.body;
-    if (!categoryId) {
+
+    if (!categoryId || !mongoose.Types.ObjectId.isValid(categoryId)) {
       return res
         .status(400)
-        .json({ success: false, message: "categoryId is required" });
+        .json({ success: false, message: "Valid categoryId is required" });
     }
 
+    const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
+
     // Save offer on category first
-    await categoryModel.findByIdAndUpdate(categoryId, {
+    await categoryModel.findByIdAndUpdate(categoryObjectId, {
       offer: offerId || null,
     });
 
-    // Fetch products AFTER category update — so categoryId.offer is fresh
-    const products = await Product.find({ categoryId }).select("_id");
+    // Explicit ObjectId cast — protects against any products whose
+    // categoryId was stored as a plain string
+    const products = await Product.find({ categoryId: categoryObjectId }).select("_id");
 
-    // Just pass productId — applyOffersToProduct fetches everything fresh itself
-    for (const product of products) {
-      await applyOffersToProduct(product._id);
+    console.log(`[categoryOffer] Found ${products.length} products for category ${categoryId}`);
+
+    const results = [];
+for (const product of products) {
+  const result = await applyOffersToProduct(product._id);
+  results.push({ productId: product._id, ...result });
+  if (!result.success) {
+    console.error(`[categoryOffer] Failed for product ${product._id}:`, result.message);
+  }
+}
+
+console.log("[categoryOffer] Results:", results);
+
+    const failedCount = results.filter(r => !r.success).length;
+    if (failedCount > 0) {
+      console.warn(`[categoryOffer] ${failedCount}/${products.length} products failed to update`);
     }
 
     return res.json({
@@ -144,12 +127,50 @@ export const adminCategoryOfferAdd = async (req, res) => {
       message: offerId
         ? "Offer applied to category products successfully"
         : "Offer removed successfully",
+      updated: products.length - failedCount,
+      failed: failedCount,
     });
   } catch (error) {
     console.error("adminCategoryOfferAdd error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+
+// export const adminCategoryOfferAdd = async (req, res) => {
+//   try {
+//     const { categoryId, offerId } = req.body;
+//     if (!categoryId) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "categoryId is required" });
+//     }
+
+//     // Save offer on category first
+//     await categoryModel.findByIdAndUpdate(categoryId, {
+//       offer: offerId || null,
+//     });
+
+//     // Fetch products AFTER category update — so categoryId.offer is fresh
+//     const products = await Product.find({ categoryId }).select("_id");
+
+//     // Just pass productId — applyOffersToProduct fetches everything fresh itself
+//     for (const product of products) {
+//       await applyOffersToProduct(product._id);
+//     }
+
+//     return res.json({
+//       success: true,
+//       message: offerId
+//         ? "Offer applied to category products successfully"
+//         : "Offer removed successfully",
+//     });
+//   } catch (error) {
+//     console.error("adminCategoryOfferAdd error:", error);
+//     return res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
 
 export const addCategoryPageLoad = async (req, res) => {
   try {

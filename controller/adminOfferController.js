@@ -35,9 +35,14 @@ export const offerLoad = async (req, res) => {
 
 export const offerAddPage = (req, res) => {
   try {
-    return res.render("Admin/offerAddPage", {
-      activePage: "offer",
-      error: null,
+    const error = req.session.addOfferError || null;
+    req.session.addOfferError = null;
+
+    req.session.save(() => {
+      return res.render("Admin/offerAddPage", {
+        activePage: "offer",
+        error,
+      });
     });
   } catch (e) {
     console.error(e);
@@ -45,14 +50,10 @@ export const offerAddPage = (req, res) => {
   }
 };
 
-
-
-
-
 export const offerAdd = async (req, res) => {
   try {
-   console.log(req.body);
-   
+    
+
     const {
       name,
       type,
@@ -62,8 +63,6 @@ export const offerAdd = async (req, res) => {
       endDate,
       maxDiscount,
     } = req.body;
-    
-    
 
     if (
       !name ||
@@ -73,17 +72,13 @@ export const offerAdd = async (req, res) => {
       !startDate ||
       !endDate
     ) {
-      return res.render("Admin/offerAddPage", {
-        activePage: "offer",
-        error: "All required fields must be filled.",
-      });
+      req.session.addOfferError = "All required fields must be filled.";
+      return req.session.save(() => res.redirect("/admin/offer-add"));
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
-      return res.render("Admin/offerAddPage", {
-        activePage: "offer",
-        error: "Start date must be before end date.",
-      });
+      req.session.addOfferError = "Start date must be before end date.";
+      return req.session.save(() => res.redirect("/admin/offer-add"));
     }
 
     const result = await createOffer({
@@ -97,16 +92,15 @@ export const offerAdd = async (req, res) => {
     });
 
     if (!result.success) {
-      return res.render("Admin/offerAddPage", {
-        activePage: "offer",
-        error: result.message,
-      });
+      req.session.addOfferError = result.message;
+      return req.session.save(() => res.redirect("/admin/offer-add"));
     }
 
     return res.redirect("/admin/offer");
   } catch (e) {
     console.error(e);
-    return res.redirect("/admin/offer");
+    req.session.addOfferError = "Server error. Please try again.";
+    return req.session.save(() => res.redirect("/admin/offer-add"));
   }
 };
 
@@ -116,10 +110,15 @@ export const offerEditPage = async (req, res) => {
 
     if (!result.success) return res.redirect("/admin/offer");
 
-    return res.render("Admin/offerEditPage", {
-      activePage: "offer",
-      offer: result.data,
-      error: null,
+    const error = req.session.editOfferError || null;
+    req.session.editOfferError = null;
+
+    req.session.save(() => {
+      return res.render("Admin/offerEditPage", {
+        activePage: "offer",
+        offer: result.data,
+        error,
+      });
     });
   } catch (e) {
     console.error(e);
@@ -147,21 +146,13 @@ export const offerEdit = async (req, res) => {
       !startDate ||
       !endDate
     ) {
-      const offer = await getOfferById(req.params.id);
-      return res.render("Admin/offerEditPage", {
-        activePage: "offer",
-        offer: offer.data,
-        error: "All required fields must be filled.",
-      });
+      req.session.editOfferError = "All required fields must be filled.";
+      return req.session.save(() => res.redirect(`/admin/offer-edit/${req.params.id}`));
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
-      const offer = await getOfferById(req.params.id);
-      return res.render("Admin/offerEditPage", {
-        activePage: "offer",
-        offer: offer.data,
-        error: "Start date must be before end date.",
-      });
+      req.session.editOfferError = "Start date must be before end date.";
+      return req.session.save(() => res.redirect(`/admin/offer-edit/${req.params.id}`));
     }
 
     const result = await updateOffer(req.params.id, {
@@ -175,18 +166,15 @@ export const offerEdit = async (req, res) => {
     });
 
     if (!result.success) {
-      const offer = await getOfferById(req.params.id);
-      return res.render("Admin/offerEditPage", {
-        activePage: "offer",
-        offer: offer.data,
-        error: result.message,
-      });
+      req.session.editOfferError = result.message;
+      return req.session.save(() => res.redirect(`/admin/offer-edit/${req.params.id}`));
     }
 
     return res.redirect("/admin/offer");
   } catch (e) {
     console.error(e);
-    return res.redirect("/admin/offer");
+    req.session.editOfferError = "Server error. Please try again.";
+    return req.session.save(() => res.redirect(`/admin/offer-edit/${req.params.id}`));
   }
 };
 

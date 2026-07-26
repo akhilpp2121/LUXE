@@ -195,6 +195,19 @@
           <div class="err-msg" id="password-err"></div>
         </div>
 
+        <!-- Confirm Password -->
+        <div class="space-y-1">
+          <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Confirm Password</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">lock_reset</span>
+            <input id="confirmPassword" name="confirmPassword" class="w-full pl-12 pr-12 py-3.5 bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-500 transition-all" placeholder="••••••••" type="password" autocomplete="new-password"/>
+            <button id="eyeBtnConfirm" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none" type="button" aria-label="Toggle confirm password visibility" tabindex="-1">
+              <span id="eyeIconConfirm" class="material-symbols-outlined text-[20px]">visibility</span>
+            </button>
+          </div>
+          <div class="err-msg" id="confirmPassword-err"></div>
+        </div>
+
         <!-- Submit Button -->
         <button id="submitBtn" class="w-full py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/20 transform active:scale-[0.98] mt-2 disabled:opacity-60 disabled:cursor-not-allowed" type="submit">
           Create Account
@@ -246,7 +259,7 @@
   if (backendMessage) {
     showBanner('error', backendMessage);
   }
-  // ── Eye Toggle ──────────────────────────────────────────────────────────────
+  // ── Eye Toggle: Password ──────────────────────────────────────────────────
   const pwInput  = document.getElementById('password');
   const eyeBtn   = document.getElementById('eyeBtn');
   const eyeIcon  = document.getElementById('eyeIcon');
@@ -255,6 +268,17 @@
     const show = pwInput.type === 'password';
     pwInput.type  = show ? 'text' : 'password';
     eyeIcon.textContent = show ? 'visibility_off' : 'visibility';
+  });
+
+  // ── Eye Toggle: Confirm Password ─────────────────────────────────────────
+  const cpInput      = document.getElementById('confirmPassword');
+  const eyeBtnConfirm = document.getElementById('eyeBtnConfirm');
+  const eyeIconConfirm = document.getElementById('eyeIconConfirm');
+
+  eyeBtnConfirm.addEventListener('click', () => {
+    const show = cpInput.type === 'password';
+    cpInput.type = show ? 'text' : 'password';
+    eyeIconConfirm.textContent = show ? 'visibility_off' : 'visibility';
   });
 
   // ── Validation helpers ───────────────────────────────────────────────────────
@@ -339,12 +363,25 @@ if (id === 'phoneNumber') {
       if (!/[a-z]/.test(val)) return setErr(id, 'Include at least one lowercase letter (a–z)');
       if (!/[0-9]/.test(val)) return setErr(id, 'Include at least one number (0–9)');
       if (!/[@$!%*?&]/.test(val)) return setErr(id, 'Include a special character: @ $ ! % * ? &');
+      // Re-check confirm password whenever password changes, if it has a value
+      const cpVal = document.getElementById('confirmPassword').value;
+      if (cpVal) {
+        if (cpVal !== val) setErr('confirmPassword', 'Passwords do not match');
+        else setOk('confirmPassword');
+      }
+      return setOk(id);
+    }
+
+    if (id === 'confirmPassword') {
+      const pwVal = document.getElementById('password').value;
+      if (!val) return setErr(id, 'Please confirm your password');
+      if (val !== pwVal) return setErr(id, 'Passwords do not match');
       return setOk(id);
     }
   }
 
   // Live re-validate on input (only after first blur/submit)
-  ['fullName', 'email', 'phoneNumber', 'password'].forEach(id => {
+  ['fullName', 'email', 'phoneNumber', 'password', 'confirmPassword'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('blur',  () => { if (el.value) validateField(id); });
     el.addEventListener('input', () => { if (el.classList.contains('field-error')) validateField(id); });
@@ -380,7 +417,7 @@ function hideOverlay() {
   }  document.getElementById('registerForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
-  const ids = ['fullName', 'email', 'phoneNumber', 'password'];
+  const ids = ['fullName', 'email', 'phoneNumber', 'password', 'confirmPassword'];
   const results = ids.map(id => validateField(id));
 
   if (results.includes(false)) return;

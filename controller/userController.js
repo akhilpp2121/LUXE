@@ -25,13 +25,32 @@ export const userLoginLoad = (req, res) => {
   if (req.query.redirect) {
     req.session.redirectTo = req.query.redirect;
   }
-  return res.render("Users/login", { message: null });
+  const flashMessage = req.session.flashMessage || null;
+  req.session.flashMessage = null;
+  const message = flashMessage ? flashMessage.message : null;
+  return res.render("Users/login", { message });
 };
 
 export const userSignUpLoad = (req, res) => {
   if (req.session.user) return res.redirect("/homePage");
+  
   const referralToken = req.session.referralToken || "";
-  return res.render("Users/signUp", { message: null, referralToken });
+  const signUpError = req.session.signUpError || null;
+  const signUpFields = req.session.signUpFields || {};
+  
+  req.session.signUpError = null;
+  req.session.signUpFields = null;
+
+  return req.session.save(() => {
+    res.render("Users/signUp", {
+      message: signUpError,
+      referralToken: signUpFields.referralToken || referralToken,
+      fullName: signUpFields.fullName || "",
+      email: signUpFields.email || "",
+      phoneNumber: signUpFields.phoneNumber || "",
+      password: "",
+    });
+  });
 };
 
 export const userForgotPasswordLoad = (req, res) => {
@@ -82,40 +101,40 @@ export const homeLoad = async (req, res) => {
 
 export const registerController = async (req, res) => {
   try {
-    const { fullName, email, phoneNumber, password, referralCode } = req.body;
-    console.log(email, password);
+    const { fullName, email, phoneNumber, password, confirmPassword, referralCode } = req.body;
 
     const result = await registerPreCheckService(
       req,
       fullName,
       email,
       password,
+      confirmPassword,
       phoneNumber,
       referralCode,
     );
 
     if (!result.success) {
-      return res.render("Users/signUp", {
-        message: result.message,
+      req.session.signUpError = result.message;
+      req.session.signUpFields = {
         referralToken: referralCode || "",
         fullName: fullName || "",
         email: email || "",
         phoneNumber: phoneNumber || "",
-        password: password || "",
-      });
+      };
+      return req.session.save(() => res.redirect("/signup"));
     }
 
     return res.redirect(result.redirect);
   } catch (err) {
     console.error("registerController error:", err);
-    return res.render("Users/signUp", {
-      message: "Server error. Please try again.",
+    req.session.signUpError = "Server error. Please try again.";
+    req.session.signUpFields = {
       referralToken: req.body.referralCode || "",
       fullName: req.body.fullName || "",
       email: req.body.email || "",
       phoneNumber: req.body.phoneNumber || "",
-      password: req.body.password || "",
-    });
+    };
+    return req.session.save(() => res.redirect("/signup"));
   }
 };
 
@@ -141,6 +160,18 @@ export const loginController = async (req, res) => {
 export async function googleCallback(req, res) {
   try {
     const user = req.user;
+
+    if (user.isBlocked) {
+      req.session.user = null;
+      if (req.logout) {
+        req.logout(() => {});
+      }
+      req.session.flashMessage = {
+        type: "error",
+        message: "Your account has been blocked by the admin",
+      };
+      return res.redirect("/login");
+    }
 
     req.session.user = {
       id: user._id,
@@ -171,6 +202,8 @@ export const verifyEmailController = async (req, res) => {
 
 export const verifyOtpController = async (req, res) => {
   try {
+    
+    
     const result = await handleOtpVerifyService(req);
 
     return res.json(result);
@@ -328,6 +361,9 @@ export const productListingLoad = async (req, res) => {
   }
 };
 
+
+
+
 export const productDetailLoad = async (req, res) => {
   const { productId } = req.params;
 
@@ -342,6 +378,8 @@ export const productDetailLoad = async (req, res) => {
 
     if (!data.success && data.reason === "unavailable") {
       return res.render("Users/productDetailsPage", {
+        user: req.session.user || null,
+        cart: req.session?.cart?.length || 0,
         product: null,
         variants: [],
         allVariants: [],
@@ -379,6 +417,7 @@ export const productDetailLoad = async (req, res) => {
 
     return res.render("Users/productDetailsPage", {
       user,
+      cart: req.session?.cart?.length || 0,
       product: data.product,
       variants: data.variants,
       allVariants: data.allVariants,
@@ -393,6 +432,7 @@ export const productDetailLoad = async (req, res) => {
     console.error("productDetailLoad error:", err);
     return res.status(500).render("Users/productDetailsPage", {
       user: req.session.user || null,
+      cart: req.session?.cart?.length || 0,
       product: null,
       variants: [],
       allVariants: [],
@@ -405,6 +445,7 @@ export const productDetailLoad = async (req, res) => {
     });
   }
 };
+
 
 export const getProductVariants = async (req, res) => {
   try {

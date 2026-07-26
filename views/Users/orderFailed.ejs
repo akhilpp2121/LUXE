@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Payment Failed — LUXE</title>
+<script src="/js/blockedUserGuard.js"></script>
+<link rel="icon" type="image/x-icon" href="/favicon.png">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          primary: "#1152d4",
+          "primary-dark": "#0d3fa8",
+          "bg-dark": "#101622",
+        },
+        fontFamily: {
+          display: ["Manrope", "sans-serif"],
+          serif: ["Cormorant Garamond", "Georgia", "serif"],
+        },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Manrope', sans-serif; }
+  .msym { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  #toast {
+    position: fixed; bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fu { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+  .d1 { animation-delay: 0.05s; }
+  .d2 { animation-delay: 0.12s; }
+  .d3 { animation-delay: 0.20s; }
+
+  #loadingOverlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(16,22,34,.88); backdrop-filter: blur(8px);
+    z-index: 9999; justify-content: center; align-items: center;
+    flex-direction: column; gap: 18px;
+  }
+  #loadingOverlay.active { display: flex; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 2px solid #1e293b; border-top-color: #1152d4;
+    border-radius: 50%; animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .summary-card { background: #0d1322; border: 1px solid #1e293b; border-radius: 16px; padding: 1.5rem; }
+
+  .price-section { background: #0b1120; border: 1px solid #1e293b; border-radius: 12px; padding: 18px 18px 4px; margin-bottom: 22px; }
+  .price-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; }
+  .price-row.total { padding-top: 14px; padding-bottom: 2px; border-top: 1px solid #1e293b; margin-top: 4px; }
+
+  .scroll-thin::-webkit-scrollbar { width: 4px; }
+  .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+  .scroll-thin::-webkit-scrollbar-thumb { background: #1152d4; border-radius: 2px; }
+
+  .fail-icon-wrap {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .retry-btn {
+    background: #1152d4; color: #fff; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; font-size: 13px; padding: 15px 0; border-radius: 12px;
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 10px 30px -8px rgba(17,82,212,.5); transition: all .2s;
+  }
+  .retry-btn:hover { background: #0d3fa8; }
+  .retry-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  .secondary-btn {
+    background: transparent; border: 1px solid #334155; color: #94a3b8;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .1em; font-size: 11px;
+    padding: 13px 0; border-radius: 12px; width: 100%; transition: all .2s;
+  }
+  .secondary-btn:hover { border-color: #f87171; color: #f87171; }
+
+  .error-banner {
+    background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
+    border-radius: 12px; padding: 14px 18px;
+  }
+
+  .attempt-pill {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: #f87171; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25);
+    padding: 3px 10px; border-radius: 20px; display: inline-block;
+  }
+</style>
+  <link rel="stylesheet" href="/css/navigation-consistency.css" />
+</head>
+<body class="bg-bg-dark text-slate-100 antialiased min-h-screen">
+
+<!-- ══ TOAST ══ -->
+<div id="toast">
+  <div class="flex items-center gap-3 bg-slate-900 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl">
+    <span id="toast-icon" class="material-symbols-outlined msym text-green-400">check_circle</span>
+    <span id="toast-msg" class="text-sm font-semibold"></span>
+  </div>
+</div>
+
+<!-- ══ LOADING OVERLAY ══ -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <p class="text-[11px] tracking-[.2em] uppercase text-slate-500 loading-text">Processing &nbsp;·&nbsp; Please wait</p>
+</div>
+
+<div class="flex flex-col min-h-screen">
+
+  <!-- ══ HEADER ══ -->
+  <header class="sticky top-0 z-50 border-b border-slate-800 bg-bg-dark/80 backdrop-blur-md px-6 lg:px-20 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+      <div class="flex items-center gap-12">
+        <a href="/" class="flex items-center gap-2 text-primary">
+          <span class="material-symbols-outlined msym text-3xl">diamond</span>
+          <span class="text-white text-2xl font-extrabold tracking-tight">LUXE</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Home</a>
+          <a href="/product-listing" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Products</a>
+          <a href="/cart" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Cart</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 mr-1">
+          <span class="material-symbols-outlined msym text-emerald-400" style="font-size:15px;font-variation-settings:'FILL' 1">verified_user</span>
+          Secure Checkout
+        </div>
+        <a href="/profile" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym">person</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full px-6 lg:px-20 py-10 flex-1">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6 fu d1">
+      <a href="/" class="hover:text-primary transition-colors">Home</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <a href="/checkout" class="hover:text-primary transition-colors">Checkout</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <span class="text-slate-200 font-semibold">Payment Failed</span>
+    </nav>
+
+    <!-- Steps -->
+    <div class="flex items-center gap-4 mb-10 fu d1">
+      <span class="text-[11px] font-bold uppercase tracking-[.18em] text-slate-600">Shipping</span>
+      <div class="w-10 h-px bg-slate-800"></div>
+      <span class="text-[11px] font-bold uppercase tracking-[.18em] text-red-400">Payment</span>
+      <div class="w-10 h-px bg-slate-800"></div>
+      <span class="text-[11px] font-bold uppercase tracking-[.18em] text-slate-600">Confirm</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+      <!-- ═══════════ LEFT COLUMN ═══════════ -->
+      <div class="lg:col-span-2 flex flex-col gap-8 fu d2">
+
+        <div class="flex items-start gap-5">
+          <div class="fail-icon-wrap flex-shrink-0">
+            <span class="material-symbols-outlined msym text-red-400" style="font-size:34px;font-variation-settings:'FILL' 1">error</span>
+          </div>
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight font-serif mb-2">Payment Didn't Go Through</h1>
+            <p class="text-sm text-slate-400 leading-relaxed max-w-md">
+              Your order was created but the PayPal payment wasn't completed. Don't worry —
+              your items are held for you. You can retry the payment below or cancel and go back to your cart.
+            </p>
+          </div>
+        </div>
+
+        <!-- Order meta -->
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-xs text-slate-500">Order</span>
+          <span class="text-sm font-bold text-white tracking-wide">#<%= order.orderCode %></span>
+          <% if (order.paymentDetails && order.paymentDetails.retryCount > 0) { %>
+            <span class="attempt-pill"><%= order.paymentDetails.retryCount %> failed attempt<%= order.paymentDetails.retryCount > 1 ? 's' : '' %></span>
+          <% } %>
+        </div>
+
+        <!-- Error detail -->
+        <% if (order.paymentDetails && order.paymentDetails.lastError) { %>
+          <div class="error-banner flex gap-3 items-start">
+            <span class="material-symbols-outlined msym text-red-400 mt-0.5" style="font-size:18px">info</span>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">Reason</p>
+              <p class="text-sm text-slate-300"><%= order.paymentDetails.lastError %></p>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Shipping address recap -->
+        <div>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Shipping To</h2>
+          <div class="bg-[#0d1322] border border-slate-800 rounded-xl p-5 text-sm text-slate-300 leading-relaxed">
+            <div class="font-bold text-white mb-1"><%= order.shippingAddress.username %></div>
+            <%= order.shippingAddress.street_address %><br>
+            <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.postal_code %><br>
+            <%= order.shippingAddress.country %>
+            <div class="text-slate-500 mt-2"><%= order.shippingAddress.phone_number %></div>
+          </div>
+        </div>
+
+      </div><!-- /left column -->
+
+      <!-- ═══════════ RIGHT COLUMN ═══════════ -->
+      <div class="fu d3">
+        <div class="summary-card">
+          <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-5 pb-4 border-b border-slate-800">Order Summary</h2>
+
+          <!-- PRODUCT LIST -->
+          <div class="max-h-[300px] overflow-y-auto scroll-thin mb-5 pr-1">
+            <% order.orderItems.forEach((item) => { %>
+              <div class="flex gap-3.5 py-3.5 border-b border-slate-800 last:border-b-0 last:pb-0">
+                <div class="w-[54px] h-[64px] flex-shrink-0 bg-slate-800 rounded-lg border border-slate-800 flex items-center justify-center text-slate-600">
+                  <span class="material-symbols-outlined msym" style="font-size:20px">checkroom</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs font-bold uppercase tracking-wide text-white mb-1 truncate"><%= item.productName %></div>
+                  <div class="text-[11px] text-slate-500"><%= item.variantName %></div>
+                  <div class="text-[11px] text-slate-500 mt-1">Qty: <%= item.quantity %></div>
+                </div>
+                <div class="text-[13px] font-bold text-primary whitespace-nowrap pt-0.5">
+                  ₹<%= item.totalPrice.toLocaleString('en-IN') %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+
+          <!-- PRICE BREAKDOWN -->
+          <div class="price-section">
+            <div class="price-row">
+              <span class="text-sm text-slate-400">Subtotal</span>
+              <span class="text-sm font-semibold text-white">₹<%= order.subTotal.toLocaleString('en-IN') %></span>
+            </div>
+            <% if (order.couponApplied > 0) { %>
+              <div class="price-row">
+                <span class="text-sm text-emerald-400">Coupon Discount</span>
+                <span class="text-sm font-semibold text-emerald-400">— ₹<%= order.couponApplied.toLocaleString('en-IN') %></span>
+              </div>
+            <% } %>
+            <div class="price-row">
+              <span class="text-sm text-amber-400">GST (<%= order.gstRate %>%)</span>
+              <span class="text-xs text-amber-400">+ ₹<%= order.gstAmount.toLocaleString('en-IN') %></span>
+            </div>
+            <div class="price-row">
+              <span class="text-sm text-slate-400">Shipping Fee</span>
+              <span class="text-sm font-semibold">
+                <% if (order.shippingCharge === 0) { %><span class="text-emerald-400">Free</span><% } else { %><span class="text-white">₹<%= order.shippingCharge %></span><% } %>
+              </span>
+            </div>
+            <div class="price-row total">
+              <span class="text-lg font-extrabold text-white font-serif">Amount Due</span>
+              <span class="text-2xl font-extrabold text-primary font-serif">₹<%= order.totalAmount.toLocaleString('en-IN') %></span>
+            </div>
+          </div>
+
+          <!-- RETRY PAYMENT -->
+          <button class="retry-btn mb-3" id="retryBtn" onclick="startRetry()">
+            <span class="material-symbols-outlined msym text-base">refresh</span>
+            Retry with PayPal
+          </button>
+          <div id="paypal-retry-container" style="display:none; margin-bottom: 12px;"></div>
+
+          <a href="/cart" class="block">
+            <button class="secondary-btn">Cancel &amp; Return to Cart</button>
+          </a>
+
+          <p class="text-center text-xs text-slate-600 flex items-center justify-center gap-1.5 mt-5">
+            <span class="material-symbols-outlined msym text-emerald-400" style="font-size:14px;font-variation-settings:'FILL' 1">inventory_2</span>
+            Your items are held — no need to re-add to cart
+          </p>
+        </div><!-- /summary-card -->
+      </div><!-- /right column -->
+
+    </div><!-- /grid -->
+  </main>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="bg-slate-900/60 mt-20 px-6 lg:px-20 py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 uppercase tracking-widest">
+      <div class="flex items-center gap-2 text-primary">
+        <span class="material-symbols-outlined msym">diamond</span>
+        <span class="text-white font-extrabold tracking-tight">LUXE</span>
+      </div>
+      <p>© <%= new Date().getFullYear() %> Luxe Menswear. All Rights Reserved.</p>
+      <div class="flex gap-6"></div>
+    </div>
+  </footer>
+
+</div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=AUVHxcEAGa6HevQSXIEiiZsdjAsegfmTNURoAmrnB8bwpdC7o8UHeuImbPwCGu7Gq-33yqvrfJq4dM8l&currency=USD"></script>
+
+<script>
+  const orderCode = "<%= order.orderCode %>";
+
+  const overlay    = document.getElementById('loadingOverlay');
+  const showLoader = () => overlay.classList.add('active');
+  const hideLoader = () => overlay.classList.remove('active');
+
+  let _toastTimer;
+  function showToast(msg, icon = 'check_circle', cls = 'text-green-400') {
+    document.getElementById('toast-msg').textContent = msg;
+    const ic = document.getElementById('toast-icon');
+    ic.textContent = icon;
+    ic.className   = 'material-symbols-outlined msym ' + cls;
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 2800);
+  }
+  function toastError(msg)   { showToast(msg, 'error', 'text-red-400'); }
+  function toastSuccess(msg) { showToast(msg, 'check_circle', 'text-green-400'); }
+
+  let retryButtonsRendered = false;
+
+  function startRetry() {
+    document.getElementById('retryBtn').style.display = 'none';
+    document.getElementById('paypal-retry-container').style.display = 'block';
+    if (!retryButtonsRendered) renderRetryButtons();
+  }
+
+  function renderRetryButtons() {
+    paypal.Buttons({
+
+      createOrder: async function () {
+        try {
+          const res  = await fetch(`/checkout/paypal/retry-order/${orderCode}`, { method: 'POST' });
+          const data = await res.json();
+          if (!data.id) throw new Error(data.message || 'Could not start retry payment');
+          return data.id;
+        } catch (err) {
+          toastError(err.message || 'Could not start retry payment.');
+          return Promise.reject(err);
+        }
+      },
+
+      onApprove: async function (data) {
+        showLoader();
+        try {
+          const captureRes  = await fetch('/checkout/paypal/capture-order', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ orderID: data.orderID }),
+          });
+          const captureData = await captureRes.json();
+          hideLoader();
+
+          if (!captureData.success || captureData.status !== 'COMPLETED') {
+            toastError(captureData.message || 'Payment still not completed. Please try again.');
+            return setTimeout(() => window.location.reload(), 1600);
+          }
+
+          toastSuccess('Payment successful — redirecting…');
+          setTimeout(() => { window.location.href = captureData.redirect; }, 1400);
+        } catch (err) {
+          hideLoader();
+          toastError('Something went wrong. Please try again.');
+        }
+      },
+
+      onCancel: function () {
+        toastError('Retry cancelled.');
+      },
+
+      onError: function (err) {
+        console.error('PayPal retry error:', err);
+        toastError('A PayPal error occurred. Please try again.');
+      },
+
+      style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay', height: 45 },
+
+    }).render('#paypal-retry-container');
+
+    retryButtonsRendered = true;
+  }
+</script>
+
+</body>
+</html>

@@ -261,28 +261,28 @@ export const adminProductsAdd = async (req, res) => {
         });
 
     const finalVariants = await Promise.all(
-      rawVariants.map(async (v, i) => {
-        const sku = await generateUniqueSKU(
-          productName.trim(),
-          v.color,
-          v.size,
-          i + 1,
-        );
-        const price = Number(v.price);
-        const manuvalDiscount = v.discount ? Number(v.discount) : price;
-        return {
-          color: v.color.trim(),
-          size: v.size.trim(),
-          sku,
-          stock: Number(v.stock),
-          price,
-          manuvalDiscount,
-          discount: manuvalDiscount,
-          images: v.images,
-          isActive: true,
-        };
-      }),
+  rawVariants.map(async (v, i) => {
+    const sku = await generateUniqueSKU(
+      productName.trim(),
+      v.color,
+      v.size,
+      i + 1,
     );
+    const price = Number(v.price);
+const manualDiscount = v.discount ? Number(v.discount) : price;
+return {
+  color: v.color.trim(),
+  size: v.size.trim(),
+  sku,
+  stock: Number(v.stock),
+  price,
+  manualDiscount,
+  discount: manualDiscount,
+  images: v.images,
+  isActive: true,
+};
+  }),
+);
 
     const result = await adminProductsAddLogic(
       productName.trim(),

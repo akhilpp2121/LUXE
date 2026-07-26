@@ -9,6 +9,7 @@ import { generateInvoicePDF } from "../service/orderService.js";
 import { CartDataTake } from "../service/cartService.js";
 import { normaliseOrder } from "../utilites/orderHelperfile.js";
 import { findUserBlocked } from "../service/userService.js";
+import orderModel from "../model/orderModel.js";
 
 export const orderSuccessPage = async (req, res) => {
   try {
@@ -31,7 +32,6 @@ export const orderSuccessPage = async (req, res) => {
   }
 };
 
-import orderModel from "../model/orderModel.js";
 import { getCartCount } from "../service/cartService.js";
 
 const getOrderById = async (orderId) => {
@@ -249,5 +249,26 @@ export const userOrdersLoad = async (req, res) => {
   } catch (e) {
     console.error("userOrdersLoad error:", e);
     return res.redirect("/");
+  }
+};
+
+export const orderFailedPage = async (req, res) => {
+  try {
+    const { orderCode } = req.params;
+    const userId = req.session.user?._id || req.session.user?.id;
+
+    if (!userId) return res.redirect("/login");
+
+    const order = await orderModel.findOne({ orderCode, userId }).lean();
+
+    if (!order) return res.redirect("/order");
+
+    return res.render("Users/orderFailed", {
+      isLogged: req.session.user || "",
+      order,  
+    });
+  } catch (error) {
+    console.error("orderFailedPage error:", error);
+    return res.redirect("/error");
   }
 };

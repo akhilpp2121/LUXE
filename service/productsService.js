@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import category from "../model/categoryModel.js";
 import Product from "../model/productsModel.js";
 import Variant from "../model/variantModel.js";
 import offerModel from "../model/offerModel.js";
+import categoryModel from "../model/categoryModel.js";
 
 export const productModelLoad = async (filter = {}, sort = {}, pageNo = 1) => {
   try {
@@ -228,53 +228,92 @@ export const updateVariantStatuses = async (productId, changes) => {
   return result;
 };
 
-// export const applyOffersToProduct = async (productId,offer) => {
-//   try {
 
-//     const product = await Product.findById(productId).populate("offer").populate("categoryId");
-//     if (!product) return { success: false, message: "Product not found" };
 
-//     let activeOffer = null;
-//     const now = new Date();
 
-//     if (product.offer && product.offer.isActive && product.offer.startDate <= now && product.offer.endDate >= now) {
-//       activeOffer = product.offer;
-//     }
 
-//     if (!activeOffer && product.categoryId) {
-//       const cat = await category.findById(product.categoryId).populate("offer");
-//       if (cat && cat.offer && cat.offer.isActive && cat.offer.startDate <= now && cat.offer.endDate >= now) {
-//         activeOffer = cat.offer;
-//       }
-//     }
 
-//     const variants = await Variant.find({ productId });
 
-//     for (const variant of variants) {
-//       let discountedPrice = variant.price;
-//       if (activeOffer) {
-//         if (activeOffer.discountType === "PERCENTAGE") {
-//           let discountAmount = variant.price * (activeOffer.discountValue / 100);
-//           if (activeOffer.maxDiscount && discountAmount > activeOffer.maxDiscount) {
-//             discountAmount = activeOffer.maxDiscount;
-//           }
-//           discountedPrice = variant.price - discountAmount;
-//         } else if (activeOffer.discountType === "FLAT") {
-//           discountedPrice = variant.price - activeOffer.discountValue;
-//         }
-//         if (discountedPrice < 0) {
-//           discountedPrice = 0;
-//         }
-//       }
-//       variant.discount = Math.round(discountedPrice);
-//       await variant.save();
-//     }
-//     return { success: true };
-//   } catch (error) {
-//     console.error("applyOffersToProduct error:", error);
-//     return { success: false, message: error.message };
-//   }
-// };
+export const applyOffersToProduct = async (productId) => {
+  try {
+    // Fetch raw first so we always have a reliable categoryId, regardless
+    // of whether populate succeeds
+    const rawProduct = await Product.findById(productId);
+    if (!rawProduct) return { success: false, message: "Product not found" };
+
+    const categoryId = rawProduct.categoryId; // raw ObjectId, not populated
+
+    const product = await Product.findById(productId).populate("offer");
+    if (!product) return { success: false, message: "Product not found" };
+
+    const now = new Date();
+
+    const productOffer =
+      product.offer &&
+      product.offer.isActive &&
+      product.offer.startDate <= now &&
+      product.offer.endDate >= now
+        ? product.offer
+        : null;
+
+    let categoryOffer = null;
+    if (categoryId) {
+      const cat = await categoryModel.findById(categoryId).populate("offer");
+
+      if (
+        cat &&
+        cat.offer &&
+        cat.offer.isActive &&
+        cat.offer.startDate <= now &&
+        cat.offer.endDate >= now
+      ) {
+        categoryOffer = cat.offer;
+      }
+    } else {
+      console.warn(`[applyOffersToProduct] Product ${productId} has no categoryId set`);
+    }
+
+    const calculateSavings = (price, offer) => {
+      if (!offer) return 0;
+      let savings = 0;
+      if (offer.discountType === "PERCENTAGE") {
+        savings = price * (offer.discountValue / 100);
+        if (offer.maxDiscount && savings > offer.maxDiscount) {
+          savings = offer.maxDiscount;
+        }
+      } else if (offer.discountType === "FLAT") {
+        savings = offer.discountValue;
+      }
+      return Math.min(savings, price);
+    };
+
+    const variants = await Variant.find({ productId });
+
+    for (const variant of variants) {
+      const originalPrice = variant.price;
+      const productSavings = calculateSavings(originalPrice, productOffer);
+      const categorySavings = calculateSavings(originalPrice, categoryOffer);
+      const bestSavings = Math.max(productSavings, categorySavings);
+
+      if (bestSavings > 0) {
+        variant.discount = Math.round(originalPrice - bestSavings);
+      } else {
+        variant.discount = variant.manualDiscount ?? originalPrice;
+      }
+
+      await variant.save();
+    }
+
+    return { success: true, appliedCategoryOffer: !!categoryOffer, appliedProductOffer: !!productOffer };
+  } catch (error) {
+    console.error(`applyOffersToProduct error for ${productId}:`, error);
+    return { success: false, message: error.message };
+  }
+};
+
+
+
+
 
 // export const applyOffersToProduct = async (productId) => {
 //   try {
@@ -286,7 +325,6 @@ export const updateVariantStatuses = async (productId, changes) => {
 
 //     const now = new Date();
 
-//     // Check product offer validity
 //     const productOffer =
 //       product.offer &&
 //       product.offer.isActive &&
@@ -295,10 +333,12 @@ export const updateVariantStatuses = async (productId, changes) => {
 //         ? product.offer
 //         : null;
 
-//     // Check category offer validity
 //     let categoryOffer = null;
 //     if (product.categoryId) {
-//       const cat = await category.findById(product.categoryId).populate("offer");
+//       const cat = await categoryModel
+//         .findById(product.categoryId._id)
+//         .populate("offer");
+
 //       if (
 //         cat &&
 //         cat.offer &&
@@ -321,23 +361,20 @@ export const updateVariantStatuses = async (productId, changes) => {
 //       } else if (offer.discountType === "FLAT") {
 //         savings = offer.discountValue;
 //       }
-//       return Math.min(savings, price); // can't exceed price
+//       return Math.min(savings, price);
 //     };
 
 //     const variants = await Variant.find({ productId });
 
 //     for (const variant of variants) {
 //       const originalPrice = variant.price;
-
-//       const productSavings  = calculateSavings(originalPrice, productOffer);
+//       const productSavings = calculateSavings(originalPrice, productOffer);
 //       const categorySavings = calculateSavings(originalPrice, categoryOffer);
-//       const bestSavings     = Math.max(productSavings, categorySavings);
+//       const bestSavings = Math.max(productSavings, categorySavings);
 
 //       if (bestSavings > 0) {
-//         // Offer wins — overwrite discount with offer price
 //         variant.discount = Math.round(originalPrice - bestSavings);
 //       } else {
-//         // No offer — restore manual discount
 //         variant.discount = variant.manualDiscount ?? originalPrice;
 //       }
 
@@ -345,111 +382,8 @@ export const updateVariantStatuses = async (productId, changes) => {
 //     }
 
 //     return { success: true };
-
 //   } catch (error) {
 //     console.error("applyOffersToProduct error:", error);
 //     return { success: false, message: error.message };
 //   }
 // };
-
-export const applyOffersToProduct = async (productId) => {
-  try {
-    const product = await Product.findById(productId)
-      .populate("offer")
-      .populate("categoryId");
-
-    if (!product) return { success: false, message: "Product not found" };
-
-    const now = new Date();
-
-    const productOffer =
-      product.offer &&
-      product.offer.isActive &&
-      product.offer.startDate <= now &&
-      product.offer.endDate >= now
-        ? product.offer
-        : null;
-
-    let categoryOffer = null;
-    if (product.categoryId) {
-      const cat = await category.findById(product.categoryId).populate("offer");
-      if (
-        cat &&
-        cat.offer &&
-        cat.offer.isActive &&
-        cat.offer.startDate <= now &&
-        cat.offer.endDate >= now
-      ) {
-        categoryOffer = cat.offer;
-      }
-    }
-
-    // ── DEBUG ──
-    console.log("productId:", productId);
-    console.log(
-      "productOffer:",
-      productOffer
-        ? `${productOffer.name} | ${productOffer.discountType} | ${productOffer.discountValue}`
-        : "NONE",
-    );
-    console.log(
-      "categoryOffer:",
-      categoryOffer
-        ? `${categoryOffer.name} | ${categoryOffer.discountType} | ${categoryOffer.discountValue}`
-        : "NONE",
-    );
-
-    const calculateSavings = (price, offer) => {
-      if (!offer) return 0;
-      let savings = 0;
-      if (offer.discountType === "PERCENTAGE") {
-        savings = price * (offer.discountValue / 100);
-        if (offer.maxDiscount && savings > offer.maxDiscount) {
-          savings = offer.maxDiscount;
-        }
-      } else if (offer.discountType === "FLAT") {
-        savings = offer.discountValue;
-      }
-      return Math.min(savings, price);
-    };
-
-    const variants = await Variant.find({ productId });
-    console.log("variants found:", variants.length);
-
-    for (const variant of variants) {
-      const originalPrice = variant.price;
-      const productSavings = calculateSavings(originalPrice, productOffer);
-      const categorySavings = calculateSavings(originalPrice, categoryOffer);
-      const bestSavings = Math.max(productSavings, categorySavings);
-
-      // ── DEBUG ──
-      console.log("--- variant ---", variant._id);
-      console.log("  originalPrice:", originalPrice);
-      console.log("  manualDiscount:", variant.manualDiscount);
-      console.log("  productSavings:", productSavings);
-      console.log("  categorySavings:", categorySavings);
-      console.log("  bestSavings:", bestSavings);
-
-      if (bestSavings > 0) {
-        variant.discount = Math.round(originalPrice - bestSavings);
-      } else {
-        variant.discount = variant.manualDiscount ?? originalPrice;
-      }
-
-      console.log("  final discount:", variant.discount);
-
-      await variant.save();
-
-      // verify it actually saved
-      const check = await Variant.findById(variant._id).select(
-        "discount price manualDiscount",
-      );
-      console.log("  DB after save:", check.discount, "| price:", check.price);
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error("applyOffersToProduct error:", error);
-    return { success: false, message: error.message };
-  }
-};

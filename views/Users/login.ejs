@@ -412,6 +412,27 @@
       const overlay = document.getElementById("successOverlay");
       const form = document.getElementById("loginForm");
 
+      /* ---------------- BLOCKED-VIA-AJAX MESSAGE ---------------- */
+      // If blockedUserGuard.js redirected here from an AJAX call on another
+      // page, show that message the same way the server-rendered one displays.
+      document.addEventListener("DOMContentLoaded", () => {
+        const blockedMsg = sessionStorage.getItem("blockedMessage");
+        if (!blockedMsg) return;
+        sessionStorage.removeItem("blockedMessage");
+
+        let el = document.getElementById("serverError");
+        if (!el) {
+          el = document.createElement("div");
+          el.id = "serverError";
+          el.className =
+            "p-3 mb-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-[10px] font-bold tracking-[0.2em] uppercase text-center";
+          el.setAttribute("role", "alert");
+          el.setAttribute("aria-live", "polite");
+          document.getElementById("passwordError").insertAdjacentElement("afterend", el);
+        }
+        el.textContent = blockedMsg;
+      });
+
       /* ---------------- ERROR HANDLING ---------------- */
       function showError(input, errorEl, msg) {
         errorEl.textContent = msg;

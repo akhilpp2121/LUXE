@@ -3,353 +3,341 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>My Orders | LUXE Internationale</title>
+<title>My Orders — LUXE</title>
+<script src="/js/blockedUserGuard.js"></script>
+<link rel="icon" type="image/x-icon" href="/favicon.png">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<script>
   tailwind.config = {
     darkMode: "class",
     theme: {
       extend: {
         colors: {
-          "on-primary-container": "#74829d",
-          "outline": "#8f9097",
-          "on-surface": "#d8e2ff",
-          "on-secondary-fixed": "#241a00",
-          "on-primary-fixed": "#0d1c32",
-          "tertiary-fixed": "#e2e2e4",
-          "surface-container-low": "#091b39",
-          "outline-variant": "#44474d",
-          "on-tertiary-container": "#808284",
-          "surface-dim": "#011230",
-          "inverse-primary": "#515f78",
-          "on-primary-fixed-variant": "#39475f",
-          "error": "#ffb4ab",
-          "secondary-container": "#af8d11",
-          "on-tertiary-fixed-variant": "#454749",
-          "on-background": "#d8e2ff",
-          "secondary": "#e9c349",
-          "on-secondary-fixed-variant": "#574500",
-          "on-secondary-container": "#342800",
-          "on-secondary": "#3c2f00",
-          "primary-fixed": "#d6e3ff",
-          "background": "#011230",
-          "error-container": "#93000a",
-          "on-tertiary": "#2f3132",
-          "on-surface-variant": "#c5c6cd",
-          "surface-tint": "#b9c7e4",
-          "primary": "#b9c7e4",
-          "tertiary-container": "#17191b",
-          "inverse-on-surface": "#20304f",
-          "primary-fixed-dim": "#b9c7e4",
-          "primary-container": "#0a192f",
-          "tertiary-fixed-dim": "#c6c6c8",
-          "tertiary": "#c6c6c8",
-          "surface-bright": "#293958",
-          "on-error-container": "#ffdad6",
-          "surface-container": "#0e1f3d",
-          "surface": "#011230",
-          "on-primary": "#233148",
-          "on-error": "#690005",
-          "surface-container-highest": "#253453",
-          "inverse-surface": "#d8e2ff",
-          "secondary-fixed-dim": "#e9c349",
-          "surface-container-high": "#192a48",
-          "secondary-fixed": "#ffe088",
-          "on-tertiary-fixed": "#1a1c1d"
-        },
-        borderRadius: {
-          "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"
-        },
-        spacing: {
-          "base": "8px", "gutter": "24px", "section-gap": "120px",
-          "margin-desktop": "80px", "margin-mobile": "20px"
+          primary: "#1152d4",
+          "primary-dark": "#0d3fa8",
+          "bg-dark": "#101622",
         },
         fontFamily: {
-          "label-sm": ["Inter"], "label-md": ["Inter"],
-          "body-lg": ["Inter"], "body-md": ["Inter"],
-          "headline-md": ["Playfair Display"], "headline-lg": ["Playfair Display"],
-          "display-lg": ["Playfair Display"], "headline-lg-mobile": ["Playfair Display"]
+          display: ["Manrope", "sans-serif"],
+          serif: ["Cormorant Garamond", "Georgia", "serif"],
         },
-        fontSize: {
-          "label-sm": ["12px", {"lineHeight":"1.2","letterSpacing":"0.05em","fontWeight":"500"}],
-          "label-md": ["14px", {"lineHeight":"1.2","letterSpacing":"0.1em","fontWeight":"600"}],
-          "body-lg":  ["18px", {"lineHeight":"1.6","fontWeight":"400"}],
-          "body-md":  ["16px", {"lineHeight":"1.6","fontWeight":"400"}],
-          "headline-md": ["28px", {"lineHeight":"1.3","fontWeight":"500"}],
-          "headline-lg": ["40px", {"lineHeight":"1.2","fontWeight":"600"}],
-          "display-lg":  ["64px", {"lineHeight":"1.1","letterSpacing":"-0.02em","fontWeight":"700"}],
-          "headline-lg-mobile": ["32px", {"lineHeight":"1.2","fontWeight":"600"}]
-        }
-      }
-    }
+      },
+    },
   }
 </script>
 <style>
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-    vertical-align: middle;
+  body { font-family: 'Manrope', sans-serif; }
+  .msym { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  #toast {
+    position: fixed; bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
   }
-  .order-card-hover { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-  .order-card-hover:hover {
-    background-color: #0e1f3d;
-    border-color: #e9c349;
-    transform: translateY(-2px);
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  .order-thumbnail-zoom { overflow: hidden; }
-  .order-thumbnail-zoom img { transition: transform 0.5s ease; }
-  .order-card-hover:hover .order-thumbnail-zoom img { transform: scale(1.1); }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: #011230; }
-  ::-webkit-scrollbar-thumb { background: #44474d; border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background: #e9c349; }
+  .fu { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+  .d1 { animation-delay: 0.05s; }
+  .d2 { animation-delay: 0.12s; }
+  .d3 { animation-delay: 0.20s; }
+  .d4 { animation-delay: 0.28s; }
+
+  /* ── ORDER CARD ── */
+  .order-card {
+    background: #0d1322; border: 1px solid #1e293b; border-radius: 12px;
+    padding: 20px 22px; position: relative;
+    transition: border-color .2s, background .2s, transform .15s;
+  }
+  .order-card:hover { border-color: #1e3a6e; background: #0f1829; transform: translateY(-2px); }
+
+  .order-thumb-zoom { overflow: hidden; border-radius: 10px; }
+  .order-thumb-zoom img { transition: transform 0.5s ease; }
+  .order-card:hover .order-thumb-zoom img { transform: scale(1.08); }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .status-delivered  { color: #34d399; background: rgba(52,211,153,.1);  border: 1px solid rgba(52,211,153,.25); }
+  .status-cancelled  { color: #f87171; background: rgba(239,68,68,.1);   border: 1px solid rgba(239,68,68,.25); }
+  .status-transit    { color: #60a5fa; background: rgba(96,165,250,.1);  border: 1px solid rgba(96,165,250,.25); }
+  .status-processing { color: #fbbf24; background: rgba(251,191,36,.1);  border: 1px solid rgba(251,191,36,.25); }
+
+  .view-details-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; border: 1px solid #334155; color: #60a5fa;
+    font-family: 'Manrope', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    padding: 9px 16px; border-radius: 8px; cursor: pointer; transition: all .2s; white-space: nowrap;
+  }
+  .view-details-btn:hover { background: #1152d4; color: #fff; border-color: #1152d4; }
+  .view-details-btn .material-symbols-outlined { transition: transform .2s; font-size: 16px; }
+  .view-details-btn:hover .material-symbols-outlined { transform: translateX(3px); }
+
+  .scroll-thin::-webkit-scrollbar { width: 4px; }
+  .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+  .scroll-thin::-webkit-scrollbar-thumb { background: #1152d4; border-radius: 2px; }
+
+  .page-btn {
+    background: transparent; border: 1px solid #1e293b; color: #94a3b8;
+    font-family: 'Manrope', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    padding: 9px 16px; border-radius: 8px; transition: all .2s;
+  }
+  .page-btn:hover { border-color: #1152d4; color: #60a5fa; }
 </style>
   <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
-<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
+<body class="bg-bg-dark text-slate-100 antialiased min-h-screen">
 
-<!-- TopNavBar -->
-<nav class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center px-margin-desktop py-base w-full max-w-none">
-  <div class="flex items-center">
-    <span class="font-headline-lg text-headline-lg text-secondary">LUXE</span>
+<!-- ══ TOAST ══ -->
+<div id="toast">
+  <div class="flex items-center gap-3 bg-slate-900 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl">
+    <span id="toast-icon" class="material-symbols-outlined msym text-green-400">check_circle</span>
+    <span id="toast-msg" class="text-sm font-semibold"></span>
   </div>
-  <div class="hidden md:flex items-center space-x-gutter">
-    <a class="font-label-md text-label-md uppercase tracking-widest text-on-surface-variant hover:text-secondary transition-colors duration-300" href="/product-listing">Collections</a>
-    <a class="font-label-md text-label-md uppercase tracking-widest text-on-surface-variant hover:text-secondary transition-colors duration-300" href="/product-listing">New Arrivals</a>
-  </div>
-  <div class="flex items-center space-x-gutter">
-<a href="/cart" class="text-on-surface-variant hover:text-secondary transition-all duration-300 ease-in-out relative">
-  <span class="material-symbols-outlined">shopping_bag</span>
-  <% if (cart > 0) { %>
-    <span style="
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      background: #1d4ed8;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-    "><%= cart %></span>
-  <% } %>
-</a>
+</div>
 
-<a href="/profile" class="text-secondary border-b border-secondary pb-1 transition-all duration-300 ease-in-out">
-  <span class="material-symbols-outlined">person</span>
-</a>
-    
-  </div>
-</nav>
+<div class="flex flex-col min-h-screen">
 
-<!-- Main Content -->
-<main class="flex-grow pt-[120px] pb-section-gap px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto w-full">
-
-  <!-- Header -->
-  <header class="mb-gutter md:mb-section-gap flex flex-col md:flex-row md:items-end justify-between gap-base">
-    <div>
-      <h1 class="font-headline-lg text-headline-lg mb-2">My Orders</h1>
-      <p class="text-on-tertiary-container font-label-md uppercase tracking-widest">A curated history of your acquisitions</p>
+  <!-- ══ HEADER ══ -->
+  <header class="sticky top-0 z-50 border-b border-slate-800 bg-bg-dark/80 backdrop-blur-md px-6 lg:px-20 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+      <div class="flex items-center gap-12">
+        <a href="/" class="flex items-center gap-2 text-primary">
+          <span class="material-symbols-outlined msym text-3xl">diamond</span>
+          <span class="text-white text-2xl font-extrabold tracking-tight">LUXE</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Home</a>
+          <a href="/product-listing" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Products</a>
+          <a href="/cart" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Cart</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/cart" class="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym">shopping_bag</span>
+          <% if (cart > 0) { %>
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+              <%= cart %>
+            </span>
+          <% } %>
+        </a>
+        <a href="/profile" class="p-2 text-primary bg-primary/10 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym" style="font-variation-settings:'FILL' 1">person</span>
+        </a>
+      </div>
     </div>
-   
   </header>
 
-  <!-- Order Listing -->
-  <div class="space-y-gutter">
+  <main class="max-w-7xl mx-auto w-full px-6 lg:px-20 py-10 flex-1">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6 fu d1">
+      <a href="/" class="hover:text-primary transition-colors">Home</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <a href="/profile" class="hover:text-primary transition-colors">Account</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <span class="text-slate-200 font-semibold">My Orders</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-10 fu d1">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold uppercase tracking-tight font-serif mb-1">My Orders</h1>
+        <p class="text-sm text-slate-500">A curated history of your acquisitions</p>
+      </div>
+    </div>
 
     <% if (!orders || orders.length === 0) { %>
-      <!-- Empty State -->
-      <div class="flex flex-col items-center justify-center py-32 gap-6 text-center">
-        <span class="material-symbols-outlined text-6xl text-on-tertiary-container">inbox</span>
-        <p class="font-headline-md text-headline-md text-on-surface">No orders yet</p>
-        <p class="text-on-tertiary-container font-label-md uppercase tracking-widest">Your acquisitions will appear here</p>
-        <a href="/shop">
-          <button class="mt-4 px-8 py-3 bg-secondary text-on-secondary font-label-md uppercase tracking-wider hover:opacity-90 transition-all">
+      <!-- ══ EMPTY STATE ══ -->
+      <div class="flex flex-col items-center justify-center py-28 gap-5 text-center fu d2 bg-[#0d1322] border border-slate-800 rounded-2xl">
+        <span class="material-symbols-outlined msym text-6xl text-slate-600">inbox</span>
+        <p class="text-xl font-extrabold font-serif text-white">No orders yet</p>
+        <p class="text-xs text-slate-500 uppercase tracking-widest">Your acquisitions will appear here</p>
+        <a href="/product-listing">
+          <button class="mt-2 inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold px-7 py-3 rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 text-xs uppercase tracking-widest">
             Begin Shopping
           </button>
         </a>
       </div>
 
     <% } else { %>
-      <% orders.forEach(function(o) { %>
-        <%
-          /* ── resolve first active item for thumbnail ── */
-          const cancelledVIds = new Set(
-            (o.cancelledAt || []).flatMap(ca =>
-              (ca.cancelledProducts || []).map(cp => cp && cp._id ? cp._id.toString() : String(cp))
-            )
-          );
-          const activeItems = (o.orderItems || []).filter(item => {
-            const vid = item.variantId && typeof item.variantId === 'object'
-              ? item.variantId._id.toString()
-              : String(item.variantId);
-            return !cancelledVIds.has(vid);
-          });
-          const firstItem  = activeItems[0] || (o.orderItems || [])[0];
-          const firstVariant = firstItem && firstItem.variantId && typeof firstItem.variantId === 'object'
-            ? firstItem.variantId : null;
-          const firstImages  = firstVariant ? (firstVariant.images || firstVariant.image || []) : [];
-          const firstThumb   = firstImages[0] ? '/uploads/' + firstImages[0] : '/images/placeholder.png';
+      <div class="flex flex-col gap-4 fu d2">
+        <% orders.forEach(function(o) { %>
+          <%
+            /* ── resolve first active item for thumbnail ── */
+            const cancelledVIds = new Set(
+              (o.cancelledAt || []).flatMap(ca =>
+                (ca.cancelledProducts || []).map(cp => cp && cp._id ? cp._id.toString() : String(cp))
+              )
+            );
+            const activeItems = (o.orderItems || []).filter(item => {
+              const vid = item.variantId && typeof item.variantId === 'object'
+                ? item.variantId._id.toString()
+                : String(item.variantId);
+              return !cancelledVIds.has(vid);
+            });
+            const firstItem  = activeItems[0] || (o.orderItems || [])[0];
+            const firstVariant = firstItem && firstItem.variantId && typeof firstItem.variantId === 'object'
+              ? firstItem.variantId : null;
+            const firstImages  = firstVariant ? (firstVariant.images || firstVariant.image || []) : [];
+            const firstThumb   = firstImages[0] ? '/uploads/' + firstImages[0] : '/images/placeholder.png';
 
-          /* ── status display ── */
-          const st = (o.orderStatus || '').toLowerCase();
-          const isDelivered  = st === 'completed';
-          const isCancelled  = st === 'cancelled';
-          const isProcessing = st === 'placed' || st === 'pending';
-          const isTransit    = st === 'processing' || st === 'shipped';
+            /* ── status display ── */
+            const st = (o.orderStatus || '').toLowerCase();
+            const isDelivered  = st === 'completed';
+            const isCancelled  = st === 'cancelled';
+            const isProcessing = st === 'placed' || st === 'pending';
+            const isTransit    = st === 'processing' || st === 'shipped';
 
-          /* ── total items count ── */
-          const totalQty = (o.orderItems || []).reduce((s, i) => s + (i.quantity || 1), 0);
-        %>
+            /* ── total items count ── */
+            const totalQty = (o.orderItems || []).reduce((s, i) => s + (i.quantity || 1), 0);
+          %>
 
-        <div class="order-card-hover border border-outline-variant/30 bg-surface-container-lowest p-gutter rounded-none flex flex-col md:flex-row gap-gutter">
-          <div class="flex-grow flex flex-col justify-between">
+          <div class="order-card flex flex-col md:flex-row gap-5">
 
-            <!-- Top row: meta -->
-            <div class="flex flex-wrap justify-between items-start gap-base mb-gutter">
-
-              <div>
-                <span class="font-label-sm text-label-sm text-on-tertiary-container uppercase mb-1 block">Order Reference</span>
-                <h3 class="font-body-lg text-body-lg font-bold text-on-surface">#<%= o.orderCode %></h3>
-              </div>
-
-              <div>
-                <span class="font-label-sm text-label-sm text-on-tertiary-container uppercase mb-1 block">Placed On</span>
-                <p class="text-on-surface"><%= new Date(o.orderDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) %></p>
-              </div>
-
-              <div>
-                <span class="font-label-sm text-label-sm text-on-tertiary-container uppercase mb-1 block">Status</span>
-                <% if (isDelivered) { %>
-                  <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
-                    <span class="text-secondary font-label-md uppercase">Delivered</span>
-                  </div>
-                <% } else if (isCancelled) { %>
-                  <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-error text-[18px]">cancel</span>
-                    <span class="text-error font-label-md uppercase">Cancelled</span>
-                  </div>
-                <% } else if (isTransit) { %>
-                  <div class="flex items-center gap-2 text-on-primary-container">
-                    <span class="material-symbols-outlined text-[18px]">local_shipping</span>
-                    <span class="font-label-md uppercase">In Transit</span>
-                  </div>
-                <% } else { %>
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                    <span class="text-secondary font-label-md uppercase">Processing</span>
-                  </div>
-                <% } %>
-              </div>
-
-              <div>
-                <span class="font-label-sm text-label-sm text-on-tertiary-container uppercase mb-1 block">Total</span>
-                <p class="text-on-surface font-bold text-body-lg">₹<%= (o.totalAmount || 0).toFixed(2) %></p>
-              </div>
-
+            <!-- Thumbnails -->
+            <div class="flex -space-x-4 flex-shrink-0">
+              <% (o.orderItems || []).slice(0, 2).forEach(function(item, idx) {
+                const v   = item.variantId && typeof item.variantId === 'object' ? item.variantId : null;
+                const img = v ? (v.images || v.image || [])[0] : null;
+                const src = img ? '/uploads/' + img : '/images/placeholder.png';
+              %>
+                <div class="order-thumb-zoom w-20 h-20 bg-slate-800 border-2 border-[#0d1322] flex-shrink-0" style="z-index:<%= 20 - idx %>;">
+                  <img alt="<%= item.productName || 'Product' %>" class="w-full h-full object-cover" src="<%= src %>" onerror="this.src='/images/placeholder.png'"/>
+                </div>
+              <% }) %>
             </div>
 
-            <!-- Bottom row: thumbnail + actions -->
-            <div class="flex items-center gap-4 mt-auto">
+            <div class="flex-grow flex flex-col justify-between gap-4">
 
-              <!-- Thumbnails (up to 2) -->
-              <div class="flex -space-x-4">
-                <% (o.orderItems || []).slice(0, 2).forEach(function(item, idx) {
-                  const v   = item.variantId && typeof item.variantId === 'object' ? item.variantId : null;
-                  const img = v ? (v.images || v.image || [])[0] : null;
-                  const src = img ? '/uploads/' + img : '/images/placeholder.png';
-                %>
-                  <div class="order-thumbnail-zoom w-20 h-20 bg-surface-bright flex-shrink-0 border-2 border-background" style="z-index:<%= 20 - idx %>;">
-                    <img alt="<%= item.productName || 'Product' %>" class="w-full h-full object-cover" src="<%= src %>"/>
-                  </div>
-                <% }) %>
+              <!-- Top row: meta -->
+              <div class="flex flex-wrap justify-between items-start gap-4">
+
+                <div>
+                  <span class="text-[10px] uppercase tracking-widest text-slate-500 mb-1 block">Order Reference</span>
+                  <h3 class="text-sm font-bold text-white">#<%= o.orderCode %></h3>
+                </div>
+
+                <div>
+                  <span class="text-[10px] uppercase tracking-widest text-slate-500 mb-1 block">Placed On</span>
+                  <p class="text-sm text-slate-300"><%= new Date(o.orderDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) %></p>
+                </div>
+
+                <div>
+                  <span class="text-[10px] uppercase tracking-widest text-slate-500 mb-1 block">Status</span>
+                  <% if (isDelivered) { %>
+                    <span class="status-pill status-delivered">
+                      <span class="material-symbols-outlined msym" style="font-size:13px;font-variation-settings:'FILL' 1">check_circle</span>
+                      Delivered
+                    </span>
+                  <% } else if (isCancelled) { %>
+                    <span class="status-pill status-cancelled">
+                      <span class="material-symbols-outlined msym" style="font-size:13px">cancel</span>
+                      Cancelled
+                    </span>
+                  <% } else if (isTransit) { %>
+                    <span class="status-pill status-transit">
+                      <span class="material-symbols-outlined msym" style="font-size:13px">local_shipping</span>
+                      In Transit
+                    </span>
+                  <% } else { %>
+                    <span class="status-pill status-processing">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                      Processing
+                    </span>
+                  <% } %>
+                </div>
+
+                <div>
+                  <span class="text-[10px] uppercase tracking-widest text-slate-500 mb-1 block">Total</span>
+                  <p class="text-primary font-extrabold text-sm">₹<%= (o.totalAmount || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></p>
+                </div>
+
               </div>
 
-              <!-- Item name + qty -->
-              <div class="hidden sm:block">
-                <p class="text-on-surface font-label-md"><%= firstItem ? firstItem.productName : 'N/A' %></p>
-                <p class="text-on-tertiary-container text-label-sm uppercase">
-                  Qty: <%= totalQty %> item<%= totalQty !== 1 ? 's' : '' %>
-                </p>
-              </div>
+              <!-- Bottom row: item name + actions -->
+              <div class="flex items-center gap-4 pt-4 border-t border-slate-800">
 
-              <!-- View Details -->
-              <div class="ml-auto">
-                <a href="/order/details/<%=o. _id %>">
-                  <button class="group flex items-center gap-2 text-label-md uppercase tracking-widest text-on-surface-variant hover:text-secondary transition-colors">
-                    View Details
-                    <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                  </button>
-                </a>
-              </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold uppercase tracking-wide text-white truncate"><%= firstItem ? firstItem.productName : 'N/A' %></p>
+                  <p class="text-[11px] text-slate-500 mt-0.5">
+                    Qty: <%= totalQty %> item<%= totalQty !== 1 ? 's' : '' %>
+                  </p>
+                </div>
 
+                <div class="ml-auto">
+                  <a href="/order/details/<%= o._id %>">
+                    <button class="view-details-btn">
+                      View Details
+                      <span class="material-symbols-outlined msym">arrow_forward</span>
+                    </button>
+                  </a>
+                </div>
+
+              </div>
             </div>
           </div>
-        </div>
 
-      <% }) %>
+        <% }) %>
+      </div>
+
+      <!-- ══ PAGINATION ══ -->
+      <% if (pagination && pagination.totalPages > 1) { %>
+        <div class="mt-12 flex justify-center items-center gap-4 fu d3">
+          <% if (pagination.currentPage > 1) { %>
+            <a href="?page=<%= pagination.currentPage - 1 %>" class="page-btn">Prev</a>
+          <% } %>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+            Page <%= pagination.currentPage %> of <%= pagination.totalPages %>
+          </span>
+          <% if (pagination.currentPage < pagination.totalPages) { %>
+            <a href="?page=<%= pagination.currentPage + 1 %>" class="page-btn">Next</a>
+          <% } %>
+        </div>
+      <% } %>
     <% } %>
 
-  </div>
+  </main>
 
-  <!-- Pagination -->
-  <% if (pagination && pagination.totalPages > 1) { %>
-    <div class="mt-section-gap flex justify-center items-center gap-4">
-      <% if (pagination.currentPage > 1) { %>
-        <a href="?page=<%= pagination.currentPage - 1 %>" class="px-4 py-2 border border-outline-variant text-on-surface-variant hover:border-secondary hover:text-secondary transition-all font-label-md uppercase tracking-wider">Prev</a>
-      <% } %>
-      <span class="font-label-md text-on-tertiary-container uppercase tracking-widest">
-        Page <%= pagination.currentPage %> of <%= pagination.totalPages %>
-      </span>
-      <% if (pagination.currentPage < pagination.totalPages) { %>
-        <a href="?page=<%= pagination.currentPage + 1 %>" class="px-4 py-2 border border-outline-variant text-on-surface-variant hover:border-secondary hover:text-secondary transition-all font-label-md uppercase tracking-wider">Next</a>
-      <% } %>
+  <!-- ══ FOOTER ══ -->
+  <footer class="bg-slate-900/60 mt-20 px-6 lg:px-20 py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 uppercase tracking-widest">
+      <div class="flex items-center gap-2 text-primary">
+        <span class="material-symbols-outlined msym">diamond</span>
+        <span class="text-white font-extrabold tracking-tight">LUXE</span>
+      </div>
+      <p>© <%= new Date().getFullYear() %> Luxe Menswear. All Rights Reserved.</p>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
+        <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
+        <a href="#" class="hover:text-primary transition-colors">Contact Us</a>
+      </div>
     </div>
-  <% } %>
+  </footer>
 
-</main>
-
-<!-- Footer -->
-<footer class="w-full bg-surface-container-lowest border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center px-margin-desktop py-gutter gap-base">
-  <div class="flex flex-col items-center md:items-start gap-2">
-    <span class="font-headline-md text-headline-md text-secondary">LUXE</span>
-    <p class="font-label-sm text-label-sm uppercase tracking-tighter text-on-tertiary-container">© 2024 LUXE INTERNATIONALE. ALL RIGHTS RESERVED.</p>
-  </div>
-  <div class="flex flex-wrap justify-center gap-gutter">
-    <a class="font-label-sm text-label-sm uppercase tracking-tighter text-on-tertiary-container hover:text-secondary transition-colors duration-300" href="#">Privacy Policy</a>
-    <a class="font-label-sm text-label-sm uppercase tracking-tighter text-on-tertiary-container hover:text-secondary transition-colors duration-300" href="#">Terms of Service</a>
-    <a class="font-label-sm text-label-sm uppercase tracking-tighter text-on-tertiary-container hover:text-secondary transition-colors duration-300" href="#">Shipping &amp; Returns</a>
-    <a class="font-label-sm text-label-sm uppercase tracking-tighter text-on-tertiary-container hover:text-secondary transition-colors duration-300" href="#">Contact Us</a>
-  </div>
-</footer>
+</div>
 
 <script>
-  document.querySelectorAll('.order-card-hover').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-    });
-  });
-
-  window.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.order-card-hover').forEach((card, index) => {
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(20px)';
-      setTimeout(() => {
-        card.style.transition = 'all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
-        card.style.opacity = '1';
-        card.style.transform = 'translateY(0)';
-      }, 100 * index);
-    });
-  });
+  /* ── TOAST (matches checkout page) ── */
+  let _toastTimer;
+  function showToast(msg, icon = 'check_circle', cls = 'text-green-400') {
+    document.getElementById('toast-msg').textContent = msg;
+    const ic = document.getElementById('toast-icon');
+    ic.textContent = icon;
+    ic.className   = 'material-symbols-outlined msym ' + cls;
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 2800);
+  }
 </script>
 </body>
 </html>

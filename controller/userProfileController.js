@@ -57,10 +57,26 @@ export const editProfileLoad = async (req, res) => {
     if (!req.session.user) return res.redirect("/login");
     const user = await getUserProfileService(req.session.user.id);
     if (!user) return res.redirect("/login");
-    return res.render("Users/editProfile", {
-      user,
-      error: null,
-      success: null,
+
+    const error = req.session.editProfileError || null;
+    const success = req.session.editProfileSuccess || null;
+    const fields = req.session.editProfileFields || {};
+
+    req.session.editProfileError = null;
+    req.session.editProfileSuccess = null;
+    req.session.editProfileFields = null;
+
+    if (error && fields) {
+      if (fields.fullName !== undefined) user.fullName = fields.fullName;
+      if (fields.phoneNumber !== undefined) user.phoneNumber = fields.phoneNumber;
+    }
+
+    return req.session.save(() => {
+      res.render("Users/editProfile", {
+        user,
+        error,
+        success,
+      });
     });
   } catch (err) {
     console.error("editProfileLoad error:", err);
@@ -75,33 +91,24 @@ export const userProfileUpdate = async (req, res) => {
     const result = await updateProfileService(req);
 
     if (!result.success) {
-      const user = await getUserProfileService(req.session.user.id);
-      if (user) {
-        if (req.body.fullName !== undefined) user.fullName = req.body.fullName;
-        if (req.body.phoneNumber !== undefined) user.phoneNumber = req.body.phoneNumber;
-      }
-      return res.render("Users/editProfile", {
-        user,
-        error: result.message,
-        success: null,
-      });
+      req.session.editProfileError = result.message;
+      req.session.editProfileFields = {
+        fullName: req.body.fullName,
+        phoneNumber: req.body.phoneNumber,
+      };
+      return req.session.save(() => res.redirect("/profile/edit"));
     }
 
     req.session.user.fullName = result.fullName;
     req.session.user.phoneNumber = result.phoneNumber;
     req.session.user.avatar = result.avatar;
+    req.session.editProfileSuccess = result.message;
 
-    // STAY ON SAME PAGE WITH SUCCESS
-    const updatedUser = await getUserProfileService(req.session.user.id);
-
-    return res.render("Users/editProfile", {
-      user: updatedUser,
-      error: null,
-      success: result.message,
-    });
+    return req.session.save(() => res.redirect("/profile/edit"));
   } catch (err) {
     console.error("userProfileUpdate error:", err);
-    return res.status(500).send("Server error");
+    req.session.editProfileError = "Server error. Please try again.";
+    return req.session.save(() => res.redirect("/profile/edit"));
   }
 };
 
@@ -180,7 +187,11 @@ export const addressPageLoad = async (req, res) => {
 export const profileEditEmailLoad = async (req, res) => {
   try {
     if (!req.session.user) return res.redirect("/login");
-    return res.render("Users/profileEditEmail", { user: req.session.user });
+    const error = req.session.emailEditError || null;
+    req.session.emailEditError = null;
+    return req.session.save(() => {
+      res.render("Users/profileEditEmail", { user: req.session.user, error });
+    });
   } catch (err) {
     return res.status(500).send("Server error");
   }
@@ -191,25 +202,19 @@ export const emailChangeProfileController = async (req, res) => {
     const { newEmail, confirmEmail } = req.body;
 
     if (!newEmail || !confirmEmail) {
-      return res.render("Users/profileEditEmail", {
-        user: req.session.user,
-        error: "All fields required"
-      });
+      req.session.emailEditError = "All fields required";
+      return req.session.save(() => res.redirect("/profile/email-edit"));
     }
 
     if (newEmail !== confirmEmail) {
-      return res.render("Users/profileEditEmail", {
-        user: req.session.user,
-        error: "Emails do not match"
-      });
+      req.session.emailEditError = "Emails do not match";
+      return req.session.save(() => res.redirect("/profile/email-edit"));
     }
 
     const otpLimit = await checkAndRecordOtpRequest(newEmail);
     if (!otpLimit.allowed) {
-      return res.render("Users/profileEditEmail", {
-        user: req.session.user,
-        error: otpLimit.message
-      });
+      req.session.emailEditError = otpLimit.message;
+      return req.session.save(() => res.redirect("/profile/email-edit"));
     }
 
     req.session.tempEmail = newEmail;
@@ -220,7 +225,8 @@ export const emailChangeProfileController = async (req, res) => {
     return res.redirect("/otp");
   } catch (error) {
     console.error(error);
-    res.status(500).send("Server error");
+    req.session.emailEditError = "Server error. Please try again.";
+    return req.session.save(() => res.redirect("/profile/email-edit"));
   }
 };
 

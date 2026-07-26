@@ -149,6 +149,29 @@ const returnSchema = new mongoose.Schema(
   { _id: false },
 );
 
+// ── Payment tracking for retry-able payment methods (e.g. PayPal) ──
+const paymentDetailsSchema = new mongoose.Schema(
+  {
+    paypalOrderId: {
+      type: String,
+      default: null,
+    },
+    paypalCaptureId: {
+      type: String,
+      default: null,
+    },
+    retryCount: {
+      type: Number,
+      default: 0,
+    },
+    lastError: {
+      type: String,
+      default: null,
+    },
+  },
+  { _id: false },
+);
+
 const orderSchema = new mongoose.Schema(
   {
     userId: {
@@ -210,8 +233,21 @@ const orderSchema = new mongoose.Schema(
 
     orderStatus: {
       type: String,
-      enum: ["placed", "cancelled", "completed", "returned"],
+      enum: [
+        "payment_pending", // PayPal order created, payment not yet captured
+        "placed",          // payment captured / COD / wallet debited
+        "payment_failed",  // capture failed or errored — retryable
+        "cancelled",
+        "completed",
+        "returned",
+      ],
       default: "placed",
+    },
+
+    // Only populated/used for payment methods that support retry (PayPal)
+    paymentDetails: {
+      type: paymentDetailsSchema,
+      default: () => ({}),
     },
 
     deliveryStatus: {

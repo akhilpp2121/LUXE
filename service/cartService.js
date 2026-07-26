@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import cartModel from "../model/cartModel.js";
 import variantModel from "../model/variantModel.js";
 
-// ── Cart fetch ──
 export const CartDataTake = async (userId) => {
   try {
     const cart = await cartModel.findOne({ userId }).populate({
@@ -19,15 +18,34 @@ export const CartDataTake = async (userId) => {
     }
 
     let modified = false;
+    const remainingItems = [];
+
     for (let item of cart.items) {
-      if (!item.variantId) continue;
+      if (!item.variantId) {
+        modified = true; // variant deleted, drop it
+        continue;
+      }
+
       const stock = item.variantId.stock ?? 0;
+
+      if (stock < 1) {
+        // out of stock → remove item entirely, don't set quantity to 0
+        modified = true;
+        continue;
+      }
+
       if (item.quantity > stock) {
         item.quantity = stock;
         modified = true;
       }
+
+      remainingItems.push(item);
     }
-    if (modified) await cart.save();
+
+    if (modified) {
+      cart.items = remainingItems;
+      await cart.save();
+    }
 
     return { success: true, data: cart.items };
   } catch (error) {
@@ -38,7 +56,6 @@ export const CartDataTake = async (userId) => {
     };
   }
 };
-
 // ── Add to cart ──
 export const addToCart = async (variantId, userId, quantity) => {
   try {

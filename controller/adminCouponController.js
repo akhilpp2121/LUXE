@@ -55,7 +55,11 @@ import {
 
 // GET /admin/coupons-add
 export const getAddCoupon = (req, res) => {
-  res.render("Admin/addCouponPage");
+  const error = req.session.addCouponError || null;
+  req.session.addCouponError = null;
+  req.session.save(() => {
+    res.render("Admin/addCouponPage", { error });
+  });
 };
 
 // POST /admin/coupons-add
@@ -64,15 +68,15 @@ export const postAddCoupon = async (req, res) => {
     const result = await addCouponService(req.body);
 
     if (!result.success) {
-      return res.render("Admin/addCouponPage", { error: result.message });
+      req.session.addCouponError = result.message;
+      return req.session.save(() => res.redirect("/admin/coupons-add"));
     }
 
     res.redirect("/admin/coupons");
   } catch (error) {
     console.error("postAddCoupon error:", error);
-    res.render("Admin/addCouponPage", {
-      error: "Server error. Please try again.",
-    });
+    req.session.addCouponError = "Server error. Please try again.";
+    return req.session.save(() => res.redirect("/admin/coupons-add"));
   }
 };
 
@@ -83,7 +87,12 @@ export const getEditCoupon = async (req, res) => {
 
     if (!result.success) return res.redirect("/admin/coupons");
 
-    res.render("Admin/editCouponPage", { coupon: result.coupon });
+    const error = req.session.editCouponError || null;
+    req.session.editCouponError = null;
+
+    req.session.save(() => {
+      res.render("Admin/editCouponPage", { coupon: result.coupon, error });
+    });
   } catch (error) {
     console.error("getEditCoupon error:", error);
     res.redirect("/admin/coupons");
@@ -96,16 +105,14 @@ export const postEditCoupon = async (req, res) => {
     const result = await editCouponService(req.params.id, req.body);
 
     if (!result.success) {
-      const couponResult = await getCouponByIdService(req.params.id);
-      return res.render("Admin/editCouponPage", {
-        coupon: couponResult.coupon,
-        error: result.message,
-      });
+      req.session.editCouponError = result.message;
+      return req.session.save(() => res.redirect(`/admin/coupon-edit/${req.params.id}`));
     }
 
     res.redirect("/admin/coupons");
   } catch (error) {
     console.error("postEditCoupon error:", error);
-    res.redirect("/admin/coupons");
+    req.session.editCouponError = "Server error. Please try again.";
+    return req.session.save(() => res.redirect(`/admin/coupon-edit/${req.params.id}`));
   }
 };
