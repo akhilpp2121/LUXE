@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Your Cart — LUXE</title>
+<script src="/js/blockedUserGuard.js"></script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -29,7 +30,6 @@
   body { font-family: 'Manrope', sans-serif; }
   .msym { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
-  /* ── Toast ── */
   #toast {
     position: fixed; bottom: 2rem; left: 50%;
     transform: translateX(-50%) translateY(120px);
@@ -39,7 +39,6 @@
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* ── Fade-up ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -50,7 +49,6 @@
   .d3 { animation-delay: 0.20s; }
   .d4 { animation-delay: 0.28s; }
 
-  /* ── Cart item card ── */
   .cart-item {
     display: grid;
     grid-template-columns: 96px 1fr auto;
@@ -65,7 +63,6 @@
   .cart-item:hover { border-color: #1e3a6e; background: #0f1829; }
   .cart-item.invalid { opacity: 0.6; }
 
-  /* ── Qty stepper ── */
   .qty-btn {
     width: 30px; height: 30px;
     display: flex; align-items: center; justify-content: center;
@@ -76,7 +73,6 @@
   .qty-btn:hover { border-color: #1152d4; color: #60a5fa; background: rgba(17,82,212,0.1); }
   .qty-btn:disabled { border-color: #1e293b; color: #334155; cursor: not-allowed; }
 
-  /* ── Remove btn ── */
   .remove-btn {
     padding: 6px; border-radius: 8px;
     border: none; background: transparent;
@@ -84,7 +80,6 @@
   }
   .remove-btn:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
 
-  /* ── Summary card ── */
   .summary-card {
     background: #0d1322;
     border: 1px solid #1e293b;
@@ -94,17 +89,13 @@
     top: 88px;
   }
 
-  /* ── Divider ── */
   .divider { border-color: #1e293b; }
 
-  /* ── Empty state ── */
   .empty-icon { font-size: 72px; color: #1e293b; }
 
-  /* ── Pulse ── */
   @keyframes pulse-slow { 0%,100%{opacity:1} 50%{opacity:0.5} }
   .pulse { animation: pulse-slow 2s infinite; }
 
-  /* ── Out-of-stock badge ── */
   .oos-badge {
     display: inline-flex; align-items: center; gap: 4px;
     background: rgba(239,68,68,0.12); color: #f87171;
@@ -113,7 +104,6 @@
     text-transform: uppercase; letter-spacing: 0.05em;
   }
 
-  /* ── Unavailable badge ── */
   .unavail-badge {
     display: inline-flex; align-items: center; gap: 4px;
     background: rgba(100,116,139,0.15); color: #94a3b8;
@@ -122,7 +112,6 @@
     text-transform: uppercase; letter-spacing: 0.05em;
   }
 
-  /* mobile: stack cart item */
   @media (max-width: 480px) {
     .cart-item { grid-template-columns: 72px 1fr; }
     .cart-item-actions { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
@@ -189,6 +178,29 @@
         <span class="text-slate-500 text-sm font-semibold"><%= data.length %> item<%= data.length !== 1 ? 's' : '' %></span>
       <% } %>
     </div>
+
+    <!-- ══ LOAD ERROR BANNER ══ -->
+    <% if (typeof loadError !== 'undefined' && loadError) { %>
+      <div class="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6 fu d1">
+        <span class="material-symbols-outlined msym text-red-400">error</span>
+        <p class="text-sm text-red-400 font-semibold"><%= loadError %></p>
+      </div>
+    <% } %>
+
+    <!-- ══ UNAVAILABLE ITEMS BANNER ══ -->
+    <% if (typeof unavailableCount !== 'undefined' && unavailableCount > 0) { %>
+      <div class="flex items-start gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6 fu d1">
+        <span class="material-symbols-outlined msym text-amber-400 mt-0.5">warning</span>
+        <div>
+          <p class="text-sm text-amber-400 font-bold">
+            <%= unavailableCount %> item<%= unavailableCount !== 1 ? 's' : '' %> in your bag <%= unavailableCount !== 1 ? 'are' : 'is' %> no longer available
+          </p>
+          <p class="text-xs text-amber-400/70 mt-0.5">
+            Please remove <%= unavailableCount !== 1 ? 'them' : 'it' %> to proceed to checkout.
+          </p>
+        </div>
+      </div>
+    <% } %>
 
     <% if (!data || data.length === 0) { %>
       <!-- ══ EMPTY STATE ══ -->
@@ -342,7 +354,6 @@
             </div>
 
             <!-- ── Line price ── -->
-            <!-- ── Line price ── -->
 <div class="flex flex-col items-end justify-between gap-2 self-stretch">
   <% if (isInvalid) { %>
     <p class="text-slate-600 font-bold text-base line-through whitespace-nowrap">
@@ -386,7 +397,9 @@
             <!-- Shipping -->
             <div class="flex justify-between items-center mb-3">
               <span class="text-sm text-slate-400">Shipping</span>
-              <% if ((price || 0) >= 999) { %>
+              <% if ((price || 0) === 0) { %>
+                <span class="text-sm font-semibold text-white">₹0</span>
+              <% } else if ((price || 0) >= 999) { %>
                 <span class="text-sm font-semibold text-emerald-400">Free</span>
               <% } else { %>
                 <span class="text-sm font-semibold text-white">₹99</span>
@@ -400,22 +413,22 @@
               <span class="text-base font-bold text-white">Total</span>
               <span class="text-xl font-extrabold text-primary" id="summary-total">
                 <%
-                  const shipping = (price || 0) >= 999 ? 0 : 99;
-                  const total    = (price || 0) + shipping;
+                  const shipping = (price || 0) === 0 ? 0 : ((price || 0) >= 999 ? 0 : 99);
+                  const total     = (price || 0) + shipping;
                 %>
                 ₹<%= total.toLocaleString('en-IN') %>
               </span>
             </div>
 
             <!-- Free shipping nudge -->
-            <% if ((price || 0) < 999) { %>
+            <% if ((price || 0) > 0 && (price || 0) < 999) { %>
               <div class="flex items-start gap-2 bg-slate-800/60 rounded-lg p-3 mb-5">
                 <span class="material-symbols-outlined msym text-amber-400 text-sm mt-0.5">info</span>
                 <p class="text-xs text-slate-400">
                   Add <span class="text-white font-bold">₹<%= (999 - (price || 0)).toLocaleString('en-IN') %></span> more for free shipping.
                 </p>
               </div>
-            <% } else { %>
+            <% } else if ((price || 0) >= 999) { %>
               <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 mb-5">
                 <span class="material-symbols-outlined msym text-emerald-400 text-sm" style="font-variation-settings:'FILL' 1">check_circle</span>
                 <p class="text-xs text-emerald-400 font-semibold">You qualify for free shipping!</p>
@@ -423,13 +436,22 @@
             <% } %>
 
             <!-- Checkout button -->
-            <a href="/checkout"
-               class="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark
-                      text-white font-bold py-4 rounded-xl transition-all
-                      shadow-xl shadow-primary/20 active:scale-95 text-sm">
-              <span class="material-symbols-outlined msym text-sm">lock</span>
-              Proceed to Checkout
-            </a>
+            <% if (typeof unavailableCount !== 'undefined' && unavailableCount > 0) { %>
+              <button disabled
+                 class="flex items-center justify-center gap-2 w-full bg-slate-800 text-slate-500
+                        font-bold py-4 rounded-xl cursor-not-allowed text-sm">
+                <span class="material-symbols-outlined msym text-sm">block</span>
+                Remove unavailable items to continue
+              </button>
+            <% } else { %>
+              <a href="/checkout"
+                 class="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark
+                        text-white font-bold py-4 rounded-xl transition-all
+                        shadow-xl shadow-primary/20 active:scale-95 text-sm">
+                <span class="material-symbols-outlined msym text-sm">lock</span>
+                Proceed to Checkout
+              </a>
+            <% } %>
 
             <p class="text-center text-xs text-slate-600 mt-4 flex items-center justify-center gap-1">
               <span class="material-symbols-outlined msym text-xs">verified_user</span>
@@ -459,137 +481,6 @@
 
 </div>
 
-<!-- <script>
-
-
-
-  /* ── TOAST ── */
-  let _toastTimer;
-  function showToast(msg, icon = 'check_circle', cls = 'text-green-400') {
-    document.getElementById('toast-msg').textContent = msg;
-    const ic = document.getElementById('toast-icon');
-    ic.textContent = icon;
-    ic.className   = 'material-symbols-outlined msym ' + cls;
-    document.getElementById('toast').classList.add('show');
-    clearTimeout(_toastTimer);
-    _toastTimer = setTimeout(() =>
-      document.getElementById('toast').classList.remove('show'), 2800);
-  }
-
-  /* ── CHANGE QUANTITY ── */
-  async function changeQty(cartId, variantId, delta, currentQty, maxStock) {
-    // block inactive / out-of-stock items completely
-    if (maxStock <= 0) {
-      return showToast('This item is no longer available', 'block', 'text-red-400');
-    }
-
-    const newQty = currentQty + delta;
-    if (newQty < 1) return;
-    if (newQty > maxStock) {
-      return showToast(`Only ${maxStock} item(s) available in stock`, 'inventory_2', 'text-amber-400');
-    }
-    if (newQty > 10) {
-      return showToast('Maximum 10 items allowed per order', 'block', 'text-amber-400');
-    }
-
-    const row = document.getElementById('cart-item-' + cartId);
-    if (!row) return;
-
-    const qtyEl               = document.getElementById('qty-' + cartId);
-    const [minusBtn, plusBtn] = row.querySelectorAll('.qty-btn');
-
-    /* optimistic update */
-    qtyEl.textContent = newQty;
-    minusBtn.disabled = newQty <= 1;
-    plusBtn.disabled  = newQty >= maxStock || newQty >= 10;
-    minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${newQty},${maxStock})`);
-    plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${newQty},${maxStock})`);
-
-    try {
-      const res  = await fetch('/cart/update-quantity', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartId, variantId, quantity: newQty })
-      });
-      const data = await res.json();
-
-      if (!data.success) {
-
-
-  qtyEl.textContent = currentQty;
-  minusBtn.disabled = currentQty <= 1;
-  plusBtn.disabled  = currentQty >= maxStock || currentQty >= 10;
-  minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${currentQty},${maxStock})`);
-  plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${currentQty},${maxStock})`);
-
-  if (res.status === 401) {
-    return showToast(data.message, 'block', 'text-red-400');
-  }
-
-  return showToast(data.message || 'Could not update', 'error', 'text-red-400');
-}
-
-
-      if (data.unitPrice) {
-        const lineEl = document.getElementById('line-total-' + cartId);
-        if (lineEl) lineEl.textContent = (data.unitPrice * newQty).toLocaleString('en-IN');
-      }
-
-      updateSummary();
-      showToast('Cart updated', 'check_circle', 'text-green-400');
-
-    } catch (err) {
-      /* rollback */
-      qtyEl.textContent = currentQty;
-      minusBtn.disabled = currentQty <= 1;
-      plusBtn.disabled  = currentQty >= maxStock || currentQty >= 10;
-      minusBtn.setAttribute('onclick', `changeQty('${cartId}','${variantId}',-1,${currentQty},${maxStock})`);
-      plusBtn.setAttribute( 'onclick', `changeQty('${cartId}','${variantId}', 1,${currentQty},${maxStock})`);
-      showToast('Something went wrong', 'error', 'text-red-400');
-    }
-  }
-
-  /* ── REMOVE ITEM ── */
-  async function removeItem(cartId) {
-    try {
-      const res  = await fetch('/cart/remove-cart', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: cartId })
-      });
-      const data = await res.json();
-
-      if (!data.success) {
-        return showToast(data.message || 'Failed to remove', 'error', 'text-red-400');
-      }
-
-      document.getElementById('cart-item-' + cartId)?.remove();
-      showToast('Item removed', 'check_circle', 'text-green-400');
-      updateSummary();
-
-      if (document.querySelectorAll('[id^="cart-item-"]').length === 0) {
-        location.reload();
-      }
-
-    } catch (err) {
-      showToast('Something went wrong', 'error', 'text-red-400');
-    }
-  }
-
-  /* ── UPDATE SUMMARY ── */
-  /* only sums line-total elements — invalid items have no line-total id */
-  function updateSummary() {
-    let subtotal = 0;
-    document.querySelectorAll('[id^="line-total-"]').forEach(el => {
-      subtotal += parseInt(el.textContent.replace(/,/g, '')) || 0;
-    });
-    const shipping = subtotal >= 999 ? 0 : 99;
-    document.getElementById('summary-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
-    document.getElementById('summary-total').textContent    = '₹' + (subtotal + shipping).toLocaleString('en-IN');
-  }
-</script> -->
-
-
 <script>
   /* ─────────────────────────────────────────
      TOAST
@@ -609,7 +500,6 @@
     );
   }
 
-  
   function lockCart(message) {
     document.querySelectorAll('.qty-btn, .remove-btn').forEach(btn => {
       btn.disabled = true;
@@ -688,44 +578,41 @@
     }
   }
 
-  
   async function removeItem(cartId, variantId) {
-  try {
-    const res  = await fetch('/cart/remove-cart', {
-      method : 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({ variantId })
-    });
-    const data = await res.json();
+    try {
+      const res  = await fetch('/cart/remove-cart', {
+        method : 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ variantId })
+      });
+      const data = await res.json();
 
-    if (!data.success) {
-      if (res.status === 401) return lockCart(data.message);
-      return showToast(data.message || 'Failed to remove', 'error', 'text-red-400');
+      if (!data.success) {
+        if (res.status === 401) return lockCart(data.message);
+        return showToast(data.message || 'Failed to remove', 'error', 'text-red-400');
+      }
+
+      document.getElementById('cart-item-' + cartId)?.remove();
+      showToast('Item removed', 'check_circle', 'text-green-400');
+      updateSummary();
+
+      if (document.querySelectorAll('[id^="cart-item-"]').length === 0) {
+        location.reload();
+      }
+
+    } catch {
+      showToast('Something went wrong', 'error', 'text-red-400');
     }
-
-    document.getElementById('cart-item-' + cartId)?.remove();
-    showToast('Item removed', 'check_circle', 'text-green-400');
-    updateSummary();
-
-    if (document.querySelectorAll('[id^="cart-item-"]').length === 0) {
-      location.reload();
-    }
-
-  } catch {
-    showToast('Something went wrong', 'error', 'text-red-400');
   }
-}
-  
+
   function updateSummary() {
     let subtotal = 0;
     document.querySelectorAll('[id^="line-total-"]').forEach(el => {
       subtotal += parseInt(el.textContent.replace(/,/g, '')) || 0;
     });
-    const shipping = subtotal >= 999 ? 0 : 99;
-    document.getElementById('summary-subtotal').textContent =
-      '₹' + subtotal.toLocaleString('en-IN');
-    document.getElementById('summary-total').textContent =
-      '₹' + (subtotal + shipping).toLocaleString('en-IN');
+    const shipping = subtotal === 0 ? 0 : (subtotal >= 999 ? 0 : 99);
+    document.getElementById('summary-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
+    document.getElementById('summary-total').textContent    = '₹' + (subtotal + shipping).toLocaleString('en-IN');
   }
 </script>
 

@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Order <%= order[0].orderCode %> | THE DIGITAL ATELIER</title>
+  <title>Order <%= order[0].orderCode %> | LUXE</title>
+  <script src="/js/blockedUserGuard.js"></script>
   <link rel="icon" type="image/x-icon" href="/favicon.png"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
@@ -17,32 +18,32 @@
       theme: {
         extend: {
           colors: {
-            "surface":                   "#0b1326",
-            "background":                "#0b1326",
-            "surface-container":         "#171f33",
-            "surface-container-low":     "#131b2e",
-            "surface-container-high":    "#222a3d",
-            "surface-container-highest": "#2d3449",
-            "on-surface":                "#dae2fd",
-            "on-surface-variant":        "#c4c5d7",
-            "primary":                   "#b7c4ff",
-            "primary-container":         "#1d4ed8",
-            "on-primary-container":      "#cad3ff",
-            "outline-variant":           "#434655",
-            "outline":                   "#8e90a0",
-            "error":                     "#ffb4ab",
-            "error-container":           "#93000a",
+            "surface":                   "#101622",
+            "background":                "#101622",
+            "surface-container":         "#0d1322",
+            "surface-container-low":     "#0d1322",
+            "surface-container-high":    "#141b2b",
+            "surface-container-highest": "#1e293b",
+            "on-surface":                "#f1f5f9",
+            "on-surface-variant":        "#94a3b8",
+            "primary":                   "#1152d4",
+            "primary-container":         "#1152d4",
+            "on-primary-container":      "#dbe4ff",
+            "outline-variant":           "#1e293b",
+            "outline":                   "#475569",
+            "error":                     "#f87171",
+            "error-container":           "#7f1d1d",
           },
           fontFamily: {
-            headline: ["Plus Jakarta Sans", "sans-serif"],
-            serif:    ["DM Serif Display", "serif"],
-            mono:     ["DM Mono", "monospace"],
+            headline: ["Manrope", "sans-serif"],
+            serif:    ["Cormorant Garamond", "Georgia", "serif"],
+            mono:     ["Manrope", "sans-serif"],
           },
           borderRadius: {
             DEFAULT: "0.125rem",
-            lg:      "0.25rem",
-            xl:      "0.5rem",
-            "2xl":   "0.75rem",
+            lg:      "0.5rem",
+            xl:      "0.75rem",
+            "2xl":   "1rem",
             full:    "9999px",
           },
         }
@@ -52,59 +53,54 @@
 
   <style>
     * { box-sizing: border-box; }
-    body { background-color: #0b1326; color: #dae2fd; font-family: "Plus Jakarta Sans", sans-serif; }
+    body { background-color: #101622; color: #f1f5f9; font-family: "Manrope", sans-serif; }
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
 
-    body::before {
-      content: "";
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      background-size: 200px 200px; opacity: .4;
-    }
     main, nav, footer { position: relative; z-index: 1; }
 
-    .glass { background: rgba(23,31,51,.6); backdrop-filter: blur(20px); border: 1px solid rgba(67,70,85,.4); }
+    .glass { background: #0d1322; border: 1px solid #1e293b; }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     .fade-up { opacity: 0; animation: fadeUp .55s cubic-bezier(.22,1,.36,1) forwards; }
+    .fu { opacity: 0; animation: fadeUp .5s ease forwards; }
     .d1 { animation-delay: .05s; } .d2 { animation-delay: .13s; }
     .d3 { animation-delay: .21s; } .d4 { animation-delay: .29s; }
     .d5 { animation-delay: .37s; } .d6 { animation-delay: .45s; }
 
-    .item-row { border-bottom: 1px solid rgba(67,70,85,.3); transition: background .2s, transform .2s; }
-    .item-row:hover { background: rgba(29,78,216,.06); transform: translateX(3px); }
+    .item-row { border-bottom: 1px solid rgba(30,41,59,.6); transition: background .2s, transform .2s; }
+    .item-row:hover { background: rgba(17,82,212,.06); transform: translateX(3px); }
     .item-row:last-child { border-bottom: none; }
     .item-row.is-cancelled:hover { transform: none; background: transparent; }
 
     @keyframes strikeIn { from { opacity: 1; } to { opacity: .38; } }
     .item-row.cancelling { animation: strikeIn .4s ease forwards; pointer-events: none; }
 
-    .pill-transit   { background: rgba(183,196,255,.1); border: 1px solid rgba(183,196,255,.3); color: #b7c4ff; }
-    .pill-completed { background: rgba(52,211,153,.1);  border: 1px solid rgba(52,211,153,.3);  color: #34d399; }
-    .pill-cancelled { background: rgba(255,180,171,.1); border: 1px solid rgba(255,180,171,.3); color: #ffb4ab; }
-    .pill-pending   { background: rgba(251,191,36,.1);  border: 1px solid rgba(251,191,36,.3);  color: #fbbf24; }
+    .pill-transit   { background: rgba(17,82,212,.1);  border: 1px solid rgba(17,82,212,.3);  color: #60a5fa; }
+    .pill-completed { background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3); color: #34d399; }
+    .pill-cancelled { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: #f87171; }
+    .pill-pending   { background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.3); color: #fbbf24; }
     .pill-shipped   { background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); color: #a78bfa; }
-    .pill-returned  { background: rgba(52,211,153,.1);  border: 1px solid rgba(52,211,153,.3);  color: #34d399; }
+    .pill-returned  { background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3); color: #34d399; }
 
-    .step-done   { background: #1d4ed8; }
-    .step-active { background: #0b1326; border: 2px solid #1d4ed8; }
-    .step-future { background: #0b1326; border: 1px solid #434655; }
-    .conn-full { background: #1d4ed8; }
-    .conn-half { background: linear-gradient(90deg, #1d4ed8 50%, #222a3d 50%); }
-    .conn-empty { background: #222a3d; }
+    .step-done   { background: #1152d4; }
+    .step-active { background: #101622; border: 2px solid #1152d4; }
+    .step-future { background: #101622; border: 1px solid #1e293b; }
+    .conn-full  { background: #1152d4; }
+    .conn-half  { background: linear-gradient(90deg, #1152d4 50%, #1e293b 50%); }
+    .conn-empty { background: #1e293b; }
 
     .da-modal {
       display: none; position: fixed; inset: 0; z-index: 200;
-      background: rgba(6,14,32,.85); backdrop-filter: blur(8px);
+      background: rgba(16,22,34,.88); backdrop-filter: blur(8px);
       align-items: center; justify-content: center;
     }
     .da-modal.active { display: flex; }
     .da-modal-box {
-      background: #131b2e; border: 1px solid #434655;
-      border-radius: .5rem; max-width: 540px; width: 92%;
+      background: #0d1322; border: 1px solid #1e293b;
+      border-radius: .75rem; max-width: 540px; width: 92%;
       animation: slideUp .3s cubic-bezier(.22,1,.36,1);
       max-height: 90vh; overflow-y: auto;
     }
@@ -114,31 +110,31 @@
     }
 
     .da-input {
-      width: 100%; background: #0b1326; border: 1px solid #434655;
-      color: #dae2fd; border-radius: .25rem;
-      padding: .75rem 1rem; font-family: "Plus Jakarta Sans", sans-serif;
+      width: 100%; background: #0b1120; border: 1px solid #1e293b;
+      color: #f1f5f9; border-radius: .5rem;
+      padding: .75rem 1rem; font-family: "Manrope", sans-serif;
       font-size: .875rem; transition: border-color .2s; appearance: none;
     }
-    .da-input:focus { outline: none; border-color: #1d4ed8; }
-    .da-input option { background: #131b2e; }
+    .da-input:focus { outline: none; border-color: #1152d4; }
+    .da-input option { background: #0d1322; }
 
     .qty-spinner {
       display: flex; align-items: center; gap: 0;
-      border: 1px solid #434655; border-radius: .25rem; overflow: hidden;
+      border: 1px solid #1e293b; border-radius: .5rem; overflow: hidden;
       width: fit-content;
     }
     .qty-spinner button {
-      background: #0b1326; border: none; color: #dae2fd;
+      background: #0b1120; border: none; color: #f1f5f9;
       width: 36px; height: 36px; font-size: 1.1rem; cursor: pointer;
       transition: background .15s; flex-shrink: 0;
     }
-    .qty-spinner button:hover { background: #222a3d; }
+    .qty-spinner button:hover { background: #1e293b; }
     .qty-spinner button:disabled { opacity: .3; cursor: not-allowed; }
     .qty-spinner input {
-      background: #0b1326; border: none; border-left: 1px solid #434655;
-      border-right: 1px solid #434655; color: #dae2fd;
+      background: #0b1120; border: none; border-left: 1px solid #1e293b;
+      border-right: 1px solid #1e293b; color: #f1f5f9;
       width: 52px; height: 36px; text-align: center;
-      font-family: "DM Mono", monospace; font-size: .875rem;
+      font-family: "Manrope", sans-serif; font-size: .875rem;
       -moz-appearance: textfield;
     }
     .qty-spinner input::-webkit-outer-spin-button,
@@ -147,33 +143,33 @@
 
     .btn-atelier {
       display: inline-flex; align-items: center; gap: .5rem;
-      padding: .7rem 1.6rem; border-radius: .25rem;
-      font-family: "Plus Jakarta Sans", sans-serif;
+      padding: .7rem 1.6rem; border-radius: .5rem;
+      font-family: "Manrope", sans-serif;
       font-size: .75rem; font-weight: 700; letter-spacing: .1em;
       text-transform: uppercase; transition: all .2s; cursor: pointer;
     }
-    .btn-primary-da  { background: #1d4ed8; color: #cad3ff; border: none; }
-    .btn-primary-da:hover  { opacity: .9; transform: translateY(-1px); }
-    .btn-ghost-da    { background: transparent; color: #dae2fd; border: 1px solid #434655; }
-    .btn-ghost-da:hover    { background: rgba(255,255,255,.04); }
-    .btn-danger-da   { background: transparent; color: #ffb4ab; border: 1px solid rgba(255,180,171,.3); }
-    .btn-danger-da:hover   { background: rgba(255,180,171,.06); }
+    .btn-primary-da  { background: #1152d4; color: #fff; border: none; }
+    .btn-primary-da:hover  { background: #0d3fa8; transform: translateY(-1px); }
+    .btn-ghost-da    { background: transparent; color: #f1f5f9; border: 1px solid #334155; }
+    .btn-ghost-da:hover    { border-color: #1152d4; color: #60a5fa; }
+    .btn-danger-da   { background: transparent; color: #f87171; border: 1px solid rgba(248,113,113,.3); }
+    .btn-danger-da:hover   { background: rgba(248,113,113,.06); }
     .btn-atelier:disabled  { opacity: .4; cursor: not-allowed; transform: none !important; }
 
     @keyframes totalFlash {
       0%   { color: #34d399; }
-      100% { color: #dae2fd; }
+      100% { color: #f1f5f9; }
     }
     .total-flash { animation: totalFlash .8s ease; }
 
-    .swal2-popup   { background: #131b2e !important; color: #dae2fd !important; border: 1px solid #434655 !important; }
-    .swal2-title   { color: #dae2fd !important; font-family: "Plus Jakarta Sans" !important; }
-    .swal2-confirm { background: #1d4ed8 !important; font-family: "Plus Jakarta Sans" !important; }
-    .swal2-cancel  { background: #222a3d !important; color: #dae2fd !important; font-family: "Plus Jakarta Sans" !important; }
+    .swal2-popup   { background: #0d1322 !important; color: #f1f5f9 !important; border: 1px solid #1e293b !important; }
+    .swal2-title   { color: #f1f5f9 !important; font-family: "Manrope" !important; }
+    .swal2-confirm { background: #1152d4 !important; font-family: "Manrope" !important; }
+    .swal2-cancel  { background: #1e293b !important; color: #f1f5f9 !important; font-family: "Manrope" !important; }
   </style>
   <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
-<body>
+<body class="bg-bg-dark text-slate-100 antialiased min-h-screen">
 
 <%
   var ord         = order[0];
@@ -398,7 +394,37 @@ if (hasActiveItems && ord.couponApplied > 0) {
   var cancelledVIdCount = Object.keys(cancelledVIds).length;
 %>
 
-<main class="pt-28 pb-24 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen">
+<!-- ══ HEADER ══ -->
+<header class="sticky top-0 z-50 border-b border-slate-800 bg-bg-dark/80 backdrop-blur-md px-6 lg:px-20 py-4">
+  <div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+    <div class="flex items-center gap-12">
+      <a href="/" class="flex items-center gap-2 text-primary">
+        <span class="material-symbols-outlined msym text-3xl">diamond</span>
+        <span class="text-white text-2xl font-extrabold tracking-tight">LUXE</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-8">
+        <a href="/" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Home</a>
+        <a href="/product-listing" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Products</a>
+        <a href="/cart" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Cart</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/cart" class="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+        <span class="material-symbols-outlined">shopping_bag</span>
+        <% if (typeof cart !== 'undefined' && cart > 0) { %>
+          <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+            <%= cart %>
+          </span>
+        <% } %>
+      </a>
+      <a href="/profile" class="p-2 text-primary bg-primary/10 rounded-lg transition-all">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">person</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="pt-16 pb-24 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen">
 
   <!-- Back -->
   <div class="mb-10 fade-up d1">
@@ -440,7 +466,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
 
       <!-- Pending cancel requests banner -->
       <% if (pendingCancels.length > 0) { %>
-        <div class="mt-4 flex items-center gap-3 px-4 py-3 bg-yellow-500/5 border border-yellow-500/20 rounded text-sm text-yellow-400/90">
+        <div class="mt-4 flex items-center gap-3 px-4 py-3 bg-yellow-500/5 border border-yellow-500/20 rounded-lg text-sm text-yellow-400/90">
           <span class="material-symbols-outlined text-base text-yellow-400">hourglass_top</span>
           <%= pendingCancels.length %> cancel request<%= pendingCancels.length > 1 ? 's' : '' %> pending approval
         </div>
@@ -450,7 +476,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
       <% if (cancelledAt.length > 0) { %>
         <% var lastCancel = cancelledAt[cancelledAt.length - 1]; %>
         <% if (lastCancel.cancelRequestStatus !== 'Pending') { %>
-          <div class="mt-4 flex items-center gap-3 px-4 py-3 bg-error-container/10 border border-error/20 rounded text-sm text-error/80">
+          <div class="mt-4 flex items-center gap-3 px-4 py-3 bg-error-container/10 border border-error/20 rounded-lg text-sm text-error/80">
             <span class="material-symbols-outlined text-base text-error">info</span>
             Cancel request: <%= new Date(lastCancel.requestedAt).toLocaleString("en-IN") %>
             <span class="ml-2 px-2 py-0.5 bg-error/10 rounded text-[10px] uppercase tracking-wider"><%= lastCancel.cancelRequestStatus %></span>
@@ -516,8 +542,8 @@ if (hasActiveItems && ord.couponApplied > 0) {
         <% } %>
       </div>
 
-      <div class="pt-8 border-t border-outline-variant/20 flex items-start gap-5">
-        <div class="w-11 h-11 rounded-xl bg-primary-container/10 flex items-center justify-center flex-shrink-0">
+      <div class="pt-8 border-t border-outline-variant/40 flex items-start gap-5">
+        <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-primary">history</span>
         </div>
         <div>
@@ -532,7 +558,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
             <p class="text-on-surface-variant text-sm mt-0.5">Your order is with the delivery partner</p>
           <% } else if (delivSt === 'delivered') { %>
             <p class="text-white font-semibold font-headline">Delivered successfully</p>
-            <p class="text-on-surface-variant text-sm mt-0.5">Thank you for shopping with The Digital Atelier</p>
+            <p class="text-on-surface-variant text-sm mt-0.5">Thank you for shopping with LUXE</p>
           <% } %>
         </div>
       </div>
@@ -566,7 +592,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
 
   <!-- Shipped hint -->
   <% if (delivSt === 'shipped' || delivSt === 'out_for_delivery') { %>
-    <div class="mb-8 flex items-center gap-4 px-6 py-4 bg-primary-container/5 border border-primary/15 rounded-xl fade-up d3">
+    <div class="mb-8 flex items-center gap-4 px-6 py-4 bg-primary/5 border border-primary/15 rounded-xl fade-up d3">
       <span class="material-symbols-outlined text-primary flex-shrink-0">info</span>
       <p class="text-on-surface-variant text-sm">
         Your order is <span class="text-white font-semibold">
@@ -606,7 +632,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
                data-cancelled="<%= r.cancelled ? 'true' : 'false' %>">
 
             <!-- Thumbnail -->
-            <div class="w-20 h-28 bg-surface-container-highest rounded-sm overflow-hidden flex-shrink-0">
+            <div class="w-20 h-28 bg-surface-container-highest rounded-lg overflow-hidden flex-shrink-0">
               <img src="<%= r.thumb %>" alt="<%= item.productName %>"
                    class="w-full h-full object-cover <%= r.cancelled ? 'grayscale opacity-50' : 'grayscale hover:grayscale-0 transition-all duration-700' %>"/>
             </div>
@@ -720,9 +746,9 @@ if (hasActiveItems && ord.couponApplied > 0) {
 
       <!-- Return All CTA -->
       <% if (returnableItems.length > 1) { %>
-        <div class="mt-8 glass rounded-xl p-6 flex flex-col sm:flex-row justify-between items-center gap-6 border-l-4 border-primary-container">
+        <div class="mt-8 glass rounded-xl p-6 flex flex-col sm:flex-row justify-between items-center gap-6 border-l-4 border-primary">
           <div class="flex items-center gap-5">
-            <div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center flex-shrink-0">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
               <span class="material-symbols-outlined text-primary">package_2</span>
             </div>
             <div>
@@ -746,9 +772,9 @@ if (hasActiveItems && ord.couponApplied > 0) {
             <% var ret = returnedAt[reti]; %>
             <% var retApproved = ret.returnRequestStatus === 'Approved'; %>
             <% var retPending  = ret.returnRequestStatus === 'Pending'; %>
-            <% var retBorder   = retApproved ? 'border-green-500' : retPending ? 'border-primary-container' : 'border-error'; %>
-            <% var retBg       = retApproved ? 'bg-green-500/10'  : retPending ? 'bg-primary-container/10'  : 'bg-error/10'; %>
-            <% var retColor    = retApproved ? 'text-green-400'   : retPending ? 'text-primary'             : 'text-error'; %>
+            <% var retBorder   = retApproved ? 'border-green-500' : retPending ? 'border-primary' : 'border-error'; %>
+            <% var retBg       = retApproved ? 'bg-green-500/10'  : retPending ? 'bg-primary/10'  : 'bg-error/10'; %>
+            <% var retColor    = retApproved ? 'text-green-400'   : retPending ? 'text-primary'   : 'text-error'; %>
             <% var retIcon     = retApproved ? 'check_circle' : retPending ? 'hourglass_top' : 'cancel'; %>
             <%
               var retItem = null;
@@ -820,7 +846,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
         <p class="text-[10px] uppercase tracking-[.22em] font-bold text-primary mb-4">Payment Method</p>
         <div class="glass rounded-xl p-6">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-8 bg-surface-container rounded border border-outline-variant/30 flex items-center justify-center">
+            <div class="w-12 h-8 bg-surface-container-high rounded border border-outline-variant/40 flex items-center justify-center">
               <span class="material-symbols-outlined text-sm text-on-surface-variant">payments</span>
             </div>
             <p class="text-white font-headline font-bold uppercase tracking-tight text-sm"><%= (ord.orderMethod || 'N/A').toUpperCase() %></p>
@@ -856,18 +882,18 @@ if (hasActiveItems && ord.couponApplied > 0) {
 
             <div class="flex justify-between text-sm">
               <span class="text-on-surface-variant">Shipping</span>
-              <span id="displayShipping" class="<%= shippingCharge === 0 ? 'text-primary font-bold' : 'text-white font-medium' %>">
+              <span id="displayShipping" class="<%= shippingCharge === 0 ? 'text-emerald-400 font-bold' : 'text-white font-medium' %>">
                 <%= shippingCharge === 0 ? 'FREE' : '&#8377;' + shippingCharge.toFixed(2) %>
               </span>
             </div>
           </div>
 
-          <div class="border-t border-outline-variant/20"></div>
+          <div class="border-t border-outline-variant/40"></div>
           <p class="text-[10px] text-on-surface-variant/40 tracking-wide">GST of 5% applied on the coupon-discounted taxable subtotal · Free shipping over &#8377;999</p>
 
           <div class="flex justify-between items-end">
             <span class="text-[10px] uppercase tracking-[.15em] font-bold text-white">Grand Total</span>
-            <span class="font-serif text-3xl text-white" id="displayTotal">&#8377;<%= activeTotal.toFixed(2) %></span>
+            <span class="font-serif text-3xl text-primary" id="displayTotal">&#8377;<%= activeTotal.toFixed(2) %></span>
           </div>
 
           <% if (cancelledVIdCount > 0) { %>
@@ -879,8 +905,20 @@ if (hasActiveItems && ord.couponApplied > 0) {
   </div>
 </main>
 
-<footer class="relative z-10 mt-20 py-10 px-12 border-t border-outline-variant/10 text-center">
-  <p class="text-[10px] uppercase tracking-[.4em] font-bold text-on-surface-variant/30">© 2024 THE DIGITAL ATELIER · ALL RIGHTS RESERVED</p>
+<!-- ══ FOOTER ══ -->
+<footer class="bg-slate-900/60 mt-20 px-6 lg:px-20 py-12 border-t border-slate-800">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 uppercase tracking-widest">
+    <div class="flex items-center gap-2 text-primary">
+      <span class="material-symbols-outlined">diamond</span>
+      <span class="text-white font-extrabold tracking-tight">LUXE</span>
+    </div>
+    <p>© <%= new Date().getFullYear() %> Luxe Menswear. All Rights Reserved.</p>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
+      <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
+      <a href="#" class="hover:text-primary transition-colors">Contact Us</a>
+    </div>
+  </div>
 </footer>
 
 
@@ -980,7 +1018,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
     <div class="p-7">
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-primary-container/10 flex items-center justify-center">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <span class="material-symbols-outlined text-primary text-lg">undo</span>
           </div>
           <div>
@@ -998,7 +1036,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
       <input type="hidden" id="returnOrderId"/>
       <input type="hidden" id="returnVariantId"/>
 
-      <div id="returnItemChip" style="display:none;" class="mb-5 flex items-center gap-3 p-3 rounded bg-primary/5 border border-primary/20">
+      <div id="returnItemChip" style="display:none;" class="mb-5 flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
         <span class="material-symbols-outlined text-primary text-base">inventory_2</span>
         <div>
           <p class="text-white text-sm font-semibold" id="returnItemName"></p>
@@ -1098,7 +1136,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
     if (couponEl) couponEl.textContent = '−₹' + couponUsed.toFixed(2);
     if (gstEl)    gstEl.textContent = '+ ₹' + gst.toFixed(2);
     if (shippingEl) {
-      shippingEl.className   = shipping === 0 ? 'text-primary font-bold' : 'text-white font-medium';
+      shippingEl.className   = shipping === 0 ? 'text-emerald-400 font-bold' : 'text-white font-medium';
       shippingEl.textContent = shipping === 0 ? 'FREE' : '₹' + shipping.toFixed(2);
     }
     if (totalEl) {
@@ -1243,7 +1281,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
   }
 
   function toast(icon, title) {
-    Swal.fire({ toast: true, icon: icon, title: title, position: 'top-right', showConfirmButton: false, timer: 3000, background: '#131b2e', color: '#dae2fd' });
+    Swal.fire({ toast: true, icon: icon, title: title, position: 'top-right', showConfirmButton: false, timer: 3000, background: '#0d1322', color: '#f1f5f9' });
   }
   function postJSON(url, body) {
     return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
@@ -1268,7 +1306,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
         if (!result.success) { setLoading(self, false); return toast('error', result.message || 'Something went wrong'); }
         markItemCancelled(id, result.pendingApproval ? 'Pending' : 'Cancelled');
         closeCancelModal();
-        Swal.fire({ icon: 'success', title: result.message || 'Item cancelled', timer: 1500, showConfirmButton: false, background: '#131b2e', color: '#dae2fd' });
+        Swal.fire({ icon: 'success', title: result.message || 'Item cancelled', timer: 1500, showConfirmButton: false, background: '#0d1322', color: '#f1f5f9' });
         setTimeout(function() { window.location.reload(); }, 1800);
       })
       .catch(function() { setLoading(self, false); toast('error', 'Something went wrong'); });
@@ -1288,7 +1326,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
         if (!result.success) { setLoading(self, false); return toast('error', result.message || 'Something went wrong'); }
         markAllCancelled();
         closeCancelALLModal();
-        Swal.fire({ icon: 'success', title: result.message || 'Order cancelled', timer: 1500, showConfirmButton: false, background: '#131b2e', color: '#dae2fd' });
+        Swal.fire({ icon: 'success', title: result.message || 'Order cancelled', timer: 1500, showConfirmButton: false, background: '#0d1322', color: '#f1f5f9' });
         setTimeout(function() { window.location.reload(); }, 1800);
       })
       .catch(function() { setLoading(self, false); toast('error', 'Something went wrong'); });
@@ -1314,7 +1352,7 @@ if (hasActiveItems && ord.couponApplied > 0) {
         if (!result.success) { setLoading(self, false); return toast('error', result.message || 'Something went wrong'); }
         closeReturnModal();
         markItemReturned(variantId);
-        Swal.fire({ icon: 'success', title: result.message || 'Return request submitted', timer: 1500, showConfirmButton: false, background: '#131b2e', color: '#dae2fd' });
+        Swal.fire({ icon: 'success', title: result.message || 'Return request submitted', timer: 1500, showConfirmButton: false, background: '#0d1322', color: '#f1f5f9' });
         setTimeout(function() { window.location.reload(); }, 1800);
       })
       .catch(function() { setLoading(self, false); toast('error', 'Something went wrong'); });

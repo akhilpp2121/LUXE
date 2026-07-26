@@ -17,925 +17,763 @@
       totalSavings += hasDiscount ? ((op - ep) * qty) : 0;
     }
   });
-
   const gstAmount  = Math.round(subtotal * GST_RATE);
-  const shipping   = subtotal >= 999 ? 0 : 99;
-  const totalPrice = subtotal + totalSavings;
-  const grandTotal = subtotal + gstAmount + shipping;
+const shipping   = subtotal >= 999 ? 0 : 99;
+const totalPrice = subtotal + totalSavings;
+const grandTotal = subtotal + gstAmount + shipping;
+const eligibleCoupons = (availableCoupons || []).filter(c => grandTotal >= (c.minOrderValue || 0));
 %>
+
+ 
+
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en" style="color-scheme: dark;">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout — LUXE</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Checkout — LUXE</title>
+<link rel="icon" type="image/x-icon" href="/favicon.png">
+<script src="/js/blockedUserGuard.js"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          primary: "#1152d4",
+          "primary-dark": "#0d3fa8",
+          "bg-dark": "#101622",
+        },
+        fontFamily: {
+          display: ["Manrope", "sans-serif"],
+          serif: ["Cormorant Garamond", "Georgia", "serif"],
+        },
+      },
+    },
+  }
+</script>
+<style>
+  /* ── FORCE DARK COLOR-SCHEME ──
+     Without this, browsers fall back to a light base for native form
+     chrome (autofill overlay, date/number spinners, etc.) even when
+     every visible property is styled dark — the box-shadow inset trick
+     below only fully works once this is set. */
+  html, body { color-scheme: dark; }
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Manrope', sans-serif; }
+  .msym { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
-    :root {
-      --blue-950:    #020b18;
-      --blue-900:    #050f20;
-      --blue-850:    #071428;
-      --blue-800:    #0b1e3a;
-      --blue-750:    #0f2548;
-      --blue-700:    #132c55;
-      --blue-600:    #1a3a6e;
-      --blue-500:    #1e4a8f;
-      --blue-400:    #2563b0;
-      --accent:      #4da6ff;
-      --accent-glow: rgba(77,166,255,.18);
-      --accent-dim:  #2b7fd4;
-      --accent-soft: rgba(77,166,255,.10);
-      --cyan:        #38d9e0;
-      --cyan-dim:    rgba(56,217,224,.12);
-      --text-1:     #e8f1ff;
-      --text-2:     #93afd4;
-      --text-3:     #4e6b8f;
-      --text-4:     #2a4060;
-      --success:    #34d399;
-      --danger:     #f87171;
-      --warning:    #fbbf24;
-      --border-1:   rgba(77,166,255,.08);
-      --border-2:   rgba(77,166,255,.18);
-      --border-3:   rgba(77,166,255,.32);
-    }
+  #toast {
+    position: fixed; bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
 
-    html { scroll-behavior: smooth; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fu { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+  .d1 { animation-delay: 0.05s; }
+  .d2 { animation-delay: 0.12s; }
+  .d3 { animation-delay: 0.20s; }
+  .d4 { animation-delay: 0.28s; }
 
-    body {
-      background: var(--blue-900);
-      color: var(--text-1);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 400;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      background-image:
-        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(37,99,176,.18) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(77,166,255,.08) 0%, transparent 55%);
-    }
+  /* ── LOADING OVERLAY ── */
+  #loadingOverlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(16,22,34,.88); backdrop-filter: blur(8px);
+    z-index: 9999; justify-content: center; align-items: center;
+    flex-direction: column; gap: 18px;
+  }
+  #loadingOverlay.active { display: flex; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 2px solid #1e293b; border-top-color: #1152d4;
+    border-radius: 50%; animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── LOADING OVERLAY ── */
-    #loadingOverlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(5,15,32,.88); backdrop-filter: blur(8px);
-      z-index: 9999; justify-content: center; align-items: center;
-      flex-direction: column; gap: 18px;
-    }
-    #loadingOverlay.active { display: flex; }
-    .spinner {
-      width: 40px; height: 40px;
-      border: 2px solid var(--border-1); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--text-3); }
+  /* ── ADDRESS CARDS ── */
+  .addr-card {
+    background: #0d1322; border: 1px solid #1e293b; border-radius: 12px;
+    padding: 20px 20px 20px 24px; cursor: pointer; position: relative;
+    transition: border-color .2s, background .2s, transform .15s;
+  }
+  .addr-card:hover { border-color: #1e3a6e; background: #0f1829; transform: translateY(-1px); }
+  .addr-card.selected { border-color: #1152d4; background: rgba(17,82,212,.08); box-shadow: 0 0 0 1px rgba(17,82,212,.25); }
+  .addr-check {
+    position: absolute; top: 16px; right: 16px; width: 20px; height: 20px;
+    border: 1.5px solid #334155; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: transparent; transition: all .2s;
+  }
+  .addr-card.selected .addr-check { background: #1152d4; border-color: #1152d4; color: #fff; font-weight: 700; }
 
-    /* ── LAYOUT ── */
-    .page { max-width: 1180px; margin: 0 auto; padding: 0 28px 90px; }
+  /* ══════════════════════════════
+     ADDRESS FORM — inputs + autofill fix
+  ══════════════════════════════ */
+  .form-panel { display: none; }
+  .form-panel.open { display: block; animation: fadeUp .25s ease; }
 
-    /* ── HEADER ── */
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 26px 0; border-bottom: 1px solid var(--border-1); margin-bottom: 40px;
-    }
-    .logo {
-      font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600;
-      color: var(--accent); letter-spacing: .3em; text-transform: uppercase;
-      text-decoration: none; position: relative;
-    }
-    .logo::after {
-      content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
-      height: 1px; background: linear-gradient(90deg, var(--accent), transparent);
-    }
-    .secure-badge {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3);
-    }
-    .secure-dot {
-      width: 7px; height: 7px; border-radius: 50%; background: var(--success);
-      box-shadow: 0 0 8px var(--success); animation: pulse 2.4s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .form-input,
+  input.form-input[type="text"],
+  input.form-input[type="tel"] {
+    background-color: #0b1120 !important;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: #f1f5f9 !important;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .2s, background-color .2s;
+    width: 100%;
+    caret-color: #f1f5f9;
+    color-scheme: dark;
+  }
+  .form-input:focus { border-color: #1152d4 !important; background-color: #0d1322 !important; }
+  .form-input::placeholder { color: #475569; }
+  .form-input.error { border-color: #ef4444 !important; }
 
-    /* ── BREADCRUMB ── */
-    .breadcrumb { display: flex; align-items: center; gap: 16px; margin-bottom: 48px; }
-    .bc-step { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--text-4); font-weight: 500; }
-    .bc-step.active { color: var(--accent); }
-    .bc-step.done   { color: var(--success); }
-    .bc-line { width: 40px; height: 1px; background: var(--border-1); }
-    .bc-line.done { background: var(--accent-dim); }
+  /* Kills the white/yellow autofill background on Chrome/Edge (webkit) */
+  .form-input:-webkit-autofill,
+  .form-input:-webkit-autofill:hover,
+  .form-input:-webkit-autofill:focus,
+  .form-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #f1f5f9 !important;
+    -webkit-box-shadow: 0 0 0 1000px #0b1120 inset !important;
+    box-shadow: 0 0 0 1000px #0b1120 inset !important;
+    caret-color: #f1f5f9 !important;
+    border: 1px solid #1e293b !important;
+    transition: background-color 9999s ease-in-out 0s, color 9999s ease-in-out 0s;
+  }
+  .form-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #0d1322 inset !important;
+    box-shadow: 0 0 0 1000px #0d1322 inset !important;
+    border-color: #1152d4 !important;
+  }
+  /* Firefox */
+  .form-input:autofill {
+    background-color: #0b1120 !important;
+    color: #f1f5f9 !important;
+  }
 
-    /* ── MAIN GRID ── */
-    .main-grid { display: grid; grid-template-columns: 1fr 430px; gap: 56px; align-items: start; }
-    @media (max-width: 920px) { .main-grid { grid-template-columns: 1fr; } }
+  /* ── PAYMENT ── */
+  .pay-option {
+    background: #0d1322; border: 1px solid #1e293b; border-radius: 12px;
+    padding: 18px 20px; cursor: pointer; transition: border-color .2s, background .2s;
+  }
+  .pay-option:hover:not(.disabled) { border-color: #1e3a6e; }
+  .pay-option.selected { border-color: #1152d4; background: rgba(17,82,212,.08); }
+  .pay-option.disabled { opacity: .35; cursor: not-allowed; }
+  .pay-radio {
+    width: 18px; height: 18px; border: 1.5px solid #334155; border-radius: 50%;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .2s;
+  }
+  .pay-option.selected .pay-radio { border-color: #1152d4; }
+  .pay-dot { width: 8px; height: 8px; border-radius: 50%; background: #1152d4; display: none; }
+  .pay-option.selected .pay-dot { display: block; }
 
-    /* ── SECTION HEADINGS ── */
-    .sec-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--text-1); letter-spacing: .04em; margin-bottom: 4px; }
-    .sec-sub { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin-bottom: 24px; }
+  /* ── PAYPAL BUTTON FRAME ──
+     PayPal's SDK renders its own iframe internally with a white/light
+     background baked in (button + "Powered by PayPal" footer) — this
+     can't be recolored with CSS. Instead of letting that white patch sit
+     bare on the dark page, we frame it in a card that matches the other
+     payment options (same border, radius, and background rhythm), so the
+     white content reads as an intentional inset panel rather than a
+     visual glitch. */
+  .paypal-card {
+    background: #ffffff;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 14px;
+  }
 
-    /* ── ADDRESS CARDS ── */
-    .address-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-    @media (max-width: 600px) { .address-grid { grid-template-columns: 1fr; } }
+  /* ── ORDER SUMMARY ── */
+  .summary-card { background: #0d1322; border: 1px solid #1e293b; border-radius: 16px; padding: 1.5rem; position: sticky; top: 96px; }
 
-    .addr-card {
-      padding: 20px 20px 20px 24px; border: 1px solid var(--border-1);
-      background: var(--blue-800); cursor: pointer; position: relative;
-      transition: border-color .22s, background .22s, transform .18s; border-radius: 6px;
-    }
-    .addr-card::before {
-      content: ''; position: absolute; top: 0; left: 0;
-      width: 3px; height: 100%; background: transparent;
-      border-radius: 6px 0 0 6px; transition: background .22s;
-    }
-    .addr-card:hover { border-color: var(--border-2); transform: translateY(-1px); }
-    .addr-card.selected { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent-glow); }
-    .addr-card.selected::before { background: var(--accent); }
-    .addr-check {
-      position: absolute; top: 14px; right: 14px; width: 20px; height: 20px;
-      border: 1.5px solid var(--border-2); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; color: transparent; transition: all .22s;
-    }
-    .addr-card.selected .addr-check { background: var(--accent); border-color: var(--accent); color: #020b18; font-weight: 700; }
-    .addr-default-badge {
-      display: inline-block; font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
-      color: var(--accent); border: 1px solid var(--border-2); padding: 2px 10px;
-      margin-bottom: 10px; border-radius: 3px; background: var(--accent-soft);
-    }
-    .addr-name { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-1); margin-bottom: 8px; }
-    .addr-line { font-size: 13px; color: var(--text-2); line-height: 1.75; }
-    .addr-phone { font-size: 12px; color: var(--text-3); margin-top: 8px; }
-    .addr-actions { display: flex; gap: 8px; margin-top: 14px; }
-    .addr-action-btn {
-      background: transparent; border: 1px solid var(--border-2); color: var(--accent);
-      font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: .14em;
-      text-transform: uppercase; padding: 7px 12px; cursor: pointer; border-radius: 4px;
-      transition: background .2s, color .2s, border-color .2s;
-    }
-    .addr-action-btn:hover { background: var(--accent); color: #020b18; border-color: var(--accent); }
-    .addr-action-btn.default-btn { color: var(--text-3); border-color: var(--border-1); }
-    .addr-action-btn.default-btn:hover { background: var(--success); color: #020b18; border-color: var(--success); }
+  .scroll-thin::-webkit-scrollbar { width: 4px; }
+  .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+  .scroll-thin::-webkit-scrollbar-thumb { background: #1152d4; border-radius: 2px; }
 
-    /* ── ADD ADDRESS BUTTON ── */
-    .add-addr-btn {
-      width: 100%; padding: 15px; border: 1px dashed var(--border-2);
-      background: transparent; color: var(--text-3); font-family: 'DM Sans', sans-serif;
-      font-size: 11px; letter-spacing: .18em; text-transform: uppercase; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: border-color .22s, color .22s; border-radius: 6px;
-    }
-    .add-addr-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+  .prod-item.invalid { opacity: .5; }
+  .invalid-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(239,68,68,.12); color: #f87171;
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
 
-    /* ── ADDRESS FORM PANEL ── */
-    .form-panel {
-      background: var(--blue-800); border: 1px solid var(--border-2);
-      padding: 28px 24px; margin-top: 14px; display: none;
-      animation: slideDown .26s ease; border-radius: 8px;
-    }
-    .form-panel.open { display: block; }
-    .form-panel-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: var(--text-1); margin-bottom: 18px; }
-    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-    .form-row.full { grid-template-columns: 1fr; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-label { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--text-3); }
-    .form-input {
-      background: var(--blue-750); border: 1px solid var(--border-1);
-      padding: 12px 14px; color: var(--text-1); font-family: 'DM Sans', sans-serif;
-      font-size: 13px; outline: none; transition: border-color .2s; width: 100%; border-radius: 5px;
-    }
-    .form-input:focus { border-color: var(--accent-dim); background: var(--blue-700); }
-    .form-input::placeholder { color: var(--text-4); }
-    .form-input.error { border-color: var(--danger); }
-    .save-addr-btn {
-      background: transparent; border: 1px solid var(--accent-dim); color: var(--accent);
-      font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: .16em;
-      text-transform: uppercase; padding: 11px 26px; cursor: pointer;
-      transition: all .25s; margin-top: 10px; border-radius: 5px;
-    }
-    .save-addr-btn:hover { background: var(--accent); color: #020b18; }
+  /* ══════════════════════════════
+     COUPON — inputs + autofill fix
+  ══════════════════════════════ */
+  .coupon-wrap { border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+  .coupon-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #0b1120; border-bottom: 1px solid #1e293b; cursor: pointer; user-select: none; }
+  .coupon-chevron { transition: transform .25s; }
+  .coupon-chevron.open { transform: rotate(180deg); }
+  .coupon-body { padding: 14px 16px; background: #0d1322; }
+  .coupon-card {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; border: 1px dashed #334155; border-radius: 8px; background: #0b1120;
+    transition: border-color .2s, background .2s; position: relative;
+  }
+  .coupon-card:hover { border-color: #1152d4; background: #0f1829; }
+  .coupon-card.applied { border-color: #34d399; background: rgba(52,211,153,.06); border-style: solid; }
+  .coupon-card.applied .coupon-card-code { color: #34d399; }
+  .coupon-card-btn {
+    background: transparent; border: 1px solid #334155; color: #60a5fa;
+    font-family: 'Manrope', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all .2s;
+  }
+  .coupon-card-btn:hover { background: #1152d4; color: #fff; border-color: #1152d4; }
+  .coupon-card-btn.remove-btn { border-color: rgba(239,68,68,.4); color: #f87171; }
+  .coupon-card-btn.remove-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 
-    /* ── PAYMENT ── */
-    .payment-section { margin-top: 44px; }
-    .pay-option {
-      display: flex; align-items: center; gap: 16px; padding: 18px 20px;
-      border: 1px solid var(--border-1); background: var(--blue-800); cursor: pointer;
-      transition: border-color .22s, background .22s; margin-bottom: 10px; border-radius: 6px;
-    }
-    .pay-option:hover:not(.disabled) { border-color: var(--border-2); }
-    .pay-option.selected { border-color: var(--accent); background: var(--accent-soft); }
-    .pay-option.disabled { opacity: .3; cursor: not-allowed; }
-    .pay-radio {
-      width: 18px; height: 18px; border: 1.5px solid var(--border-2); border-radius: 50%;
-      flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .22s;
-    }
-    .pay-option.selected .pay-radio { border-color: var(--accent); }
-    .pay-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
-    .pay-option.selected .pay-dot { display: block; }
-    .pay-icon { font-size: 20px; color: var(--text-3); }
-    .pay-option.selected .pay-icon { color: var(--accent); }
-    .pay-label { font-size: 14px; font-weight: 500; color: var(--text-1); }
-    .pay-sub { font-size: 11px; color: var(--text-3); letter-spacing: .06em; margin-top: 2px; }
-    .pay-badge {
-      margin-left: auto; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-      color: var(--success); background: rgba(52,211,153,.08);
-      border: 1px solid rgba(52,211,153,.25); padding: 3px 10px; border-radius: 3px;
-    }
+  .coupon-input,
+  input.coupon-input[type="text"] {
+    flex: 1;
+    background-color: #0d1322 !important;
+    border: 1px solid #1e293b;
+    border-right: none;
+    padding: 10px 14px;
+    color: #cbd5e1 !important;
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px; letter-spacing: .05em; text-transform: uppercase; outline: none;
+    border-radius: 8px 0 0 8px;
+    caret-color: #1152d4;
+    color-scheme: dark;
+  }
+  .coupon-input::placeholder { color: #475569; text-transform: none; }
+  .coupon-input:focus { border-color: #1152d4 !important; background-color: #0d1322 !important; }
 
-    /* ── ORDER SUMMARY CARD ── */
-    .summary-card {
-      background: var(--blue-800); border: 1px solid var(--border-2);
-      padding: 28px 26px; position: sticky; top: 24px; border-radius: 10px;
-    }
-    .summary-title {
-      font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 500;
-      letter-spacing: .05em; margin-bottom: 22px; padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-1); color: var(--text-1);
-    }
+  .coupon-input:-webkit-autofill,
+  .coupon-input:-webkit-autofill:hover,
+  .coupon-input:-webkit-autofill:focus,
+  .coupon-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #cbd5e1 !important;
+    -webkit-box-shadow: 0 0 0 1000px #0d1322 inset !important;
+    box-shadow: 0 0 0 1000px #0d1322 inset !important;
+    caret-color: #1152d4 !important;
+    transition: background-color 9999s ease-in-out 0s, color 9999s ease-in-out 0s;
+  }
+  .coupon-input:autofill {
+    background-color: #0d1322 !important;
+    color: #cbd5e1 !important;
+  }
 
-    /* ── PRODUCT LIST ── */
-    .product-list { max-height: 340px; overflow-y: auto; margin-bottom: 20px; padding-right: 4px; }
-    .product-list::-webkit-scrollbar { width: 2px; }
-    .product-list::-webkit-scrollbar-track { background: transparent; }
-    .product-list::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: 2px; }
+  .coupon-btn {
+    background: transparent; border: 1px solid #334155; color: #60a5fa; font-family: 'Manrope', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    padding: 10px 18px; cursor: pointer; border-radius: 0 8px 8px 0; transition: all .2s; white-space: nowrap;
+  }
+  .coupon-btn:hover { background: #1152d4; color: #fff; border-color: #1152d4; }
+  .coupon-msg { font-size: 11px; margin-top: 8px; min-height: 16px; display: flex; align-items: center; gap: 6px; }
+  .coupon-msg.success { color: #34d399; }
+  .coupon-msg.error { color: #f87171; }
+  .coupon-discount-row { display: none; }
+  .coupon-discount-row.visible { display: flex; }
 
-    .prod-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border-1); }
-    .prod-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .prod-item.invalid { opacity: .45; }
-    .prod-img { width: 62px; height: 74px; object-fit: cover; flex-shrink: 0; background: var(--blue-750); border-radius: 5px; border: 1px solid var(--border-1); }
-    .prod-img-placeholder { width: 62px; height: 74px; flex-shrink: 0; background: var(--blue-750); border-radius: 5px; border: 1px solid var(--border-1); display: flex; align-items: center; justify-content: center; color: var(--text-4); font-size: 22px; }
-    .prod-info { flex: 1; min-width: 0; }
-    .prod-name { font-size: 12px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-1); margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .prod-meta { font-size: 11px; color: var(--text-3); line-height: 1.75; }
-    .prod-meta span { display: inline-block; background: var(--blue-700); border: 1px solid var(--border-1); border-radius: 3px; padding: 1px 7px; margin-right: 4px; margin-bottom: 3px; font-size: 10px; letter-spacing: .06em; }
-    .prod-qty { font-size: 11px; color: var(--text-3); margin-top: 5px; letter-spacing: .04em; }
-    .prod-breakdown { margin-top: 8px; border-top: 1px solid var(--border-1); padding-top: 7px; display: flex; flex-direction: column; gap: 4px; }
-    .bd-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); }
-    .bd-row.green { color: var(--success); }
-    .bd-row.muted { color: var(--text-4); }
-    .bd-row.final { color: var(--text-2); font-weight: 500; border-top: 1px dashed var(--border-1); padding-top: 4px; margin-top: 2px; }
-    .strike { text-decoration: line-through; color: var(--text-4); }
-    .invalid-badge { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--danger); border: 1px solid rgba(248,113,113,.25); padding: 2px 7px; margin-top: 4px; display: inline-block; border-radius: 3px; }
-    .prod-prices { display: flex; flex-direction: column; align-items: flex-end; padding-top: 2px; }
-    .prod-price-final { font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
-    .prod-price-original { font-size: 11px; color: var(--text-4); text-decoration: line-through; margin-top: 2px; }
-    .prod-price-strike { font-size: 13px; font-weight: 400; color: var(--text-4); text-decoration: line-through; }
+  /* ── PRICE BREAKDOWN ── */
+  .price-section { background: #0b1120; border: 1px solid #1e293b; border-radius: 12px; padding: 18px 18px 4px; margin-bottom: 22px; }
+  .price-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; }
+  .price-row.total { padding-top: 14px; padding-bottom: 2px; border-top: 1px solid #1e293b; margin-top: 4px; }
 
-    /* ══════════════════════════════════════
-       COUPON SECTION — matches dark theme
-    ══════════════════════════════════════ */
-    .coupon-wrap {
-      margin-bottom: 20px;
-      border: 1px solid var(--border-1);
-      border-radius: 8px;
-      overflow: hidden;
-    }
+  .place-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-    /* Header bar */
-    .coupon-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--blue-750);
-      border-bottom: 1px solid var(--border-1);
-      cursor: pointer;
-      user-select: none;
-    }
-    .coupon-header-left {
-      display: flex; align-items: center; gap: 10px;
-    }
-    .coupon-header-icon {
-      font-size: 15px;
-    }
-    .coupon-label {
-      font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-      color: var(--text-2); font-weight: 500;
-    }
-    .coupon-count-badge {
-      font-size: 10px; letter-spacing: .08em;
-      color: var(--accent); background: var(--accent-soft);
-      border: 1px solid var(--border-2);
-      padding: 2px 8px; border-radius: 20px;
-    }
-    .coupon-chevron {
-      font-size: 10px; color: var(--text-3);
-      transition: transform .25s;
-    }
-    .coupon-chevron.open { transform: rotate(180deg); }
+  /* ── REMOVED ITEMS BANNER ── */
+  .removed-banner { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.2); border-radius: 12px; padding: 16px 20px; }
 
-    /* Body */
-    .coupon-body {
-      padding: 14px 16px;
-      background: var(--blue-800);
-    }
-
-    /* Available coupons list */
-    .available-coupons-title {
-      font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
-      color: var(--text-3); margin-bottom: 10px;
-    }
-
-    .coupon-cards-list {
-      display: flex; flex-direction: column; gap: 8px;
-      margin-bottom: 14px;
-      max-height: 220px; overflow-y: auto;
-      padding-right: 2px;
-    }
-    .coupon-cards-list::-webkit-scrollbar { width: 2px; }
-    .coupon-cards-list::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: 2px; }
-
-    .coupon-card {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 12px 14px;
-      border: 1px dashed var(--border-2);
-      border-radius: 6px;
-      background: var(--blue-750);
-      transition: border-color .2s, background .2s;
-      position: relative;
-    }
-    .coupon-card::before {
-      content: '';
-      position: absolute; left: 0; top: 0; bottom: 0;
-      width: 3px; background: var(--accent-dim);
-      border-radius: 6px 0 0 6px; opacity: .5;
-    }
-    .coupon-card:hover {
-      border-color: var(--border-3);
-      background: var(--blue-700);
-    }
-    .coupon-card.applied {
-      border-color: var(--success);
-      background: rgba(52,211,153,.06);
-    }
-    .coupon-card.applied::before { background: var(--success); opacity: 1; }
-
-    .coupon-card-info { flex: 1; min-width: 0; }
-    .coupon-card-code {
-      font-size: 13px; font-weight: 700; letter-spacing: .12em;
-      color: var(--accent); display: block; margin-bottom: 3px;
-      font-family: 'DM Sans', monospace;
-    }
-    .coupon-card.applied .coupon-card-code { color: var(--success); }
-    .coupon-card-desc {
-      font-size: 11px; color: var(--text-3); line-height: 1.5;
-    }
-    .coupon-card-save {
-      font-size: 10px; color: var(--success);
-      margin-top: 3px; display: block; letter-spacing: .04em;
-    }
-
-    .coupon-card-btn {
-      background: transparent;
-      border: 1px solid var(--border-2);
-      color: var(--accent);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
-      padding: 6px 14px; border-radius: 4px; cursor: pointer;
-      white-space: nowrap; flex-shrink: 0;
-      transition: all .22s;
-    }
-    .coupon-card-btn:hover {
-      background: var(--accent); color: #020b18; border-color: var(--accent);
-    }
-    .coupon-card-btn.remove-btn {
-      border-color: rgba(248,113,113,.4); color: var(--danger);
-    }
-    .coupon-card-btn.remove-btn:hover {
-      background: var(--danger); color: #020b18; border-color: var(--danger);
-    }
-
-    /* divider between list and input */
-    .coupon-divider {
-      height: 1px; background: var(--border-1);
-      margin: 12px 0;
-    }
-
-    /* Manual input row */
-    .coupon-row { display: flex; gap: 0; }
-    .coupon-input {
-      flex: 1; background: var(--blue-750);
-      border: 1px solid var(--border-1); border-right: none;
-      padding: 10px 14px; color: var(--text-1);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
-      outline: none; transition: border-color .2s;
-      border-radius: 5px 0 0 5px;
-    }
-    .coupon-input::placeholder { color: var(--text-4); text-transform: none; letter-spacing: .04em; }
-    .coupon-input:focus { border-color: var(--border-2); background: var(--blue-700); }
-    .coupon-btn {
-      background: transparent; border: 1px solid var(--border-2);
-      color: var(--accent); font-family: 'DM Sans', sans-serif;
-      font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-      padding: 10px 18px; cursor: pointer;
-      transition: all .25s; white-space: nowrap;
-      border-radius: 0 5px 5px 0;
-    }
-    .coupon-btn:hover { background: var(--accent); color: #020b18; border-color: var(--accent); }
-
-    /* Status message */
-    .coupon-msg {
-      font-size: 11px; margin-top: 8px;
-      letter-spacing: .06em; min-height: 16px;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .coupon-msg.success { color: var(--success); }
-    .coupon-msg.error   { color: var(--danger); }
-
-    /* Applied coupon row in price summary */
-    .coupon-discount-row {
-      display: none;
-    }
-    .coupon-discount-row.visible {
-      display: flex;
-    }
-    /* ══════════════════════════════════════ */
-
-    /* ── SAVINGS BAR ── */
-    .savings-bar {
-      background: rgba(52,211,153,.07); border: 1px solid rgba(52,211,153,.18);
-      border-radius: 6px; padding: 10px 14px;
-      display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
-    }
-    .savings-bar .icon { font-size: 14px; color: var(--success); }
-    .savings-bar p { font-size: 12px; color: var(--success); }
-    .savings-bar strong { font-weight: 600; }
-
-    /* ── PRICE BREAKDOWN ── */
-    .price-section {
-      background: var(--blue-750); border: 1px solid var(--border-1);
-      border-radius: 8px; padding: 18px 18px 4px; margin-bottom: 22px;
-    }
-    .price-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; }
-    .pr-label { font-size: 12px; color: var(--text-2); letter-spacing: .04em; }
-    .pr-val { font-size: 13px; color: var(--text-1); font-weight: 500; }
-    .price-row.free .pr-val { color: var(--success); font-size: 12px; font-weight: 500; }
-    .price-row.discount .pr-label,
-    .price-row.discount .pr-val { color: var(--success); }
-    .price-row.coupon-row-summary .pr-label,
-    .price-row.coupon-row-summary .pr-val { color: var(--accent); }
-    .price-row.total { padding-top: 14px; padding-bottom: 2px; border-top: 1px solid var(--border-2); margin-top: 4px; }
-    .price-row.total .pr-label { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: var(--text-1); }
-    .price-row.total .pr-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--accent); }
-
-    /* ── PLACE ORDER ── */
-    .place-btn {
-      width: 100%; padding: 17px; background: var(--accent); color: #020b18;
-      border: none; border-radius: 7px; font-family: 'DM Sans', sans-serif;
-      font-size: 12px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase;
-      cursor: pointer; transition: background .25s, transform .15s, box-shadow .25s;
-      margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .place-btn:hover { background: #69b8ff; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(77,166,255,.32); }
-    .place-btn:active { transform: translateY(0); box-shadow: none; }
-    .place-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-
-    .guarantee {
-      text-align: center; font-size: 11px; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--text-3);
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .divider-dots { text-align: center; color: var(--text-4); letter-spacing: .6em; font-size: 12px; margin-top: 20px; }
-    #addr-select-error { font-size: 11px; color: var(--danger); letter-spacing: .06em; margin-bottom: 12px; display: none; }
-
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border-1); margin-top: 70px; padding: 28px 28px;
-      max-width: 1180px; margin-left: auto; margin-right: auto;
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
-    }
-    .footer-logo { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: var(--text-3); letter-spacing: .28em; text-transform: uppercase; }
-    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
-    .footer-links a { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-4); text-decoration: none; transition: color .2s; }
-    .footer-links a:hover { color: var(--accent); }
-    .footer-copy { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-4); }
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-  </style>
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+</style>
   <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
+<body class="bg-bg-dark text-slate-100 antialiased min-h-screen">
 
-<body>
-
-<div id="loadingOverlay">
-  <div class="spinner"></div>
-  <p class="loading-text">Processing &nbsp;·&nbsp; Please wait</p>
+<!-- ══ TOAST ══ -->
+<div id="toast">
+  <div class="flex items-center gap-3 bg-slate-900 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl">
+    <span id="toast-icon" class="material-symbols-outlined msym text-green-400">check_circle</span>
+    <span id="toast-msg" class="text-sm font-semibold"></span>
+  </div>
 </div>
 
-<div class="page">
+<!-- ══ LOADING OVERLAY ══ -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <p class="text-[11px] tracking-[.2em] uppercase text-slate-500 loading-text">Processing &nbsp;·&nbsp; Please wait</p>
+</div>
 
-  <header>
-    <a href="/" class="logo">Luxe</a>
-    <div class="secure-badge">
-      <div class="secure-dot"></div>
-      Secure Checkout
+<div class="flex flex-col min-h-screen">
+
+  <!-- ══ HEADER ══ -->
+  <header class="sticky top-0 z-50 border-b border-slate-800 bg-bg-dark/80 backdrop-blur-md px-6 lg:px-20 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+      <div class="flex items-center gap-12">
+        <a href="/" class="flex items-center gap-2 text-primary">
+          <span class="material-symbols-outlined msym text-3xl">diamond</span>
+          <span class="text-white text-2xl font-extrabold tracking-tight">LUXE</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Home</a>
+          <a href="/product-listing" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Products</a>
+          <a href="/cart" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Cart</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 mr-1">
+          <span class="material-symbols-outlined msym text-emerald-400" style="font-size:15px;font-variation-settings:'FILL' 1">verified_user</span>
+          Secure Checkout
+        </div>
+        <a href="/cart" class="relative p-2 text-primary hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+          <% if (cart && cart.length > 0) { %>
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+              <%= cart.length %>
+            </span>
+          <% } %>
+        </a>
+        <a href="/profile" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+          <span class="material-symbols-outlined msym">person</span>
+        </a>
+      </div>
     </div>
   </header>
 
-  <div class="breadcrumb">
-    <span class="bc-step active">Shipping</span>
-    <div class="bc-line done"></div>
-    <span class="bc-step">Payment</span>
-    <div class="bc-line"></div>
-    <span class="bc-step">Confirm</span>
-  </div>
+  <main class="max-w-7xl mx-auto w-full px-6 lg:px-20 py-10 flex-1">
 
-  <div class="main-grid">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6 fu d1">
+      <a href="/" class="hover:text-primary transition-colors">Home</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <a href="/cart" class="hover:text-primary transition-colors">Cart</a>
+      <span class="material-symbols-outlined msym text-xs">chevron_right</span>
+      <span class="text-slate-200 font-semibold">Checkout</span>
+    </nav>
 
-    <!-- ═══════════ LEFT COLUMN ═══════════ -->
-    <div>
+    <!-- Steps -->
+    <div class="flex items-center gap-4 mb-10 fu d1">
+      <span class="text-[11px] font-bold uppercase tracking-[.18em] text-primary">Shipping</span>
+      <div class="w-10 h-px bg-primary/50"></div>
+      <span class="text-[11px] font-bold uppercase tracking-[.18em] text-slate-600">Payment</span>
+      <div class="w-10 h-px bg-slate-800"></div>
+      <span class="text-[11px] font-bold uppercase tracking-[.18em] text-slate-600">Confirm</span>
+    </div>
 
-      <div class="sec-title">Shipping Address</div>
-      <p class="sec-sub">Select a saved address or add a new one</p>
+    <!-- ══ REMOVED ITEMS WARNING ══ -->
+    <% if (typeof removedItems !== 'undefined' && removedItems && removedItems.length > 0) { %>
+      <div class="removed-banner flex gap-3 items-start mb-8 fu d1">
+        <span class="material-symbols-outlined msym text-amber-400 mt-0.5">warning</span>
+        <div>
+          <p class="text-sm font-bold text-amber-400 mb-2">
+            <%= removedItems.length %> item<%= removedItems.length > 1 ? 's' : '' %> removed from checkout
+          </p>
+          <ul class="flex flex-col gap-1">
+            <% removedItems.forEach(function(ri) { %>
+              <li class="text-xs text-slate-400">
+                <span class="text-white font-semibold"><%= ri.name %></span> — <%= ri.reason %>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    <% } %>
 
-      <div class="address-grid" id="addressCardGrid">
-        <% address.forEach((ad) => {
-          const isSelected = defaultAddress && String(ad._id) === String(defaultAddress._id);
-        %>
-          <div class="addr-card <%= isSelected ? 'selected' : '' %>"
-               data-id="<%= ad._id %>"
-               onclick="selectAddress(this)">
-            <div class="addr-check">✓</div>
-            <% if (ad.isDefault) { %><div class="addr-default-badge">Default</div><% } %>
-            <div class="addr-name"><%= ad.fullName %></div>
-            <div class="addr-line">
-              <%= ad.houseNumber %>, <%= ad.streetName %><br>
-              <%= ad.city %>, <%= ad.state %> <%= ad.pincode %><br>
-              <%= ad.country %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+      <!-- ═══════════ LEFT COLUMN ═══════════ -->
+      <div class="lg:col-span-2 flex flex-col gap-10">
+
+        <!-- SHIPPING ADDRESS -->
+        <div class="fu d2">
+          <h2 class="text-2xl font-extrabold uppercase tracking-tight font-serif mb-1">Shipping Address</h2>
+          <p class="text-sm text-slate-500 mb-6">Select a saved address or add a new one</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3" id="addressCardGrid">
+            <% address.forEach((ad) => {
+              const isSelected = defaultAddress && String(ad._id) === String(defaultAddress._id);
+            %>
+              <div class="addr-card <%= isSelected ? 'selected' : '' %>"
+                   data-id="<%= ad._id %>"
+                   onclick="selectAddress(this)">
+                <div class="addr-check">✓</div>
+                <% if (ad.isDefault) { %>
+                  <span class="inline-block text-[9px] font-bold uppercase tracking-widest text-primary border border-primary/40 bg-primary/10 px-2.5 py-0.5 rounded-full mb-2">Default</span>
+                <% } %>
+                <div class="text-[13px] font-bold uppercase tracking-wide text-white mb-2"><%= ad.fullName %></div>
+                <div class="text-[13px] text-slate-400 leading-relaxed">
+                  <%= ad.houseNumber %>, <%= ad.streetName %><br>
+                  <%= ad.city %>, <%= ad.state %> <%= ad.pincode %><br>
+                  <%= ad.country %>
+                </div>
+                <div class="text-xs text-slate-500 mt-2"><%= ad.phoneNumber %></div>
+                <div class="flex gap-2 mt-3.5">
+                  <button type="button" class="text-[10px] font-bold uppercase tracking-widest text-primary border border-primary/30 rounded-lg px-3 py-1.5 hover:bg-primary hover:text-white transition-all"
+                          onclick="openEditAddress(event, '<%= ad._id %>')">Edit</button>
+                  <% if (!ad.isDefault) { %>
+                    <button type="button" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 border border-slate-700 rounded-lg px-3 py-1.5 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all"
+                            onclick="setAsDefault(event, '<%= ad._id %>')">Set Default</button>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+
+          <p id="addr-select-error" class="text-xs text-red-400 mb-3" style="display:none">Please select a shipping address to continue.</p>
+
+          <button class="w-full border border-dashed border-slate-700 rounded-xl py-4 text-xs font-bold uppercase tracking-widest text-slate-500 hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
+                  onclick="openNewAddressForm()" id="addAddrToggle">
+            <span class="material-symbols-outlined msym text-base">add</span>
+            Add New Address
+          </button>
+
+          <!-- ADDRESS FORM -->
+          <div class="form-panel bg-[#0d1322] border border-slate-800 rounded-xl p-6 mt-4" id="newAddrForm">
+            <div class="text-lg font-bold font-serif text-white mb-5" id="addrFormTitle">Add New Address</div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_name">Full Name</label>
+                <input class="form-input" type="text" id="f_name" autocomplete="off" placeholder="e.g. Alexander Thorne">
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_mobile">Mobile Number</label>
+                <input class="form-input" type="tel" id="f_mobile" autocomplete="off" placeholder="+91 00000 00000">
+              </div>
             </div>
-            <div class="addr-phone"><%= ad.phoneNumber %></div>
-            <div class="addr-actions">
-              <button class="addr-action-btn" type="button"
-                      onclick="openEditAddress(event, '<%= ad._id %>')">Edit</button>
-              <% if (!ad.isDefault) { %>
-                <button class="addr-action-btn default-btn" type="button"
-                        onclick="setAsDefault(event, '<%= ad._id %>')">Set Default</button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_house">House / Flat No.</label>
+                <input class="form-input" type="text" id="f_house" autocomplete="off" placeholder="e.g. 721, Apt B">
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_street">Street / Road</label>
+                <input class="form-input" type="text" id="f_street" autocomplete="off" placeholder="e.g. Fifth Avenue">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_pincode">Pincode / ZIP</label>
+                <input class="form-input" type="text" id="f_pincode" autocomplete="off" placeholder="6-digit pincode" maxlength="6">
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_city">City / District</label>
+                <input class="form-input" type="text" id="f_city" autocomplete="off" placeholder="Auto-filled from pincode">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_state">State</label>
+                <input class="form-input" type="text" id="f_state" autocomplete="off" placeholder="Auto-filled from pincode">
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_country">Country</label>
+                <input class="form-input" type="text" id="f_country" autocomplete="off" placeholder="India">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 gap-4 mb-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase tracking-widest text-slate-500" for="f_landmark">Landmark <span class="text-slate-600">(optional)</span></label>
+                <input class="form-input" type="text" id="f_landmark" autocomplete="off" placeholder="Near ...">
+              </div>
+            </div>
+
+            <div class="flex gap-4 items-center flex-wrap mt-2">
+              <button class="bg-transparent border border-primary text-primary hover:bg-primary hover:text-white text-[11px] font-bold uppercase tracking-widest px-6 py-2.5 rounded-lg transition-all"
+                      id="saveAddressBtn" onclick="saveAddressFromCheckout()">
+                Save &amp; Use This Address
+              </button>
+              <button onclick="closeAddressForm()"
+                      class="bg-transparent border-none text-slate-500 hover:text-white text-[11px] font-semibold uppercase tracking-widest cursor-pointer">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAYMENT METHOD -->
+        <div class="fu d2">
+          <h2 class="text-2xl font-extrabold uppercase tracking-tight font-serif mb-1">Payment Method</h2>
+          <p class="text-sm text-slate-500 mb-6">Choose how you'd like to pay</p>
+
+          <div class="flex flex-col gap-2.5">
+            <div class="pay-option selected flex items-center gap-4" id="pay_cod" onclick="selectPayment('cod')">
+              <div class="pay-radio"><div class="pay-dot"></div></div>
+              <span class="material-symbols-outlined msym text-slate-400 text-2xl">payments</span>
+              <div class="flex-1">
+                <div class="text-sm font-bold text-white">Cash on Delivery</div>
+                <div class="text-xs text-slate-500 mt-0.5">Pay when your order arrives</div>
+              </div>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-full">Available</span>
+            </div>
+
+            <div class="pay-option flex items-center gap-4" id="pay_paypal" onclick="selectPayment('paypal')">
+              <div class="pay-radio"><div class="pay-dot"></div></div>
+              <span class="material-symbols-outlined msym text-slate-400 text-2xl">account_balance</span>
+              <div class="flex-1">
+                <div class="text-sm font-bold text-white">PayPal</div>
+                <div class="text-xs text-slate-500 mt-0.5">Pay securely via PayPal</div>
+              </div>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-full">Available</span>
+            </div>
+
+            <!-- PayPal button renders here, shown only when paypal is selected.
+                 Wrapped in .paypal-card so the SDK's own white iframe sits
+                 inside a framed, intentional-looking panel instead of
+                 floating bare on the dark page. -->
+            <div id="paypal-button-wrapper" style="display:none; margin-top:4px;">
+              <div class="paypal-card">
+                <div id="paypal-button-container"></div>
+              </div>
+            </div>
+
+            <% const canPayWallet = walletBalance >= grandTotal; %>
+            <div class="pay-option flex items-center gap-4 <%= !canPayWallet ? 'disabled' : '' %>"
+                 id="pay_wallet"
+                 onclick="<%= canPayWallet ? 'selectPayment(\'wallet\')' : '' %>">
+              <div class="pay-radio"><div class="pay-dot"></div></div>
+              <span class="material-symbols-outlined msym text-slate-400 text-2xl">account_balance_wallet</span>
+              <div class="flex-1">
+                <div class="text-sm font-bold text-white">Luxe Wallet</div>
+                <div class="text-xs text-slate-500 mt-0.5">
+                  Balance:
+                  <span class="font-bold <%= canPayWallet ? 'text-emerald-400' : 'text-red-400' %>">
+                    ₹<%= walletBalance.toLocaleString('en-IN') %>
+                  </span>
+                  <% if (!canPayWallet) { %>
+                    &nbsp;·&nbsp;<span class="text-red-400">Need ₹<%= (grandTotal - walletBalance).toLocaleString('en-IN') %> more</span>
+                  <% } %>
+                </div>
+              </div>
+              <% if (canPayWallet) { %>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-full">Available</span>
+              <% } else { %>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-red-400 bg-red-500/10 border border-red-500/25 px-2.5 py-1 rounded-full">Low Balance</span>
               <% } %>
             </div>
           </div>
-        <% }) %>
-      </div>
-
-      <p id="addr-select-error">Please select a shipping address to continue.</p>
-
-      <button class="add-addr-btn" onclick="openNewAddressForm()" id="addAddrToggle">
-        <span style="font-size:18px;line-height:1">+</span>
-        Add New Address
-      </button>
-
-      <!-- ADDRESS FORM -->
-      <div class="form-panel" id="newAddrForm">
-        <div class="form-panel-title" id="addrFormTitle">Add New Address</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="f_name">Full Name</label>
-            <input class="form-input" type="text" id="f_name" placeholder="e.g. Alexander Thorne">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f_mobile">Mobile Number</label>
-            <input class="form-input" type="tel" id="f_mobile" placeholder="+91 00000 00000">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="f_house">House / Flat No.</label>
-            <input class="form-input" type="text" id="f_house" placeholder="e.g. 721, Apt B">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f_street">Street / Road</label>
-            <input class="form-input" type="text" id="f_street" placeholder="e.g. Fifth Avenue">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="f_pincode">Pincode / ZIP</label>
-            <input class="form-input" type="text" id="f_pincode" placeholder="6-digit pincode" maxlength="6">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f_city">City / District</label>
-            <input class="form-input" type="text" id="f_city" placeholder="Auto-filled from pincode">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="f_state">State</label>
-            <input class="form-input" type="text" id="f_state" placeholder="Auto-filled from pincode">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f_country">Country</label>
-            <input class="form-input" type="text" id="f_country" placeholder="India">
-          </div>
-        </div>
-        <div class="form-row full">
-          <div class="form-group">
-            <label class="form-label" for="f_landmark">Landmark <span style="color:var(--text-4)">(optional)</span></label>
-            <input class="form-input" type="text" id="f_landmark" placeholder="Near ...">
-          </div>
-        </div>
-        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px">
-          <button class="save-addr-btn" id="saveAddressBtn" onclick="saveAddressFromCheckout()">
-            Save &amp; Use This Address
-          </button>
-          <button onclick="closeAddressForm()"
-            style="background:transparent;border:none;color:var(--text-3);font-family:'DM Sans',sans-serif;
-                   font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">
-            Cancel
-          </button>
-        </div>
-      </div>
-
-      <!-- PAYMENT METHOD -->
-      <div class="payment-section">
-        <div class="sec-title" style="margin-top:8px">Payment Method</div>
-        <p class="sec-sub">Choose how you'd like to pay</p>
-
-        <div class="pay-option selected" id="pay_cod" onclick="selectPayment('cod')">
-          <div class="pay-radio"><div class="pay-dot"></div></div>
-          <div class="pay-icon">🏠</div>
-          <div>
-            <div class="pay-label">Cash on Delivery</div>
-            <div class="pay-sub">Pay when your order arrives</div>
-          </div>
-          <div class="pay-badge">Available</div>
         </div>
 
-        
-
-        <!-- <div class="pay-option disabled">
-          <div class="pay-radio"></div>
-          <div class="pay-icon">📱</div>
-          <div>
-            <div class="pay-label">UPI / Net Banking</div>
-            <div class="pay-sub">Instant transfer</div>
-          </div>
-        </div> -->
-
-<div class="pay-option" id="pay_paypal" onclick="selectPayment('paypal')">
-  <div class="pay-radio"><div class="pay-dot"></div></div>
-  <div class="pay-icon">🅿️</div>
-  <div>
-    <div class="pay-label">PayPal</div>
-    <div class="pay-sub">Pay securely via PayPal</div>
-  </div>
-  <div class="pay-badge">Available</div>
-</div>
-
-<!-- PayPal button renders here, shown only when paypal is selected -->
-<div id="paypal-button-container" style="display:none; margin-top:12px;"></div>
+      </div><!-- /left column -->
 
 
-        <% const canPayWallet = walletBalance >= grandTotal; %>
-        <div class="pay-option <%= !canPayWallet ? 'disabled' : '' %>"
-             id="pay_wallet"
-             onclick="<%= canPayWallet ? 'selectPayment(\'wallet\')' : '' %>">
-          <div class="pay-radio"><div class="pay-dot"></div></div>
-          <div class="pay-icon">💰</div>
-          <div>
-            <div class="pay-label">Luxe Wallet</div>
-            <div class="pay-sub">
-              Balance: <span style="color:<%= canPayWallet ? 'var(--success)' : 'var(--danger)' %>; font-weight:600;">
-                ₹<%= walletBalance.toLocaleString('en-IN') %>
-              </span>
-              <% if (!canPayWallet) { %>
-                &nbsp;·&nbsp;
-                <span style="color:var(--danger)">Need ₹<%= (grandTotal - walletBalance).toLocaleString('en-IN') %> more</span>
-              <% } %>
+      <!-- ═══════════ RIGHT COLUMN ═══════════ -->
+      <div class="fu d3">
+        <div class="summary-card">
+          <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-5 pb-4 border-b border-slate-800">Order Summary</h2>
+
+          <!-- PRODUCT LIST -->
+          <div class="max-h-[340px] overflow-y-auto scroll-thin mb-5 pr-1">
+            <% cart.forEach((p) => {
+              const variant     = p.variantId;
+              const product     = variant?.productId;
+              const inStock     = (variant?.stock ?? 0) > 0;
+              const isInvalid   = !product?.isActive || !variant?.isActive || !inStock;
+              const hasDiscount = variant?.discount && variant.discount < variant?.price;
+              const itemPrice   = hasDiscount ? variant.discount : (variant?.price || 0);
+              const origPrice   = variant?.price || 0;
+              const qty         = p.quantity || 1;
+              const lineTotal   = itemPrice * qty;
+              const origTotal   = origPrice * qty;
+              const savedAmt    = hasDiscount ? (origTotal - lineTotal) : 0;
+              const imgSrc      = variant?.images?.[0] ? '/uploads/' + variant.images[0] : null;
+              const itemGst     = Math.round(lineTotal * 0.05);
+              const itemGross   = lineTotal + itemGst;
+            %>
+              <div class="prod-item <%= isInvalid ? 'invalid' : '' %> flex gap-3.5 py-3.5 border-b border-slate-800 last:border-b-0 last:pb-0">
+                <% if (imgSrc) { %>
+                  <img class="w-[62px] h-[74px] object-cover flex-shrink-0 bg-slate-800 rounded-lg border border-slate-800"
+                       src="<%= imgSrc %>" alt="<%= product?.name || 'Product' %>" onerror="this.style.display='none'">
+                <% } else { %>
+                  <div class="w-[62px] h-[74px] flex-shrink-0 bg-slate-800 rounded-lg border border-slate-800 flex items-center justify-center text-slate-600">
+                    <span class="material-symbols-outlined msym">image_not_supported</span>
+                  </div>
+                <% } %>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs font-bold uppercase tracking-wide text-white mb-1 truncate"><%= product?.name || 'Unknown Product' %></div>
+                  <div class="text-[11px] text-slate-500 leading-relaxed flex flex-wrap gap-1.5">
+                    <% if (variant?.color) { %><span class="bg-slate-800/70 border border-slate-800 rounded px-1.5 py-0.5">Color: <%= variant.color %></span><% } %>
+                    <% if (variant?.size)  { %><span class="bg-slate-800/70 border border-slate-800 rounded px-1.5 py-0.5">Size: <%= variant.size %></span><% } %>
+                  </div>
+                  <div class="text-[11px] text-slate-500 mt-1.5">Qty: <%= qty %></div>
+                  <% if (!isInvalid) { %>
+                    <div class="mt-2 border-t border-slate-800 pt-1.5 flex flex-col gap-1">
+                      <div class="flex justify-between text-[11px] text-slate-500">
+                        <span>Item Price</span>
+                        <% if (hasDiscount) { %>
+                          <span class="line-through text-slate-600">₹<%= origTotal.toLocaleString('en-IN') %></span>
+                        <% } else { %>
+                          <span>₹<%= lineTotal.toLocaleString('en-IN') %></span>
+                        <% } %>
+                      </div>
+                      <% if (hasDiscount) { %>
+                        <div class="flex justify-between text-[11px] text-emerald-400"><span>Discount</span><span>— ₹<%= savedAmt.toLocaleString('en-IN') %></span></div>
+                      <% } %>
+                      <div class="flex justify-between text-[11px] text-slate-600"><span>Taxable Value</span><span>₹<%= lineTotal.toLocaleString('en-IN') %></span></div>
+                      <div class="flex justify-between text-[11px] text-amber-400"><span>GST (5%)</span><span>+ ₹<%= itemGst.toLocaleString('en-IN') %></span></div>
+                      <div class="flex justify-between text-[11px] text-slate-300 font-semibold border-t border-dashed border-slate-800 pt-1 mt-0.5"><span>Item Total</span><span>₹<%= itemGross.toLocaleString('en-IN') %></span></div>
+                    </div>
+                  <% } %>
+                  <% if (!inStock) { %>
+                    <span class="invalid-badge mt-1.5">Out of stock</span>
+                  <% } else if (!product?.isActive || !variant?.isActive) { %>
+                    <span class="invalid-badge mt-1.5">Unavailable</span>
+                  <% } %>
+                </div>
+                <div class="flex flex-col items-end pt-0.5">
+                  <% if (isInvalid) { %>
+                    <div class="text-sm text-slate-600 line-through">₹<%= origTotal.toLocaleString('en-IN') %></div>
+                  <% } else { %>
+                    <div class="text-[13px] font-bold text-primary whitespace-nowrap">₹<%= itemGross.toLocaleString('en-IN') %></div>
+                    <% if (hasDiscount) { %>
+                      <div class="text-[11px] text-slate-600 line-through mt-0.5">₹<%= origTotal.toLocaleString('en-IN') %></div>
+                    <% } %>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div><!-- /product-list -->
+
+          <!-- ══════════════════════════════
+               COUPON SECTION
+          ══════════════════════════════ -->
+          <div class="coupon-wrap">
+            <div class="coupon-header" onclick="toggleCouponPanel()">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined msym text-primary" style="font-size:16px">sell</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-300">Promo Code</span>
+                <% if (eligibleCoupons.length > 0) { %>
+  <span class="text-[10px] text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 rounded-full"><%= eligibleCoupons.length %> available</span>
+<% } %>
+              </div>
+              <span class="material-symbols-outlined msym coupon-chevron text-slate-500" id="couponChevron" style="font-size:16px">expand_more</span>
             </div>
-          </div>
-          <% if (canPayWallet) { %>
-            <div class="pay-badge">Available</div>
-          <% } else { %>
-            <div style="margin-left:auto;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
-                        color:var(--danger);background:rgba(248,113,113,.08);
-                        border:1px solid rgba(248,113,113,.25);padding:3px 10px;border-radius:3px;">
-              Low Balance
+
+            <div class="coupon-body" id="couponBody">
+              <% if (eligibleCoupons.length > 0) { %>
+  <p class="text-[10px] uppercase tracking-widest text-slate-500 mb-2.5">Tap a coupon to apply</p>
+  <div class="flex flex-col gap-2 mb-3.5 max-h-[220px] overflow-y-auto scroll-thin pr-0.5" id="couponCardsList">
+    <% eligibleCoupons.forEach(c => { %>
+                    <div class="coupon-card" id="couponCard_<%= c.code %>">
+                      <div class="flex-1 min-w-0">
+                        <span class="coupon-card-code text-[13px] font-bold tracking-wider text-primary block mb-0.5"><%= c.code %></span>
+                        <span class="text-[11px] text-slate-500 leading-relaxed">
+                          <% if (c.discountType === 'PERCENTAGE') { %>
+                            <%= c.discountValue %>% off
+                            <% if (c.maxDiscount) { %>· Max ₹<%= c.maxDiscount %><% } %>
+                          <% } else { %>
+                            ₹<%= c.discountValue %> flat off
+                          <% } %>
+                          · Min order ₹<%= c.minOrderValue %>
+                        </span>
+                        <span class="text-[10px] text-emerald-400 mt-0.5 block" id="couponSave_<%= c.code %>" style="display:none"></span>
+                      </div>
+                      <button class="coupon-card-btn" id="couponBtn_<%= c.code %>" onclick="applyCoupon('<%= c.code %>')">Apply</button>
+                    </div>
+                  <% }) %>
+                </div>
+                <div class="h-px bg-slate-800 my-3"></div>
+              <% } %>
+
+              <div class="coupon-row flex">
+                <input class="coupon-input" type="text" id="couponInput" placeholder="Enter promo code" autocomplete="off">
+                <button class="coupon-btn" id="couponApplyBtn" onclick="applyCoupon()">Apply</button>
+              </div>
+              <p class="coupon-msg" id="couponMsg"></p>
+            </div>
+          </div><!-- /coupon-wrap -->
+
+          <!-- SAVINGS BANNER -->
+          <% if (totalSavings > 0) { %>
+            <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3.5 py-2.5 mb-5">
+              <span class="material-symbols-outlined msym text-emerald-400" style="font-size:16px;font-variation-settings:'FILL' 1">check_circle</span>
+              <p class="text-xs text-emerald-400">You're saving <strong>₹<%= totalSavings.toLocaleString('en-IN') %></strong> on this order</p>
             </div>
           <% } %>
-        </div>
-      </div>
 
-    </div><!-- /left column -->
-
-
-    <!-- ═══════════ RIGHT COLUMN ═══════════ -->
-    <div>
-      <div class="summary-card">
-        <div class="summary-title">Order Summary</div>
-
-        <!-- PRODUCT LIST -->
-        <div class="product-list">
-          <% cart.forEach((p) => {
-            const variant     = p.variantId;
-            const product     = variant?.productId;
-            const inStock     = (variant?.stock ?? 0) > 0;
-            const isInvalid   = !product?.isActive || !variant?.isActive || !inStock;
-            const hasDiscount = variant?.discount && variant.discount < variant?.price;
-            const itemPrice   = hasDiscount ? variant.discount : (variant?.price || 0);
-            const origPrice   = variant?.price || 0;
-            const qty         = p.quantity || 1;
-            const lineTotal   = itemPrice * qty;
-            const origTotal   = origPrice * qty;
-            const savedAmt    = hasDiscount ? (origTotal - lineTotal) : 0;
-            const imgSrc      = variant?.images?.[0] ? '/uploads/' + variant.images[0] : null;
-            const itemGst     = Math.round(lineTotal * 0.05);
-            const itemGross   = lineTotal + itemGst;
-          %>
-            <div class="prod-item <%= isInvalid ? 'invalid' : '' %>">
-              <% if (imgSrc) { %>
-                <img class="prod-img" src="<%= imgSrc %>" alt="<%= product?.name || 'Product' %>" onerror="this.style.display='none'">
-              <% } else { %>
-                <div class="prod-img-placeholder">◻</div>
-              <% } %>
-              <div class="prod-info">
-                <div class="prod-name"><%= product?.name || 'Unknown Product' %></div>
-                <div class="prod-meta">
-                  <% if (variant?.color) { %><span>Color: <%= variant.color %></span><% } %>
-                  <% if (variant?.size)  { %><span>Size: <%= variant.size %></span><% } %>
-                </div>
-                <div class="prod-qty">Qty: <%= qty %></div>
-                <% if (!isInvalid) { %>
-                  <div class="prod-breakdown">
-                    <div class="bd-row">
-                      <span>Item Price</span>
-                      <% if (hasDiscount) { %>
-                        <span class="strike">₹<%= origTotal.toLocaleString('en-IN') %></span>
-                      <% } else { %>
-                        <span>₹<%= lineTotal.toLocaleString('en-IN') %></span>
-                      <% } %>
-                    </div>
-                    <% if (hasDiscount) { %>
-                      <div class="bd-row green"><span>Discount</span><span>— ₹<%= savedAmt.toLocaleString('en-IN') %></span></div>
-                    <% } %>
-                    <div class="bd-row muted"><span>Taxable Value</span><span>₹<%= lineTotal.toLocaleString('en-IN') %></span></div>
-                    <div class="bd-row" style="color:var(--warning)"><span>GST (5%)</span><span>+ ₹<%= itemGst.toLocaleString('en-IN') %></span></div>
-                    <div class="bd-row final"><span>Item Total</span><span>₹<%= itemGross.toLocaleString('en-IN') %></span></div>
-                  </div>
-                <% } %>
-                <% if (!inStock) { %>
-                  <span class="invalid-badge">Out of stock</span>
-                <% } else if (!product?.isActive || !variant?.isActive) { %>
-                  <span class="invalid-badge">Unavailable</span>
-                <% } %>
-              </div>
-              <div class="prod-prices">
-                <% if (isInvalid) { %>
-                  <div class="prod-price-strike">₹<%= origTotal.toLocaleString('en-IN') %></div>
-                <% } else { %>
-                  <div class="prod-price-final">₹<%= itemGross.toLocaleString('en-IN') %></div>
-                  <% if (hasDiscount) { %>
-                    <div class="prod-price-original">₹<%= origTotal.toLocaleString('en-IN') %></div>
-                  <% } %>
-                <% } %>
-              </div>
+          <!-- PRICE BREAKDOWN -->
+          <div class="price-section">
+            <div class="price-row">
+              <span class="text-sm text-slate-400">Total Price</span>
+              <span class="text-sm font-semibold text-white">₹<%= totalPrice.toLocaleString('en-IN') %></span>
             </div>
-          <% }) %>
-        </div><!-- /product-list -->
 
-        <!-- ══════════════════════════════
-             COUPON SECTION
-        ══════════════════════════════ -->
-        <div class="coupon-wrap">
-
-          <!-- Collapsible header -->
-          <div class="coupon-header" onclick="toggleCouponPanel()">
-            <div class="coupon-header-left">
-              <span class="coupon-header-icon">🏷️</span>
-              <span class="coupon-label">Promo Code</span>
-              <% if (availableCoupons && availableCoupons.length > 0) { %>
-                <span class="coupon-count-badge"><%= availableCoupons.length %> available</span>
-              <% } %>
+            <% if (totalSavings > 0) { %>
+            <div class="price-row">
+              <span class="text-sm text-emerald-400">Product Discount</span>
+              <span class="text-sm font-semibold text-emerald-400">— ₹<%= totalSavings.toLocaleString('en-IN') %></span>
             </div>
-            <span class="coupon-chevron" id="couponChevron">▼</span>
-          </div>
-
-          <!-- Collapsible body -->
-          <div class="coupon-body" id="couponBody">
-
-            <!-- Available coupons list -->
-            <% if (availableCoupons && availableCoupons.length > 0) { %>
-              <p class="available-coupons-title">Tap a coupon to apply</p>
-              <div class="coupon-cards-list" id="couponCardsList">
-                <% availableCoupons.forEach(c => { %>
-                  <div class="coupon-card" id="couponCard_<%= c.code %>">
-                    <div class="coupon-card-info">
-                      <span class="coupon-card-code"><%= c.code %></span>
-                      <span class="coupon-card-desc">
-                        <% if (c.discountType === 'PERCENTAGE') { %>
-                          <%= c.discountValue %>% off
-                          <% if (c.maxDiscount) { %>· Max ₹<%= c.maxDiscount %><% } %>
-                        <% } else { %>
-                          ₹<%= c.discountValue %> flat off
-                        <% } %>
-                        · Min order ₹<%= c.minOrderValue %>
-                      </span>
-                      <span class="coupon-card-save" id="couponSave_<%= c.code %>" style="display:none"></span>
-                    </div>
-                    <button class="coupon-card-btn" id="couponBtn_<%= c.code %>"
-                            onclick="applyCoupon('<%= c.code %>')">
-                      Apply
-                    </button>
-                  </div>
-                <% }) %>
-              </div>
-              <div class="coupon-divider"></div>
             <% } %>
 
-            <!-- Manual input -->
-            <div class="coupon-row">
-              <input class="coupon-input" type="text" id="couponInput"
-                     placeholder="Enter promo code" autocomplete="off">
-              <button class="coupon-btn" id="couponApplyBtn" onclick="applyCoupon()">Apply</button>
+            <div class="price-row coupon-discount-row" id="couponDiscountRow">
+              <span class="text-sm text-primary">Coupon (<span id="appliedCouponLabel">—</span>)</span>
+              <span class="text-sm font-semibold text-primary" id="couponDiscountDisplay">— ₹0</span>
             </div>
-            <p class="coupon-msg" id="couponMsg"></p>
 
-          </div><!-- /coupon-body -->
-        </div><!-- /coupon-wrap -->
+            <div class="price-row">
+              <span class="text-sm text-slate-500">Taxable Value</span>
+              <span class="text-xs text-slate-400">₹<%= subtotal.toLocaleString('en-IN') %></span>
+            </div>
 
-        <!-- SAVINGS BANNER -->
-        <% if (totalSavings > 0) { %>
-          <div class="savings-bar">
-            <span class="icon">✓</span>
-            <p>You're saving <strong>₹<%= totalSavings.toLocaleString('en-IN') %></strong> on this order</p>
-          </div>
-        <% } %>
+            <div class="price-row">
+              <span class="text-sm text-amber-400">GST (5%)</span>
+              <span class="text-xs text-amber-400" id="displayGst">+ ₹<%= gstAmount.toLocaleString('en-IN') %></span>
+            </div>
 
-        <!-- PRICE BREAKDOWN -->
-        <div class="price-section">
-          <div class="price-row">
-            <span class="pr-label">Total Price</span>
-            <span class="pr-val">₹<%= totalPrice.toLocaleString('en-IN') %></span>
-          </div>
+            <div class="price-row">
+              <span class="text-sm text-slate-400">Shipping Fee</span>
+              <span class="text-sm font-semibold" id="displayShipping">
+                <% if (subtotal >= 999) { %><span class="text-emerald-400">Free</span><% } else { %><span class="text-white">₹99</span><% } %>
+              </span>
+            </div>
 
-          <% if (totalSavings > 0) { %>
-          <div class="price-row discount">
-            <span class="pr-label">Product Discount</span>
-            <span class="pr-val">— ₹<%= totalSavings.toLocaleString('en-IN') %></span>
-          </div>
-          <% } %>
-
-          <!-- Coupon discount row — shown dynamically -->
-          <div class="price-row coupon-row-summary coupon-discount-row" id="couponDiscountRow">
-            <span class="pr-label">🏷️ Coupon (<span id="appliedCouponLabel">—</span>)</span>
-            <span class="pr-val" id="couponDiscountDisplay">— ₹0</span>
+            <div class="price-row total">
+              <span class="text-lg font-extrabold text-white font-serif">Grand Total</span>
+              <span class="text-2xl font-extrabold text-primary font-serif" id="displayTotal">₹<%= grandTotal.toLocaleString('en-IN') %></span>
+            </div>
           </div>
 
-          <div class="price-row">
-            <span class="pr-label" style="color:var(--text-3)">Taxable Value</span>
-            <span class="pr-val" style="color:var(--text-2);font-size:12px">₹<%= subtotal.toLocaleString('en-IN') %></span>
-          </div>
+          <p class="text-[10px] text-slate-600 text-right -mt-3.5 mb-4">
+            Incl. ₹<%= gstAmount.toLocaleString('en-IN') %> GST @ 5% on clothing
+          </p>
 
-          <div class="price-row">
-  <span class="pr-label" style="color:var(--warning)">GST (5%)</span>
-  <span class="pr-val" style="color:var(--warning);font-size:12px" id="displayGst">+ ₹<%= gstAmount.toLocaleString('en-IN') %></span>
+          <!-- PLACE ORDER -->
+          <button class="place-btn flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl transition-all shadow-xl shadow-primary/20 active:scale-95 text-sm uppercase tracking-widest mb-4"
+                  id="placeOrderBtn" onclick="placeOrder()">
+            <span class="material-symbols-outlined msym text-base">lock</span>
+            Place Order
+          </button>
+
+          <p class="text-center text-xs text-slate-600 flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined msym text-emerald-400" style="font-size:14px;font-variation-settings:'FILL' 1">verified_user</span>
+            Free returns within 30 days
+          </p>
+        </div><!-- /summary-card -->
+      </div><!-- /right column -->
+
+    </div><!-- /grid -->
+  </main>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="bg-slate-900/60 mt-20 px-6 lg:px-20 py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 uppercase tracking-widest">
+      <div class="flex items-center gap-2 text-primary">
+        <span class="material-symbols-outlined msym">diamond</span>
+        <span class="text-white font-extrabold tracking-tight">LUXE</span>
+      </div>
+      <p>© <%= new Date().getFullYear() %> Luxe Menswear. All Rights Reserved.</p>
+      <div class="flex gap-6"></div>
+    </div>
+  </footer>
+
 </div>
-
-          <div class="price-row free">
-            <span class="pr-label">Shipping Fee</span>
-            <span class="pr-val" id="displayShipping">
-              <% if (subtotal >= 999) { %>Free<% } else { %><span style="color:var(--text-1)">₹99</span><% } %>
-            </span>
-          </div>
-
-          <div class="price-row total">
-            <span class="pr-label">Grand Total</span>
-            <span class="pr-val" id="displayTotal">₹<%= grandTotal.toLocaleString('en-IN') %></span>
-          </div>
-        </div>
-
-        <p style="font-size:10px;color:var(--text-4);letter-spacing:.08em;text-align:right;margin-top:-14px;margin-bottom:16px;">
-          Incl. ₹<%= gstAmount.toLocaleString('en-IN') %> GST @ 5% on clothing
-        </p>
-
-        <!-- PLACE ORDER -->
-        <button class="place-btn" id="placeOrderBtn" onclick="placeOrder()">
-          <span style="font-size:15px">🔒</span>
-          Place Order
-        </button>
-
-        <div class="guarantee">
-          <span style="font-size:13px;color:var(--success)">✓</span>
-          Free returns within 30 days
-        </div>
-
-        <div class="divider-dots">· · ·</div>
-
-      </div><!-- /summary-card -->
-    </div><!-- /right column -->
-
-  </div><!-- /main-grid -->
-</div><!-- /page -->
-
-<footer>
-  <div class="footer-logo">Luxe</div>
-  
-  <p class="footer-copy">© <%= new Date().getFullYear() %> LUXE. All rights reserved.</p>
-</footer>
-
-
 
 <script src="https://www.paypal.com/sdk/js?client-id=AUVHxcEAGa6HevQSXIEiiZsdjAsegfmTNURoAmrnB8bwpdC7o8UHeuImbPwCGu7Gq-33yqvrfJq4dM8l&currency=USD"></script>
 
@@ -948,27 +786,32 @@
   let editingAddressId      = '';
   let editingAddressDefault = false;
   let paypalButtonsRendered = false;
+  let currentOrderCode      = ''; // ← tracks the pending PayPal order for failure/retry redirects
 
- const checkoutAddresses = <%- JSON.stringify(address).replace(/</g, '\\u003c') %>;
-const baseGrandTotal    = <%= grandTotal %>;
-const baseSubtotal      = <%= subtotal %>;
-const orderTotal        = <%= orderTotal %>;
-const walletBalance     = <%= walletBalance %>;
+  const checkoutAddresses = <%- JSON.stringify(address).replace(/</g, '\\u003c') %>;
+  const baseGrandTotal    = <%= grandTotal %>;
+  const baseSubtotal      = <%= subtotal %>;
+  const orderTotal        = <%= orderTotal %>;
+  const walletBalance     = <%= walletBalance %>;
 
   /* ── LOADER ── */
   const overlay    = document.getElementById('loadingOverlay');
   const showLoader = () => overlay.classList.add('active');
   const hideLoader = () => overlay.classList.remove('active');
 
-  /* ── TOAST ── */
-  function toast(icon, title) {
-    Swal.fire({
-      toast: true, icon, title,
-      position: 'top-right', showConfirmButton: false, timer: 3200,
-      background: '#0b1e3a', color: '#e8f1ff',
-      iconColor: icon === 'success' ? '#4da6ff' : '#f87171'
-    });
+  /* ── TOAST (matches cart page) ── */
+  let _toastTimer;
+  function showToast(msg, icon = 'check_circle', cls = 'text-green-400') {
+    document.getElementById('toast-msg').textContent = msg;
+    const ic = document.getElementById('toast-icon');
+    ic.textContent = icon;
+    ic.className   = 'material-symbols-outlined msym ' + cls;
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 2800);
   }
+  function toastError(msg) { showToast(msg, 'error', 'text-red-400'); }
+  function toastSuccess(msg) { showToast(msg, 'check_circle', 'text-green-400'); }
 
   /* ══════════════════════════════
      PAYMENT SELECTION
@@ -979,16 +822,16 @@ const walletBalance     = <%= walletBalance %>;
     document.getElementById('pay_' + method)?.classList.add('selected');
     selectedPayment = method;
 
-    const paypalContainer = document.getElementById('paypal-button-container');
-    const placeBtn        = document.getElementById('placeOrderBtn');
+    const paypalWrapper = document.getElementById('paypal-button-wrapper'); // ← now targets the framed wrapper
+    const placeBtn       = document.getElementById('placeOrderBtn');
 
     if (method === 'paypal') {
-      paypalContainer.style.display = 'block';
-      placeBtn.style.display        = 'none';   // PayPal has its own button
+      paypalWrapper.style.display = 'block';
+      placeBtn.style.display      = 'none';   // PayPal has its own button
       if (!paypalButtonsRendered) renderPaypalButtons();
     } else {
-      paypalContainer.style.display = 'none';
-      placeBtn.style.display        = 'flex';
+      paypalWrapper.style.display = 'none';
+      placeBtn.style.display      = 'flex';
     }
   }
 
@@ -998,89 +841,90 @@ const walletBalance     = <%= walletBalance %>;
   function renderPaypalButtons() {
     paypal.Buttons({
 
-      // 1️⃣  Create the PayPal order via your backend
+      // Restrict to the PayPal wallet button only — without this, PayPal's
+      // SDK also renders a separate "Debit or Credit Card" button beneath
+      // it, which adds a second white block and duplicate payment option
+      // that isn't needed here.
+      fundingSource: paypal.FUNDING.PAYPAL,
+
       createOrder: async function () {
         if (!selectedAddressId) {
           document.getElementById('addr-select-error').style.display = 'block';
           document.getElementById('addressCardGrid')
                   .scrollIntoView({ behavior: 'smooth', block: 'start' });
-          toast('error', 'Please select a shipping address.');
-          // Returning undefined prevents the PayPal popup from opening
+          toastError('Please select a shipping address.');
           return Promise.reject(new Error('No address selected'));
         }
 
         try {
-          const res  = await fetch('/checkout/paypal/create-order', { method: 'POST' });
+          const res  = await fetch('/checkout/paypal/create-order', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              addressId:  selectedAddressId,
+              couponCode: appliedCouponCode || null,
+              discount:   appliedDiscount   || 0,
+            }),
+          });
           const data = await res.json();
           if (!data.id) throw new Error(data.message || 'Could not create PayPal order');
-          return data.id;   // PayPal order ID
+          currentOrderCode = data.orderCode || currentOrderCode; // track for failure redirect
+          return data.id;
         } catch (err) {
-          toast('error', err.message || 'PayPal order creation failed.');
+          toastError(err.message || 'PayPal order creation failed.');
           return Promise.reject(err);
         }
       },
 
-      // 2️⃣  Capture payment & place the order in your DB
       onApprove: async function (data) {
         showLoader();
         try {
-          // Step A — capture payment with PayPal
           const captureRes  = await fetch('/checkout/paypal/capture-order', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ orderID: data.orderID }),
           });
           const captureData = await captureRes.json();
-
-          if (!captureData.success || captureData.status !== 'COMPLETED') {
-            hideLoader();
-            return toast('error', 'PayPal payment was not completed. Please try again.');
-          }
-
-          // Step B — place order in your system
-          const orderRes  = await fetch('/checkout/place-order', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              addressId:      selectedAddressId,
-              paymentMethod:  'paypal',
-              couponCode:     appliedCouponCode || null,
-              discount:       appliedDiscount   || 0,
-              paypalOrderId:  data.orderID,     // pass through for your records
-            }),
-          });
-          const orderData = await orderRes.json();
-
           hideLoader();
 
-          if (!orderData.success) return toast('error', orderData.message);
+          if (!captureData.success || captureData.status !== 'COMPLETED') {
+            const failedCode = captureData.orderCode || currentOrderCode;
+            if (failedCode) {
+              toastError('Payment could not be completed — redirecting to retry…');
+              setTimeout(() => { window.location.href = `/checkout/order-failed/${failedCode}`; }, 1400);
+            } else {
+              toastError(captureData.message || 'PayPal payment was not completed. Please try again.');
+            }
+            return;
+          }
 
-          Swal.fire({
-            icon: 'success', title: 'Payment Successful!',
-            text: 'Your PayPal payment has been captured. Redirecting…',
-            timer: 1800, showConfirmButton: false,
-            background: '#0b1e3a', color: '#e8f1ff', iconColor: '#4da6ff',
-          });
-          setTimeout(() => { window.location.href = orderData.redirect; }, 1800);
+          toastSuccess('Payment successful — redirecting…');
+          setTimeout(() => { window.location.href = captureData.redirect; }, 1400);
 
         } catch (err) {
           hideLoader();
-          toast('error', 'Something went wrong during payment. Please try again.');
+          if (currentOrderCode) {
+            toastError('Something went wrong — redirecting to retry…');
+            setTimeout(() => { window.location.href = `/checkout/order-failed/${currentOrderCode}`; }, 1400);
+          } else {
+            toastError('Something went wrong during payment. Please try again.');
+          }
         }
       },
 
-      //   User cancelled
       onCancel: function () {
-        window.location.href='/checkout/cancel'
+        if (currentOrderCode) {
+          window.location.href = `/checkout/order-failed/${currentOrderCode}`;
+        } else {
+          window.location.href = '/checkout/cancel';
+        }
       },
 
-      // 4️⃣  PayPal error
       onError: function (err) {
         console.error('PayPal error:', err);
-        toast('error', 'A PayPal error occurred. Please try again.');
+        toastError('A PayPal error occurred. Please try again.');
       },
 
-      // Style to match your dark theme
       style: {
         layout: 'vertical',
         color:  'blue',
@@ -1095,7 +939,7 @@ const walletBalance     = <%= walletBalance %>;
   }
 
   /* ══════════════════════════════
-     COUPON LOGIC  (unchanged)
+     COUPON LOGIC
   ══════════════════════════════ */
   function toggleCouponPanel() {
     const body    = document.getElementById('couponBody');
@@ -1170,8 +1014,8 @@ const walletBalance     = <%= walletBalance %>;
     totalEl.textContent  = '₹' + newTotal.toLocaleString('en-IN');
     gstEl.textContent    = '+ ₹' + gst.toLocaleString('en-IN');
     shippingEl.innerHTML = shipping === 0
-      ? 'Free'
-      : '<span style="color:var(--text-1)">₹' + shipping + '</span>';
+      ? '<span class="text-emerald-400">Free</span>'
+      : '<span class="text-white">₹' + shipping + '</span>';
 
     if (discount > 0 && couponCode) {
       discountRow.classList.add('visible');
@@ -1188,7 +1032,7 @@ const walletBalance     = <%= walletBalance %>;
   }
 
   /* ══════════════════════════════
-     ADDRESS LOGIC  (unchanged)
+     ADDRESS LOGIC
   ══════════════════════════════ */
   function selectAddress(card) {
     document.querySelectorAll('.addr-card').forEach(c => c.classList.remove('selected'));
@@ -1224,7 +1068,7 @@ const walletBalance     = <%= walletBalance %>;
   function openEditAddress(event, id) {
     event.stopPropagation();
     const addr = checkoutAddresses.find(a => String(a._id) === String(id));
-    if (!addr) return toast('error', 'Address not found.');
+    if (!addr) return toastError('Address not found.');
     editingAddressId      = String(id);
     editingAddressDefault = Boolean(addr.isDefault);
     document.getElementById('addrFormTitle').textContent    = 'Edit Address';
@@ -1252,10 +1096,10 @@ const walletBalance     = <%= walletBalance %>;
       const res  = await fetch(`/address/default/${id}`, { method: 'PATCH' });
       const data = await res.json();
       hideLoader();
-      if (!res.ok || !data.success) return toast('error', data.message || 'Failed to set default.');
-      Swal.fire({ icon: 'success', title: 'Default address updated', timer: 1200, showConfirmButton: false, background: '#0b1e3a', color: '#e8f1ff', iconColor: '#4da6ff' });
-      setTimeout(() => window.location.reload(), 1200);
-    } catch(e) { hideLoader(); toast('error', 'Something went wrong. Please try again.'); }
+      if (!res.ok || !data.success) return toastError(data.message || 'Failed to set default.');
+      toastSuccess('Default address updated');
+      setTimeout(() => window.location.reload(), 1000);
+    } catch(e) { hideLoader(); toastError('Something went wrong. Please try again.'); }
   }
 
   /* ── FORM VALIDATION ── */
@@ -1284,7 +1128,7 @@ const walletBalance     = <%= walletBalance %>;
     if (!errEl) {
       errEl = document.createElement('span');
       errEl.id = id + '_err';
-      errEl.style.cssText = 'font-size:10px;color:var(--danger);letter-spacing:.06em;margin-top:3px;display:block;';
+      errEl.style.cssText = 'font-size:10px;color:#f87171;margin-top:3px;display:block;';
       el.parentNode.appendChild(errEl);
     }
     if (message) { el.classList.add('error'); errEl.textContent = message; errEl.style.display = 'block'; }
@@ -1326,23 +1170,23 @@ const walletBalance     = <%= walletBalance %>;
       const res    = await fetch('/address/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(getNewAddressPayload()) });
       const result = await res.json();
       hideLoader();
-      if (!res.ok || result.success === false) return toast('error', result.message || 'Failed to add address.');
-      Swal.fire({ icon: 'success', title: 'Address saved', timer: 1200, showConfirmButton: false, background: '#0b1e3a', color: '#e8f1ff', iconColor: '#4da6ff' });
-      setTimeout(() => window.location.reload(), 1200);
-    } catch { hideLoader(); toast('error', 'Something went wrong. Please try again.'); }
+      if (!res.ok || result.success === false) return toastError(result.message || 'Failed to add address.');
+      toastSuccess('Address saved');
+      setTimeout(() => window.location.reload(), 1000);
+    } catch { hideLoader(); toastError('Something went wrong. Please try again.'); }
   }
 
   async function updateAddress() {
-    if (!editingAddressId) return toast('error', 'No address selected for editing.');
+    if (!editingAddressId) return toastError('No address selected for editing.');
     if (!validateForm()) return; showLoader();
     try {
       const res    = await fetch(`/address/edit/${editingAddressId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(getEditAddressPayload()) });
       const result = await res.json();
       hideLoader();
-      if (!res.ok || result.success === false) return toast('error', result.message || 'Failed to update address.');
-      Swal.fire({ icon: 'success', title: 'Address updated', timer: 1200, showConfirmButton: false, background: '#0b1e3a', color: '#e8f1ff', iconColor: '#4da6ff' });
-      setTimeout(() => window.location.reload(), 1200);
-    } catch { hideLoader(); toast('error', 'Something went wrong. Please try again.'); }
+      if (!res.ok || result.success === false) return toastError(result.message || 'Failed to update address.');
+      toastSuccess('Address updated');
+      setTimeout(() => window.location.reload(), 1000);
+    } catch { hideLoader(); toastError('Something went wrong. Please try again.'); }
   }
 
   function saveAddressFromCheckout() {
@@ -1350,21 +1194,20 @@ const walletBalance     = <%= walletBalance %>;
   }
 
   /* ── COD / WALLET PLACE ORDER ── */
-
   async function placeOrder() {
     if (!selectedAddressId) {
       document.getElementById('addr-select-error').style.display = 'block';
       document.getElementById('addressCardGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return toast('error', 'Please select a shipping address.');
+      return toastError('Please select a shipping address.');
     }
 
     const taxable_     = Math.max(baseSubtotal - appliedDiscount, 0);
     const gst_         = Math.round(taxable_ * 0.05);
     const shipping_    = baseSubtotal >= 999 ? 0 : 99;
     const currentTotal = taxable_ + gst_ + shipping_;
- 
+
     if (selectedPayment === 'wallet' && walletBalance < currentTotal) {
-      return toast('error', `Insufficient wallet balance. You need ₹${(currentTotal - walletBalance).toLocaleString('en-IN')} more.`);
+      return toastError(`Insufficient wallet balance. You need ₹${(currentTotal - walletBalance).toLocaleString('en-IN')} more.`);
     }
 
     const loadingText = document.querySelector('.loading-text');
@@ -1385,25 +1228,17 @@ const walletBalance     = <%= walletBalance %>;
       });
       const data = await res.json();
       hideLoader();
-      if (!data.success) return toast('error', data.message);
-      Swal.fire({
-        icon: 'success', title: 'Order Confirmed!',
-        text: selectedPayment === 'wallet'
-          ? `₹${currentTotal.toLocaleString('en-IN')} debited from your wallet.`
-          : 'Redirecting to order summary…',
-        timer: 1600, showConfirmButton: false,
-        background: '#0b1e3a', color: '#e8f1ff', iconColor: '#4da6ff',
-      });
-      setTimeout(() => { window.location.href = data.redirect; }, 1600);
+      if (!data.success) return toastError(data.message);
+      toastSuccess(selectedPayment === 'wallet'
+        ? `₹${currentTotal.toLocaleString('en-IN')} debited from your wallet.`
+        : 'Order confirmed — redirecting…');
+      setTimeout(() => { window.location.href = data.redirect; }, 1400);
     } catch {
       hideLoader();
-      toast('error', 'Something went wrong. Please try again.');
+      toastError('Something went wrong. Please try again.');
     }
   }
 </script>
-
-
-
 
 </body>
 </html>

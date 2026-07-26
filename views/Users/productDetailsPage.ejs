@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="/js/blockedUserGuard.js"></script>
 <title><%= product ? product.name + ' — LUXE' : 'LUXE' %></title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
@@ -220,12 +221,18 @@
   /* ── Login modal ── */
   @keyframes modalIn { from{opacity:0;transform:translateY(12px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
   .animate-modal-in { animation: modalIn 0.25s ease forwards; }
+
+  /* ── Unavailable state (server-rendered fallback) ── */
+  #unavailable-block {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 1rem; padding: 6rem 1.5rem;
+  }
 </style>
   <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
 <body class="bg-bg-dark text-slate-100 antialiased font-display min-h-screen">
 
-<!-- ══ REDIRECT OVERLAY ══ -->
+<!-- ══ REDIRECT OVERLAY (JS-driven, shows immediately on load if unavailable) ══ -->
 <div id="redirect-overlay">
   <div class="text-center space-y-4">
     <span class="material-symbols-outlined msym text-6xl text-slate-500">inventory_2</span>
@@ -313,6 +320,21 @@
       </div>
     </div>
   </header>
+
+  <!-- ══ UNAVAILABLE / BLOCKED PRODUCT (server-rendered fallback, works even without JS) ══ -->
+  <% if (!product) { %>
+  <main id="unavailable-block" class="max-w-7xl mx-auto w-full px-6 flex-1">
+    <span class="material-symbols-outlined msym text-6xl text-slate-500">inventory_2</span>
+    <h2 class="text-2xl font-bold text-white">This product is currently not available</h2>
+    <p class="text-slate-400 text-sm max-w-sm">
+      It may have been removed, blocked, or is temporarily unlisted. You'll be redirected to our collection shortly.
+    </p>
+    <a href="/product-listing"
+       class="mt-2 px-6 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-dark transition-colors">
+      Browse Collection
+    </a>
+  </main>
+  <% } %>
 
   <% if (product) { %>
   <main class="max-w-7xl mx-auto w-full px-6 lg:px-20 py-8 lg:py-12 flex-1">
@@ -610,11 +632,11 @@
       </div>
       <div>
         <h4 class="font-bold text-white mb-6 uppercase tracking-wider text-xs">Customer Care</h4>
-       
+
       </div>
       <div>
         <h4 class="font-bold text-white mb-6 uppercase tracking-wider text-xs">Company</h4>
-        
+
       </div>
       <div></div>
     </div>

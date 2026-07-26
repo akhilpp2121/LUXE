@@ -41,6 +41,11 @@ let variantSchema = new schema(
       required: true,
       default: 0,
     },
+     appliedOffer:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Offer",
+        default:null
+    }
   },
   { timestamps: true },
 );

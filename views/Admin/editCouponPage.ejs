@@ -611,6 +611,18 @@
       this.submit();
     });
   </script>
+  <% if (typeof error !== 'undefined' && error) { %>
+    <script>
+      Swal.fire({
+        title: "Error",
+        text: "<%= error %>",
+        icon: "error",
+        background: "#141f38",
+        color: "#dee5ff",
+        confirmButtonColor: "#316bf3",
+      });
+    </script>
+  <% } %>
 </body>
 
 </html>

@@ -1,85 +1,54 @@
 import checkoutNodeJssdk from "@paypal/checkout-server-sdk";
 import paypalClient from "../config/paypal.js";
-import cartModel from "../model/cartModel.js";
 import paymentModel from "../model/paymentModel.js";
-/* ── helper ── */
-const calculateOrderTotal = async (userId) => {
-  try {
-    const cart = await cartModel.findOne({ userId }).populate({
-      path: "items.variantId",
-      populate: { path: "productId" }
-    });
+import cartModel from "../model/cartModel.js";
+import {
+  createPendingPaypalOrder,
+  markOrderPaid,
+  markOrderPaymentFailed,
+  getRetryableOrder,
+} from "../service/checkoutService.js";
+const USD_RATE = 90.72;
 
-    if (!cart || cart.items.length === 0) {
-      return { success: false, totalAmount: 0 };
-    }
-
-    let totalAmount = 0;
-
-    for (const item of cart.items) {
-      const variant = item.variantId;
-
-      // skip invalid / inactive items
-      if (!variant || !variant.isActive || !variant?.productId?.isActive || variant.stock < 1) {
-        continue;
-      }
-
-      const price = variant.discount && variant.discount < variant.price
-        ? variant.discount
-        : variant.price;
-
-      const gst      = Math.round(price * 0.05);
-      const quantity = item.quantity || 1;
-
-      totalAmount += (price + gst) * quantity;
-    }
-
-    // add shipping if below free threshold
-    if (totalAmount < 999) totalAmount += 99;
-
-    if (totalAmount <= 0) return { success: false, totalAmount: 0 };
-
-    return { success: true, totalAmount };
-
-  } catch (e) {
-    console.error("calculateOrderTotal error:", e);
-    return { success: false, totalAmount: 0 };
-  }
-};
-
-/* ── controllers ── */
+/* Creates the Order in DB THEN the matching PayPal order */
 export const createOrder = async (req, res) => {
   try {
     const userId = req.session.user.id || req.session.user._id;
-    const total  = await calculateOrderTotal(userId);
+    const { addressId, couponCode, discount } = req.body;
 
-    if (!total.success) {
-      return res.status(400).json({ message: "Cart is empty or invalid" });
+    if (!addressId) {
+      return res.status(400).json({ message: "Address is required" });
     }
 
-    const usdAmount = Math.round((total.totalAmount / 90.72) * 100) / 100;
+    const result = await createPendingPaypalOrder(
+      userId,
+      addressId,
+      couponCode || null,
+      discount || 0,
+    );
 
-    if (!usdAmount || usdAmount <= 0) {
-      return res.status(400).json({ message: "Invalid amount" });
+    if (!result.success) {
+      return res.status(400).json({ message: result.message });
     }
 
-    req.session.paypalTotal = usdAmount;
+    const usdAmount = Math.round((result.totalAmount / USD_RATE) * 100) / 100;
 
     const request = new checkoutNodeJssdk.orders.OrdersCreateRequest();
     request.prefer("return=representation");
     request.requestBody({
       intent: "CAPTURE",
       purchase_units: [{
-        amount: {
-          currency_code: "USD",
-          value: usdAmount.toString()
-        }
-      }]
+        amount: { currency_code: "USD", value: usdAmount.toString() },
+      }],
     });
 
-    const order = await paypalClient.execute(request);
-    return res.json({ id: order.result.id });
+    const paypalOrder = await paypalClient.execute(request);
 
+    // link the PayPal order id back onto our Order document
+    req.session.pendingOrderId = result.orderId;
+    req.session.pendingOrderCode = result.orderCode;
+
+    return res.json({ id: paypalOrder.result.id, orderCode: result.orderCode });
   } catch (e) {
     console.error("Create order Error:", e);
     return res.status(500).json({ message: "Payment failed" });
@@ -87,48 +56,92 @@ export const createOrder = async (req, res) => {
 };
 
 export const captureOrder = async (req, res) => {
+  const orderId = req.session.pendingOrderId;
+  const orderCode = req.session.pendingOrderCode;
+
   try {
     const { orderID } = req.body;
-
-    if (!orderID) {
-      return res.status(400).json({ message: "Order ID is required" });
+    if (!orderID || !orderId) {
+      return res.status(400).json({ message: "Missing order reference" });
     }
 
     const request = new checkoutNodeJssdk.orders.OrdersCaptureRequest(orderID);
     request.requestBody({});
 
     const capture = await paypalClient.execute(request);
-    const result  = capture.result;
-    const status  = result.status;
+    const result = capture.result;
 
-    if (status !== "COMPLETED") {
-      return res.json({ success: false, message: "Payment not completed" });
+    if (result.status !== "COMPLETED") {
+      await markOrderPaymentFailed(orderId, `PayPal status: ${result.status}`);
+      return res.json({
+        success: false,
+        message: "Payment not completed",
+        orderCode,
+      });
     }
 
     const paymentDetails = result.purchase_units[0].payments.captures[0];
-    const userId         = req.session.user.id || req.session.user._id;
-    const email          = req.session.user.email;
+    const userId = req.session.user.id || req.session.user._id;
 
+    await paymentModel.create({
+      userId,
+      paypalOrderId: orderID,
+      paypalCaptureId: paymentDetails.id,
+      amount: paymentDetails.amount.value,
+      currency: paymentDetails.amount.currency_code,
+      paymentStatus: result.status,
+      payerEmail: req.session.user.email,
+      payerName: result.payer.name.given_name,
+    });
 
-    const newOrder = new paymentModel({   
-  userId,
-  paypalOrderId:   orderID,
-  paypalCaptureId: paymentDetails.id,
-  amount:          paymentDetails.amount.value,
-  currency:        paymentDetails.amount.currency_code,
-  paymentStatus:   status,
-  payerEmail:      email,
-  payerName:       result.payer.name.given_name
-});
+    await markOrderPaid(orderId, paymentDetails.id);
+    await cartModel.updateOne({ userId }, { $set: { items: [] } });
 
+    delete req.session.pendingOrderId;
+    delete req.session.pendingOrderCode;
 
-    
-    await newOrder.save();
-
-    return res.json({ success: true, status: "COMPLETED" });
-
+    return res.json({
+      success: true,
+      status: "COMPLETED",
+      redirect: `/checkout/order-success/${orderCode}`,
+    });
   } catch (error) {
     console.error("Capture Error:", error);
-    return res.status(500).json({ message: "Payment failed" });
+    if (orderId) await markOrderPaymentFailed(orderId, error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Payment failed",
+      orderCode,
+    });
+  }
+};
+
+/* ── RETRY: re-attempt payment against the same failed Order ── */
+export const retryCreateOrder = async (req, res) => {
+  try {
+    const userId = req.session.user.id || req.session.user._id;
+    const { orderCode } = req.params;
+
+    const check = await getRetryableOrder(userId, orderCode);
+    if (!check.success) return res.status(400).json({ message: check.message });
+
+    const usdAmount = Math.round((check.order.totalAmount / USD_RATE) * 100) / 100;
+
+    const request = new checkoutNodeJssdk.orders.OrdersCreateRequest();
+    request.prefer("return=representation");
+    request.requestBody({
+      intent: "CAPTURE",
+      purchase_units: [{ amount: { currency_code: "USD", value: usdAmount.toString() } }],
+    });
+
+    const paypalOrder = await paypalClient.execute(request);
+
+    req.session.pendingOrderId = check.order._id;
+    req.session.pendingOrderCode = check.order.orderCode;
+
+    return res.json({ id: paypalOrder.result.id });
+  } catch (e) {
+    console.error("Retry create order error:", e);
+    return res.status(500).json({ message: "Could not start retry payment" });
   }
 };

@@ -284,3 +284,13 @@ export const getProductDetailData = async (productId) => {
     relatedProducts,
   };
 };
+
+
+
+
+
+
+
+
+
+

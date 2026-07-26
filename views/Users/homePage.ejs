@@ -4,6 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="/js/blockedUserGuard.js"></script>
+    <!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
@@ -138,6 +141,194 @@
         }
         .vm-color-swatch.selected { border-color: #1152d4; }
         .vm-color-swatch .swatch-inner { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); }
+
+        /* ---- Navbar refinements ---- */
+
+        header.site-header {
+            transition: box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+        }
+
+        header.site-header.scrolled {
+            box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.35);
+            border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        /* Logo */
+        .brand-mark {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-mark .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 500;
+            filter: drop-shadow(0 0 10px rgba(17, 82, 212, 0.45));
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .brand-mark:hover .material-symbols-outlined {
+            transform: rotate(20deg) scale(1.08);
+        }
+
+        .brand-mark .brand-name {
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            background: linear-gradient(90deg, currentColor 60%, #1152d4 140%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            transition: color 0.2s;
+        }
+
+        /* Nav links with sliding underline */
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px;
+            color: inherit;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 2px;
+            width: 0%;
+            background: #1152d4;
+            border-radius: 999px;
+            transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .nav-link.active {
+            color: #1152d4;
+        }
+
+        /* Icon buttons */
+        .icon-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            transition: background-color 0.2s ease, transform 0.15s ease, color 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(17, 82, 212, 0.1);
+            color: #1152d4;
+            transform: translateY(-1px);
+        }
+
+        .icon-btn:active {
+            transform: translateY(0) scale(0.94);
+        }
+
+        .cart-badge {
+            box-shadow: 0 0 0 2px var(--badge-ring, #f6f6f8);
+        }
+        .dark .cart-badge {
+            --badge-ring: #101622;
+        }
+
+        /* Avatar */
+        .avatar-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(17, 82, 212, 0.16), rgba(17, 82, 212, 0.04));
+            border: 1px solid rgba(17, 82, 212, 0.25);
+            transition: border-color 0.2s ease, transform 0.15s ease;
+        }
+        .avatar-btn:hover {
+            border-color: #1152d4;
+            transform: translateY(-1px);
+        }
+
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+        }
+
+        .mobile-nav {
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 24px 20px;
+            border-top: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        .mobile-nav.open {
+            display: flex;
+        }
+
+        .mobile-nav a {
+            padding: 12px 4px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .mobile-nav a:hover {
+            background: rgba(17, 82, 212, 0.08);
+            color: #1152d4;
+        }
+
+        .header-icons .hide-on-mobile {
+            display: flex;
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-nav-item .material-symbols-outlined {
+            font-size: 20px;
+            color: #1152d4;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+            .desktop-search {
+                display: none;
+            }
+            .header-icons {
+                gap: 4px;
+            }
+            .header-icons .hide-on-mobile {
+                display: none;
+            }
+            .icon-btn {
+                width: 38px;
+                height: 38px;
+            }
+            .brand-mark .material-symbols-outlined {
+                font-size: 26px !important;
+            }
+            .brand-mark .brand-name {
+                font-size: 1.125rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .brand-mark .brand-name {
+                display: none;
+            }
+        }
     </style>
   <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
@@ -146,24 +337,23 @@
 
     <!-- Header -->
     <header
-        class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-12">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-3xl">diamond</span>
-                    <a href="/homePage"
-                        class="text-2xl font-bold tracking-tighter text-slate-900 dark:text-white uppercase hover:text-gray-500 transition">
-                        Luxe
-                    </a>
-                </div>
-                <nav class="hidden md:flex items-center gap-8">
-                    <a class="text-sm font-medium hover:text-primary transition-colors"
-                        href="/product-listing">Collections</a>
+        id="site-header"
+        class="site-header sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between gap-3 md:gap-6">
 
+            <div class="flex items-center gap-12">
+                <a href="/homePage" class="brand-mark">
+                    <span class="material-symbols-outlined text-primary text-3xl">diamond</span>
+                    <span class="brand-name text-2xl tracking-tighter text-slate-900 dark:text-white uppercase">
+                        Luxe
+                    </span>
+                </a>
+                <nav class="hidden md:flex items-center gap-8 text-sm">
+                    <a class="nav-link active" href="/product-listing">Collections</a>
                 </nav>
             </div>
 
-            <form method="GET" action="/homePage" class="search-wrap relative flex items-center"
+            <form method="GET" action="/homePage" class="search-wrap desktop-search relative flex items-center"
                 onsubmit="const i=this.querySelector('[name=search]'); i.value=i.value.trim();">
                 <span class="material-symbols-outlined ic-search">search</span>
                 <input name="search" type="text" placeholder="Search products..." value="<%= searchQuery || '' %>" />
@@ -172,39 +362,62 @@
                 </button>
             </form>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1 md:gap-2 header-icons">
 
-                <a href="/wishlist">
-                    <button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                        <span class="material-symbols-outlined">favorite</span>
-                    </button>
+                <a href="/wishlist" class="icon-btn hide-on-mobile" aria-label="Wishlist">
+                    <span class="material-symbols-outlined">favorite</span>
                 </a>
 
-                <a href="/cart"
-                    class="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
-                    <span class="material-symbols-outlined msym">shopping_cart</span>
+                <a href="/cart" class="icon-btn" aria-label="Cart">
+                    <span class="material-symbols-outlined">shopping_cart</span>
                     <% if (locals.cart> 0) { %>
                         <span
-                            class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                            class="cart-badge absolute top-0 right-0 w-5 h-5 bg-primary text-white text-[11px] font-bold rounded-full flex items-center justify-center">
                             <%= locals.cart %>
                         </span>
                         <% } %>
                 </a>
 
-                <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                    <a href="/profile">
-                        <span class="material-symbols-outlined text-slate-500">person</span>
-                    </a>
-                </div>
+                <a href="/profile" class="avatar-btn hide-on-mobile" aria-label="Profile">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 20px;">person</span>
+                </a>
+
+                <button type="button" class="mobile-menu-btn icon-btn" id="mobile-menu-toggle" aria-label="Menu" aria-expanded="false">
+                    <span class="material-symbols-outlined" id="mobile-menu-icon">menu</span>
+                </button>
             </div>
         </div>
+
+        <!-- Mobile search + nav -->
+        <div class="mobile-nav" id="mobile-nav">
+            <form method="GET" action="/homePage" class="search-wrap relative flex items-center mb-3"
+                onsubmit="const i=this.querySelector('[name=search]'); i.value=i.value.trim();">
+                <span class="material-symbols-outlined ic-search">search</span>
+                <input name="search" type="text" placeholder="Search products..." value="<%= searchQuery || '' %>" style="width: 100%;" />
+                <button type="submit" aria-label="Search">
+                    <span class="material-symbols-outlined" style="font-size:16px; color:#fff;">arrow_forward</span>
+                </button>
+            </form>
+            <a href="/product-listing" class="mobile-nav-item">
+                <span class="material-symbols-outlined">grid_view</span>
+                Collections
+            </a>
+            <a href="/wishlist" class="mobile-nav-item">
+                <span class="material-symbols-outlined">favorite</span>
+                Wishlist
+            </a>
+            <a href="/profile" class="mobile-nav-item">
+                <span class="material-symbols-outlined">person</span>
+                Profile
+            </a>
         </div>
     </header>
 
     <main>
 
         <!-- Hero Section -->
-        <section class="relative w-full h-[85vh] overflow-hidden">
+        <!-- <section class="relative w-full h-[85vh] overflow-hidden">
+
             <div class="absolute inset-0 bg-cover bg-center"
                 style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAJtx5iykZ8DNnG4JOd-R63qiKb68-RxlTSQX0QOls5TgddIkRvoktGm2jTTYDQWbOI_iBKAWkLLxsIlHxE3VQ35E53IOoBpgkxyz-XmUqYOEuBPsLVhqgZ8cv_y4VIZLEDejPHScxDSwxl4CRDjRL_CbbOSSXEilDLCRrU2bUlKDT-ihr5VfUFI84Qg9hMUhD_VhhSWhe8bA4dLoHxkmt3EKtg9KFEdTcBL6metIaPBtOSIusleR1KG7jHBqWnWJ0WERSndazUH_MF');">
                 <div
@@ -227,7 +440,138 @@
                     </a>
                 </div>
             </div>
-        </section>
+        </section> -->
+
+
+
+
+<!-- Hero Section (6 Slideshow) -->
+<section class="relative w-full h-[85vh] overflow-hidden">
+    <div class="swiper myHeroSwiper w-full h-full">
+        <div class="swiper-wrapper">
+            
+            <!-- Slide 1 -->
+            <div class="swiper-slide relative w-full h-full">
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070');">
+                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                </div>
+                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                    <div class="max-w-2xl">
+                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Summer Editorial 2026</span>
+                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Elevated Essentials</h2>
+                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Experience the pinnacle of modern luxury with our meticulously crafted seasonal collection.</p>
+                        <a href="/product-listing">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Shop Now</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="swiper-slide relative w-full h-full">
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070');">
+                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                </div>
+                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                    <div class="max-w-2xl">
+                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Exclusive Tailoring</span>
+                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Timeless Suits</h2>
+                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Refine your wardrobe with precision tailoring designed for the modern gentleman.</p>
+                        <a href="/product-listing">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Explore Suits</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="swiper-slide relative w-full h-full">
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2071');">
+                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                </div>
+                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                    <div class="max-w-2xl">
+                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">New Season Drop</span>
+                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Street Luxury</h2>
+                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Unmatched comfort meets contemporary fashion in our newest streetwear arrivals.</p>
+                        <a href="/product-listing">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">View Collection</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="swiper-slide relative w-full h-full">
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=2070');">
+                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                </div>
+                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                    <div class="max-w-2xl">
+                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Handcrafted Goods</span>
+                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Pure Quality</h2>
+                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Sustainable materials crafted into iconic everyday wear that lasts forever.</p>
+                        <a href="/product-listing">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Discover Quality</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5 -->
+            <div class="swiper-slide relative w-full h-full">
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=2070');">
+                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                </div>
+                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                    <div class="max-w-2xl">
+                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Limited Edition</span>
+                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Urban Elegance</h2>
+                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Stand out with bold designs crafted for those who define trends, not follow them.</p>
+                        <a href="/product-listing">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Shop Limited</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6 -->
+            <div class="swiper-slide relative w-full h-full">
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070');">
+                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                </div>
+                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                    <div class="max-w-2xl">
+                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Special Offer</span>
+                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Autumn Sale</h2>
+                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Up to 40% off on selected premium collections. Limited time only.</p>
+                        <a href="/product-listing">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Claim Offer</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Arrows & Pagination -->
+        <div class="swiper-button-next text-white hover:text-primary transition"></div>
+        <div class="swiper-button-prev text-white hover:text-primary transition"></div>
+        <div class="swiper-pagination"></div>
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
 
         <!-- Popular Products -->
         <section class="py-24 max-w-7xl mx-auto px-6">
@@ -475,6 +819,55 @@
     </div>
 
     <script>
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const heroSwiper = new Swiper('.myHeroSwiper', {
+        loop: true,
+        autoplay: {
+            delay: 3500, 
+            disableOnInteraction: false,
+        },
+        effect: 'fade',
+        fadeEffect: {
+            crossFade: true
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+    });
+});
+
+// ── Header: shadow on scroll ──────────────────────────
+(function () {
+    const header = document.getElementById('site-header');
+    const onScroll = () => {
+        if (window.scrollY > 8) header.classList.add('scrolled');
+        else header.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+})();
+
+// ── Header: mobile menu toggle ────────────────────────
+(function () {
+    const btn = document.getElementById('mobile-menu-toggle');
+    const menu = document.getElementById('mobile-nav');
+    const icon = document.getElementById('mobile-menu-icon');
+    if (!btn || !menu) return;
+    btn.addEventListener('click', () => {
+        const open = menu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        icon.textContent = open ? 'close' : 'menu';
+    });
+})();
+
+
         // ── Variant selection modal ──────────────────────────
         let vmState = { variants: [], selectedColor: null, selectedVariant: null, productId: null, wishlistId: null, cardEl: null };
 
@@ -686,6 +1079,8 @@
         });
     </script>
 
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </body>
 
 </html>
