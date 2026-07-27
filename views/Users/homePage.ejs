@@ -38,6 +38,14 @@
         }
     </script>
     <style>
+        /* ============ GLOBAL MOBILE FIX ============ */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        * { box-sizing: border-box; }
+        img, svg { max-width: 100%; }
+
         body {
             font-family: 'Manrope', sans-serif;
         }
@@ -153,163 +161,155 @@
             border-color: rgba(148, 163, 184, 0.25);
         }
 
-        /* Logo */
-        /* .brand-mark {
+        /* ---- Animated Logo (Puzzle Assembly) ---- */
+        .brand-mark {
             position: relative;
             display: flex;
             align-items: center;
             gap: 10px;
+            opacity: 0;
+            animation: logoEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        .brand-mark .material-symbols-outlined {
+        @keyframes logoEntrance {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Puzzle container */
+        .diamond-puzzle {
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+
+        .diamond-puzzle .piece {
+            position: absolute;
+            inset: 0;
+            font-size: 30px;
+            line-height: 30px;
+            color: #1152d4;
             font-variation-settings: 'FILL' 1, 'wght' 500;
-            filter: drop-shadow(0 0 10px rgba(17, 82, 212, 0.45));
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            filter: drop-shadow(0 0 6px rgba(17, 82, 212, 0.4));
         }
 
-        .brand-mark:hover .material-symbols-outlined {
-            transform: rotate(20deg) scale(1.08);
+        /* Each piece = one quadrant of the glyph */
+        .piece-1 { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
+        .piece-2 { clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%); }
+        .piece-3 { clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%); }
+        .piece-4 { clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%); }
+
+        /* Ambient puzzle-assemble loop */
+        .piece-1 { animation: puzzle1 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+        .piece-2 { animation: puzzle2 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+        .piece-3 { animation: puzzle3 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+        .piece-4 { animation: puzzle4 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+
+        @keyframes puzzle1 {
+            0%, 100% { transform: translate(-10px, -10px) rotate(-25deg); opacity: 0.4; }
+            35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+        }
+        @keyframes puzzle2 {
+            0%, 100% { transform: translate(10px, -10px) rotate(25deg); opacity: 0.4; }
+            35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+        }
+        @keyframes puzzle3 {
+            0%, 100% { transform: translate(-10px, 10px) rotate(25deg); opacity: 0.4; }
+            35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+        }
+        @keyframes puzzle4 {
+            0%, 100% { transform: translate(10px, 10px) rotate(-25deg); opacity: 0.4; }
+            35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
         }
 
-        .brand-mark .brand-name {
+        /* Snappy "solve" burst on hover */
+        .brand-mark:hover .piece {
+            animation-play-state: paused;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+        }
+        .brand-mark:hover .piece-1 { transform: translate(-6px, -6px) rotate(-15deg); }
+        .brand-mark:hover .piece-2 { transform: translate(6px, -6px) rotate(15deg); }
+        .brand-mark:hover .piece-3 { transform: translate(-6px, 6px) rotate(15deg); }
+        .brand-mark:hover .piece-4 { transform: translate(6px, 6px) rotate(-15deg); }
+
+        .brand-mark:hover .diamond-puzzle {
+            animation: solveSnap 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+        }
+        @keyframes solveSnap {
+            to { filter: drop-shadow(0 0 12px rgba(17, 82, 212, 0.7)); }
+        }
+        .brand-mark:hover .piece-1,
+        .brand-mark:hover .piece-2,
+        .brand-mark:hover .piece-3,
+        .brand-mark:hover .piece-4 {
+            animation: none;
+            transition-delay: 0.15s;
+        }
+        .brand-mark:hover .piece-1 { transition-property: transform; }
+        .brand-mark:not(:hover) .piece { transition: none; }
+
+        /* Actual re-snap to center when mouse leaves the burst */
+        .brand-mark:hover .diamond-puzzle:hover .piece,
+        .brand-mark:active .piece {
+            transform: translate(0, 0) rotate(0deg) !important;
+        }
+
+        /* Shimmer text */
+        .brand-mark .brand-name,
+        .logo-text {
             font-weight: 800;
             letter-spacing: 0.06em;
-            background: linear-gradient(90deg, currentColor 60%, #1152d4 140%);
+            background: linear-gradient(
+                100deg,
+                currentColor 30%,
+                #1152d4 45%,
+                #6ea0ff 50%,
+                #1152d4 55%,
+                currentColor 70%
+            );
+            background-size: 250% 100%;
+            background-position: 100% 0;
             -webkit-background-clip: text;
             background-clip: text;
-            transition: color 0.2s;
-        } */
+            -webkit-text-fill-color: transparent;
+            animation: shimmerSweep 4s ease-in-out infinite;
+        }
 
+        @keyframes shimmerSweep {
+            0%   { background-position: 160% 0; }
+            50%  { background-position: -60% 0; }
+            100% { background-position: -60% 0; }
+        }
 
-     /* ---- Animated Logo (Puzzle Assembly) ---- */
-.brand-mark {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    opacity: 0;
-    animation: logoEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
+        .brand-mark:hover .brand-name,
+        .logo-link:hover .logo-text {
+            animation-duration: 1.2s;
+        }
 
-@keyframes logoEntrance {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
+        .logo-link {
+            opacity: 0;
+            animation: logoEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .logo-link:hover .piece {
+            animation: none !important;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+        }
+        .logo-link:hover .piece-1 { transform: translate(-6px, -6px) rotate(-15deg); }
+        .logo-link:hover .piece-2 { transform: translate(6px, -6px) rotate(15deg); }
+        .logo-link:hover .piece-3 { transform: translate(-6px, 6px) rotate(15deg); }
+        .logo-link:hover .piece-4 { transform: translate(6px, 6px) rotate(-15deg); }
+        .logo-link:hover .diamond-puzzle:hover .piece,
+        .logo-link:active .piece {
+            transform: translate(0, 0) rotate(0deg) !important;
+            transition-delay: 0.25s !important;
+        }
 
-/* Puzzle container */
-.diamond-puzzle {
-    position: relative;
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    flex-shrink: 0;
-}
-
-.diamond-puzzle .piece {
-    position: absolute;
-    inset: 0;
-    font-size: 30px;
-    line-height: 30px;
-    color: #1152d4;
-    font-variation-settings: 'FILL' 1, 'wght' 500;
-    filter: drop-shadow(0 0 6px rgba(17, 82, 212, 0.4));
-}
-
-/* Each piece = one quadrant of the glyph */
-.piece-1 { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
-.piece-2 { clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%); }
-.piece-3 { clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%); }
-.piece-4 { clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%); }
-
-/* Ambient puzzle-assemble loop */
-.piece-1 { animation: puzzle1 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-.piece-2 { animation: puzzle2 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-.piece-3 { animation: puzzle3 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-.piece-4 { animation: puzzle4 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-
-@keyframes puzzle1 {
-    0%, 100% { transform: translate(-10px, -10px) rotate(-25deg); opacity: 0.4; }
-    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-}
-@keyframes puzzle2 {
-    0%, 100% { transform: translate(10px, -10px) rotate(25deg); opacity: 0.4; }
-    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-}
-@keyframes puzzle3 {
-    0%, 100% { transform: translate(-10px, 10px) rotate(25deg); opacity: 0.4; }
-    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-}
-@keyframes puzzle4 {
-    0%, 100% { transform: translate(10px, 10px) rotate(-25deg); opacity: 0.4; }
-    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-}
-
-/* Snappy "solve" burst on hover */
-.brand-mark:hover .piece {
-    animation-play-state: paused;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
-}
-.brand-mark:hover .piece-1 { transform: translate(-6px, -6px) rotate(-15deg); }
-.brand-mark:hover .piece-2 { transform: translate(6px, -6px) rotate(15deg); }
-.brand-mark:hover .piece-3 { transform: translate(-6px, 6px) rotate(15deg); }
-.brand-mark:hover .piece-4 { transform: translate(6px, 6px) rotate(-15deg); }
-
-.brand-mark:hover .diamond-puzzle {
-    animation: solveSnap 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
-}
-@keyframes solveSnap {
-    to { filter: drop-shadow(0 0 12px rgba(17, 82, 212, 0.7)); }
-}
-.brand-mark:hover .piece-1,
-.brand-mark:hover .piece-2,
-.brand-mark:hover .piece-3,
-.brand-mark:hover .piece-4 {
-    animation: none;
-    transition-delay: 0.15s;
-}
-.brand-mark:hover .piece-1 { transition-property: transform; }
-.brand-mark:not(:hover) .piece { transition: none; }
-
-/* Actual re-snap to center when mouse leaves the burst */
-.brand-mark:hover .diamond-puzzle:hover .piece,
-.brand-mark:active .piece {
-    transform: translate(0, 0) rotate(0deg) !important;
-}
-
-/* Shimmer text stays the same */
-.brand-mark .brand-name {
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    background: linear-gradient(
-        100deg,
-        currentColor 30%,
-        #1152d4 45%,
-        #6ea0ff 50%,
-        #1152d4 55%,
-        currentColor 70%
-    );
-    background-size: 250% 100%;
-    background-position: 100% 0;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmerSweep 4s ease-in-out infinite;
-}
-
-@keyframes shimmerSweep {
-    0%   { background-position: 160% 0; }
-    50%  { background-position: -60% 0; }
-    100% { background-position: -60% 0; }
-}
-
-.brand-mark:hover .brand-name {
-    animation-duration: 1.2s;
-}
-
-@media (max-width: 768px) {
-    .diamond-puzzle { width: 26px; height: 26px; }
-    .diamond-puzzle .piece { font-size: 26px; line-height: 26px; }
-}
+        @media (max-width: 768px) {
+            .diamond-puzzle { width: 26px; height: 26px; }
+            .diamond-puzzle .piece { font-size: 26px; line-height: 26px; }
+        }
 
         /* Nav links with sliding underline */
         .nav-link {
@@ -430,6 +430,25 @@
             color: #1152d4;
         }
 
+        /* ============ MOBILE SEARCH TOGGLE ============ */
+        .mobile-search-btn { display: none; }
+
+        .mobile-search-bar {
+            display: none;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.25s ease;
+            opacity: 0;
+            padding: 0 16px;
+        }
+        .mobile-search-bar.open {
+            max-height: 70px;
+            opacity: 1;
+            padding: 8px 16px 14px;
+        }
+        .mobile-search-bar .search-wrap { width: 100%; }
+        .mobile-search-bar .search-wrap input { width: 100%; }
+
         @media (max-width: 768px) {
             .mobile-menu-btn {
                 display: flex;
@@ -438,14 +457,14 @@
                 display: none;
             }
             .header-icons {
-                gap: 4px;
+                gap: 2px;
             }
             .header-icons .hide-on-mobile {
                 display: none;
             }
             .icon-btn {
-                width: 38px;
-                height: 38px;
+                width: 36px;
+                height: 36px;
             }
             .brand-mark .material-symbols-outlined {
                 font-size: 26px !important;
@@ -453,12 +472,91 @@
             .brand-mark .brand-name {
                 font-size: 1.125rem;
             }
+            .mobile-search-btn { display: flex; }
+            .mobile-search-bar { display: block; }
         }
 
         @media (max-width: 380px) {
             .brand-mark .brand-name {
                 display: none;
             }
+        }
+
+        /* ============ HERO SECTION — MOBILE ============ */
+        @media (max-width: 768px) {
+            #hero-section { height: 78vh; }
+
+            .swiper-slide .flex.flex-col.justify-center.items-start {
+                align-items: center;
+                text-align: center;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .swiper-slide .max-w-2xl { max-width: 100%; }
+
+            .swiper-slide span.text-primary.font-bold {
+                font-size: 11px !important;
+                margin-bottom: 10px !important;
+                letter-spacing: 0.15em !important;
+            }
+
+            .swiper-slide h2 {
+                font-size: 2.1rem !important;
+                line-height: 1.2 !important;
+                margin-bottom: 14px !important;
+            }
+
+            .swiper-slide p {
+                font-size: 0.9rem !important;
+                line-height: 1.55 !important;
+                margin-bottom: 22px !important;
+                max-width: 100% !important;
+            }
+
+            .swiper-slide button {
+                padding: 12px 28px !important;
+                font-size: 14px !important;
+            }
+
+            .swiper-button-next, .swiper-button-prev { display: none; }
+        }
+
+        @media (max-width: 480px) {
+            #hero-section { height: 72vh; }
+            .swiper-slide h2 { font-size: 1.7rem !important; }
+            .swiper-slide p { font-size: 0.85rem !important; }
+        }
+
+        /* ============ POPULAR PRODUCTS — MOBILE ============ */
+        @media (max-width: 768px) {
+            section.py-24 {
+                padding-top: 48px !important;
+                padding-bottom: 48px !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+            }
+
+            section.py-24 .flex.items-end.justify-between {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                margin-bottom: 24px !important;
+            }
+
+            section.py-24 h3.text-3xl { font-size: 1.5rem !important; }
+
+            .grid.grid-cols-2.md\:grid-cols-4 { gap: 12px !important; }
+        }
+
+        /* ============ FOOTER — MOBILE ============ */
+        @media (max-width: 768px) {
+            footer.pt-20 {
+                padding-top: 48px !important;
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+            footer .grid.grid-cols-1 { gap: 32px !important; }
         }
     </style>
   <link rel="stylesheet" href="/css/navigation-consistency.css" />
@@ -475,11 +573,11 @@
             <div class="flex items-center gap-12">
                 <a href="/homePage" class="brand-mark">
                     <span class="diamond-puzzle" aria-hidden="true">
-    <span class="material-symbols-outlined piece piece-1">diamond</span>
-    <span class="material-symbols-outlined piece piece-2">diamond</span>
-    <span class="material-symbols-outlined piece piece-3">diamond</span>
-    <span class="material-symbols-outlined piece piece-4">diamond</span>
-</span>
+                        <span class="material-symbols-outlined piece piece-1">diamond</span>
+                        <span class="material-symbols-outlined piece piece-2">diamond</span>
+                        <span class="material-symbols-outlined piece piece-3">diamond</span>
+                        <span class="material-symbols-outlined piece piece-4">diamond</span>
+                    </span>
                     <span class="brand-name text-2xl tracking-tighter text-slate-900 dark:text-white uppercase">
                         Luxe
                     </span>
@@ -504,6 +602,10 @@
                     <span class="material-symbols-outlined">favorite</span>
                 </a>
 
+                <button type="button" class="mobile-search-btn icon-btn" id="mobile-search-toggle" aria-label="Search" aria-expanded="false">
+                    <span class="material-symbols-outlined" id="mobile-search-icon">search</span>
+                </button>
+
                 <a href="/cart" class="icon-btn" aria-label="Cart">
                     <span class="material-symbols-outlined">shopping_cart</span>
                     <% if (locals.cart> 0) { %>
@@ -524,16 +626,20 @@
             </div>
         </div>
 
-        <!-- Mobile search + nav -->
-        <div class="mobile-nav" id="mobile-nav">
-            <form method="GET" action="/homePage" class="search-wrap relative flex items-center mb-3"
+        <!-- Expandable mobile search bar -->
+        <div class="mobile-search-bar" id="mobile-search-bar">
+            <form method="GET" action="/homePage" class="search-wrap relative flex items-center"
                 onsubmit="const i=this.querySelector('[name=search]'); i.value=i.value.trim();">
                 <span class="material-symbols-outlined ic-search">search</span>
-                <input name="search" type="text" placeholder="Search products..." value="<%= searchQuery || '' %>" style="width: 100%;" />
+                <input name="search" type="text" id="mobile-search-input" placeholder="Search products..." value="<%= searchQuery || '' %>" />
                 <button type="submit" aria-label="Search">
                     <span class="material-symbols-outlined" style="font-size:16px; color:#fff;">arrow_forward</span>
                 </button>
             </form>
+        </div>
+
+        <!-- Mobile nav -->
+        <div class="mobile-nav" id="mobile-nav">
             <a href="/product-listing" class="mobile-nav-item">
                 <span class="material-symbols-outlined">grid_view</span>
                 Collections
@@ -551,163 +657,121 @@
 
     <main>
 
-        <!-- Hero Section -->
-        <!-- <section class="relative w-full h-[85vh] overflow-hidden">
+        <!-- Hero Section (6 Slideshow) -->
+        <section id="hero-section" class="relative w-full h-[85vh] overflow-hidden">
+            <div class="swiper myHeroSwiper w-full h-full">
+                <div class="swiper-wrapper">
 
-            <div class="absolute inset-0 bg-cover bg-center"
-                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAJtx5iykZ8DNnG4JOd-R63qiKb68-RxlTSQX0QOls5TgddIkRvoktGm2jTTYDQWbOI_iBKAWkLLxsIlHxE3VQ35E53IOoBpgkxyz-XmUqYOEuBPsLVhqgZ8cv_y4VIZLEDejPHScxDSwxl4CRDjRL_CbbOSSXEilDLCRrU2bUlKDT-ihr5VfUFI84Qg9hMUhD_VhhSWhe8bA4dLoHxkmt3EKtg9KFEdTcBL6metIaPBtOSIusleR1KG7jHBqWnWJ0WERSndazUH_MF');">
-                <div
-                    class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent">
-                </div>
-            </div>
-            <div class="relative h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
-                <div class="max-w-2xl">
-                    <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Summer Editorial
-                        2024</span>
-                    <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Elevated
-                        Essentials</h2>
-                    <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Experience the pinnacle of modern
-                        luxury with our meticulously crafted seasonal collection.</p>
-                    <a href="/product-listing">
-                        <button
-                            class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
-                            Shop Now
-                        </button>
-                    </a>
-                </div>
-            </div>
-        </section> -->
-
-
-
-
-<!-- Hero Section (6 Slideshow) -->
-<section class="relative w-full h-[85vh] overflow-hidden">
-    <div class="swiper myHeroSwiper w-full h-full">
-        <div class="swiper-wrapper">
-            
-            <!-- Slide 1 -->
-            <div class="swiper-slide relative w-full h-full">
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070');">
-                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
-                </div>
-                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
-                    <div class="max-w-2xl">
-                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Summer Editorial 2026</span>
-                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Elevated Essentials</h2>
-                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Experience the pinnacle of modern luxury with our meticulously crafted seasonal collection.</p>
-                        <a href="/product-listing">
-                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Shop Now</button>
-                        </a>
+                    <!-- Slide 1 -->
+                    <div class="swiper-slide relative w-full h-full">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070');">
+                            <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                        </div>
+                        <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                            <div class="max-w-2xl">
+                                <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Summer Editorial 2026</span>
+                                <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Elevated Essentials</h2>
+                                <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Experience the pinnacle of modern luxury with our meticulously crafted seasonal collection.</p>
+                                <a href="/product-listing">
+                                    <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Shop Now</button>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Slide 2 -->
-            <div class="swiper-slide relative w-full h-full">
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070');">
-                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
-                </div>
-                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
-                    <div class="max-w-2xl">
-                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Exclusive Tailoring</span>
-                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Timeless Suits</h2>
-                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Refine your wardrobe with precision tailoring designed for the modern gentleman.</p>
-                        <a href="/product-listing">
-                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Explore Suits</button>
-                        </a>
+                    <!-- Slide 2 -->
+                    <div class="swiper-slide relative w-full h-full">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070');">
+                            <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                        </div>
+                        <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                            <div class="max-w-2xl">
+                                <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Exclusive Tailoring</span>
+                                <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Timeless Suits</h2>
+                                <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Refine your wardrobe with precision tailoring designed for the modern gentleman.</p>
+                                <a href="/product-listing">
+                                    <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Explore Suits</button>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Slide 3 -->
-            <div class="swiper-slide relative w-full h-full">
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2071');">
-                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
-                </div>
-                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
-                    <div class="max-w-2xl">
-                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">New Season Drop</span>
-                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Street Luxury</h2>
-                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Unmatched comfort meets contemporary fashion in our newest streetwear arrivals.</p>
-                        <a href="/product-listing">
-                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">View Collection</button>
-                        </a>
+                    <!-- Slide 3 -->
+                    <div class="swiper-slide relative w-full h-full">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2071');">
+                            <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                        </div>
+                        <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                            <div class="max-w-2xl">
+                                <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">New Season Drop</span>
+                                <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Street Luxury</h2>
+                                <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Unmatched comfort meets contemporary fashion in our newest streetwear arrivals.</p>
+                                <a href="/product-listing">
+                                    <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">View Collection</button>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Slide 4 -->
-            <div class="swiper-slide relative w-full h-full">
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=2070');">
-                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
-                </div>
-                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
-                    <div class="max-w-2xl">
-                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Handcrafted Goods</span>
-                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Pure Quality</h2>
-                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Sustainable materials crafted into iconic everyday wear that lasts forever.</p>
-                        <a href="/product-listing">
-                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Discover Quality</button>
-                        </a>
+                    <!-- Slide 4 -->
+                    <div class="swiper-slide relative w-full h-full">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=2070');">
+                            <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                        </div>
+                        <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                            <div class="max-w-2xl">
+                                <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Handcrafted Goods</span>
+                                <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Pure Quality</h2>
+                                <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Sustainable materials crafted into iconic everyday wear that lasts forever.</p>
+                                <a href="/product-listing">
+                                    <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Discover Quality</button>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Slide 5 -->
-            <div class="swiper-slide relative w-full h-full">
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=2070');">
-                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
-                </div>
-                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
-                    <div class="max-w-2xl">
-                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Limited Edition</span>
-                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Urban Elegance</h2>
-                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Stand out with bold designs crafted for those who define trends, not follow them.</p>
-                        <a href="/product-listing">
-                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Shop Limited</button>
-                        </a>
+                    <!-- Slide 5 -->
+                    <div class="swiper-slide relative w-full h-full">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=2070');">
+                            <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                        </div>
+                        <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                            <div class="max-w-2xl">
+                                <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Limited Edition</span>
+                                <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Urban Elegance</h2>
+                                <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Stand out with bold designs crafted for those who define trends, not follow them.</p>
+                                <a href="/product-listing">
+                                    <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Shop Limited</button>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Slide 6 -->
-            <div class="swiper-slide relative w-full h-full">
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070');">
-                    <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
-                </div>
-                <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
-                    <div class="max-w-2xl">
-                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Special Offer</span>
-                        <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Autumn Sale</h2>
-                        <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Up to 40% off on selected premium collections. Limited time only.</p>
-                        <a href="/product-listing">
-                            <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Claim Offer</button>
-                        </a>
+                    <!-- Slide 6 -->
+                    <div class="swiper-slide relative w-full h-full">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070');">
+                            <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent"></div>
+                        </div>
+                        <div class="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-start">
+                            <div class="max-w-2xl">
+                                <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Special Offer</span>
+                                <h2 class="text-6xl md:text-8xl font-800 text-white leading-[1.1] mb-6 tracking-tight">Autumn Sale</h2>
+                                <p class="text-xl text-slate-300 mb-10 max-w-lg leading-relaxed">Up to 40% off on selected premium collections. Limited time only.</p>
+                                <a href="/product-listing">
+                                    <button class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105">Claim Offer</button>
+                                </a>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
+
+                <!-- Arrows & Pagination -->
+                <div class="swiper-button-next text-white hover:text-primary transition"></div>
+                <div class="swiper-button-prev text-white hover:text-primary transition"></div>
+                <div class="swiper-pagination"></div>
             </div>
-
-        </div>
-
-        <!-- Arrows & Pagination -->
-        <div class="swiper-button-next text-white hover:text-primary transition"></div>
-        <div class="swiper-button-prev text-white hover:text-primary transition"></div>
-        <div class="swiper-pagination"></div>
-    </div>
-</section>
-
-
-
-
-
-
-
-
-
-
-
-
+        </section>
 
         <!-- Popular Products -->
         <section class="py-24 max-w-7xl mx-auto px-6">
@@ -822,15 +886,15 @@
     <footer class="bg-slate-50 dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 pt-20 pb-10">
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div>
-               <div class="logo-link flex items-center gap-2 text-primary">
-  <span class="diamond-puzzle" aria-hidden="true">
-    <span class="material-symbols-outlined msym piece piece-1">diamond</span>
-    <span class="material-symbols-outlined msym piece piece-2">diamond</span>
-    <span class="material-symbols-outlined msym piece piece-3">diamond</span>
-    <span class="material-symbols-outlined msym piece piece-4">diamond</span>
-  </span>
-  <span class="logo-text text-white text-2xl font-extrabold tracking-tight">LUXE</span>
-</div>
+                <div class="logo-link flex items-center gap-2 text-primary mb-8">
+                    <span class="diamond-puzzle" aria-hidden="true">
+                        <span class="material-symbols-outlined piece piece-1">diamond</span>
+                        <span class="material-symbols-outlined piece piece-2">diamond</span>
+                        <span class="material-symbols-outlined piece piece-3">diamond</span>
+                        <span class="material-symbols-outlined piece piece-4">diamond</span>
+                    </span>
+                    <h2 class="logo-text text-2xl font-800 tracking-tighter text-slate-900 dark:text-white uppercase">Luxe</h2>
+                </div>
                 <p class="text-slate-500 leading-relaxed mb-6">Redefining modern luxury through sustainable practices
                     and timeless design.</p>
                 <div class="flex items-center gap-4">
@@ -1005,6 +1069,42 @@ document.addEventListener("DOMContentLoaded", function () {
         const open = menu.classList.toggle('open');
         btn.setAttribute('aria-expanded', open ? 'true' : 'false');
         icon.textContent = open ? 'close' : 'menu';
+
+        // close search bar if it's open
+        const searchBar = document.getElementById('mobile-search-bar');
+        const searchBtn = document.getElementById('mobile-search-toggle');
+        const searchIcon = document.getElementById('mobile-search-icon');
+        if (searchBar && searchBar.classList.contains('open')) {
+            searchBar.classList.remove('open');
+            searchBtn.setAttribute('aria-expanded', 'false');
+            searchIcon.textContent = 'search';
+        }
+    });
+})();
+
+// ── Header: mobile search toggle ──────────────────────
+(function () {
+    const btn = document.getElementById('mobile-search-toggle');
+    const bar = document.getElementById('mobile-search-bar');
+    const icon = document.getElementById('mobile-search-icon');
+    const input = document.getElementById('mobile-search-input');
+    if (!btn || !bar) return;
+
+    btn.addEventListener('click', () => {
+        const open = bar.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        icon.textContent = open ? 'close' : 'search';
+        if (open) setTimeout(() => input?.focus(), 200);
+
+        // close hamburger menu if it's open
+        const menu = document.getElementById('mobile-nav');
+        const menuBtn = document.getElementById('mobile-menu-toggle');
+        const menuIcon = document.getElementById('mobile-menu-icon');
+        if (menu && menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            menuBtn.setAttribute('aria-expanded', 'false');
+            menuIcon.textContent = 'menu';
+        }
     });
 })();
 

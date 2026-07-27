@@ -177,6 +177,109 @@
           width 0.3s ease,
           background 0.3s ease;
       }
+
+      /* ---- Animated Logo (Puzzle Assembly) ---- */
+.logo-link {
+    opacity: 0;
+    animation: logoEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes logoEntrance {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Puzzle container */
+.diamond-puzzle {
+    position: relative;
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.diamond-puzzle .piece {
+    position: absolute;
+    inset: 0;
+    font-size: 26px;
+    line-height: 26px;
+    color: #1152d4;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    filter: drop-shadow(0 0 6px rgba(17, 82, 212, 0.4));
+}
+
+/* Each piece = one quadrant of the glyph */
+.piece-1 { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
+.piece-2 { clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%); }
+.piece-3 { clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%); }
+.piece-4 { clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%); }
+
+/* Ambient puzzle-assemble loop */
+.piece-1 { animation: puzzle1 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.piece-2 { animation: puzzle2 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.piece-3 { animation: puzzle3 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.piece-4 { animation: puzzle4 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+
+@keyframes puzzle1 {
+    0%, 100% { transform: translate(-8px, -8px) rotate(-25deg); opacity: 0.4; }
+    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+@keyframes puzzle2 {
+    0%, 100% { transform: translate(8px, -8px) rotate(25deg); opacity: 0.4; }
+    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+@keyframes puzzle3 {
+    0%, 100% { transform: translate(-8px, 8px) rotate(25deg); opacity: 0.4; }
+    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+@keyframes puzzle4 {
+    0%, 100% { transform: translate(8px, 8px) rotate(-25deg); opacity: 0.4; }
+    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+
+/* Burst-apart then snap-together on hover */
+.logo-link:hover .piece {
+    animation: none !important;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.logo-link:hover .piece-1 { transform: translate(-6px, -6px) rotate(-15deg); }
+.logo-link:hover .piece-2 { transform: translate(6px, -6px) rotate(15deg); }
+.logo-link:hover .piece-3 { transform: translate(-6px, 6px) rotate(15deg); }
+.logo-link:hover .piece-4 { transform: translate(6px, 6px) rotate(-15deg); }
+
+.logo-link:hover .diamond-puzzle:hover .piece,
+.logo-link:active .piece {
+    transform: translate(0, 0) rotate(0deg) !important;
+    transition-delay: 0.25s !important;
+}
+
+/* Text shimmer */
+.logo-text {
+    background: linear-gradient(
+        100deg,
+        #f1f5f9 30%,
+        #1152d4 45%,
+        #6ea0ff 50%,
+        #1152d4 55%,
+        #f1f5f9 70%
+    );
+    background-size: 250% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmerSweep 4s ease-in-out infinite;
+}
+
+@keyframes shimmerSweep {
+    0%   { background-position: 160% 0; }
+    50%  { background-position: -60% 0; }
+    100% { background-position: -60% 0; }
+}
+
+.logo-link:hover .logo-text {
+    animation-duration: 1.2s;
+}
     </style>
     <link rel="stylesheet" href="/css/navigation-consistency.css" />
 </head>
@@ -197,7 +300,15 @@
         <div
           class="relative z-20 flex flex-col justify-between h-full w-full p-12"
         >
-          <span class="text-2xl font-extrabold tracking-tighter">LUXE</span>
+         <a href="/" class="logo-link flex items-center gap-2">
+  <span class="diamond-puzzle" aria-hidden="true">
+    <span class="material-symbols-outlined piece piece-1">diamond</span>
+    <span class="material-symbols-outlined piece piece-2">diamond</span>
+    <span class="material-symbols-outlined piece piece-3">diamond</span>
+    <span class="material-symbols-outlined piece piece-4">diamond</span>
+  </span>
+  <span class="logo-text text-2xl font-extrabold tracking-tighter">LUXE</span>
+</a>
           <div class="max-w-md">
             <span
               class="text-xs font-bold tracking-[0.3em] text-primary uppercase mb-4 block"
@@ -218,8 +329,16 @@
       >
         <div class="w-full max-w-md space-y-10">
           <div class="lg:hidden flex justify-center mb-8">
-            <span class="text-2xl font-extrabold tracking-tighter">LUXE</span>
-          </div>
+  <a href="/" class="logo-link flex items-center gap-2">
+    <span class="diamond-puzzle" aria-hidden="true">
+      <span class="material-symbols-outlined piece piece-1">diamond</span>
+      <span class="material-symbols-outlined piece piece-2">diamond</span>
+      <span class="material-symbols-outlined piece piece-3">diamond</span>
+      <span class="material-symbols-outlined piece piece-4">diamond</span>
+    </span>
+    <span class="logo-text text-2xl font-extrabold tracking-tighter">LUXE</span>
+  </a>
+</div>
 
           <div class="text-center space-y-2">
             <h1 class="text-4xl font-extrabold tracking-tight text-blue-600">
