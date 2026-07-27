@@ -154,7 +154,7 @@
         }
 
         /* Logo */
-        .brand-mark {
+        /* .brand-mark {
             position: relative;
             display: flex;
             align-items: center;
@@ -178,7 +178,138 @@
             -webkit-background-clip: text;
             background-clip: text;
             transition: color 0.2s;
-        }
+        } */
+
+
+     /* ---- Animated Logo (Puzzle Assembly) ---- */
+.brand-mark {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    animation: logoEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes logoEntrance {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Puzzle container */
+.diamond-puzzle {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.diamond-puzzle .piece {
+    position: absolute;
+    inset: 0;
+    font-size: 30px;
+    line-height: 30px;
+    color: #1152d4;
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+    filter: drop-shadow(0 0 6px rgba(17, 82, 212, 0.4));
+}
+
+/* Each piece = one quadrant of the glyph */
+.piece-1 { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
+.piece-2 { clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%); }
+.piece-3 { clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%); }
+.piece-4 { clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%); }
+
+/* Ambient puzzle-assemble loop */
+.piece-1 { animation: puzzle1 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.piece-2 { animation: puzzle2 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.piece-3 { animation: puzzle3 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.piece-4 { animation: puzzle4 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+
+@keyframes puzzle1 {
+    0%, 100% { transform: translate(-10px, -10px) rotate(-25deg); opacity: 0.4; }
+    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+@keyframes puzzle2 {
+    0%, 100% { transform: translate(10px, -10px) rotate(25deg); opacity: 0.4; }
+    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+@keyframes puzzle3 {
+    0%, 100% { transform: translate(-10px, 10px) rotate(25deg); opacity: 0.4; }
+    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+@keyframes puzzle4 {
+    0%, 100% { transform: translate(10px, 10px) rotate(-25deg); opacity: 0.4; }
+    35%, 65% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+
+/* Snappy "solve" burst on hover */
+.brand-mark:hover .piece {
+    animation-play-state: paused;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.brand-mark:hover .piece-1 { transform: translate(-6px, -6px) rotate(-15deg); }
+.brand-mark:hover .piece-2 { transform: translate(6px, -6px) rotate(15deg); }
+.brand-mark:hover .piece-3 { transform: translate(-6px, 6px) rotate(15deg); }
+.brand-mark:hover .piece-4 { transform: translate(6px, 6px) rotate(-15deg); }
+
+.brand-mark:hover .diamond-puzzle {
+    animation: solveSnap 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+}
+@keyframes solveSnap {
+    to { filter: drop-shadow(0 0 12px rgba(17, 82, 212, 0.7)); }
+}
+.brand-mark:hover .piece-1,
+.brand-mark:hover .piece-2,
+.brand-mark:hover .piece-3,
+.brand-mark:hover .piece-4 {
+    animation: none;
+    transition-delay: 0.15s;
+}
+.brand-mark:hover .piece-1 { transition-property: transform; }
+.brand-mark:not(:hover) .piece { transition: none; }
+
+/* Actual re-snap to center when mouse leaves the burst */
+.brand-mark:hover .diamond-puzzle:hover .piece,
+.brand-mark:active .piece {
+    transform: translate(0, 0) rotate(0deg) !important;
+}
+
+/* Shimmer text stays the same */
+.brand-mark .brand-name {
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    background: linear-gradient(
+        100deg,
+        currentColor 30%,
+        #1152d4 45%,
+        #6ea0ff 50%,
+        #1152d4 55%,
+        currentColor 70%
+    );
+    background-size: 250% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmerSweep 4s ease-in-out infinite;
+}
+
+@keyframes shimmerSweep {
+    0%   { background-position: 160% 0; }
+    50%  { background-position: -60% 0; }
+    100% { background-position: -60% 0; }
+}
+
+.brand-mark:hover .brand-name {
+    animation-duration: 1.2s;
+}
+
+@media (max-width: 768px) {
+    .diamond-puzzle { width: 26px; height: 26px; }
+    .diamond-puzzle .piece { font-size: 26px; line-height: 26px; }
+}
 
         /* Nav links with sliding underline */
         .nav-link {
@@ -343,7 +474,12 @@
 
             <div class="flex items-center gap-12">
                 <a href="/homePage" class="brand-mark">
-                    <span class="material-symbols-outlined text-primary text-3xl">diamond</span>
+                    <span class="diamond-puzzle" aria-hidden="true">
+    <span class="material-symbols-outlined piece piece-1">diamond</span>
+    <span class="material-symbols-outlined piece piece-2">diamond</span>
+    <span class="material-symbols-outlined piece piece-3">diamond</span>
+    <span class="material-symbols-outlined piece piece-4">diamond</span>
+</span>
                     <span class="brand-name text-2xl tracking-tighter text-slate-900 dark:text-white uppercase">
                         Luxe
                     </span>
@@ -686,10 +822,15 @@
     <footer class="bg-slate-50 dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 pt-20 pb-10">
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div>
-                <div class="flex items-center gap-2 mb-8">
-                    <span class="material-symbols-outlined text-primary text-3xl">diamond</span>
-                    <h2 class="text-2xl font-800 tracking-tighter uppercase">Luxe</h2>
-                </div>
+               <div class="logo-link flex items-center gap-2 text-primary">
+  <span class="diamond-puzzle" aria-hidden="true">
+    <span class="material-symbols-outlined msym piece piece-1">diamond</span>
+    <span class="material-symbols-outlined msym piece piece-2">diamond</span>
+    <span class="material-symbols-outlined msym piece piece-3">diamond</span>
+    <span class="material-symbols-outlined msym piece piece-4">diamond</span>
+  </span>
+  <span class="logo-text text-white text-2xl font-extrabold tracking-tight">LUXE</span>
+</div>
                 <p class="text-slate-500 leading-relaxed mb-6">Redefining modern luxury through sustainable practices
                     and timeless design.</p>
                 <div class="flex items-center gap-4">
