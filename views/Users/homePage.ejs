@@ -528,6 +528,178 @@
             .swiper-slide p { font-size: 0.85rem !important; }
         }
 
+        /* ============ HERO — ATTRACTIVE UPGRADE ============ */
+
+        /* Ken Burns slow zoom on background images */
+        .swiper-slide .absolute.inset-0.bg-cover {
+            animation: kenBurns 9s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+        @keyframes kenBurns {
+            0%   { transform: scale(1); }
+            100% { transform: scale(1.12); }
+        }
+
+        /* Richer overlay: darker left, subtle vignette, faint bottom fade for depth */
+        .swiper-slide .absolute.inset-0.bg-cover > .absolute.inset-0 {
+            background:
+                linear-gradient(90deg, rgba(16,22,34,0.88) 0%, rgba(16,22,34,0.5) 45%, rgba(16,22,34,0.05) 75%),
+                linear-gradient(to top, rgba(16,22,34,0.55) 0%, transparent 30%);
+        }
+
+        /* Eyebrow label with animated line */
+        .swiper-slide span.text-primary.font-bold {
+            position: relative;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(14px);
+        }
+        .swiper-slide span.text-primary.font-bold::before {
+            content: "";
+            width: 32px;
+            height: 2px;
+            background: #1152d4;
+            display: inline-block;
+            box-shadow: 0 0 8px rgba(17, 82, 212, 0.8);
+        }
+
+        .swiper-slide h2 {
+            opacity: 0;
+            transform: translateY(24px);
+            text-shadow: 0 4px 30px rgba(0,0,0,0.35);
+        }
+
+        .swiper-slide p {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .swiper-slide .max-w-2xl > a {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+
+        /* Staggered entrance, triggered by .swiper-slide-active */
+        .swiper-slide-active span.text-primary.font-bold {
+            animation: heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.25s forwards;
+        }
+        .swiper-slide-active h2 {
+            animation: heroFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
+        }
+        .swiper-slide-active p {
+            animation: heroFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.55s forwards;
+        }
+        .swiper-slide-active .max-w-2xl > a {
+            animation: heroFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.7s forwards;
+        }
+
+        @keyframes heroFadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CTA button: glow + shine sweep */
+        .swiper-slide .max-w-2xl button {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 30px -6px rgba(17, 82, 212, 0.6);
+        }
+        .swiper-slide .max-w-2xl button::after {
+            content: "";
+            position: absolute;
+            top: 0; left: -75%;
+            width: 50%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.6s ease;
+        }
+        .swiper-slide .max-w-2xl button:hover::after { left: 125%; }
+        .swiper-slide .max-w-2xl button:hover {
+            box-shadow: 0 10px 40px -4px rgba(17, 82, 212, 0.85);
+        }
+
+        /* Custom pagination bullets (pill style) */
+        .swiper-pagination-bullet {
+            width: 8px !important;
+            height: 8px !important;
+            background: rgba(255,255,255,0.5) !important;
+            opacity: 1 !important;
+            transition: all 0.3s ease !important;
+        }
+        .swiper-pagination-bullet-active {
+            width: 26px !important;
+            border-radius: 999px !important;
+            background: #1152d4 !important;
+            box-shadow: 0 0 10px rgba(17, 82, 212, 0.7);
+        }
+
+        /* Nav arrows: glassy circular buttons */
+        .swiper-button-next, .swiper-button-prev {
+            width: 48px !important;
+            height: 48px !important;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 999px;
+            backdrop-filter: blur(6px);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .swiper-button-next:hover, .swiper-button-prev:hover {
+            background: #1152d4;
+            border-color: #1152d4;
+            transform: scale(1.08);
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            font-size: 18px !important;
+            font-weight: 900;
+        }
+
+        /* Scroll cue */
+        .hero-scroll-cue {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.7);
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 600;
+            animation: heroFadeUp 0.8s ease 1s forwards;
+            opacity: 0;
+        }
+        .hero-scroll-cue .scroll-line {
+            width: 1px;
+            height: 28px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-scroll-cue .scroll-line::after {
+            content: "";
+            position: absolute;
+            top: -28px;
+            left: 0;
+            width: 100%;
+            height: 28px;
+            background: #1152d4;
+            animation: scrollDrop 1.8s ease-in-out infinite;
+        }
+        @keyframes scrollDrop {
+            0%   { top: -28px; }
+            60%  { top: 28px; }
+            100% { top: 28px; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-scroll-cue { display: none; }
+        }
+
         /* ============ POPULAR PRODUCTS — MOBILE ============ */
         @media (max-width: 768px) {
             section.py-24 {
@@ -770,6 +942,12 @@
                 <div class="swiper-button-next text-white hover:text-primary transition"></div>
                 <div class="swiper-button-prev text-white hover:text-primary transition"></div>
                 <div class="swiper-pagination"></div>
+            </div>
+
+            <!-- Scroll cue -->
+            <div class="hero-scroll-cue">
+                <span>Scroll</span>
+                <span class="scroll-line"></span>
             </div>
         </section>
 
@@ -1045,6 +1223,19 @@ document.addEventListener("DOMContentLoaded", function () {
             nextEl: '.swiper-button-next',
             prevEl: '.swiper-button-prev',
         },
+        on: {
+            slideChangeTransitionStart(swiper) {
+                // force re-trigger of entrance animations on the incoming slide
+                const activeEl = swiper.slides[swiper.activeIndex];
+                if (!activeEl) return;
+                const animTargets = activeEl.querySelectorAll('span.text-primary.font-bold, h2, p, .max-w-2xl > a');
+                animTargets.forEach(el => {
+                    el.style.animation = 'none';
+                    void el.offsetWidth; // reflow to reset animation
+                    el.style.animation = '';
+                });
+            }
+        }
     });
 });
 

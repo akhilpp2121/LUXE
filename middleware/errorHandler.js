@@ -41,7 +41,10 @@ const sendErrorDev = (err, req, res) => {
       .json({ success: false, message, error: err, stack: err.stack });
   }
 
-  return res.status(statusCode).render("Users/error", {
+  const isAdmin = req.originalUrl && req.originalUrl.startsWith("/admin");
+  const viewPath = isAdmin ? "Admin/error" : "Users/error";
+
+  return res.status(statusCode).render(viewPath, {
     error: {
       statusCode,
       title:
@@ -65,7 +68,10 @@ const sendErrorProd = (err, req, res) => {
     return res.status(statusCode).json({ success: false, message });
   }
 
-  return res.status(statusCode).render("Users/error", {
+  const isAdmin = req.originalUrl && req.originalUrl.startsWith("/admin");
+  const viewPath = isAdmin ? "Admin/error" : "Users/error";
+
+  return res.status(statusCode).render(viewPath, {
     error: {
       statusCode,
       title: statusCode === 404 ? "Page Not Found" : "Error Occurred",

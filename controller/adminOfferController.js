@@ -50,10 +50,45 @@ export const offerAddPage = (req, res) => {
   }
 };
 
+
+const validateOfferInput = ({ discountType, discountValue, maxDiscount }) => {
+  const type = (discountType || "").toUpperCase();
+  const value = Number(discountValue);
+
+  if (isNaN(value) || value <= 0) {
+    return "Discount value must be a positive number.";
+  }
+
+  if (type === "PERCENTAGE") {
+    if (value > 99) {
+      return "Percentage discount cannot exceed 99%.";
+    }
+    if (maxDiscount === undefined || maxDiscount === null || maxDiscount === "") {
+      return "Max discount cap is required for percentage offers.";
+    }
+    const cap = Number(maxDiscount);
+    if (isNaN(cap) || cap <= 0) {
+      return "Max discount cap must be a positive number.";
+    }
+  } else if (type === "FLAT") {
+    if (maxDiscount !== undefined && maxDiscount !== null && maxDiscount !== "") {
+      const cap = Number(maxDiscount);
+      if (isNaN(cap) || cap <= 0) {
+        return "Max discount must be a positive number.";
+      }
+      if (cap < value) {
+        return "Max discount cannot be less than the flat discount value.";
+      }
+    }
+  } else {
+    return "Invalid discount type.";
+  }
+
+  return null;
+};
+
 export const offerAdd = async (req, res) => {
   try {
-    
-
     const {
       name,
       type,
@@ -78,6 +113,14 @@ export const offerAdd = async (req, res) => {
 
     if (new Date(startDate) >= new Date(endDate)) {
       req.session.addOfferError = "Start date must be before end date.";
+      return req.session.save(() => res.redirect("/admin/offer-add"));
+    }
+
+    // FIX: catch the percentage/maxDiscount mismatch HERE with a specific
+    // message, before ever reaching the DB layer
+    const inputError = validateOfferInput({ discountType, discountValue, maxDiscount });
+    if (inputError) {
+      req.session.addOfferError = inputError;
       return req.session.save(() => res.redirect("/admin/offer-add"));
     }
 
@@ -152,6 +195,13 @@ export const offerEdit = async (req, res) => {
 
     if (new Date(startDate) >= new Date(endDate)) {
       req.session.editOfferError = "Start date must be before end date.";
+      return req.session.save(() => res.redirect(`/admin/offer-edit/${req.params.id}`));
+    }
+
+    // FIX: same specific-error check applied on edit too (previously missing here)
+    const inputError = validateOfferInput({ discountType, discountValue, maxDiscount });
+    if (inputError) {
+      req.session.editOfferError = inputError;
       return req.session.save(() => res.redirect(`/admin/offer-edit/${req.params.id}`));
     }
 

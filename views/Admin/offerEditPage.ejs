@@ -300,7 +300,7 @@
         href="/admin/offer">
         <span class="material-symbols-outlined text-lg">local_offer</span>Offers
       </a>
-      
+
     </nav>
 
     <div class="mt-auto px-4 pt-6 border-t border-[#1f2a44]">
@@ -486,22 +486,32 @@
                     value="<%= offer.discountValue %>" />
                   <span class="inp-suffix" id="discount-unit"><%= offer.discountType === 'FLAT' ? '₹' : '%' %></span>
                 </div>
-                <p class="err-msg" id="err-discountValue"></p>
+                <!-- FIX: message now matches the real backend rule (max 99, not 100) -->
+                <p class="err-msg" id="err-discountValue">Enter a valid discount value (1–99).</p>
               </div>
 
-              <!-- Max Discount (shown only for PERCENTAGE) -->
-              <div class="field" id="maxDiscountField" style="margin-top:18px;<%= offer.discountType === 'FLAT' ? 'display:none;' : '' %>">
+              <!--
+                FIX (matches Add Offer page): maxDiscount is REQUIRED by the backend
+                for PERCENTAGE offers. Previously this page always labelled it "optional"
+                and never enforced it, so an admin could save a percentage offer here
+                that the Add form would have rejected. Field is now:
+                - required + validated when discount type is PERCENTAGE
+                - optional (but validated if filled) when discount type is FLAT
+                - ALWAYS visible and never auto-cleared, so switching to FLAT no longer
+                  wipes out a previously-saved cap when the page loads.
+              -->
+              <div class="field" id="maxDiscountField" style="margin-top:18px;">
                 <label class="lbl" for="maxDiscount">
-                  Max discount cap <span class="opt">optional</span>
+                  Max discount cap <span class="req" id="maxDiscount-req">*</span><span class="opt" id="maxDiscount-opt" style="display:none;">optional for flat</span>
                 </label>
                 <div class="inp-wrap has-icon">
                   <span class="material-symbols-outlined inp-icon">currency_rupee</span>
-                  <input type="number" id="maxDiscount" name="maxDiscount" placeholder="e.g. 500" min="0"
+                  <input type="number" id="maxDiscount" name="maxDiscount" placeholder="e.g. 500" min="1"
                     value="<%= offer.maxDiscount || '' %>" />
                 </div>
-                <p class="err-msg" id="err-maxDiscount"></p>
+                <p class="err-msg" id="err-maxDiscount">Max discount cap is required for percentage offers.</p>
                 <p class="text-[11px] text-on-surface-variant mt-1">
-                  Caps the max saving from a % discount.
+                  Caps the max saving from a % discount. Required for percentage offers.
                 </p>
               </div>
 
@@ -526,7 +536,9 @@
               </div>
               <p class="prev-name" id="prev-name"><%= offer.name %></p>
               <p class="prev-discount" id="prev-discount">
-                <%= offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% OFF` : `₹${offer.discountValue} FLAT` %>
+                <%= offer.discountType === 'PERCENTAGE'
+                    ? `${offer.discountValue}% OFF` + (offer.maxDiscount ? ` (up to ₹${offer.maxDiscount})` : '')
+                    : `₹${offer.discountValue} FLAT` %>
               </p>
               <div class="prev-pills">
                 <span class="prev-pill" id="prev-type"><%= offer.type || '—' %></span>
@@ -567,18 +579,27 @@
       var flat = document.getElementById('btn-flat');
       var unit = document.getElementById('discount-unit');
       var maxField = document.getElementById('maxDiscountField');
+      var maxReq = document.getElementById('maxDiscount-req');
+      var maxOpt = document.getElementById('maxDiscount-opt');
 
       if (val === 'PERCENTAGE') {
         pct.classList.add('tog-active');
         flat.classList.remove('tog-active');
         unit.textContent = '%';
+        // FIX: field stays visible and REQUIRED for percentage offers
         if (maxField) maxField.style.display = 'flex';
+        if (maxReq) maxReq.style.display = 'inline';
+        if (maxOpt) maxOpt.style.display = 'none';
       } else {
         flat.classList.add('tog-active');
         pct.classList.remove('tog-active');
         unit.textContent = '₹';
-        if (maxField) maxField.style.display = 'none';
-        document.getElementById('maxDiscount').value = '';
+        // FIX: field stays visible but OPTIONAL for flat offers.
+        // Crucially: we no longer clear the input's value here, so a previously
+        // saved cap isn't wiped out just by switching type or reloading the page.
+        if (maxField) maxField.style.display = 'flex';
+        if (maxReq) maxReq.style.display = 'none';
+        if (maxOpt) maxOpt.style.display = 'inline';
         clearErr('maxDiscount');
       }
       if (!skipUpdate) updatePreview();
@@ -613,27 +634,43 @@
       var type = document.getElementById('type').value;
       var start = document.getElementById('startDate').value;
       var end = document.getElementById('endDate').value;
+      var maxDisc = document.getElementById('maxDiscount').value;
 
       document.getElementById('prev-name').textContent = name || '—';
-      document.getElementById('prev-discount').textContent = val
-        ? (dtype === 'PERCENTAGE' ? val + '% OFF' : '₹' + val + ' FLAT')
-        : '—';
+
+      var discountText = '—';
+      if (val) {
+        if (dtype === 'PERCENTAGE') {
+          discountText = val + '% OFF';
+          // FIX: preview reflects the cap so the admin sees the real max saving
+          if (maxDisc) discountText += ' (up to ₹' + maxDisc + ')';
+        } else {
+          discountText = '₹' + val + ' FLAT';
+        }
+      }
+      document.getElementById('prev-discount').textContent = discountText;
       document.getElementById('prev-type').textContent = type || '—';
       document.getElementById('prev-dates').textContent =
         (start && end) ? fmtDate(start) + ' → ' + fmtDate(end) : '—';
     }
 
-    ['name', 'discountValue', 'type', 'startDate', 'endDate'].forEach(function (id) {
+    ['name', 'discountValue', 'type', 'startDate', 'endDate', 'maxDiscount'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) { el.addEventListener('input', updatePreview); el.addEventListener('change', updatePreview); }
     });
     document.getElementById('isActive').addEventListener('change', updateStatusDot);
 
     /* ── Validation ── */
+    // FIX: this used to try to strip a "⚠ " prefix out of el.textContent before
+    // falling back to msg. The ⚠ is only ever a CSS ::before icon — it's never
+    // actually part of textContent — so once a message was set once, textContent
+    // was never empty again, and every later validation call kept showing the
+    // FIRST error message forever, even when the real problem had changed.
+    // Now it simply always sets the current message, exactly like the Add form.
     function showErr(id, msg) {
       var el = document.getElementById('err-' + id);
       var inp = document.getElementById(id);
-      if (el) { el.textContent = (el.textContent.replace(/^⚠\s?/, '') || msg); el.classList.add('show'); }
+      if (el) { if (msg) el.textContent = msg; el.classList.add('show'); }
       if (inp) inp.classList.add('field-error');
     }
     function clearErr(id) {
@@ -656,7 +693,7 @@
       var type = document.getElementById('type').value;
       var dtype = document.getElementById('discountType').value;
       var dval = parseFloat(document.getElementById('discountValue').value);
-      var maxDisc = document.getElementById('maxDiscount').value;
+      var maxDiscRaw = document.getElementById('maxDiscount').value;
       var start = document.getElementById('startDate').value;
       var end = document.getElementById('endDate').value;
 
@@ -670,15 +707,28 @@
       }
       if (isNaN(dval) || dval <= 0) {
         showErr('discountValue', 'Enter a valid discount value greater than 0.'); ok = false;
-      } else if (dtype === 'PERCENTAGE' && dval > 100) {
-        showErr('discountValue', 'Percentage discount cannot exceed 100%.'); ok = false;
+      } else if (dtype === 'PERCENTAGE' && dval > 99) {
+        // FIX: 99 now, matching the backend service rule exactly (was 100 before — mismatch with Add form)
+        showErr('discountValue', 'Percentage discount cannot exceed 99%.'); ok = false;
       }
-      if (dtype === 'PERCENTAGE' && maxDisc !== '' && maxDisc !== null && maxDisc !== undefined) {
-        var mv = parseFloat(maxDisc);
-        if (!isNaN(mv) && mv <= 0) {
+
+      if (dtype === 'PERCENTAGE') {
+        // FIX: maxDiscount is now REQUIRED for percentage offers, matching backend + Add form
+        var mv = parseFloat(maxDiscRaw);
+        if (maxDiscRaw === '' || isNaN(mv) || mv <= 0) {
+          showErr('maxDiscount', 'Max discount cap is required for percentage offers.'); ok = false;
+        }
+      } else if (dtype === 'FLAT' && maxDiscRaw !== '') {
+        // Flat offers: cap is optional, but if given, must be a valid positive number
+        // and not less than the flat discount value itself
+        var mvFlat = parseFloat(maxDiscRaw);
+        if (isNaN(mvFlat) || mvFlat <= 0) {
           showErr('maxDiscount', 'Max discount must be a positive number.'); ok = false;
+        } else if (!isNaN(dval) && mvFlat < dval) {
+          showErr('maxDiscount', 'Max discount cannot be less than the flat discount value.'); ok = false;
         }
       }
+
       if (!start) {
         showErr('startDate', 'Start date is required.'); ok = false;
       }
