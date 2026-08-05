@@ -76,9 +76,9 @@ export const homeLoad = async (req, res) => {
       req.session.user = null;
       req.session.flashMessage = {
         type: "error",
-        message: "Your account has been blocked.",
+        message: "Your account has been blocked by admin.",
       };
-      return res.redirect("/login");
+      return req.session.save(() => res.redirect("/login"));
     }
 
     const searchQuery = (req.query.search ?? "").trim();
@@ -168,7 +168,7 @@ export async function googleCallback(req, res) {
       }
       req.session.flashMessage = {
         type: "error",
-        message: "Your account has been blocked by the admin",
+        message: "Your account has been blocked by admin.",
       };
       return res.redirect("/login");
     }

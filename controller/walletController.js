@@ -10,7 +10,7 @@ export const walletPageLoad = async (req, res) => {
       req.session.user = null;
       req.session.flashMessage = {
         type: "error",
-        message: "Your account has been blocked.",
+        message: "Your account has been blocked by admin.",
       };
       return res.redirect("/login");
     }

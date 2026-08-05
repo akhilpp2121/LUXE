@@ -22,16 +22,15 @@ import bcrypt from "bcrypt";
 
 export const profileLoadPage = async (req, res) => {
   try {
-    const userId = req.session.user._id || req.session.user.id;
-
+    const userId = req.session.user.id || req.session.user._id;
     const isBlockedUser = await findUserBlocked(userId);
     if (isBlockedUser) {
       req.session.user = null;
       req.session.flashMessage = {
         type: "error",
-        message: "Your account has been blocked.",
+        message: "Your account has been blocked by admin.",
       };
-      return res.redirect("/login");
+      return req.session.save(() => res.redirect("/login"));
     }
 
     if (!req.session.user) return res.redirect("/login");

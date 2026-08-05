@@ -7,7 +7,7 @@
   cart.forEach(p => {
     const v     = p.variantId;
     const inStk = (v?.stock ?? 0) > 0;
-    const isInv = !v?.productId?.isActive || !v?.isActive || !inStk;
+    const isInv = !v?.productId?.isActive || !v?.isActive || !v?.productId?.categoryId?.isActive || !inStk;
     if (!isInv) {
       const hasDiscount = v?.discount && v.discount < v?.price;
       const ep  = hasDiscount ? v.discount : (v?.price || 0);
@@ -683,7 +683,7 @@ const eligibleCoupons = (availableCoupons || []).filter(c => grandTotal >= (c.mi
               const variant     = p.variantId;
               const product     = variant?.productId;
               const inStock     = (variant?.stock ?? 0) > 0;
-              const isInvalid   = !product?.isActive || !variant?.isActive || !inStock;
+              const isInvalid   = !product?.isActive || !variant?.isActive || !product?.categoryId?.isActive || !inStock;
               const hasDiscount = variant?.discount && variant.discount < variant?.price;
               const itemPrice   = hasDiscount ? variant.discount : (variant?.price || 0);
               const origPrice   = variant?.price || 0;
@@ -731,7 +731,7 @@ const eligibleCoupons = (availableCoupons || []).filter(c => grandTotal >= (c.mi
                   <% } %>
                   <% if (!inStock) { %>
                     <span class="invalid-badge mt-1.5">Out of stock</span>
-                  <% } else if (!product?.isActive || !variant?.isActive) { %>
+                  <% } else if (!product?.isActive || !variant?.isActive || !product?.categoryId?.isActive) { %>
                     <span class="invalid-badge mt-1.5">Unavailable</span>
                   <% } %>
                 </div>

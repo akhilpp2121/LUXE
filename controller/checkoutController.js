@@ -81,7 +81,7 @@ export const checkoutPageLoad = async (req, res) => {
     for (const item of allCartItems) {
       const v = item.variantId;
 
-      const isActive = v?.isActive === true;
+      const isActive = v?.isActive === true && v?.productId?.isActive === true && v?.productId?.categoryId?.isActive === true;
       const hasStock = (v?.stock ?? 0) > 0;
       const qtyOk = hasStock && item.quantity <= v.stock;
 

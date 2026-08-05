@@ -55,6 +55,13 @@ export const wishListUpdateLogic = async (variantId, action, userId) => {
     }
 
     if (action === "ADD") {
+      const variant = await variantModel.findById(variantId).populate({
+        path: "productId",
+        populate: { path: "categoryId" }
+      });
+      if (!variant || !variant.isActive || !variant.productId?.isActive || !variant.productId?.categoryId?.isActive) {
+        return { success: false, message: "Product is no longer available" };
+      }
       const existsInWishlist = await wishlistModel.findOne({
         userId,
         variantId,
@@ -92,14 +99,17 @@ export const wishListUpdateLogic = async (variantId, action, userId) => {
 
 export const moveToCartLogic = async (variantId, wishlistId, userId) => {
   try {
-    const variant = await variantModel.findById(variantId);
+    const variant = await variantModel.findById(variantId).populate({
+      path: "productId",
+      populate: { path: "categoryId" }
+    });
 
-    if (!variant) {
+    if (!variant || !variant.productId) {
       return { success: false, message: "Product not found" };
     }
 
-    if (!variant.isActive || variant.stock <= 0) {
-      return { success: false, message: "Item is out of stock" };
+    if (!variant.isActive || !variant.productId.isActive || !variant.productId.categoryId?.isActive || variant.stock <= 0) {
+      return { success: false, message: "Item is no longer available or out of stock" };
     }
 
     const existsInCart = await cartModel.findOne({ userId, variantId });

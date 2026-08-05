@@ -18,23 +18,24 @@ export const isUserAuthenticated = async (req, res, next) => {
         }
         req.session.flashMessage = {
           type: "error",
-          message: "Your account has been blocked by the admin",
+          message: "Your account has been blocked by admin.",
         };
 
         
         const wantsJson =
-          req.method !== "GET" ||
-          req.xhr ||
-          (req.headers.accept && req.headers.accept.indexOf("json") > -1);
+  req.xhr ||
+  req.get("X-Requested-With") === "XMLHttpRequest" ||
+  (req.headers.accept && req.headers.accept.includes("json")) ||
+  req.method !== "GET";
 
         if (wantsJson) {
           return res.status(403).json({
             success: false,
-            message: "Your account has been blocked by the admin",
+            message: "Your account has been blocked by admin.",
             redirect: "/login"
           });
         }
-        return res.redirect("/login");
+        return req.session.save(() => res.redirect("/login"));
       }
     } catch (err) {
       console.error("isUserAuthenticated check block error:", err);

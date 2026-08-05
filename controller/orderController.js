@@ -63,7 +63,7 @@ export const orderDetailsLoad = async (req, res) => {
       req.session.user = null;
       req.session.flashMessage = {
         type: "error",
-        message: "Your account has been blocked.",
+        message: "Your account has been blocked by admin.",
       };
       return res.redirect("/login");
     }
@@ -94,40 +94,7 @@ export const orderDetailsLoad = async (req, res) => {
   }
 };
 
-// export const downloadInvoice = async (req, res) => {
-//   try {
-//     const { id } = req.params;
 
-//     if (!req.session.user) {
-//       return res.redirect("/login");
-//     }
-
-//     const userId = req.session.user._id || req.session.user.id;
-
-//     const order = await orderModel
-//       .findById(id)
-//       .populate("orderItems.variantId")
-//       .populate("cancelledAt.cancelledProducts")
-//       .lean();
-
-//     if (!order) {
-//       return res.status(404).send("Order not found");
-//     }
-
-//     if (order.userId.toString() !== userId.toString()) {
-//       return res.status(403).send("Access denied");
-//     }
-
-//     const filename = `invoice-${order.orderCode}.pdf`;
-//     res.setHeader("Content-Type", "application/pdf");
-//     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-
-//     generateInvoicePDF(order, res);
-//   } catch (error) {
-//     console.error("downloadInvoice error:", error);
-//     return res.status(500).send("Could not generate invoice");
-//   }
-// };
 
 export const downloadInvoice = async (req, res) => {
   try {

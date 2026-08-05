@@ -22,7 +22,7 @@ const validateCartStock = (cartItems) => {
       continue;
     }
 
-    if (!product.isActive || !variant?.isActive) {
+    if (!product.isActive || !variant?.isActive || !product.categoryId?.isActive) {
       issues.push(`${product.name} is no longer available`);
       continue;
     }
@@ -65,7 +65,10 @@ export const placeOrderLogic = async (
     // 2. Cart
     const cartdata = await cartModel.findOne({ userId }).populate({
       path: "items.variantId",
-      populate: { path: "productId" },
+      populate: {
+        path: "productId",
+        populate: { path: "categoryId" },
+      },
     });
 
     if (!cartdata || cartdata.items.length === 0)
@@ -282,7 +285,10 @@ export const createPendingPaypalOrder = async (
 
     const cartdata = await cartModel.findOne({ userId }).populate({
       path: "items.variantId",
-      populate: { path: "productId" },
+      populate: {
+        path: "productId",
+        populate: { path: "categoryId" },
+      },
     });
 
     if (!cartdata || cartdata.items.length === 0)

@@ -29,24 +29,53 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");                        
 app.set("views", path.join(__dirname, "views"));
 
-
-
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: true,
+// ── USER SESSION ──
+const userSessionMiddleware = session({
+  name: "connect.sid",
+  secret: process.env.SECRET,
+  resave: false,
   saveUninitialized: false,
   rolling: true,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     collectionName: "sessions",
+    touchAfter: 60,
   }),
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" && process.env.SECURE_COOKIES === "true",
     sameSite: "lax",
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
-}));
+});
+
+// ── ADMIN SESSION ──
+const adminSessionMiddleware = session({
+  name: "admin.sid",
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: "admin_sessions",
+    touchAfter: 60,
+  }),
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production" && process.env.SECURE_COOKIES === "true",
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+});
+
+// route-inu anusarich correct session apply cheyyuka
+app.use((req, res, next) => {
+  if (req.path.startsWith("/admin")) {
+    return adminSessionMiddleware(req, res, next);
+  }
+  return userSessionMiddleware(req, res, next);
+});
 
 app.use((req, res, next) => {
   if (req.query.ref) {

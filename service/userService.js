@@ -54,7 +54,7 @@ export const userLoginLogic = async (req, email, password) => {
       return { success: false, field: "email", message: "Email is incorrect" };
 
     if (user.isBlocked)
-      return { success: false, field: "email", message: "Your account has been blocked by the admin" };
+      return { success: false, field: "email", message: "Your account has been blocked by admin." };
 
     // Account exists but has no password (e.g. created via Google) — can't login with password
     if (!user.password) {
@@ -306,7 +306,7 @@ export const handleOtpVerifyService = async (req) => {
 
       return {
         success: true,
-        message: "Account created successfully!",
+        message: "Account created successfully. Please login.",
         redirect: "/login",
       };
     }

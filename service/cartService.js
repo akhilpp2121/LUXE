@@ -74,7 +74,7 @@ export const addToCart = async (variantId, userId, quantity) => {
         populate: { path: "categoryId", match: { isActive: true } },
       });
 
-    if (!variant || !variant.productId?.categoryId) {
+    if (!variant || !variant.productId?.categoryId || !variant.productId?.isActive) {
       return {
         success: false,
         message: "Product might be blocked or out of stock",
@@ -145,9 +145,12 @@ export const cartDelete = async (userId, variantId) => {
 
 export const cartEdit = async (userId, variantId, quantity) => {
   try {
-    const variant = await variantModel.findById(variantId);
-    if (!variant || !variant.isActive) {
-      return { success: false, message: "Product not found" };
+    const variant = await variantModel.findById(variantId).populate({
+      path: "productId",
+      populate: { path: "categoryId" }
+    });
+    if (!variant || !variant.isActive || !variant.productId?.isActive || !variant.productId?.categoryId?.isActive) {
+      return { success: false, message: "Product is no longer available" };
     }
 
     if (quantity < 1)

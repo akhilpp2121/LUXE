@@ -6,60 +6,6 @@ import {
 } from "../service/cartService.js";
 import { findUserBlocked } from "../service/userService.js";
 
-// export const cartPageLoad = async (req, res) => {
-//   try {
-//     const user = req.session.user;
-//     if (!user) return res.redirect("/login");
-
-//     const userId = user._id || user.id;
-//     const cartData = await CartDataTake(userId);
-
-//     //  Empty cart — early return with all required variables
-//     if (!cartData.success) {
-//       return res.status(200).render("Users/cart", {
-//         isLogged: req.session.user || "",
-//         email: "",
-//         data: [],
-//         price: 0,
-//         cart: 0,
-//       });
-//     }
-
-//     //  Price calculation only when cart has data
-//     const price = cartData.data.reduce((sum, item) => {
-//       const variant = item.variantId;
-//       const product = variant?.productId;
-//       const category = product?.categoryId;
-
-//       const outOfStock = (variant?.stock ?? 0) < 1;
-//       const variantInactive = !variant?.isActive;
-//       const productInactive = !product?.isActive;
-//       const categoryInactive = !category?.isActive;
-
-//       if (outOfStock || variantInactive || productInactive || categoryInactive)
-//         return sum;
-
-//       const effectivePrice =
-//         variant.discount && variant.discount < variant.price
-//           ? variant.discount
-//           : variant.price;
-
-//       return sum + effectivePrice * item.quantity;
-//     }, 0);
-
-//     return res.status(200).render("Users/cart", {
-//       isLogged: req.session.user || "",
-//       email: "",
-//       data: cartData.data,
-//       price,
-//       cart: cartData.data.length,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.redirect("/error");
-//   }
-// };
-
 
 export const cartPageLoad = async (req, res) => {
   try {
@@ -68,6 +14,22 @@ export const cartPageLoad = async (req, res) => {
 
     const userId = user._id || user.id;
     const cartData = await CartDataTake(userId);
+
+
+      const isBlockedUser = await findUserBlocked(userId);
+    
+        if (isBlockedUser) {
+          req.session.user = null;
+          req.session.flashMessage = {
+            type: "error",
+            message: "Your account has been blocked.",
+          };
+          return res.redirect("/login");
+        }
+    
+        if (!req.session?.user) {
+          return res.redirect("/login");
+        }
 
     if (!cartData.success) {
       return res.status(200).render("Users/cart", {
