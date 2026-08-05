@@ -258,6 +258,8 @@ export const changePasswordController = async (req, res) => {
 
     //  check current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
+    
+    
 
     if (!isMatch) {
       req.session.flashMessage = {

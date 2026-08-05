@@ -140,6 +140,8 @@ const deriveOrderStatus = (orderItems) => {
   return { deliveryStatus: "pending", orderStatus: "placed" };
 };
 
+
+
 export const updateAllItemsStatusService = async (orderId, deliveryStatus) => {
   if (!mongoose.Types.ObjectId.isValid(orderId))
     return { success: false, message: "Invalid order ID" };
@@ -152,19 +154,52 @@ export const updateAllItemsStatusService = async (orderId, deliveryStatus) => {
 
   const newRank = STATUS_RANK[deliveryStatus];
 
-  order.orderItems.forEach((item) => {
+  if (newRank === undefined) {
+    return { success: false, message: "Invalid status value" };
+  }
+
+  //  FULLY CANCELLED BLOCK
+  const isFullyCancelled = order.orderItems.every(
+    (item) => item.deliveryStatus === "cancelled"
+  );
+
+  if (isFullyCancelled) {
+    return {
+      success: false,
+      message: "Cannot update cancelled order",
+    };
+  }
+
+  for (let item of order.orderItems) {
     if (
       item.deliveryStatus === "cancelled" ||
       item.deliveryStatus === "returned"
-    )
-      return;
+    ) {
+      continue;
+    }
+
+    const currentRank = STATUS_RANK[item.deliveryStatus];
+
+    if (newRank <= currentRank) {
+      return {
+        success: false,
+        message: `Invalid status change: ${item.deliveryStatus} → ${deliveryStatus}`,
+      };
+    }
 
     item.deliveryStatus = deliveryStatus;
-  });
+  }
 
-  const derived = deriveOrderStatus(order.orderItems);
-  order.deliveryStatus = derived.deliveryStatus;
-  order.orderStatus = derived.orderStatus;
+  // Only update order if not fully cancelled
+  const allCancelled = order.orderItems.every(
+    (item) => item.deliveryStatus === "cancelled"
+  );
+
+  if (!allCancelled) {
+    const derived = deriveOrderStatus(order.orderItems);
+    order.deliveryStatus = derived.deliveryStatus;
+    order.orderStatus = derived.orderStatus;
+  }
 
   await order.save();
 
@@ -175,6 +210,9 @@ export const updateAllItemsStatusService = async (orderId, deliveryStatus) => {
     message: "All items updated successfully",
   };
 };
+
+
+
 
 export const updateOrderItemStatusService = async (
   orderId,

@@ -352,7 +352,7 @@ export const handleOtpVerifyService = async (req) => {
       );
       return {
         success: true,
-        message: "Identity verified! You can now reset your password.",
+        message: "Identity verified! ",
         redirect: "/reset-password",
       };
     }

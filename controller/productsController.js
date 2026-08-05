@@ -67,49 +67,6 @@ export const adminProductPageLoad = async (req, res) => {
   });
 };
 
-// export const adminProductOfferAdd = async (req, res) => {
-//   try {
-//     const { productId, offerId } = req.body;
-
-//     if (!productId) {
-//       return res.status(400).json({ success: false, message: "productId is required" });
-//     }
-
-//     // Save the chosen product-level offer
-//     await Product.findByIdAndUpdate(productId, { offer: offerId || null });
-
-//     // Re-fetch with variants + category to compare offers
-//     const product = await Product.findById(productId)
-//       .populate("variants")
-//       .populate("offer")
-//       .lean();
-
-//     const bestOffer = await resolveBestOffer(product);
-
-//     // Store which offer actually won
-//     await Product.findByIdAndUpdate(productId, {
-//       appliedOffer: bestOffer?._id || null,
-//     });
-
-//     const result = await applyOffersToProduct(productId, bestOffer);
-//     if (!result.success) {
-//       return res.status(500).json({ success: false, message: result.message });
-//     }
-
-//     const updatedProduct = await Product.findById(productId)
-//       .populate("variants")
-//       .populate("offer");
-
-//     return res.json({
-//       success: true,
-//       message: "Best offer applied successfully",
-//       product: updatedProduct,
-//     });
-//   } catch (error) {
-//     console.error("adminProductOfferAdd error:", error);
-//     return res.status(500).json({ success: false, message: "Server error" });
-//   }
-// };
 
 export const adminProductOfferAdd = async (req, res) => {
   try {
