@@ -29,6 +29,14 @@ const orderItemSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+     allocatedCoupon: {
+      type: Number,
+      default: 0,
+    },
+    allocatedGst: {
+      type: Number,
+      default: 0,
+    },
     deliveryStatus: {
       type: String,
       enum: [

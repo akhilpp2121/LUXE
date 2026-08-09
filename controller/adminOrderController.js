@@ -68,50 +68,6 @@ export const updateOrderItemStatus = async (req, res) => {
   }
 };
 
-// export const updateReturnRequest = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { action, variantId, adminRemark } = req.body;
-
-//     //  Basic validation
-//     if (!id) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Order ID is required",
-//       });
-//     }
-
-//     if (!action) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Action is required",
-//       });
-//     }
-
-//     //  Normalize values
-//     const normalizedVariant =
-//       !variantId || variantId === "ALL" ? "ALL" : variantId;
-
-//     const remark = adminRemark?.trim() || "";
-
-//     // Call service
-//     const result = await updateReturnRequestService(
-//       id,
-//       action,
-//       normalizedVariant,
-//       remark
-//     );
-
-//     return res.status(result.success ? 200 : 400).json(result);
-
-//   } catch (error) {
-//     console.error("updateReturnRequest error:", error);
-//     return res.status(500).json({
-//       success: false,
-//       message: "Server error",
-//     });
-//   }
-// };
 
 export const updateReturnRequest = async (req, res) => {
   try {

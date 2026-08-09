@@ -213,7 +213,6 @@ export const updateAllItemsStatusService = async (orderId, deliveryStatus) => {
 
 
 
-
 export const updateOrderItemStatusService = async (
   orderId,
   variantId,
@@ -228,6 +227,10 @@ export const updateOrderItemStatusService = async (
   if (!VALID_ADMIN_STATUSES.includes(deliveryStatus))
     return { success: false, message: "Invalid status" };
 
+  const newRank = STATUS_RANK[deliveryStatus];
+  if (newRank === undefined)
+    return { success: false, message: "Invalid status value" };
+
   const order = await orderModel.findById(orderId);
   if (!order) return { success: false, message: "Order not found" };
 
@@ -241,6 +244,15 @@ export const updateOrderItemStatusService = async (
 
   if (item.deliveryStatus === "returned")
     return { success: false, message: "Cannot update a returned item" };
+
+  const currentRank = STATUS_RANK[item.deliveryStatus];
+
+  if (newRank <= currentRank) {
+    return {
+      success: false,
+      message: `Invalid status change: ${item.deliveryStatus} → ${deliveryStatus}`,
+    };
+  }
 
   item.deliveryStatus = deliveryStatus;
 
@@ -259,48 +271,8 @@ export const updateOrderItemStatusService = async (
   };
 };
 
-const GST_RATE = 0.05;
-const SHIPPING_THRESHOLD = 999;
-const SHIPPING_FEE = 99;
 
-function calcOrderTotal(
-  orderItems,
-  couponApplied,
-  cancelledVariantIds,
-  approvedQtyByVariant,
-) {
-  let activeSubTotal = 0;
 
-  for (const item of orderItems) {
-    const vid = item.variantId.toString();
-    if (cancelledVariantIds.has(vid)) continue;
-
-    const unitValue = item.quantity > 0 ? item.totalPrice / item.quantity : 0;
-
-    const approvedQty = Math.min(approvedQtyByVariant[vid] ?? 0, item.quantity);
-
-    const remainingQty = Math.max(item.quantity - approvedQty, 0);
-
-    activeSubTotal += unitValue * remainingQty;
-  }
-
-  const hasActiveItems = activeSubTotal > 0;
-
-  const coupon = hasActiveItems
-    ? Math.min(couponApplied || 0, activeSubTotal)
-    : 0;
-
-  const taxable = Math.max(activeSubTotal - coupon, 0);
-  const gst = Math.round(taxable * GST_RATE);
-
-  const shipping = hasActiveItems
-    ? activeSubTotal >= SHIPPING_THRESHOLD
-      ? 0
-      : SHIPPING_FEE
-    : 0;
-
-  return Math.round(taxable + gst + shipping);
-}
 
 export const updateReturnRequestService = async (
   orderId,
@@ -335,24 +307,6 @@ export const updateReturnRequestService = async (
     if (!pendingReturns.length)
       return { success: true, message: "No pending return found" };
 
-    // Snapshot of cancelled variants
-    const cancelledVariantIds = new Set();
-    (order.cancelledAt || []).forEach((c) => {
-      (c.cancelledProducts || []).forEach((pid) => {
-        cancelledVariantIds.add(pid._id ? pid._id.toString() : String(pid));
-      });
-    });
-
-    // Already approved quantities
-    const approvedQtyByVariant = {};
-    (order.returnedAt || []).forEach((r) => {
-      if (r.variant && r.returnRequestStatus === "Approved") {
-        const vid = r.variant.toString();
-        approvedQtyByVariant[vid] =
-          (approvedQtyByVariant[vid] || 0) + (r.quantity || 1);
-      }
-    });
-
     let totalRefund = 0;
     const refundBreakdown = [];
 
@@ -376,27 +330,21 @@ export const updateReturnRequestService = async (
 
         item.deliveryStatus = "returned";
 
-        // Total BEFORE
-        const totalBefore = calcOrderTotal(
-          order.orderItems,
-          order.couponApplied,
-          cancelledVariantIds,
-          approvedQtyByVariant,
+        // ── Direct calc using LOCKED per-item allocation, no dynamic diff ──
+        const qtyShare = item.quantity > 0 ? qty / item.quantity : 0;
+
+        const priceShare = item.totalPrice * qtyShare;
+        const couponShare = (item.allocatedCoupon || 0) * qtyShare;
+        const gstShare = (item.allocatedGst || 0) * qtyShare;
+
+        // Shipping is refunded ONLY if this return empties the whole order,
+        // since shippingCharge was a one-time frozen fee, not per-item.
+        // Adjust this business rule if you want partial-shipping refunds.
+        const itemRefund = Math.max(
+          Math.round(priceShare - couponShare + gstShare),
+          0,
         );
-
-        // Apply return
-        approvedQtyByVariant[vid] = (approvedQtyByVariant[vid] || 0) + qty;
-
-        // Total AFTER
-        const totalAfter = calcOrderTotal(
-          order.orderItems,
-          order.couponApplied,
-          cancelledVariantIds,
-          approvedQtyByVariant,
-        );
-
-        // Refund = difference
-        const itemRefund = Math.max(totalBefore - totalAfter, 0);
+        // ─────────────────────────────────────────────────────────────────
 
         totalRefund += itemRefund;
 
@@ -408,6 +356,17 @@ export const updateReturnRequestService = async (
         });
       }
     }
+
+    // ── Shipping refund: only if EVERY item ends up cancelled/returned ──
+    if (action === "Approved") {
+      const allInactive = order.orderItems.every(
+        (i) => i.deliveryStatus === "cancelled" || i.deliveryStatus === "returned",
+      );
+      if (allInactive && order.shippingCharge > 0) {
+        totalRefund += order.shippingCharge;
+      }
+    }
+    // ──────────────────────────────────────────────────────────────────
 
     totalRefund = Math.round(totalRefund);
 

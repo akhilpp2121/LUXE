@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import { userModel } from "../model/usermodel.js";
 import couponModel from "../model/couponModel.js";
 import { debitWallet } from "./walletService.js";
+import { allocateOrderItemCharges } from "../utilites/allocatedOrderItemCharge.js";
 
 
 const validateCartStock = (cartItems) => {
@@ -136,6 +137,7 @@ export const placeOrderLogic = async (
     const gstAmount = Math.round(taxableValue * GST_RATE);
 
     const grandTotal = taxableValue + gstAmount + shipping;
+    allocateOrderItemCharges(orderItems, appliedDiscount, GST_RATE);
 
     // 6. Wallet pre-check (use final grandTotal after coupon)
     if (paymentMethod === "wallet") {
@@ -262,14 +264,6 @@ export const applyCoupon = async (code, orderTotal) => {
   };
 };
 
-/* ══════════════════════════════════════════════════
-   PAYPAL RETRY-SUPPORT FUNCTIONS
-   (used by utilites/paypal.js — createOrder/captureOrder/retryCreateOrder)
-══════════════════════════════════════════════════ */
-
-// Creates the order + reserves stock, but does NOT clear the cart and
-// does NOT assume payment succeeded. Used for PayPal, where payment
-// confirmation happens in a separate step (captureOrder).
 export const createPendingPaypalOrder = async (
   userId,
   addressId,
@@ -345,6 +339,7 @@ export const createPendingPaypalOrder = async (
     const taxableValue = Math.max(subTotal - appliedDiscount, 0);
     const gstAmount = Math.round(taxableValue * GST_RATE);
     const grandTotal = taxableValue + gstAmount + shipping;
+    allocateOrderItemCharges(orderItems, appliedDiscount, GST_RATE);
 
     const [order] = await orderModel.create(
       [

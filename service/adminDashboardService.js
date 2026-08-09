@@ -1,5 +1,4 @@
-// adminDashboardService.js
-// Provides data for the admin dashboard: chart data, top products, top categories.
+
 
 import orderModel from "../model/orderModel.js";
 import productsModel from "../model/productsModel.js";

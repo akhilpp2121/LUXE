@@ -595,6 +595,10 @@ function calcActiveOrderTotal(orderItems, couponApplied, excludedVariantIds) {
   };
 }
 
+
+
+
+
 export const cancelRequestLogic = async (
   id,
   reason,
@@ -619,6 +623,7 @@ export const cancelRequestLogic = async (
     if (!order.cancelledAt) order.cancelledAt = [];
 
     // ══════════ FULL ORDER CANCEL ══════════
+    // Unchanged — this refunds the exact amount paid, no per-item math needed.
     if (id === "ALL") {
       const refundAmount = order.totalAmount; // take refund BEFORE modifying
 
@@ -632,8 +637,8 @@ export const cancelRequestLogic = async (
 
       order.subTotal = 0;
       order.shippingCharge = 0;
-      order.gstAmount = 0;       
-      order.couponApplied = 0;   
+      order.gstAmount = 0;
+      order.couponApplied = 0;
       order.totalAmount = 0;
       order.orderStatus = "cancelled";
       order.deliveryStatus = "cancelled";
@@ -680,25 +685,16 @@ export const cancelRequestLogic = async (
       return { success: false, message: "Item already cancelled" };
     }
 
-    // ── STEP 1: snapshot of currently-excluded variants (before this cancel) ──
-    const excludedBefore = new Set(
-      order.cancelledAt.flatMap((c) =>
-        c.cancelledProducts.map((v) => v.toString()),
-      ),
-    );
+    if (item.deliveryStatus === "returned") {
+      return { success: false, message: "Cannot cancel a returned item" };
+    }
 
-    // ── STEP 2: totals BEFORE this cancel ──
-    const before = calcActiveOrderTotal(
-      order.orderItems,
-      order.couponApplied,
-      excludedBefore,
-    );
-
-    // ── STEP 3: apply the cancel + restore stock ──
+    // ── Restore stock ──
     await variantModel.updateOne(
       { _id: item.variantId },
       { $inc: { stock: item.quantity } },
     );
+
     item.deliveryStatus = "cancelled";
 
     order.cancelledAt.push({
@@ -708,31 +704,34 @@ export const cancelRequestLogic = async (
       cancelledProducts: [item.variantId],
     });
 
-    const excludedAfter = new Set(excludedBefore);
-    excludedAfter.add(item.variantId.toString());
+   
+    const priceShare = item.totalPrice;
+    const couponShare = item.allocatedCoupon || 0;
+    const gstShare = item.allocatedGst || 0;
 
-    // ── STEP 4: totals AFTER this cancel ──
-    const after = calcActiveOrderTotal(
-      order.orderItems,
-      order.couponApplied,
-      excludedAfter,
+    let refundAmount = Math.max(
+      Math.round(priceShare - couponShare + gstShare),
+      0,
     );
 
-    // ── STEP 5: refund = exact difference — no rounding drift ──
-    const refundAmount = Math.max(before.totalAmount - after.totalAmount, 0);
+    
+    order.subTotal = Math.max((order.subTotal || 0) - priceShare, 0);
+    order.couponApplied = Math.max((order.couponApplied || 0) - couponShare, 0);
+    order.gstAmount = Math.max((order.gstAmount || 0) - gstShare, 0);
 
-    // ── STEP 6: persist recalculated order fields ──
-    order.subTotal = after.subTotal;
-    order.gstAmount = after.gstAmount;
-    order.shippingCharge = after.shippingCharge;
-    order.couponApplied = after.couponApplied;
-    order.totalAmount = after.totalAmount;
+    const allInactive = order.orderItems.every(
+      (i) => i.deliveryStatus === "cancelled" || i.deliveryStatus === "returned",
+    );
 
-    if (after.subTotal === 0) {
+    if (allInactive) {
+      refundAmount += order.shippingCharge || 0;
+      order.shippingCharge = 0;
       order.orderStatus = "cancelled";
       order.deliveryStatus = "cancelled";
       order.expectedDeliveryDate = null;
     }
+
+    order.totalAmount = Math.max((order.totalAmount || 0) - refundAmount, 0);
 
     await order.save();
 
@@ -750,9 +749,10 @@ export const cancelRequestLogic = async (
 
     return {
       success: true,
-      message: refundAmount > 0
-        ? `Item cancelled. ₹${refundAmount} refunded to wallet.`
-        : "Item cancelled successfully.",
+      message:
+        refundAmount > 0
+          ? `Item cancelled. ₹${refundAmount} refunded to wallet.`
+          : "Item cancelled successfully.",
       refundAmount,
     };
   } catch (error) {
