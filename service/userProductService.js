@@ -71,11 +71,11 @@ export const getHomePageData = async (searchQuery = "") => {
       let savings = 0;
 
       if (bestSavings > 0) {
-        // ✅ Offer applied — use offer price
+        //  Offer applied — use offer price
         discountedPrice = Math.round(originalPrice - bestSavings);
         savings = Math.round(bestSavings);
       } else if (v.manualDiscount && v.manualDiscount < originalPrice) {
-        // ✅ No offer — show manual discount from creation time
+        //  No offer — show manual discount from creation time
         discountedPrice = v.manualDiscount;
         savings = Math.round(originalPrice - v.manualDiscount);
       }

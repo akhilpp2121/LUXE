@@ -26,18 +26,20 @@ export const userLoginLoad = (req, res) => {
     req.session.redirectTo = req.query.redirect;
   }
   const flashMessage = req.session.flashMessage || null;
+
   req.session.flashMessage = null;
   const message = flashMessage ? flashMessage.message : null;
+
   return res.render("Users/login", { message });
 };
 
 export const userSignUpLoad = (req, res) => {
   if (req.session.user) return res.redirect("/homePage");
-  
+
   const referralToken = req.session.referralToken || "";
   const signUpError = req.session.signUpError || null;
   const signUpFields = req.session.signUpFields || {};
-  
+
   req.session.signUpError = null;
   req.session.signUpFields = null;
 
@@ -101,7 +103,14 @@ export const homeLoad = async (req, res) => {
 
 export const registerController = async (req, res) => {
   try {
-    const { fullName, email, phoneNumber, password, confirmPassword, referralCode } = req.body;
+    const {
+      fullName,
+      email,
+      phoneNumber,
+      password,
+      confirmPassword,
+      referralCode,
+    } = req.body;
 
     const result = await registerPreCheckService(
       req,
@@ -202,8 +211,6 @@ export const verifyEmailController = async (req, res) => {
 
 export const verifyOtpController = async (req, res) => {
   try {
-    
-    
     const result = await handleOtpVerifyService(req);
 
     return res.json(result);
@@ -361,9 +368,6 @@ export const productListingLoad = async (req, res) => {
   }
 };
 
-
-
-
 export const productDetailLoad = async (req, res) => {
   const { productId } = req.params;
 
@@ -402,17 +406,19 @@ export const productDetailLoad = async (req, res) => {
 
     // Set isWishlisted flag on variants
     if (data.allVariants) {
-      data.allVariants.forEach(v => {
+      data.allVariants.forEach((v) => {
         v.isWishlisted = wishlistedIds.includes(v._id.toString());
       });
     }
     if (data.variants) {
-      data.variants.forEach(v => {
+      data.variants.forEach((v) => {
         v.isWishlisted = wishlistedIds.includes(v._id.toString());
       });
     }
     if (data.defaultVariant) {
-      data.defaultVariant.isWishlisted = wishlistedIds.includes(data.defaultVariant._id.toString());
+      data.defaultVariant.isWishlisted = wishlistedIds.includes(
+        data.defaultVariant._id.toString(),
+      );
     }
 
     return res.render("Users/productDetailsPage", {
@@ -445,7 +451,6 @@ export const productDetailLoad = async (req, res) => {
     });
   }
 };
-
 
 export const getProductVariants = async (req, res) => {
   try {
